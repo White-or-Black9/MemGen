@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import logging
-from typing import Optional, Literal
+import os
+from typing import Optional, Literal, Set
 
 from peft import PeftModel, LoraConfig
 import torch
@@ -141,28 +142,37 @@ class MemGenGenerationMixin(GenerationMixin):
 
         return new_labels
 
+    def _get_delimiter_token_ids(self, tokenizer, delimiters: list[str]) -> Set[int]:
+        """预计算 delimiter 对应的 token ids (在 __init__ 后调用一次)"""
+        delimiter_token_ids = set()
+        for d in delimiters:
+            ids = tokenizer.encode(d, add_special_tokens=False)
+            delimiter_token_ids.update(ids)
+        return delimiter_token_ids
+
     def _check_ends_with_delimiter(
         self, input_ids: torch.Tensor, tokenizer, delimiters: list[str]
     ) -> torch.Tensor:
+        """检查每个序列的最后一个 token 是否是 delimiter token (O(1) 每序列，无 decode)"""
         batch_size = input_ids.size(0)
+        device = input_ids.device
 
-        # Initialize result tensor: False by default
-        augmentation_decisions = torch.zeros(batch_size, 1, dtype=torch.bool, device=input_ids.device)
+        # 获取最后一个有效 token (跳过 padding)
+        pad_token_id = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else 0
+        mask = input_ids != pad_token_id
+        last_positions = mask.sum(dim=1).clamp(min=1) - 1
+        last_tokens = input_ids[torch.arange(batch_size, device=device), last_positions]
 
-        # Decode token IDs to text sequences
-        decoded_inputs = tokenizer.batch_decode(input_ids)
+        # 预计算并缓存 delimiter token ids tensor (只执行一次)
+        cache_key = '_delimiter_token_tensor'
+        if not hasattr(self, cache_key):
+            token_ids = self._get_delimiter_token_ids(tokenizer, delimiters)
+            setattr(self, cache_key, torch.tensor(list(token_ids), device=device))
 
-        for i in range(batch_size):
-            ends_with_augment_str = False
-            # Check if the sequence ends with any of the given delimiters
-            for aug_str in delimiters:
-                if decoded_inputs[i].endswith(aug_str):
-                    ends_with_augment_str = True
-                    break
-            
-            augmentation_decisions[i] = ends_with_augment_str
-        
-        return augmentation_decisions
+        delimiter_tensor = getattr(self, cache_key)
+        is_delimiter = (last_tokens.unsqueeze(1) == delimiter_tensor).any(dim=1)
+
+        return is_delimiter.unsqueeze(1)
     
     def _select_augment_points_after_delimiter(
         self,
@@ -187,8 +197,8 @@ class MemGenGenerationMixin(GenerationMixin):
             # Detect valid label regions for inference augmentation
             elif (labels[:, i] != -100).all() and (labels[:, i - 1] != -100).all():
                 batch_tokens_before_i = input_ids[:, :i]
-                # Assume check_ends_with_delimiter is defined
-                if any(self._check_ends_with_delimiter(batch_tokens_before_i, tokenizer, delimiters)):
+                # Fast token-level check (no decode)
+                if self._check_ends_with_delimiter(batch_tokens_before_i, tokenizer, delimiters).any():
                     inference_augment_idx.append(i)
         
         # Ensure exactly one prompt augmentation point exists for single-turn processing
@@ -378,7 +388,12 @@ class MemGenGenerationMixin(GenerationMixin):
     @torch.no_grad()
     def _check_generate(self, input_ids: torch.LongTensor, augmentation_pos: torch.LongTensor):
         """检查 augmentation_pos[b][i] == 1 的位置, input_ids[b][:i] (不包括第 i 位) 对应的字符串是否以 delimiters 结尾
+        仅在 DEBUG_MODE 下启用，避免训练时的性能开销
         """
+        # 仅在 DEBUG 模式下执行验证，避免训练时的大量 decode 开销
+        if os.environ.get('DEBUG_MODE', '').lower() != 'true':
+            return
+
         delimiters = self.delimiters
         tokenizer = self.tokenizer
 
@@ -388,20 +403,20 @@ class MemGenGenerationMixin(GenerationMixin):
         for b in range(B):
             for i in range(1, L):
                 is_augment_point = augmentation_pos[b, i].item()
-                
+
                 if is_augment_point == -100:
                     continue
 
                 if is_augment_point == 1 or is_augment_point == 0:
                     prefix_input_ids = input_ids[b, :i].unsqueeze(0)
-                    
+
                     ends_with_delimiter = self._check_ends_with_delimiter(
                         prefix_input_ids, tokenizer, delimiters
-                    ).item() 
+                    ).item()
 
                     if not ends_with_delimiter:
                         decoded_prefix = tokenizer.decode(prefix_input_ids.squeeze(0), skip_special_tokens=False)
-                        
+
                         raise ValueError(
                             f"Augmentation position error at batch {b}, index {i}. "
                             f"augmentation_pos is 1, but the prefix does NOT end with a delimiter.\n"

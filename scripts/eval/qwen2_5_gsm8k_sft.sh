@@ -4,6 +4,10 @@ export DEBUG_MODE=true
 export LOG_PATH="./debug_log_2b.txt"
 export CUDA_VISIBLE_DEVICES=0
 export MAIN_PROCESS_PORT=29508
+
+# 自动计算 GPU 数量
+NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | wc -l)
+echo "Using $NUM_GPUS GPU(s): CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"
 export NCCL_DEBUG=INFO
 export NCCL_IB_DISABLE=1
 export NCCL_P2P_DISABLE=1
@@ -14,20 +18,21 @@ WEAVER_MODEL="Qwen/Qwen2.5-1.5B-Instruct"
 TRIGGER_MODEL="Qwen/Qwen2.5-1.5B-Instruct"
 TRIGGER_ACTIVE=False
 
-DATASET_NAME="kodcode"
+DATASET_NAME="gsm8k"
 
 MAX_PROMPT_AUG_NUM=1
-MAX_INFERENCE_AUG_NUM=5
-PROMPT_LATENTS_LEN=4
-INFERENCE_LATENTS_LEN=4
+MAX_INFERENCE_AUG_NUM=3
+PROMPT_LATENTS_LEN=8
+INFERENCE_LATENTS_LEN=8
 
 BATCH_SIZE=4
 
-LOAD_MODEL_PATH="MemGen/Qwen2.5-1.5B-Instruct/kodcode/weaver-sft/pn=1_pl=4_in=5_il=4"
+LOAD_MODEL_PATH="MemGen/Qwen2.5-1.5B-Instruct/gsm8k/weaver-sft/pn=1_pl=8_in=3_il=8"
 
 # evaluate
 python -m accelerate.commands.launch \
     --config_file=configs/zero2.yaml \
+    --num_processes=${NUM_GPUS} \
     main.py \
     --cfg-path configs/latent_memory/${DATASET_NAME}.yaml \
     --options \

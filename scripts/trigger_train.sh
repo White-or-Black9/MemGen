@@ -2,7 +2,7 @@
 
 export DEBUG_MODE=true
 export LOG_PATH="./debug_log_2b.txt"
-export CUDA_VISIBLE_DEVICES=0,1,2,3
+export CUDA_VISIBLE_DEVICES=0
 export MAIN_PROCESS_PORT=29507
 export NCCL_DEBUG=INFO
 export NCCL_IB_DISABLE=1
@@ -31,7 +31,7 @@ PROMPT_LATENTS_LEN=8
 INFERENCE_LATENTS_LEN=8
 
 
-LOAD_WEAVER_PATH="MemGen-Models/Qwen2.5-1.5B-Instruct/kodcode/weaver-sft/pn=1_pl=8_in=5_il=8/model"
+LOAD_WEAVER_PATH=""
 
 # train
 python -m accelerate.commands.launch \

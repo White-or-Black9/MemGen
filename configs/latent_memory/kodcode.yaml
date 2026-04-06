@@ -16,7 +16,7 @@ model:
     lora_config:
       r: 16
       lora_alpha: 32
-      target_modules: ["q_proj", "v_proj"]
+      target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
       lora_dropout: 0.1
       bias: "none"
       task_type: "CAUSAL_LM"
@@ -29,7 +29,7 @@ model:
     lora_config:
       r: 16
       lora_alpha: 32
-      target_modules: ["q_proj", "v_proj"]
+      target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
       lora_dropout: 0.1
       bias: "none"
       task_type: "CAUSAL_LM"
@@ -100,7 +100,7 @@ run:
       num_iterations: 1
       gradient_accumulation_steps: 1
       beta: 0.0
-      loss_type: grpo
+      loss_type: bnpo
 
       max_prompt_length: 1024
       max_completion_length: 512

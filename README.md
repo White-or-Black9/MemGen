@@ -54,13 +54,15 @@ Please follow the instructions in the [Search-R1](https://github.com/PeterGriffi
 
 Below are several MemGen models based on Qwen2.5-1.5B-Instruct and SmolLM3-3B across multiple datasets. We are currently in the process of carefully validating additional checkpoints to ensure they are fully reproducible and can be released in a clean, one-click setup. We appreciate your patience as we complete this verification process.
 
-| model   | dataset | mode   | link                    | eval_script      | train_script|
-|---------|---------|--------|------------------------|------------------|-|
-| Qwen2.5-1.5B-Instruct  | KodCode   | weaver-sft |  [huggingface link](https://huggingface.co/Kana-s/MemGen/tree/main/Qwen2.5-1.5B-Instruct/kodcode/weaver-sft) | scripts/eval/qwen2_5_kodcode.sh | scripts/train/qwen2_5_kodcode.sh |
-| Qwen2.5-1.5B-Instruct  | TriviaQA    | weaver-sft  | [huggingface link](https://huggingface.co/Kana-s/MemGen/tree/main/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft) | scripts/eval/qwen2_5_triviaqa.sh | scripts/train/qwen2_5_triviaqa.sh |
-| Qwen2.5-1.5B-Instruct  | GSM8K| weaver-sft       | [huggingface link](https://huggingface.co/Kana-s/MemGen/tree/main/Qwen2.5-1.5B-Instruct/gsm8k/weaver-sft) | scripts/eval/qwen2_5_gsm8k.sh |scripts/train/qwen2_5_gsm8k.sh |
-| SmolLM3-3B  | KodCode | weaver-sft     | [huggingface link](https://huggingface.co/Kana-s/MemGen/tree/main/SmolLM3-3B/kodcode/weaver-sft) |  scripts/eval/smollm_kodcode.sh    | scripts/train/smollm_kodcode.sh |
-| SmolLM3-3B  | TriviaQA | weaver-sft      | [huggingface link](https://huggingface.co/Kana-s/MemGen/tree/main/SmolLM3-3B/triviaqa/weaver-sft) |   scripts/eval/smollm_triviaqa.sh    | scripts/train/smollm_triviaqa.sh |
+| model | dataset | mode | link | eval_script | train_script |
+|-------|---------|------|------|-------------|--------------|
+| Qwen2.5-1.5B-Instruct | KodCode | weaver-sft | [huggingface link](https://huggingface.co/Kana-s/MemGen/tree/main/Qwen2.5-1.5B-Instruct/kodcode/weaver-sft) | `scripts/eval/qwen2_5_kodcode_sft.sh` | `scripts/train/qwen2_5_kodcode_sft.sh` |
+| Qwen2.5-1.5B-Instruct | KodCode | weaver-grpo | [huggingface link](https://huggingface.co/Kana-s/MemGen/tree/main/Qwen2.5-1.5B-Instruct/kodcode/weaver-grpo) | `scripts/eval/qwen2_5_kodcode_grpo.sh` | `scripts/train/qwen2_5_kodcode_grpo.sh` |
+| Qwen2.5-1.5B-Instruct | GSM8K | weaver-sft | [huggingface link](https://huggingface.co/Kana-s/MemGen/tree/main/Qwen2.5-1.5B-Instruct/gsm8k/weaver-sft) | `scripts/eval/qwen2_5_gsm8k_sft.sh` | `scripts/train/qwen2_5_gsm8k_sft.sh` |
+| Qwen2.5-1.5B-Instruct | GSM8K | weaver-grpo | [huggingface link](https://huggingface.co/Kana-s/MemGen/tree/main/Qwen2.5-1.5B-Instruct/gsm8k/weaver-grpo) | `scripts/eval/qwen2_5_gsm8k_grpo.sh` | `scripts/train/qwen2_5_gsm8k_grpo.sh` |
+| Qwen2.5-1.5B-Instruct | TriviaQA | weaver-sft | [huggingface link](https://huggingface.co/Kana-s/MemGen/tree/main/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft) | `scripts/eval/qwen2_5_triviaqa.sh` | `scripts/train/qwen2_5_triviaqa.sh` |
+| SmolLM3-3B | KodCode | weaver-sft | [huggingface link](https://huggingface.co/Kana-s/MemGen/tree/main/SmolLM3-3B/kodcode/weaver-sft) | `scripts/eval/smollm_kodcode.sh` | `scripts/train/smollm_kodcode.sh` |
+| SmolLM3-3B | TriviaQA | weaver-sft | [huggingface link](https://huggingface.co/Kana-s/MemGen/tree/main/SmolLM3-3B/triviaqa/weaver-sft) | `scripts/eval/smollm_triviaqa.sh` | `scripts/train/smollm_triviaqa.sh` |
 
 
 If you prefer to evaluate the vanilla model instead of MemGen, simply modify `memgen/model/modeling_memgen.py` by replacing the current `generate` function (Lines 452–629) with the commented alternative `generate` implementation (Lines 379–450), and then run the standard evaluation script.

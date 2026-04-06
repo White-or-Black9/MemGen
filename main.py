@@ -1,11 +1,6 @@
 import argparse
 from datetime import datetime
 import os
-# os.environ['HF_ENDPOINT'] = "https://hf-mirror.com"
-# os.environ['HF_HOME'] = '/home/user/gptdata/mfc/huggingface'
-# os.environ['TRANSFORMERS_OFFLINE'] = '1'
-# os.environ['HF_DATASETS_OFFLINE'] = '1'
-# os.environ["WANDB_MODE"]="offline"
 import random
 
 import numpy as np

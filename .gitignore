@@ -1,25 +1,71 @@
-.vscode/
-tests/
+# Project specific
 stuff/
-code_stuff/
-tmp_trainer/
-trainer_output/
-llms/
-docs/stage*.md
 .cache/
-wandb/
-datasets/*
+.cursor/
+interactions/
+outputs/
 logs/
-data/alfworld
-data/pddl/env/pddlgym
-docs/
-analysis/
+*.log
+debug_log*.txt
+
+# Python
 __pycache__/
-test/
-=10.1
-MemGen-Models/
-MemGen/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
 env/
-record.md
-.gitignore
+.venv/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Model weights and large files
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.ckpt
+*.h5
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Weights & Biases
+wandb/
+
+# TensorBoard
+runs/
+tensorboard_logs/
+code_stuff/
 results/
+main_shadow.py

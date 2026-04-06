@@ -2,8 +2,12 @@
 
 export DEBUG_MODE=true
 export LOG_PATH="./debug_log_2b.txt"
-export CUDA_VISIBLE_DEVICES=4,5
+export CUDA_VISIBLE_DEVICES=0
 export MAIN_PROCESS_PORT=29507
+
+# 自动计算 GPU 数量
+NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | wc -l)
+echo "Using $NUM_GPUS GPU(s): CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"
 export NCCL_DEBUG=INFO
 export NCCL_IB_DISABLE=1
 export NCCL_P2P_DISABLE=1
@@ -12,12 +16,12 @@ export NCCL_ASYNC_DISABLE=1
 # options:
 # - Qwen/Qwen2.5-1.5B-Instruct
 # - HuggingFaceTB/SmolLM3-3B
-REASONER_MODEL="HuggingFaceTB/SmolLM3-3B"   
+REASONER_MODEL="Qwen/Qwen2.5-1.5B-Instruct"   
 WEAVER_MODEL="Qwen/Qwen2.5-1.5B-Instruct"
 TRIGGER_MODEL="Qwen/Qwen2.5-1.5B-Instruct"
 
 # Dataset configs
-DATASET_NAME="gsm8k"  # options: gsm8k, gpqa, kodcode, triviaqa
+DATASET_NAME="kodcode"  # options: gsm8k, gpqa, kodcode, triviaqa
 
 # MemGen configs
 TRAIN_METHOD="sft"    # options: sft or grpo
@@ -25,10 +29,10 @@ TRAIN_METHOD="sft"    # options: sft or grpo
 # Augmentation configs:
 # - For gsm8k, gpqa, kodcode: MAX_PROMPT_AUG_NUM=1, MAX_INFERENCE_AUG_NUM=5
 # - For triviaqa:             MAX_PROMPT_AUG_NUM=6, MAX_INFERENCE_AUG_NUM=0
-MAX_PROMPT_AUG_NUM=8
+MAX_PROMPT_AUG_NUM=1
 MAX_INFERENCE_AUG_NUM=0
-PROMPT_LATENTS_LEN=4
-INFERENCE_LATENTS_LEN=4
+PROMPT_LATENTS_LEN=8
+INFERENCE_LATENTS_LEN=8
 
 BATCH_SIZE=1
 
@@ -38,6 +42,7 @@ LOAD_MODEL_PATH=null
 # train
 python -m accelerate.commands.launch \
     --config_file=configs/zero2.yaml \
+    --num_processes=${NUM_GPUS} \
     main.py \
     --cfg-path configs/latent_memory/${DATASET_NAME}.yaml \
     --options \

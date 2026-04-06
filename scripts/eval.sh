@@ -2,8 +2,11 @@
 
 export DEBUG_MODE=true  
 export LOG_PATH="./debug_log_2b.txt"
-export CUDA_VISIBLE_DEVICES=4,5
+export CUDA_VISIBLE_DEVICES=0
 export MAIN_PROCESS_PORT=29508
+
+NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | wc -l)
+echo "Using $NUM_GPUS GPU(s): CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"
 export NCCL_DEBUG=INFO
 export NCCL_IB_DISABLE=1
 export NCCL_P2P_DISABLE=1
@@ -28,19 +31,20 @@ DATASET_NAME="kodcode"  # gsm8k, gpqa, kodcode, triviaqa
 # - For triviaqa:             MAX_PROMPT_AUG_NUM=8, MAX_INFERENCE_AUG_NUM=0
 MAX_PROMPT_AUG_NUM=1
 MAX_INFERENCE_AUG_NUM=0
-PROMPT_LATENTS_LEN=8
-INFERENCE_LATENTS_LEN=8
+PROMPT_LATENTS_LEN=16
+INFERENCE_LATENTS_LEN=16
 
 BATCH_SIZE=4
 
 # Trained model path: 
 # - Must point to a checkpoint file ending with .safetensors (e.g. <output_dir>/model.safetensors)
 # - Required when evaluating the model
-LOAD_MODEL_PATH="MemGen-Models/Qwen2.5-1.5B-Instruct/kodcode/weaver-sft/pn=1_pl=8_in=0_il=8/model"
+LOAD_MODEL_PATH=""
 
 # evaluate
 python -m accelerate.commands.launch \
     --config_file=configs/zero2.yaml \
+    --num_processes=${NUM_GPUS} \
     main.py \
     --cfg-path configs/latent_memory/${DATASET_NAME}.yaml \
     --options \

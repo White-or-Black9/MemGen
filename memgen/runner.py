@@ -142,7 +142,7 @@ class MemGenRunner:
             self.generation_manager.generation_config.temperature = self.weaver_grpo_training_args.temperature
             self.generation_manager.generation_config.max_new_tokens = self.weaver_grpo_training_args.max_completion_length
             
-            # self.weaver_train_dataset = self.weaver_train_dataset.select(range(len(self.weaver_train_dataset) // 2))
+            # self.weaver_train_dataset = self.weaver_train_dataset.select(range(1600))
             
             weaver_trainer = WeaverGRPOTrainer(
                 model=self.model,
@@ -196,10 +196,28 @@ class MemGenRunner:
         if self.train_trigger:
             trainer = self._create_trigger_trainer()
             self.model.fix_component('weaver')
-        
+
         log_trainable_params(self.model)
-        trainer.train()
-        trainer.save_model()
+
+        try:
+            trainer.train()
+            trainer.save_model()
+        except RuntimeError as e:
+            # 检查是否是 OOM 相关的错误
+            if "OOM" in str(e) or "out of memory" in str(e).lower():
+                logging.error(f"[Runner] Training stopped due to OOM: {e}")
+                # 尝试最后一次保存
+                try:
+                    oom_dir = os.path.join(self.working_dir, "model_oom_final")
+                    logging.info(f"[Runner] Attempting to save final checkpoint to {oom_dir}")
+                    trainer.save_model(oom_dir)
+                    logging.info(f"[Runner] Final checkpoint saved successfully")
+                except Exception as save_e:
+                    logging.error(f"[Runner] Failed to save final checkpoint: {save_e}")
+                raise
+            else:
+                # 非 OOM 错误，直接抛出
+                raise
         
 
     # ===== evaluate =====

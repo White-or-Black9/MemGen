@@ -4,6 +4,10 @@ export DEBUG_MODE=true
 export LOG_PATH="./debug_log_2b.txt"
 export CUDA_VISIBLE_DEVICES=0
 export MAIN_PROCESS_PORT=29508
+
+# 自动计算 GPU 数量
+NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | wc -l)
+echo "Using $NUM_GPUS GPU(s): CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES"
 export NCCL_DEBUG=INFO
 export NCCL_IB_DISABLE=1
 export NCCL_P2P_DISABLE=1
@@ -28,6 +32,7 @@ LOAD_MODEL_PATH="MemGen/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0
 # evaluate
 python -m accelerate.commands.launch \
     --config_file=configs/zero2.yaml \
+    --num_processes=${NUM_GPUS} \
     main.py \
     --cfg-path configs/latent_memory/${DATASET_NAME}.yaml \
     --options \

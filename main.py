@@ -12,8 +12,13 @@ from data import get_data_builder
 from memgen.model import MemGenModel
 from memgen.runner import MemGenRunner
 
-def set_seed(random_seed: int, use_gpu: bool):
 
+def set_seed(random_seed: int, use_gpu: bool):
+    """
+    设置所有随机种子（确保可复现性）。
+
+    设置 Python、NumPy、PyTorch 和 CUDA 的随机种子。
+    """
     random.seed(random_seed)
     os.environ['PYTHONHASHSEED'] = str(random_seed)
     np.random.seed(random_seed)
@@ -22,12 +27,14 @@ def set_seed(random_seed: int, use_gpu: bool):
     if use_gpu:
         torch.cuda.manual_seed_all(random_seed)
 
-    torch.backends.cudnn.deterministic = True   
-    torch.backends.cudnn.benchmark = False      
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
     print(f"set seed: {random_seed}")
 
+
 def parse_args():
+    """解析命令行参数。"""
     parser = argparse.ArgumentParser(description="Memory Generator")
 
     parser.add_argument("--cfg-path", required=True, help="path to configuration file.")
@@ -43,8 +50,21 @@ def parse_args():
 
     return args
 
+
 def build_working_dir(config: Config) -> str:
-    
+    """
+    构建工作目录路径。
+
+    目录结构：
+    .cache/<mode>/<dataset_name>/<model_name>/pn=<max_prompt_aug_num>_pl=<prompt_latents_len>_in=<max_inference_aug_num>_il=<inference_latents_len>_<timestamp>/
+
+    其中：
+    - mode: train / evaluate
+    - pn: Prompt Augmentation 最大次数
+    - pl: Prompt Latents 长度
+    - in: Inference Augmentation 最大次数
+    - il: Inference Latents 长度
+    """
     # parent dir: <train/evaluate>/<dataset_name>/<reasoner_model_name>
     mode = config.run_cfg.mode
     dataset_name = config.dataset_cfg.name
@@ -57,20 +77,34 @@ def build_working_dir(config: Config) -> str:
     max_inference_aug_num = config.model_cfg.max_inference_aug_num
     inference_latents_len = config.model_cfg.weaver.inference_latents_len
     time = datetime.now().strftime("%Y%m%d-%H%M%S")
-    working_dir = f"pn={max_prompt_aug_num}_pl={prompt_latents_len}_in={max_inference_aug_num}_il={inference_latents_len}_{time}" 
+    working_dir = f"pn={max_prompt_aug_num}_pl={prompt_latents_len}_in={max_inference_aug_num}_il={inference_latents_len}_{time}"
 
     return os.path.join(parent_dir, working_dir)
 
-def main():
 
+def main():
+    """
+    MemGen 程序入口。
+
+    流程：
+    1. 解析命令行参数和配置文件
+    2. 设置随机种子
+    3. 创建工作目录
+    4. 设置日志
+    5. 构建组件：
+       - data_builder: 数据集构造器
+       - model: MemGenModel（带 Weaver 和 Trigger）
+       - runner: MemGenRunner（训练/评估调度器）
+    6. 执行训练或评估
+    """
     args = parse_args()
     config = Config(args)
 
     set_seed(config.run_cfg.seed, use_gpu=True)
-    
+
     # set up working directory
     working_dir = build_working_dir(config)
-    
+
     # set up logger
     config.run_cfg.log_dir = os.path.join(working_dir, "logs")
     setup_logger(output_dir=config.run_cfg.log_dir)
@@ -81,7 +115,7 @@ def main():
     config_dict = config.to_dict()
     data_builder = get_data_builder(config_dict.get("dataset"))
     model = MemGenModel.from_config(config_dict.get("model"))
-    
+
     runner = MemGenRunner(
         model=model,
         data_builder=data_builder,
@@ -89,12 +123,13 @@ def main():
         working_dir=working_dir
     )
 
-    # train or evaluate 
+    # train or evaluate
     if config.run_cfg.mode == "train":
         runner.train()
-    
+
     elif config.run_cfg.mode == "evaluate":
         runner.evaluate()
+
 
 if __name__ == "__main__":
     main()

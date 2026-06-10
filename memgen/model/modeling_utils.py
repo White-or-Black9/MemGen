@@ -140,25 +140,44 @@ class MemGenGenerationMixin(GenerationMixin):
 
     def _generate_position_ids(self, attention_mask: torch.Tensor) -> torch.Tensor:
         """
-        根据 attention_mask 生成 position IDs。
-        使用累计和的方式，确保 padding 位置 position_id = 0。
+        根据 attention_mask 生成 position ids（用于位置编码或 RoPE）。
+
+        说明与实现细节：
+        - attention_mask: 二值 tensor，1 表示有效 token，0 表示 padding。
+        - 使用 cumulative sum 决定每个有效 token 的相对位置：
+          e.g. mask [0,1,1,1,0] -> cumsum -> [0,1,2,3,3] -> 减 1 -> [ -1,0,1,2,2 ] -> clamp(min=0) -> [0,0,1,2,2]
+        - 最终用 masked_fill 将 padding 位置显式置为 0，确保 padding 不参与位置信息。
+
+        返回:
+            position_ids: 与 attention_mask 形状相同的 long tensor，padding 处为 0，其他处为从 0 开始的递增位置索引。
         """
+        # 通过累加有效 token 个数并减 1 得到从 0 开始的位置索引
         position_ids = (attention_mask.cumsum(-1) - 1).clamp(min=0)
+        # padding 明确置为 0，避免残留负数或其他值
         position_ids.masked_fill_(attention_mask == 0, 0)
         return position_ids
 
     def _is_conversation(self, input_ids: torch.Tensor, tokenizer) -> bool:
         """
-        判断输入是否为多轮对话格式。
+        判断输入是否为多轮对话（conversation）格式。
 
-        检测方法：统计 <|im_start|>assistant 的出现次数。
-        如果出现超过 1 次，说明是多轮对话。
+        目的：模型在对话模式下可能需要不同的后处理或特殊 token 忽略策略，
+        因此需要区分单轮指令式输入与多轮对话式输入。
+
+        检测策略（简单而可靠）：
+        - 寻找 token 序列 "<|im_start|>assistant" 的出现次数；
+        - 出现超过一次则判定为多轮对话（因为会出现多次 assistant 回复标记）。
+
+        注意事项：
+        - 只检查 batch 中第一个样本（假设整个 batch 使用同一输入模式）。
+        - 使用 tokenizer.encode 得到精确的 token id 序列以避免字符串匹配错误。
         """
         if len(input_ids.shape) != 2:
             raise ValueError("input_ids must be a 2D tensor of shape (batch_size, seq_len)")
 
         seq = input_ids[0].tolist()
 
+        # 精确匹配特殊标记对应的 id 序列
         im_start_ids = tokenizer.encode("<|im_start|>", add_special_tokens=False)
         assistant_ids = tokenizer.encode("assistant", add_special_tokens=False)
 
@@ -169,6 +188,7 @@ class MemGenGenerationMixin(GenerationMixin):
             if seq[i:i + len(target_seq)] == target_seq:
                 count += 1
 
+        # 多于一次出现意味着至少两轮 assistant 回复 -> 对话
         return count > 1
 
     def _postprocess_assistant_labels(

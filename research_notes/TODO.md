@@ -11,15 +11,18 @@
 
 ### Phase 0: Audit and Baseline
 
-- [ ] Identify inference entry points and call graph.
-- [ ] Identify Weaver and Trigger training boundaries that must remain untouched.
-- [ ] Locate runtime configuration and default handling.
-- [ ] Define session/sample lifecycle.
-- [ ] Locate latent representation creation and consumption.
-- [ ] Locate generation outputs, logging, and evaluation hooks.
-- [ ] Record baseline commands and metrics.
-- [ ] Define exact disabled-feature compatibility tests.
-- [ ] Update `CODE_MAP.md` and `BASELINE.md`.
+- [x] Identify inference entry points and call graph.
+- [x] Identify Weaver and Trigger training boundaries that must remain untouched.
+- [x] Locate runtime configuration and default handling.
+- [x] Define session/sample lifecycle.
+- [x] Locate latent representation creation and consumption.
+- [x] Locate generation outputs, logging, and evaluation hooks.
+- [x] Select and hash-verify the official baseline checkpoint.
+- [x] Record the canonical baseline command and metric contract.
+- [x] Define exact disabled-feature compatibility tests.
+- [x] Update `CODE_MAP.md` and `BASELINE.md`.
+- [ ] Repair `BUG-0001` in a separately approved Phase.
+- [ ] Run and accept the full baseline after loader repair.
 
 ### Phase 1: Session-Local Prototype
 
@@ -40,11 +43,11 @@
 
 ## Active
 
-- None. Awaiting approval for the next Phase.
+- None. Phase 0 is paused at the baseline gate.
 
 ## Blocked
 
-- None.
+- Trusted baseline execution is blocked by `BUG-0001`.
 
 ## Done
 

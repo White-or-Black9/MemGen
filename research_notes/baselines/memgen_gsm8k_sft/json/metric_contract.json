@@ -1,0 +1,62 @@
+{
+  "baseline_id": "memgen-gsm8k-sft-official-v1",
+  "acceptance_target": "comparison_ready",
+  "status": "broken",
+  "task": "single-turn mathematical reasoning",
+  "dataset": {
+    "repository": "gsm8k",
+    "configuration": "main",
+    "split": "test"
+  },
+  "source": {
+    "code_revision": "5e59fee296092fa056f140b38a07b927651ffdb5",
+    "checkpoint_repository": "Kana-s/MemGen",
+    "checkpoint_revision": "31372b691e334d578de0d78fd9aa01d7da025940",
+    "checkpoint_variant": "Qwen2.5-1.5B-Instruct/gsm8k/weaver-sft/pn=1_pl=8_in=3_il=8"
+  },
+  "evaluation": {
+    "entry_point": "main.py -> MemGenRunner.evaluate -> StaticEvalRecorder",
+    "batch_size": 1,
+    "seed": 42,
+    "decoding": "greedy",
+    "temperature": 0.0,
+    "max_response_length": 1024
+  },
+  "metrics": {
+    "compute_reward": {
+      "description": "Mean GSM8K answer correctness from data.gsm8k.env.GSM8KEnv.compute_reward",
+      "direction": "higher",
+      "required": true,
+      "origin_path": "evaluate/answer.json",
+      "source_ref": "data/gsm8k/env.py"
+    },
+    "latency_seconds_per_sample": {
+      "description": "Wall-clock inference latency divided by evaluated samples",
+      "direction": "lower",
+      "required": true,
+      "origin_path": "baseline runtime profile",
+      "source_ref": "research_notes/BASELINE.md"
+    },
+    "peak_cuda_memory_bytes": {
+      "description": "Peak allocated CUDA memory during baseline generation",
+      "direction": "lower",
+      "required": true,
+      "origin_path": "baseline runtime profile",
+      "source_ref": "research_notes/BASELINE.md"
+    }
+  },
+  "compatibility_oracle": {
+    "required_fields": [
+      "generated_token_ids_sha256",
+      "augmentation_mask_sha256",
+      "compute_reward"
+    ],
+    "comparison": "exact",
+    "scope": "deterministic batch_size=1 golden cases"
+  },
+  "known_deviations": [
+    "The installed PyTorch and TRL versions differ between repository manifests.",
+    "The baseline is not accepted because BUG-0001 prevents trusted LoRA adapter loading."
+  ],
+  "blocker": "BUG-0001"
+}

@@ -1,63 +1,135 @@
 # Baseline Definition
 
-## Purpose
+## Status
 
-Define the exact original MemGen inference behavior that all memory-bank variants
-must compare against and that disabled mode must preserve.
+- Acceptance target: `comparison_ready`
+- Current verdict: `broken`
+- Baseline gate: **closed**
+- Blocking defect: `BUG-0001` (official LoRA adapters are not loaded)
+- Failed smoke experiment: `EXP-20260611-001`
+
+No paper-facing or downstream comparison may use the failed smoke attempt.
 
 ## Baseline Identity
 
-- Baseline ID:
-- Date captured:
-- Code revision:
-- Working tree state:
-- Checkpoint/model:
-- Environment:
-- Hardware:
-- Dataset and split:
-- Inference entry point:
-- Configuration:
-- Random seeds:
-- Command:
-- Output directory:
+- Baseline ID: `memgen-gsm8k-sft-official-v1`
+- Date selected: 2026-06-11
+- Code revision: `5e59fee296092fa056f140b38a07b927651ffdb5`
+- Upstream code parent: `7f1444f`
+- Branch: `rlm-memory-bank`
+- Working tree during audit: clean
+- Model: `Qwen/Qwen2.5-1.5B-Instruct`
+- Dataset: `gsm8k`, configuration `main`, split `test`
+- MemGen checkpoint:
+  `Kana-s/MemGen@31372b691e334d578de0d78fd9aa01d7da025940`
+- Variant: `gsm8k/weaver-sft/pn=1_pl=8_in=3_il=8`
+- Local ignored path: `.cache/baselines/memgen-gsm8k-sft/model`
+- Inference entry point: `main.py -> MemGenRunner.evaluate()`
+- Primary metric: mean `compute_reward`, higher is better
+- Decoding: greedy, temperature `0.0`
+- Seed: `42`
+- Phase 1 default batch size: `1`
+
+## Checkpoint Integrity
+
+| File | SHA-256 |
+|---|---|
+| `projs.bin` | `54a342a64e62dc6e7b1837a169daec1dfa79f8ac6d787c3bfe1206926f3bb754` |
+| `weaver.bin` | `5c80b886508e3eae60648728d9a70a03ec58cc70732f838aca5c5030a4828e04` |
+| `trigger.bin` | `7d9f14695be9f6c1e3355ab147aa55b20ce5e594bd9111aab10c314dc8a0630c` |
+| Weaver adapter | `1ef3f419d79e73a6cc805c74546f270b90857a5ba93130793b9caafad1eb4f95` |
+| Trigger adapter | `ab97fcac48622ad332106277ac58ec732930927b039da1facd5fb211bbc65cbc` |
+
+These hashes match the official Hugging Face LFS metadata.
+
+## Environment
+
+- GPU host: 8 x NVIDIA RTX A6000, 49140 MiB each.
+- Driver: `560.35.03`.
+- Intended environment: `/home/baishilong/miniconda3/envs/memgen`.
+- Python: `3.10.20`.
+- PyTorch: `2.12.0+cu126` locally installed.
+- Transformers: `4.55.4`.
+- PEFT: `0.17.1`.
+- TRL: `0.21.0`.
+- Flash Attention: `2.8.3`.
+- Known deviation: repository manifests disagree on PyTorch CUDA build and TRL
+  version. This must remain recorded until the baseline is accepted.
+
+## Reproduction Command
+
+The canonical full evaluation command is:
+
+```bash
+CUDA_VISIBLE_DEVICES=7 \
+/home/baishilong/miniconda3/envs/memgen/bin/python \
+  -m accelerate.commands.launch \
+  --config_file=configs/zero2.yaml \
+  --num_processes=1 \
+  main.py \
+  --cfg-path configs/latent_memory/gsm8k.yaml \
+  --options \
+  model.model_name Qwen/Qwen2.5-1.5B-Instruct \
+  model.load_model_path .cache/baselines/memgen-gsm8k-sft/model \
+  model.max_prompt_aug_num 1 \
+  model.max_inference_aug_num 3 \
+  model.weaver.model_name Qwen/Qwen2.5-1.5B-Instruct \
+  model.weaver.prompt_latents_len 8 \
+  model.weaver.inference_latents_len 8 \
+  model.trigger.model_name Qwen/Qwen2.5-1.5B-Instruct \
+  model.trigger.active False \
+  run.mode evaluate \
+  run.interaction.batch_size 1 \
+  run.interaction.temperature 0.0 \
+  run.interaction.max_response_length 1024
+```
+
+Do not execute or trust this command until `BUG-0001` is repaired and verified.
 
 ## Compatibility Contract
 
 With `latent_memory_bank.enabled=false`:
 
-- Control flow follows the original inference path.
-- No memory bank state is created, retrieved, or updated.
-- Inputs, outputs, tensor shapes, dtypes, and devices remain unchanged.
-- Deterministic outputs match exactly where the original run is deterministic.
-- Existing configuration files and commands remain valid.
-- Training workflows and checkpoints remain untouched.
+- The call graph must take the original inference path without constructing,
+  retrieving, updating, or resetting a memory bank.
+- Original configuration files and commands remain valid.
+- Input IDs, attention masks, generation configuration, and checkpoint loading
+  are unchanged.
+- For deterministic `batch_size=1` golden cases, generated token IDs,
+  augmentation masks, and task metrics must match byte-for-byte.
+- Dtype, device, tensor shapes, KV-cache behavior, and output schema remain unchanged.
+- Weaver and Trigger training files, parameters, commands, and checkpoints remain
+  untouched.
 
-## Baseline Metrics
+## Required Golden Evidence
 
-| Metric | Value | Measurement Method |
+After `BUG-0001` is fixed:
+
+1. Confirm adapter tensors load with no missing/unexpected keys.
+2. Run at least three fixed GSM8K test examples with greedy decoding.
+3. Store generated token IDs, augmentation masks, output hashes, rewards, latency,
+   and peak CUDA memory.
+4. Re-run each case and require identical token and mask hashes.
+5. Use these artifacts as the disabled-feature equivalence oracle in Phase 1.
+
+## Metrics
+
+| Metric | Current Value | Status |
 |---|---:|---|
-| Primary task metric | TBD | TBD |
-| Secondary metric | TBD | TBD |
-| Latency per sample | TBD | TBD |
-| Peak device memory | TBD | TBD |
-| Throughput | TBD | TBD |
-
-## Golden Cases
-
-| Case ID | Input/Session | Expected Output/Hash | Purpose |
-|---|---|---|---|
-| TBD | TBD | TBD | Disabled-path equivalence |
-
-## Reproduction
-
-```bash
-# Add the verified baseline command during Phase 0.
-```
+| Mean `compute_reward` on GSM8K test | Not measured | Blocked |
+| Golden token hash | Not established | Blocked |
+| Latency per sample | Not established | Blocked |
+| Peak CUDA memory | Not established | Blocked |
+| Throughput | Not established | Blocked |
 
 ## Acceptance Criteria
 
-- [ ] Baseline command runs from a clean documented environment.
-- [ ] Outputs and metrics are archived.
-- [ ] Golden cases are defined.
-- [ ] Disabled-mode equivalence check is automated or precisely repeatable.
-- [ ] Training workflows are confirmed unchanged.
+- [x] Comparator identity and source revision are explicit.
+- [x] Dataset, split, evaluation path, metric, and direction are explicit.
+- [x] Official checkpoint files are local and hash-verified.
+- [x] Canonical metric contract exists.
+- [ ] Checkpoint loads all trained adapter tensors.
+- [ ] Full baseline command completes.
+- [ ] Metrics and raw outputs are archived.
+- [ ] Deterministic golden cases are established.
+- [ ] Baseline is accepted as `comparison_ready`.

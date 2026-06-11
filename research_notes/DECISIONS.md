@@ -11,6 +11,8 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0002 | 2026-06-11 | accepted | Disabled memory bank must preserve exact original behavior |
 | DEC-0003 | 2026-06-11 | accepted | Phase 1 memory is session-local, non-shared, and defaults to batch size 1 |
 | DEC-0004 | 2026-06-11 | accepted | Execute one Phase at a time and pause after completion |
+| DEC-0005 | 2026-06-11 | accepted | Use official Qwen2.5-1.5B GSM8K Weaver-SFT as the primary comparator |
+| DEC-0006 | 2026-06-11 | accepted | Keep the baseline gate closed until all official LoRA tensors load without mismatch |
 
 ## Decision Template
 
@@ -57,3 +59,34 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Status: accepted
 - Decision: Execute one approved Phase, update required notes, then pause.
 - Consequence: No automatic progression to the next Phase.
+
+### DEC-0005: Primary Baseline Comparator
+
+- Date: 2026-06-11
+- Status: accepted
+- Context: A lightweight, official, static-task comparator is needed before the
+  memory-bank implementation.
+- Decision: Use the official
+  `Qwen2.5-1.5B-Instruct/gsm8k/weaver-sft/pn=1_pl=8_in=3_il=8` checkpoint.
+- Alternatives considered: random untrained MemGen, GSM8K GRPO, KodCode,
+  TriviaQA, and SmolLM3.
+- Rationale: The checkpoint is official, small to download, uses a deterministic
+  static evaluator, has cached base weights/data, and exercises both prompt and
+  inference latent augmentation.
+- Consequences: Phase 1 compatibility evidence will initially target GSM8K,
+  greedy decoding, and `batch_size=1`.
+- Related experiments: `EXP-20260611-001`
+
+### DEC-0006: Refuse Unloaded-Adapter Baselines
+
+- Date: 2026-06-11
+- Status: accepted
+- Context: The current loader emits missing-key warnings for every trained LoRA
+  tensor but may continue execution.
+- Decision: A run is not a valid MemGen baseline unless adapter loading reports no
+  unexplained missing or unexpected trained keys.
+- Alternatives considered: Accepting outputs because generation can continue.
+- Rationale: Such outputs would mostly represent random/unadapted components and
+  cannot support scientific comparison.
+- Consequences: The Phase 0 baseline gate remains closed pending `BUG-0001`.
+- Related experiments: `EXP-20260611-001`

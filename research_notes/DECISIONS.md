@@ -17,6 +17,8 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0008 | 2026-06-11 | accepted | Future memory-bank state should be owned by the interaction session and passed explicitly into inference |
 | DEC-0009 | 2026-06-11 | accepted | Use the `memgen` environment plus local cached snapshot paths for smoke verification; treat `base` as unsupported for MemGen runs |
 | DEC-0010 | 2026-06-11 | accepted | Preserve the existing validated `memgen` package set through the Repair Phase; do not rebuild or install dependencies without new evidence and approval |
+| DEC-0011 | 2026-06-11 | accepted | Restore checkpoint adapters on the existing PEFT model after deleting constructor placeholders |
+| DEC-0012 | 2026-06-11 | accepted | Preserve the static recorder batch contract by flattening only rank-nested gather results |
 
 ## Decision Template
 
@@ -153,6 +155,47 @@ IDs and append superseding decisions rather than silently rewriting history.
   - environment changes require a separate explanation and approval
   - direct absolute Python invocation is preferred in automation
 - Related experiments: `EXP-20260611-003`
+
+### DEC-0011: Replace Placeholder Adapters During Checkpoint Restore
+
+- Date: 2026-06-11
+- Status: accepted
+- Context: MemGen construction creates named adapters from the current YAML
+  before checkpoint restoration. Wrapping the resulting `LoraModel` again
+  changes key prefixes and prevents official q/v-only tensors from loading.
+- Decision: In `MemGenModel.from_pretrained()`, delete each constructor-created
+  placeholder adapter and load the saved adapter into the existing PEFT model
+  under the same component name.
+- Alternatives considered:
+  - wrap `model.base_model` again
+  - force checkpoint tensors into the YAML's broader adapter layout
+  - change training-time adapter construction
+- Rationale: The selected approach uses the checkpoint's own adapter config,
+  avoids nested PEFT wrappers, and leaves training initialization untouched.
+- Consequences: Restored models use the exact saved target modules and weights.
+- Verification: 112/112 Weaver and 112/112 Trigger tensors match checkpoint
+  keys, shapes, and values with no missing or unexpected entries.
+- Related experiment: `EXP-20260611-004`
+- Related bug: `BUG-0001`
+
+### DEC-0012: Keep Static Recorder Inputs Batch-Shaped
+
+- Date: 2026-06-11
+- Status: accepted
+- Context: `StaticEvalRecorder.record_batch()` requires aligned completion and
+  example lists, while distributed gathering may add one rank nesting level.
+- Decision: Flatten gathered results only when the first gathered batch element
+  is itself a list, then call the recorder once with aligned flat lists.
+- Alternatives considered:
+  - make the recorder accept scalar strings and dictionaries
+  - bypass the official recorder
+  - change the shared gathering helper
+- Rationale: This preserves the recorder and metric contracts, supports both
+  single-process and rank-nested inputs, and limits the fix to static eval.
+- Consequences: Static answer logging works without changing evaluation
+  semantics or any training workflow.
+- Related experiment: `EXP-20260611-004`
+- Related bug: `BUG-0002`
 
 ### DEC-0005: Primary Baseline Comparator
 

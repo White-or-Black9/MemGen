@@ -3,7 +3,6 @@ import os
 import random
 from typing import Union
 
-from peft import PeftModel
 import torch
 import torch.nn as nn
 from transformers import (
@@ -756,16 +755,17 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
         trigger_state = torch.load(trigger_path, map_location="cpu")
         model.trigger.output_layer.load_state_dict(trigger_state["output_layer"])
 
-        # 加载 LoRA adapter
-        model.weaver.model = PeftModel.from_pretrained(
-            model.weaver.model.base_model,
+        # Replace the initialization adapters with the checkpoint adapters.
+        # Loading onto base_model would wrap the existing LoraModel a second time.
+        model.weaver.model.delete_adapter(MemGenWeaver.adapter_name)
+        model.weaver.model.load_adapter(
             os.path.join(load_directory, "weaver", "weaver"),
             adapter_name=MemGenWeaver.adapter_name,
         )
         model.weaver.model.set_adapter(MemGenWeaver.adapter_name)
 
-        model.trigger.model = PeftModel.from_pretrained(
-            model.trigger.model.base_model,
+        model.trigger.model.delete_adapter(MemGenTrigger.adapter_name)
+        model.trigger.model.load_adapter(
             os.path.join(load_directory, "trigger", "trigger"),
             adapter_name=MemGenTrigger.adapter_name,
         )

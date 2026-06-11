@@ -10,6 +10,8 @@ overwrite prior records; append a new entry.
 | EXP-20260611-001 | 2026-06-11 | Phase 0 | Can the official GSM8K SFT checkpoint produce a trusted smoke baseline? | `failed` | LoRA keys were not loaded; direct smoke then failed on projection dtype |
 | EXP-20260611-002 | 2026-06-11 | Phase 2 | Can the original MemGen inference stack run a one-sample GSM8K smoke test in the recommended environment? | `completed_with_caveats` | Original eval path reached generation but crashed in static recorder; script-only harness produced one completion; result is not a valid baseline because LoRA loading remains broken |
 | EXP-20260611-003 | 2026-06-11 | Environment Alignment | Is the existing `memgen` environment suitable for the Repair Phase without package changes? | `completed` | Imports, dependency check, CUDA/BF16, config, model snapshot, checkpoint, and dataset cache validated; no install required |
+| EXP-20260611-004 | 2026-06-11 | Temporary Repair | Do the minimal adapter-loader and static-recorder fixes unblock the official one-sample smoke path? | `completed` | Both adapters matched 112/112 tensors exactly; official static eval wrote a non-empty answer file |
+| EXP-20260611-005 | 2026-06-11 | Repair Review | Do the repaired loader and recorder remain correct across three sequential batch-size-1 samples? | `completed` | Three predictions plus one summary were written; adapter and augmentation checks passed |
 
 ## Recorded Experiments
 
@@ -237,6 +239,203 @@ overwrite prior records; append a new entry.
   - preserve package versions through the Repair Phase
 - Related decision IDs: `DEC-0009`, `DEC-0010`
 - Related bug IDs: `BUG-0003`, `BUG-0004`
+
+### EXP-20260611-004: Repaired Official Static Smoke Test
+
+- Phase: Temporary Repair Phase
+- Status: `completed`
+- Date: 2026-06-11
+- Research question: Do the minimal fixes for `BUG-0001` and `BUG-0002`
+  restore a trustworthy one-sample original MemGen smoke path?
+- Baseline/comparator: official Qwen2.5-1.5B GSM8K Weaver-SFT checkpoint; smoke
+  verification only
+- Git branch: `rlm-memory-bank`
+- Base commit: `ed741d9be111b3f549740dce6db0f90c4ae11632`
+- Working tree: uncommitted Repair Phase changes in the adapter loader, static
+  evaluator, smoke harness, and research notes
+- Environment:
+  `/home/baishilong/miniconda3/envs/memgen/bin/python`
+- Package versions: Python 3.10.20, PyTorch 2.12.0+cu126, Transformers 4.55.4,
+  PEFT 0.17.1, Accelerate 1.10.1, Datasets 4.0.0
+- Config file: `configs/latent_memory/gsm8k.yaml`
+- Model path:
+  `/home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306`
+- Checkpoint path:
+  `/mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model`
+- Dataset path:
+  `/home/baishilong/.cache/huggingface/datasets/gsm8k/main/0.0.0/740312add88f781978c0658806c59bc2815b9866`
+- Dataset/split/sample count: `gsm8k/main`, test index 0, one sample
+- Random seed: 42
+- Batch size: 1
+- Decoding: greedy, temperature 0.0, maximum response length 128, Weaver and
+  Trigger sampling disabled
+- Output directory: `outputs/baseline/EXP-20260611-004`
+- Prediction file:
+  `outputs/baseline/EXP-20260611-004/evaluate/answer.json`
+- Metric file: prediction file summary record plus
+  `outputs/baseline/EXP-20260611-004/verification.json`
+- Successful command:
+
+```bash
+env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY \
+  CUDA_VISIBLE_DEVICES=0 \
+  TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 \
+  TOKENIZERS_PARALLELISM=false \
+  /home/baishilong/miniconda3/envs/memgen/bin/python \
+  -m scripts.eval.repair_phase2_smoke \
+  --cfg-path configs/latent_memory/gsm8k.yaml \
+  --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 \
+  --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model \
+  --output-dir /mnt/18T/baishilong/MemGen/outputs/baseline/EXP-20260611-004
+```
+
+#### Results
+
+- Weaver adapter: 112 runtime keys and 112 checkpoint keys; zero missing,
+  unexpected, shape-mismatched, or value-mismatched tensors.
+- Trigger adapter: 112 runtime keys and 112 checkpoint keys; zero missing,
+  unexpected, shape-mismatched, or value-mismatched tensors.
+- Adapter loading warnings: none related to missing or unexpected keys.
+- Prediction: `\boxed{18}` for the selected GSM8K sample.
+- Metric: `compute_reward=1.0` for this one sample; no aggregate performance
+  conclusion is permitted.
+- `answer.json`: 1,006 bytes, two JSONL records, non-empty.
+- Generation trace: Trigger decision entry 85 calls, Weaver prompt augmentation
+  1 call, Weaver inference augmentation 3 calls.
+- Latency: 8.438 seconds for `runner.evaluate()`.
+- Peak allocated CUDA memory: 9,391,613,952 bytes.
+- Initial failed launch: direct script execution raised
+  `ModuleNotFoundError: common` before model loading; module execution fixed the
+  harness import path without project changes.
+
+#### Conclusion
+
+- Both Phase 2 smoke blockers are repaired.
+- This run establishes readiness to execute Phase 3, not a formal baseline.
+- Related decisions: `DEC-0011`, `DEC-0012`
+- Related bugs: `BUG-0001`, `BUG-0002`
+
+#### Implementation Summary
+
+- Adapter fix:
+  - removed the constructor-created placeholder adapter only during checkpoint
+    restoration
+  - loaded the saved adapter into the existing PEFT model under the original
+    component name
+  - avoided creating a second nested PEFT wrapper
+- Static recorder fix:
+  - preserved the recorder's `List[str]` and `List[Dict]` batch contract
+  - flattened only the optional rank nesting introduced by distributed gather
+  - did not bypass the official recorder or metric hook
+- Scope:
+  - no changes to Weaver or Trigger training initialization
+  - no changes to trainer classes or training scripts
+  - no LatentMemoryBank implementation
+  - no dependency or environment changes
+
+### EXP-20260611-005: Repair Review Three-Sample Sanity Check
+
+- Phase: Temporary Repair Review and Sanity Check
+- Status: `completed`
+- Date: 2026-06-11
+- Purpose: Review the Repair Phase diff and verify the repaired official static
+  evaluation path across more than one sample.
+- Scientific status: sanity check only; not a formal baseline
+- Git branch: `rlm-memory-bank`
+- Base commit: `ed741d9be111b3f549740dce6db0f90c4ae11632`
+- Environment:
+  `/home/baishilong/miniconda3/envs/memgen/bin/python`
+- Package versions: PyTorch 2.12.0+cu126, Transformers 4.55.4, PEFT 0.17.1,
+  Accelerate 1.10.1, Datasets 4.0.0
+- Config file: `configs/latent_memory/gsm8k.yaml`
+- Model path:
+  `/home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306`
+- Checkpoint path:
+  `/mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model`
+- Dataset path:
+  `/home/baishilong/.cache/huggingface/datasets/gsm8k/main/0.0.0/740312add88f781978c0658806c59bc2815b9866`
+- Dataset/split/sample IDs: `gsm8k/main`, test indices 0, 1, and 2
+- Sample count: 3
+- Batch size: 1
+- Random seed: 42
+- Decoding: greedy, temperature 0.0, maximum response length 128, Weaver and
+  Trigger sampling disabled
+- Output directory: `outputs/baseline/EXP-20260611-005`
+- Prediction file:
+  `outputs/baseline/EXP-20260611-005/evaluate/answer.json`
+- Verification file:
+  `outputs/baseline/EXP-20260611-005/verification.json`
+- Command:
+
+```bash
+env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY \
+  CUDA_VISIBLE_DEVICES=0 \
+  TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 \
+  TOKENIZERS_PARALLELISM=false \
+  /home/baishilong/miniconda3/envs/memgen/bin/python \
+  -m scripts.eval.repair_phase2_smoke \
+  --cfg-path configs/latent_memory/gsm8k.yaml \
+  --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 \
+  --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model \
+  --output-dir /mnt/18T/baishilong/MemGen/outputs/baseline/EXP-20260611-005 \
+  --sample-count 3
+```
+
+#### Diff Review
+
+- Core files reviewed:
+  - `memgen/model/modeling_memgen.py`
+  - `memgen/runner.py`
+- Harness reviewed and parameterized:
+  - `scripts/eval/repair_phase2_smoke.py`
+- Protected training paths checked with `git diff --name-only`:
+  - `memgen/trainer/`
+  - `scripts/train/`
+  - `scripts/weaver_sft.sh`
+  - `scripts/weaver_grpo.sh`
+  - `scripts/trigger_train.sh`
+  - `memgen/model/modeling_utils.py`
+- Protected training path diff result: empty
+- Review verdict: the repair is narrowly scoped to checkpoint restoration and
+  static evaluation result collation.
+
+#### Results
+
+- `answer.json`: 2,549 bytes and four JSONL records.
+- Prediction records: 3.
+- Summary records: 1.
+- All three prediction records contain non-empty completions.
+- One-sample rewards: 1.0, 1.0, and 0.0.
+- Summary reward: 0.6666666666666666; not accepted as a baseline metric.
+- Weaver adapter: 112/112 exact tensor match.
+- Trigger adapter: 112/112 exact tensor match.
+- Missing keys: 0.
+- Unexpected keys: 0.
+- Shape mismatches: 0.
+- Value mismatches: 0.
+- Adapter-related load warnings: 0.
+- Trigger decision calls: 193.
+- Weaver prompt augmentation calls: 3.
+- Weaver inference augmentation calls: 8.
+- Three augmentation masks were captured.
+- Evaluation latency: 14.633 seconds.
+- Peak allocated CUDA memory: 9,391,613,952 bytes.
+
+#### Caveats
+
+- Transformers warned that `temperature` may be ignored under greedy decoding;
+  sampling was disabled, so this does not change the intended deterministic
+  protocol.
+- Accelerate warned that Linux kernel 5.4 is below its recommended 5.5 minimum;
+  the run completed without a hang.
+- This experiment does not establish aggregate GSM8K performance.
+
+#### Conclusion
+
+- No Repair Phase regression was found.
+- The fixes remain suitable for proceeding to an explicitly approved Phase 3.
+- Baseline gate remains closed.
+- Related bugs: `BUG-0001`, `BUG-0002`
 
 ## Experiment Template
 

@@ -7,8 +7,8 @@ Do not delete resolved entries.
 
 | ID | Date | Severity | Status | Summary |
 |---|---|---|---|---|
-| BUG-0001 | 2026-06-11 | high | `open` | Official Weaver/Trigger LoRA adapters are not loaded by `MemGenModel.from_pretrained()` |
-| BUG-0002 | 2026-06-11 | high | `open` | Static evaluation crashes in `StaticEvalRecorder.record_batch()` after generation starts |
+| BUG-0001 | 2026-06-11 | high | `fixed` | Official Weaver/Trigger LoRA adapters were not loaded by `MemGenModel.from_pretrained()` |
+| BUG-0002 | 2026-06-11 | high | `fixed` | Static evaluation crashed in `StaticEvalRecorder.record_batch()` after generation started |
 | BUG-0003 | 2026-06-11 | medium | `open` | Checked-in environment specifications disagree on Python, CUDA, and package versions |
 | BUG-0004 | 2026-06-11 | low | `open` | PATH-level `conda` wrapper has a CRLF shebang and cannot execute |
 
@@ -18,7 +18,7 @@ Do not delete resolved entries.
 
 - Date found: 2026-06-11
 - Severity: high
-- Status: `open`
+- Status: `fixed`
 - Phase/experiment: Phase 0 / `EXP-20260611-001`
 - Environment: PEFT 0.17.1, Transformers 4.55.4, Python 3.10.20
 - Revision: `5e59fee296092fa056f140b38a07b927651ffdb5`
@@ -49,12 +49,63 @@ Do not delete resolved entries.
   - Loaded tensor equality against official safetensors.
   - Deterministic generation repeat.
   - No changes to training paths.
+- Root cause: `from_pretrained()` passed an already wrapped `LoraModel` into a
+  second `PeftModel.from_pretrained()` call. This added an extra model prefix and
+  retained the YAML's broader target-module configuration instead of restoring
+  the checkpoint's q/v-only adapter configuration.
+- Fix: Delete the constructor's placeholder named adapter, then call
+  `load_adapter()` on the existing PEFT model using the checkpoint directory and
+  original adapter name.
+- Regression verification:
+  - Weaver: 112/112 tensors, exact key/shape/value match.
+  - Trigger: 112/112 tensors, exact key/shape/value match.
+  - No adapter missing/unexpected warnings.
+  - Official one-sample generation completed.
+- Training impact: Initial adapter construction and all Weaver/Trigger trainer
+  code are unchanged. Only checkpoint restoration is corrected.
+- Related experiment: `EXP-20260611-004`
+- Related decision: `DEC-0011`
+- Date resolved: 2026-06-11
+- Repair review verification:
+  - `EXP-20260611-005` loaded Weaver and Trigger adapters with exact 112/112
+    tensor matches across a three-sample official static eval.
+  - No missing, unexpected, shape-mismatched, or value-mismatched entries
+    reappeared.
+  - Protected training files had no git diff.
+
+#### 修复说明（中文）
+
+模型构造阶段已经根据 YAML 创建了命名为 `weaver` 和 `trigger` 的
+`PeftModel/LoraModel`。原 checkpoint 恢复代码却把
+`model.<component>.model.base_model` 再传给 `PeftModel.from_pretrained()`，
+相当于在已有 LoRA 包装层外再次创建 PEFT 包装层。
+
+这会产生两个问题：
+
+1. runtime key 比 checkpoint 多一层 `base_model.model` 前缀以及 adapter
+   名后缀；
+2. runtime 继续采用 YAML 中覆盖七类 projection 的宽 LoRA 配置，共预期
+   392 个 tensor，而官方 checkpoint 实际采用 q/v-only 配置，每个组件
+   只有 112 个训练 tensor。
+
+修复时没有修改训练阶段如何创建 adapter，而是只修改 checkpoint 恢复：
+
+```python
+component.model.delete_adapter(adapter_name)
+component.model.load_adapter(checkpoint_path, adapter_name=adapter_name)
+component.model.set_adapter(adapter_name)
+```
+
+这样会删除构造阶段的占位 adapter，再由 checkpoint 的
+`adapter_config.json` 恢复正确的 q/v-only 结构和权重，避免二次包装。
+最终对 Weaver 和 Trigger 分别进行了 key、shape 和 tensor value 的逐项
+比较，均为 112/112 完全一致。
 
 ### BUG-0002: Static Eval Recorder Expects the Wrong Batch Shape
 
 - Date found: 2026-06-11
 - Severity: high
-- Status: `open`
+- Status: `fixed`
 - Phase/experiment: Phase 2 / `EXP-20260611-002`
 - Environment:
   `/home/baishilong/miniconda3/envs/memgen`, Python 3.10.20, Transformers 4.55.4,
@@ -90,6 +141,56 @@ Do not delete resolved entries.
   - no crash in `record_batch`
   - summary metrics append correctly
   - no change to Weaver/Trigger training workflows
+- Root cause: In a non-distributed run, `gather_objects()` returns the original
+  flat lists. The runner then zipped those lists and passed one completion
+  string and one example dictionary to `record_batch()`, whose contract is
+  `List[str]` plus `List[Dict]`. Accessing `examples[0]` therefore raised
+  `KeyError: 0`.
+- Fix: Normalize rank-nested gathered lists only when necessary, then call
+  `record_batch()` once with aligned flat completion and example lists.
+- Regression verification:
+  - isolated recorder contract test wrote one record plus summary
+  - official one-sample static evaluation wrote a 1,006-byte `answer.json`
+    containing one prediction plus summary
+  - sample reward remained computed through the official metric hook
+- Training impact: None; only static evaluation output collation changed.
+- Related experiment: `EXP-20260611-004`
+- Related decision: `DEC-0012`
+- Date resolved: 2026-06-11
+- Repair review verification:
+  - `EXP-20260611-005` wrote exactly three prediction records and one summary
+    record through the official recorder path.
+  - No `KeyError: 0` or output collation error reappeared.
+  - Trigger and Weaver augmentation tracing remained active for all samples.
+
+#### 修复说明（中文）
+
+`StaticEvalRecorder.record_batch()` 的接口契约是：
+
+```python
+record_batch(completions: List[str], examples: List[Dict])
+```
+
+单进程运行时，`gather_objects()` 直接返回原来的扁平列表。原 runner
+随后对两个列表执行 `zip()` 并逐项调用 recorder，实际传入的类型变成：
+
+```text
+completions = str
+examples = dict
+```
+
+因此 recorder 执行 `examples[0]` 时会把 `0` 当作字典键，触发
+`KeyError: 0`。这与 `Dataset.select(range(1))` 无关，也不是单样本字段
+发生了变化。
+
+修复方案保持 recorder 接口和评测语义不变：
+
+- 单进程结果已经是扁平列表，直接批量传入；
+- 分布式结果如果存在 rank 级嵌套，只展开这一层；
+- completion 与 example 保持相同顺序，一次调用 `record_batch()`。
+
+修复后官方 static eval 写出一条预测记录和一条 summary，指标仍通过原
+`compute_reward` hook 计算。
 
 ### BUG-0003: Environment Specifications Are Inconsistent
 

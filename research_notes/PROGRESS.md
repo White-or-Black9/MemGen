@@ -2,12 +2,12 @@
 
 ## Current State
 
-- Current Phase: Temporary Environment Alignment Phase
+- Current Phase: Temporary Repair Review and Sanity Check
 - Status: `completed`
 - Last updated: 2026-06-11
-- Stop condition: Reached; environment alignment only.
-- Next suggested Phase: A separately approved Repair Phase for `BUG-0001` and
-  `BUG-0002`; do not enter Phase 3 yet.
+- Stop condition: Reached; Repair Review only.
+- Next suggested Phase: Phase 3 - Original MemGen Baseline, after explicit
+  approval.
 
 ## Research Goal
 
@@ -73,6 +73,58 @@ The temporary environment alignment phase is complete.
   `conda` shim.
 - [x] Modified research notes only. No project code or environment package was
   changed.
+
+## Temporary Repair Phase Outcome
+
+The temporary Repair Phase is complete.
+
+- [x] Reproduced `BUG-0001` with the original nested PEFT loading path.
+- [x] Confirmed that the original path expected 392 incorrectly nested adapter
+  keys while each official checkpoint contains 112 trained q/v LoRA tensors.
+- [x] Replaced only the checkpoint adapter restoration logic; initial Weaver and
+  Trigger training adapter construction remains unchanged.
+- [x] Verified all 112 Weaver and all 112 Trigger tensors against the official
+  safetensors with no missing, unexpected, shape-mismatched, or value-mismatched
+  entries.
+- [x] Reproduced `BUG-0002` as a caller/recorder contract mismatch: the runner
+  passed one string and one dictionary where the recorder requires two lists.
+- [x] Normalized gathered static-eval batches and preserved sample order and
+  metric semantics.
+- [x] Ran the official `Config -> MemGenModel.from_config ->
+  MemGenRunner.evaluate()` path on one GSM8K sample with seed 42 and batch size 1.
+- [x] Confirmed a non-empty `answer.json` with one prediction and one summary
+  record.
+- [x] Confirmed the generation path called the Trigger decision entry 85 times,
+  Weaver prompt augmentation once, and Weaver inference augmentation three
+  times.
+- [x] Did not modify Weaver training, Trigger training, training scripts,
+  dependencies, or environment packages.
+- [x] Did not enter Phase 3.
+
+## Temporary Repair Review Outcome
+
+The temporary Repair Review and Sanity Check is complete.
+
+- [x] Reviewed the complete core diff in `memgen/model/modeling_memgen.py` and
+  `memgen/runner.py`.
+- [x] Confirmed no diff under `memgen/trainer/`, `scripts/train/`, Weaver/Trigger
+  training scripts, or `memgen/model/modeling_utils.py`.
+- [x] Confirmed fresh Weaver SFT uses `load_model_path=null` and does not enter
+  the repaired checkpoint restoration branch.
+- [x] Confirmed checkpoint-driven runs keep the same control flow while now
+  restoring the trained adapter tensors correctly.
+- [x] Parameterized the Repair Phase smoke harness only; no additional core-code
+  change was required.
+- [x] Ran three GSM8K test samples with seed 42 and batch size 1 through
+  `Config -> MemGenModel.from_config -> MemGenRunner.evaluate()`.
+- [x] Confirmed `answer.json` contains exactly three non-empty prediction records
+  and one summary record.
+- [x] Reconfirmed exact 112/112 tensor matches for both Weaver and Trigger
+  adapters with no missing, unexpected, shape, or value mismatches.
+- [x] Confirmed aggregate generation tracing: 193 Trigger decision calls, three
+  Weaver prompt calls, and eight Weaver inference calls.
+- [x] Did not treat the three-sample reward as a baseline metric.
+- [x] Did not enter Phase 3.
 
 ## Files Audited in Phase 1
 
@@ -167,11 +219,14 @@ The temporary environment alignment phase is complete.
 | 2026-06-11 | Phase 1 - Code Map and Inference Pipeline Audit | Completed | `research_notes/CODE_MAP.md` updated with verified inference path, boundaries, tensor notes, and integration risks |
 | 2026-06-11 | Phase 2 - Original Project Smoke Test | Completed with caveats | Original evaluation path reached generation but failed in static recorder; script-only harness produced one completion; baseline remains invalid due `BUG-0001` |
 | 2026-06-11 | Temporary Environment Alignment Phase | Completed | Existing `memgen` environment validated; CUDA/BF16 and local assets confirmed; no install or environment rebuild required |
+| 2026-06-11 | Temporary Repair Phase | Completed | `BUG-0001` and `BUG-0002` fixed; one-sample official static smoke wrote a non-empty `answer.json` with exact adapter tensor verification |
+| 2026-06-11 | Temporary Repair Review and Sanity Check | Completed | Core repair diff reviewed; training files unchanged; three-sample official static eval produced three predictions plus one summary |
 
 ## Session Handoff
 
-- The temporary Environment Alignment Phase can be treated as complete.
-- Do not treat any Phase 2 artifact as a scientific baseline.
-- The environment is ready for a separately approved Repair Phase.
-- Do not enter Phase 3 until `BUG-0001` and `BUG-0002` are repaired and the
-  original smoke test is rerun successfully.
+- The temporary Repair Phase can be treated as complete.
+- `BUG-0001` and `BUG-0002` are fixed under the validated `memgen` environment.
+- `EXP-20260611-004` is a smoke verification only, not a scientific baseline.
+- `EXP-20260611-005` independently sanity-checks the repaired path on three
+  samples and is also not a scientific baseline.
+- Phase 3 prerequisites are satisfied, but Phase 3 requires explicit approval.

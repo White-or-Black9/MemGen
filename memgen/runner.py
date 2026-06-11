@@ -347,8 +347,18 @@ class MemGenRunner:
             all_batches = gather_objects(local_batches)
 
             if accelerator.is_main_process:
-                for comps, batch in zip(all_completions, all_batches):
-                    recorder.record_batch(comps, batch)
+                if all_batches and isinstance(all_batches[0], list):
+                    all_completions = [
+                        completion
+                        for rank_completions in all_completions
+                        for completion in rank_completions
+                    ]
+                    all_batches = [
+                        example
+                        for rank_batch in all_batches
+                        for example in rank_batch
+                    ]
+                recorder.record_batch(all_completions, all_batches)
 
         accelerator.wait_for_everyone()
 

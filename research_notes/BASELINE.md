@@ -3,12 +3,14 @@
 ## Status
 
 - Acceptance target: `comparison_ready`
-- Current verdict: `broken`
+- Current verdict: `ready_for_phase3`
 - Baseline gate: **closed**
-- Blocking defect: `BUG-0001` (official LoRA adapters are not loaded)
+- Blocking defect: none for smoke execution; formal Phase 3 evidence is pending
 - Failed smoke experiment: `EXP-20260611-001`
+- Successful repair smoke experiment: `EXP-20260611-004`
 
-No paper-facing or downstream comparison may use the failed smoke attempt.
+The Repair Phase smoke is not a scientific baseline. No paper-facing or
+downstream comparison may use it as an aggregate result.
 
 ## Baseline Identity
 
@@ -84,7 +86,28 @@ CUDA_VISIBLE_DEVICES=7 \
   run.interaction.max_response_length 1024
 ```
 
-Do not execute or trust this command until `BUG-0001` is repaired and verified.
+`BUG-0001` and `BUG-0002` are repaired. Execute the full baseline only in an
+explicitly approved Phase 3.
+
+## Repair Smoke Evidence
+
+- Official path:
+  `Config -> MemGenModel.from_config -> MemGenRunner.evaluate()`
+- Sample count: 1
+- Batch size: 1
+- Seed: 42
+- Weaver adapter: exact 112/112 tensor match
+- Trigger adapter: exact 112/112 tensor match
+- Missing/unexpected/shape/value mismatches: none
+- Static output:
+  `outputs/baseline/EXP-20260611-004/evaluate/answer.json`
+- Output status: non-empty; one prediction plus one summary record
+- Generation path evidence:
+  - Trigger decision entry called 85 times
+  - Weaver prompt augmentation called once
+  - Weaver inference augmentation called three times
+- Verification artifact:
+  `outputs/baseline/EXP-20260611-004/verification.json`
 
 ## Compatibility Contract
 
@@ -128,7 +151,7 @@ After `BUG-0001` is fixed:
 - [x] Dataset, split, evaluation path, metric, and direction are explicit.
 - [x] Official checkpoint files are local and hash-verified.
 - [x] Canonical metric contract exists.
-- [ ] Checkpoint loads all trained adapter tensors.
+- [x] Checkpoint loads all trained adapter tensors.
 - [ ] Full baseline command completes.
 - [ ] Metrics and raw outputs are archived.
 - [ ] Deterministic golden cases are established.

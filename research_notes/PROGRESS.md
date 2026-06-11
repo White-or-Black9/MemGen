@@ -2,11 +2,12 @@
 
 ## Current State
 
-- Current Phase: Phase 2 - Original Project Smoke Test
+- Current Phase: Temporary Environment Alignment Phase
 - Status: `completed`
 - Last updated: 2026-06-11
-- Stop condition: Reached; Phase 2 closeout only.
-- Next suggested Phase: Do not enter Phase 3 baseline work until `BUG-0001` and `BUG-0002` are resolved in a separately approved repair Phase.
+- Stop condition: Reached; environment alignment only.
+- Next suggested Phase: A separately approved Repair Phase for `BUG-0001` and
+  `BUG-0002`; do not enter Phase 3 yet.
 
 ## Research Goal
 
@@ -47,6 +48,31 @@ Phase 2 is complete with blocking caveats.
 - [x] Confirmed separately that the original generation path can produce a completion when recorder logic is bypassed in a script-only harness.
 - [x] Reconfirmed that official LoRA loading is still not trustworthy; no smoke result from this Phase is a valid scientific baseline.
 - [x] Updated research notes only. No core code, Weaver training, or Trigger training logic changed.
+
+## Temporary Environment Alignment Outcome
+
+The temporary environment alignment phase is complete.
+
+- [x] Reviewed `README.md`, `requirements.txt`, `memgen.yml`, the official
+  Qwen2.5 GSM8K evaluation script, and the GSM8K configuration.
+- [x] Confirmed the active shell is the `base` environment with Python `3.13.9`
+  and must not be used to run MemGen.
+- [x] Confirmed the existing `memgen` environment is present at
+  `/home/baishilong/miniconda3/envs/memgen`.
+- [x] Confirmed the existing `memgen` Python is `3.10.20`, matching the README
+  setup instructions.
+- [x] Confirmed all required Python imports succeed and `pip check` reports no
+  broken requirements.
+- [x] Confirmed CUDA and BF16 are available from the `memgen` environment when
+  run outside the filesystem sandbox on one NVIDIA RTX A6000.
+- [x] Confirmed the GSM8K YAML, local Qwen snapshot, official MemGen checkpoint,
+  and local GSM8K dataset cache are readable.
+- [x] Determined that no environment recreation or package installation is
+  justified before the Repair Phase.
+- [x] Recorded environment specification drift and the broken PATH-level
+  `conda` shim.
+- [x] Modified research notes only. No project code or environment package was
+  changed.
 
 ## Files Audited in Phase 1
 
@@ -107,6 +133,32 @@ Phase 2 is complete with blocking caveats.
   keys under the current nested PEFT loading path, so no Phase 2 output may be
   treated as a valid baseline.
 
+## Environment Alignment Conclusions
+
+- Canonical Python executable:
+  `/home/baishilong/miniconda3/envs/memgen/bin/python`
+- Recommended activation:
+  `source /home/baishilong/miniconda3/bin/activate memgen`
+- Direct absolute Python invocation is preferred for automated runs because the
+  current PATH-level `/home/baishilong/bin/conda` wrapper has a CRLF shebang.
+- README recommends Python `3.10`; `memgen.yml` specifies Python `3.11.13`.
+  The existing environment uses Python `3.10.20` and has already reached real
+  GPU generation, so it is the lower-risk repair environment.
+- Installed key versions:
+  - PyTorch `2.12.0+cu126`
+  - Transformers `4.55.4`
+  - PEFT `0.17.1`
+  - Accelerate `1.10.1`
+  - Datasets `4.0.0`
+  - FlashAttention `2.8.3`
+- The installed PyTorch is newer than both checked-in manifests, but imports,
+  dependency validation, CUDA/BF16 checks, and Phase 2 generation succeeded.
+  Do not downgrade it before repairing the known code defects.
+- Current proxy variables point to `127.0.0.1:7898`. For reproducible offline
+  runs, unset proxy and custom HF endpoint variables, set Hugging Face offline
+  flags, and use the verified local snapshot/cache paths.
+- No project file needs modification for environment alignment.
+
 ## Phase History
 
 | Date | Phase | Outcome | Evidence |
@@ -114,12 +166,12 @@ Phase 2 is complete with blocking caveats.
 | 2026-06-11 | Phase 0 - Research Memory System and Repository Snapshot | Completed | `research_notes/` structure confirmed; repository and environment snapshot recorded |
 | 2026-06-11 | Phase 1 - Code Map and Inference Pipeline Audit | Completed | `research_notes/CODE_MAP.md` updated with verified inference path, boundaries, tensor notes, and integration risks |
 | 2026-06-11 | Phase 2 - Original Project Smoke Test | Completed with caveats | Original evaluation path reached generation but failed in static recorder; script-only harness produced one completion; baseline remains invalid due `BUG-0001` |
+| 2026-06-11 | Temporary Environment Alignment Phase | Completed | Existing `memgen` environment validated; CUDA/BF16 and local assets confirmed; no install or environment rebuild required |
 
 ## Session Handoff
 
-- Phase 2 can now be treated as complete.
+- The temporary Environment Alignment Phase can be treated as complete.
 - Do not treat any Phase 2 artifact as a scientific baseline.
-- Do not enter Phase 3 baseline work until checkpoint loading and static result
-  recording are repaired and rechecked in a separately approved Phase.
-- Recommended next step: approve a repair Phase for `BUG-0001` and `BUG-0002`,
-  then rerun the original smoke test before Phase 3.
+- The environment is ready for a separately approved Repair Phase.
+- Do not enter Phase 3 until `BUG-0001` and `BUG-0002` are repaired and the
+  original smoke test is rerun successfully.

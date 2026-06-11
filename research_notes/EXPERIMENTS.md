@@ -9,6 +9,7 @@ overwrite prior records; append a new entry.
 |---|---|---|---|---|---|
 | EXP-20260611-001 | 2026-06-11 | Phase 0 | Can the official GSM8K SFT checkpoint produce a trusted smoke baseline? | `failed` | LoRA keys were not loaded; direct smoke then failed on projection dtype |
 | EXP-20260611-002 | 2026-06-11 | Phase 2 | Can the original MemGen inference stack run a one-sample GSM8K smoke test in the recommended environment? | `completed_with_caveats` | Original eval path reached generation but crashed in static recorder; script-only harness produced one completion; result is not a valid baseline because LoRA loading remains broken |
+| EXP-20260611-003 | 2026-06-11 | Environment Alignment | Is the existing `memgen` environment suitable for the Repair Phase without package changes? | `completed` | Imports, dependency check, CUDA/BF16, config, model snapshot, checkpoint, and dataset cache validated; no install required |
 
 ## Recorded Experiments
 
@@ -138,6 +139,104 @@ overwrite prior records; append a new entry.
     `.cache/evaluate/gsm8k/home/pn=1_pl=8_in=3_il=8_20260611-103526_phase2_smoke/logs/log.txt`
   - manual completion artifact:
     `.cache/evaluate/gsm8k/home/pn=1_pl=8_in=3_il=8_20260611-104054_phase2_manual_smoke_cuda/evaluate/manual_answer.json`
+
+### EXP-20260611-003: Existing Environment Alignment Validation
+
+- Phase: Temporary Environment Alignment Phase
+- Status: `completed`
+- Research question: Can the existing `memgen` environment be used as the
+  controlled runtime for repairing `BUG-0001` and `BUG-0002` without changing
+  installed packages?
+- Hypothesis: The existing Python 3.10 environment is sufficient because it
+  already reached real GPU generation in Phase 2.
+- Baseline/comparator: checked-in `requirements.txt` and `memgen.yml`
+- Code revision: `dd6eda02c3c06823670e217c8b0217199b24235c`
+- Git branch: `rlm-memory-bank`
+- Working tree state: clean before environment-alignment note updates
+- Environment:
+  `/home/baishilong/miniconda3/envs/memgen`, Python `3.10.20`
+- Config file: `configs/latent_memory/gsm8k.yaml`
+- Model path:
+  `/home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306`
+- Checkpoint path: `.cache/baselines/memgen-gsm8k-sft/model`
+- Dataset path:
+  `/home/baishilong/.cache/huggingface/datasets/gsm8k/main/0.0.0/740312add88f781978c0658806c59bc2815b9866`
+- Dataset/sample count: no samples evaluated
+- Random seed: not applicable
+- Decoding parameters: not applicable
+- Output directory: none
+- Prediction file: none
+- Metric file: none
+- Commands:
+  - `/home/baishilong/miniconda3/bin/conda env list`
+  - `python --version`
+  - `/home/baishilong/miniconda3/envs/memgen/bin/python --version`
+  - `/home/baishilong/miniconda3/envs/memgen/bin/python -c "import torch; ..."`
+  - `/home/baishilong/miniconda3/envs/memgen/bin/python -c "import transformers, peft, accelerate, datasets; ..."`
+  - `/home/baishilong/miniconda3/envs/memgen/bin/python -m pip check`
+  - OmegaConf load of `configs/latent_memory/gsm8k.yaml`
+  - filesystem readability checks for model, checkpoint, and dataset caches
+- Latency: not measured
+- Memory usage: not measured
+
+#### Observations
+
+- Base environment:
+  - Python `3.13.9`
+  - active prefix `/home/baishilong/miniconda3`
+  - unsuitable for MemGen execution
+- Existing `memgen` environment:
+  - Python `3.10.20`
+  - PyTorch `2.12.0+cu126`
+  - Transformers `4.55.4`
+  - PEFT `0.17.1`
+  - Accelerate `1.10.1`
+  - Datasets `4.0.0`
+  - FlashAttention `2.8.3`
+- `pip check`: no broken requirements
+- CUDA outside sandbox:
+  - available: `True`
+  - device: NVIDIA RTX A6000
+  - BF16 supported: `True`
+- Sandbox-only CUDA result:
+  - unavailable because the execution sandbox hides CUDA/NVML
+  - this is not an environment-package failure
+- Local assets:
+  - Qwen snapshot readable, including single-file `model.safetensors`
+  - MemGen projection, Weaver, Trigger, and adapter files readable
+  - cached GSM8K loads successfully in offline mode with 7,473 train rows and
+    1,319 test rows
+  - a sandboxed dataset load was blocked only because Datasets attempted to
+    create a lock file under the read-only home cache; the same command
+    succeeded outside the sandbox without downloading data
+- Environment variables:
+  - `HTTP_PROXY` and `HTTPS_PROXY` target `127.0.0.1:7898`
+  - `NO_PROXY` only covers localhost
+  - no `HF_ENDPOINT` was present in the final alignment shell
+- Manifest differences:
+  - README specifies Python 3.10
+  - `memgen.yml` specifies Python 3.11.13
+  - `requirements.txt` specifies PyTorch 2.7.1+cu128
+  - `memgen.yml` specifies PyTorch 2.7.1+cu118
+  - installed PyTorch is 2.12.0+cu126
+
+#### Conclusion
+
+- Hypothesis supported: yes
+- Interpretation: The existing `memgen` environment is suitable for controlled
+  Repair Phase work. Rebuilding or changing packages now would add risk without
+  evidence of benefit.
+- Limitations: The environment manifests are internally inconsistent and do not
+  exactly reproduce the installed environment.
+- Failures:
+  - the PATH-level `/home/baishilong/bin/conda` shim has a CRLF shebang and
+    cannot execute normally
+- Follow-up:
+  - use the direct Python path or activate with the real Miniconda activation
+    script
+  - preserve package versions through the Repair Phase
+- Related decision IDs: `DEC-0009`, `DEC-0010`
+- Related bug IDs: `BUG-0003`, `BUG-0004`
 
 ## Experiment Template
 

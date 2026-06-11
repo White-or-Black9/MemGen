@@ -16,6 +16,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0007 | 2026-06-11 | accepted | Until later approval, memory remains session-local and memory-bank experiments default to batch size 1 |
 | DEC-0008 | 2026-06-11 | accepted | Future memory-bank state should be owned by the interaction session and passed explicitly into inference |
 | DEC-0009 | 2026-06-11 | accepted | Use the `memgen` environment plus local cached snapshot paths for smoke verification; treat `base` as unsupported for MemGen runs |
+| DEC-0010 | 2026-06-11 | accepted | Preserve the existing validated `memgen` package set through the Repair Phase; do not rebuild or install dependencies without new evidence and approval |
 
 ## Decision Template
 
@@ -128,6 +129,30 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Verification required:
   - cached model path loads without network access
   - CUDA is visible to PyTorch in the chosen execution context
+
+### DEC-0010: Freeze the Validated Repair Environment
+
+- Date: 2026-06-11
+- Status: accepted
+- Context: Environment alignment found inconsistent checked-in manifests, but
+  the existing Python 3.10 environment passes imports, `pip check`, CUDA/BF16
+  checks, local asset checks, and previously reached GPU generation.
+- Decision: Use
+  `/home/baishilong/miniconda3/envs/memgen/bin/python` unchanged for the Repair
+  Phase. Do not recreate the environment, downgrade PyTorch, or install/update
+  packages unless a repair test produces evidence that a dependency change is
+  required and the user explicitly approves the command.
+- Alternatives considered:
+  - recreate from `memgen.yml`
+  - reinstall from `requirements.txt`
+  - downgrade PyTorch to either checked-in version
+- Rationale: Changing the environment before repairing known code defects would
+  introduce an uncontrolled variable and weaken causal diagnosis.
+- Consequences:
+  - Repair Phase results must record the existing exact package versions
+  - environment changes require a separate explanation and approval
+  - direct absolute Python invocation is preferred in automation
+- Related experiments: `EXP-20260611-003`
 
 ### DEC-0005: Primary Baseline Comparator
 

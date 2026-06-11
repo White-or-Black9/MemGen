@@ -9,6 +9,8 @@ Do not delete resolved entries.
 |---|---|---|---|---|
 | BUG-0001 | 2026-06-11 | high | `open` | Official Weaver/Trigger LoRA adapters are not loaded by `MemGenModel.from_pretrained()` |
 | BUG-0002 | 2026-06-11 | high | `open` | Static evaluation crashes in `StaticEvalRecorder.record_batch()` after generation starts |
+| BUG-0003 | 2026-06-11 | medium | `open` | Checked-in environment specifications disagree on Python, CUDA, and package versions |
+| BUG-0004 | 2026-06-11 | low | `open` | PATH-level `conda` wrapper has a CRLF shebang and cannot execute |
 
 ## Recorded Bugs
 
@@ -88,6 +90,57 @@ Do not delete resolved entries.
   - no crash in `record_batch`
   - summary metrics append correctly
   - no change to Weaver/Trigger training workflows
+
+### BUG-0003: Environment Specifications Are Inconsistent
+
+- Date found: 2026-06-11
+- Severity: medium
+- Status: `open`
+- Phase/experiment: Temporary Environment Alignment / `EXP-20260611-003`
+- Revision: `dd6eda02c3c06823670e217c8b0217199b24235c`
+- Symptoms:
+  - README setup specifies Python `3.10`
+  - `memgen.yml` specifies Python `3.11.13`
+  - `requirements.txt` specifies PyTorch `2.7.1+cu128`
+  - `memgen.yml` specifies PyTorch `2.7.1+cu118`
+  - additional versions such as Accelerate, NumPy, TRL, safetensors, and wandb
+    also differ between the two manifests
+- Expected behavior: The documented environment sources should describe one
+  reproducible runtime or clearly identify supported alternatives.
+- Actual behavior: Recreating from README, requirements, or YAML can yield
+  materially different Python/CUDA/package stacks.
+- Compatibility impact:
+  - environment recreation is not deterministic
+  - dependency changes could confound Repair Phase verification
+- Current mitigation:
+  - preserve the validated existing `memgen` environment
+  - record exact installed versions in `EXP-20260611-003`
+- Required resolution:
+  - reconcile environment manifests in a separately approved documentation or
+    reproducibility phase
+
+### BUG-0004: PATH-Level Conda Shim Has CRLF Shebang
+
+- Date found: 2026-06-11
+- Severity: low
+- Status: `open`
+- Phase/experiment: Temporary Environment Alignment / `EXP-20260611-003`
+- Environment: current shell PATH resolves `conda` to
+  `/home/baishilong/bin/conda`
+- Symptoms: invoking `conda` fails with
+  `/bin/bash^M: bad interpreter: No such file or directory`
+- Expected behavior: `conda env list` and `conda activate` should resolve to a
+  valid shell entry point.
+- Actual behavior: the wrapper's first line contains a CRLF terminator.
+- Compatibility impact:
+  - interactive activation through the PATH-level wrapper is unreliable
+  - direct environment Python and `/home/baishilong/miniconda3/bin/conda` still
+    work
+- Current mitigation:
+  - use `/home/baishilong/miniconda3/bin/conda`
+  - or source `/home/baishilong/miniconda3/bin/activate memgen`
+  - or invoke `/home/baishilong/miniconda3/envs/memgen/bin/python` directly
+- Fix deferred: This phase did not modify shell files outside the repository.
 
 ## Bug Template
 

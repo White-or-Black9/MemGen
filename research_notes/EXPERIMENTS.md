@@ -14,6 +14,8 @@ overwrite prior records; append a new entry.
 | EXP-20260611-005 | 2026-06-11 | Repair Review | Do the repaired loader and recorder remain correct across three sequential batch-size-1 samples? | `completed` | Three predictions plus one summary were written; adapter and augmentation checks passed |
 | EXP-20260611-006 | 2026-06-11 | Phase 3 | What is Original MemGen performance on the fixed 20-sample GSM8K comparison subset? | `completed` | 20/20 predictions completed; mean `compute_reward=0.60` |
 | EXP-20260611-007 | 2026-06-11 | Phase 3 | Are the fixed golden outputs deterministic under exact replay? | `completed` | Samples 0-2 reproduced identical response-token and augmentation-mask hashes |
+| EXP-20260611-008 | 2026-06-11 | Phase 4 | Does the standalone memory-bank skeleton satisfy its tensor, retrieval, capacity, and isolation contracts? | `completed` | 16/16 unit tests passed after cleanup; production inference and training references remained absent |
+| EXP-20260611-009 | 2026-06-11 | End-of-Day Validation | Are the Repair fixes, Phase 3 baseline artifacts, and Phase 4 skeleton ready for commit and later continuation? | `completed` | Compilation and 16/16 tests passed; baseline/golden artifacts and adapter evidence remained complete; Phase 4 remained isolated |
 
 ## Recorded Experiments
 
@@ -436,7 +438,8 @@ env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY \
 
 - No Repair Phase regression was found.
 - The fixes remain suitable for proceeding to an explicitly approved Phase 3.
-- Baseline gate remains closed.
+- At this Repair Review closeout, the baseline gate remained closed until the
+  explicitly approved Phase 3 run.
 - Related bugs: `BUG-0001`, `BUG-0002`
 
 ### EXP-20260611-006: Original MemGen Fixed-Subset Baseline
@@ -548,6 +551,111 @@ full GSM8K test performance.
   `d6e708979b29292866684d928520c151868f06f891f456161ef56c9daca185e4`
 - Conclusion: deterministic golden evidence established for later disabled-path
   equivalence tests.
+
+### EXP-20260611-008: LatentMemoryBank Skeleton Unit Verification
+
+- Phase: Phase 4 - LatentMemoryBank Module Skeleton
+- Status: `completed`
+- Date: 2026-06-11
+- Code revision before Phase 4 changes:
+  `506bd21ffd53531a0cac442093ccce403e8b3891`
+- Environment:
+  `/home/baishilong/miniconda3/envs/memgen/bin/python`
+- Python: 3.10.20
+- PyTorch: 2.12.0+cu126
+- Dataset/model/checkpoint: not applicable; no inference experiment was run
+- Sample count/seed/decoding: not applicable
+- Output directory and prediction files: none
+- Commands:
+
+```bash
+/home/baishilong/miniconda3/envs/memgen/bin/python \
+  -m py_compile \
+  memgen/model/latent_memory_bank.py \
+  tests/test_latent_memory_bank.py
+
+/home/baishilong/miniconda3/envs/memgen/bin/python \
+  -m unittest discover -s tests -v
+```
+
+- Test result after Phase 4 cleanup: 16 passed, 0 failed, 0 errors.
+- Covered behavior:
+  - disabled no-op and empty retrieval
+  - explicit batch-size-1 configuration enforcement
+  - detach, clone, and source tensor metadata
+  - capacity, append refusal, replace-oldest, and replace-lowest-score
+  - top-k, threshold, and recency decay
+  - hidden-state and pre-pooled query input
+  - reset and recent-token query pooling
+  - explicit output dtype/device
+  - retrieved tensor and nested-metadata mutation isolation
+  - `replace` oldest-slot fallback when all slots are unscored
+  - invalid shape and dtype errors
+- Isolation checks:
+  - no production references to the new module
+  - no changes to model generation, runner, trainers, or training scripts
+  - importing `MemGenModel` did not load
+    `memgen.model.latent_memory_bank`
+- Failures/anomalies: none.
+- Conclusion: the Phase 4 skeleton is testable and isolated, with no performance
+  or inference-integration claim.
+- Related decisions: `DEC-0014`, `DEC-0015`, `DEC-0016`
+
+### EXP-20260611-009: End-of-Day Validation
+
+- Phase: End-of-Day Validation; no new roadmap phase
+- Status: `completed`
+- Date: 2026-06-11
+- Purpose: Verify that the Repair fixes, accepted Phase 3 baseline, and
+  standalone Phase 4 skeleton are recoverable and ready to commit.
+- Code revision: `506bd21ffd53531a0cac442093ccce403e8b3891`
+- Branch: `rlm-memory-bank`
+- Working tree: dirty with uncommitted Phase 4 module, config, tests, and
+  research-note updates
+- Environment:
+  `/home/baishilong/miniconda3/envs/memgen/bin/python`
+- Model/dataset/checkpoint: no model or dataset was loaded; existing artifacts
+  were inspected only
+- Sample count/seed/decoding: not applicable; no inference run
+- Commands:
+
+```bash
+/home/baishilong/miniconda3/envs/memgen/bin/python \
+  -m py_compile \
+  memgen/model/modeling_memgen.py \
+  memgen/runner.py \
+  memgen/model/latent_memory_bank.py \
+  scripts/eval/repair_phase2_smoke.py \
+  tests/test_latent_memory_bank.py
+
+/home/baishilong/miniconda3/envs/memgen/bin/python \
+  -m unittest discover -s tests -v
+```
+
+- Compilation: passed with exit code 0.
+- Unit tests: 16 passed, 0 failed, 0 errors.
+- Phase 3 artifact verification:
+  - `EXP-20260611-006/evaluate/answer.json` is non-empty JSONL
+  - 20 prediction records plus one summary record
+  - summary `compute_reward=0.60`
+  - `EXP-20260611-007` contains three prediction records, one summary, and a
+    readable verification artifact for sample IDs 0, 1, and 2
+- Repair verification:
+  - Weaver adapter 112/112 and Trigger adapter 112/112
+  - missing, unexpected, shape-mismatch, and value-mismatch lists are empty
+  - the accepted baseline output confirms `StaticEvalRecorder` writes complete,
+    non-empty JSONL
+- Isolation verification:
+  - no diff in protected training paths
+  - no `LatentMemoryBank` reference in `MemGenModel.generate()`, runner,
+    interaction managers, `main.py`, or `memgen.model` exports
+  - `configs/latent_memory_bank/default.yaml` remains `enabled: false`
+  - existing `configs/latent_memory/gsm8k.yaml` has no diff
+- Failures/anomalies:
+  - direct whole-file `json.loads()` is invalid because `answer.json` is JSONL;
+    line-by-line parsing succeeded and confirmed the expected record counts
+- Conclusion: current Phase 4 changes are ready to commit. Phase 5 has not
+  started and still requires explicit approval.
 
 ## Experiment Template
 

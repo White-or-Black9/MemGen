@@ -1,0 +1,12 @@
+latent_memory_bank:
+  enabled: false
+  batch_size: 1
+  max_slots: 8
+  top_k: 1
+  threshold: 0.7
+  decay_alpha: 0.05
+  pool_last_n: 64
+  retrieve_policy: threshold_topk
+  update_policy: replace_oldest
+  storage_device: cpu
+  debug: true

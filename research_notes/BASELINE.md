@@ -177,3 +177,17 @@ After `BUG-0001` is fixed:
 - [x] Metrics and raw outputs are archived.
 - [x] Deterministic golden cases are established.
 - [x] Baseline is accepted as `comparison_ready`.
+
+## End-of-Day Artifact Revalidation
+
+Validated on 2026-06-11 without rerunning inference:
+
+- `EXP-20260611-006/evaluate/answer.json`: non-empty JSONL, 20 prediction
+  records, one summary, `compute_reward=0.60`.
+- `EXP-20260611-006/verification.json`: readable; Weaver 112/112 and Trigger
+  112/112, with empty missing/unexpected/shape/value mismatch lists.
+- `EXP-20260611-007/evaluate/answer.json`: three prediction records and one
+  summary.
+- `EXP-20260611-007/verification.json`: readable and scoped to sample IDs
+  0, 1, and 2.
+- Verdict: the Original MemGen fixed-20 baseline remains `comparison_ready`.

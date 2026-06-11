@@ -2,12 +2,11 @@
 
 ## Current State
 
-- Current Phase: Phase 3 - Original MemGen Baseline
+- Current Phase: Phase 4 - LatentMemoryBank Module Skeleton
 - Status: `completed`
 - Last updated: 2026-06-11
-- Stop condition: Reached; do not enter Phase 4 without explicit approval.
-- Next suggested Phase: Phase 4 - LatentMemoryBank Module Skeleton, after
-  explicit approval.
+- Stop condition: Reached; do not enter Phase 5 without explicit approval.
+- Next suggested Phase: Phase 5 - Version A Integration, after explicit approval.
 
 ## Research Goal
 
@@ -150,6 +149,62 @@ Phase 3 is complete.
 - [x] Did not modify core method or training code in Phase 3.
 - [x] Did not enter Phase 4.
 
+## Phase 4 Outcome
+
+Phase 4 is complete.
+
+- [x] Added standalone `LatentMemoryBankConfig`, `LatentMemorySlot`, and
+  `LatentMemoryBank` in `memgen/model/latent_memory_bank.py`.
+- [x] Added disabled-by-default
+  `configs/latent_memory_bank/default.yaml`.
+- [x] Added 16 standard-library unit tests in
+  `tests/test_latent_memory_bank.py`.
+- [x] Implemented disabled and empty-bank no-op behavior.
+- [x] Implemented recent-token mean query pooling and memory mean key pooling.
+- [x] Implemented cosine similarity with exponential recency decay.
+- [x] Implemented threshold, top-k, and threshold-plus-top-k retrieval.
+- [x] Implemented append, replace-lowest-score, and replace-oldest capacity
+  behavior.
+- [x] Enforced Phase 4 batch size 1 tensor shapes.
+- [x] Enforced detach and clone on write and detached clone on retrieval.
+- [x] Confirmed caller mutation of retrieved tensors or nested metadata cannot
+  modify bank-owned slot state.
+- [x] Implemented explicit storage and retrieval device/dtype movement.
+- [x] Defined `_step` as successful memory-write count, not generation-token
+  count.
+- [x] Defined `replace` as lowest-`last_score` replacement with an oldest-slot
+  fallback when all slots are unscored.
+- [x] Added debug summary and detached state-dict-like snapshots.
+- [x] Passed compilation, YAML parsing, and all 16 unit tests.
+- [x] Confirmed production inference, `generate()`, runner, trainer, and training
+  scripts do not import or call the module.
+- [x] Confirmed importing `MemGenModel` does not load the memory-bank module.
+- [x] Did not modify existing GSM8K configuration or original inference behavior.
+- [x] Did not enter Phase 5.
+
+## End-of-Day Validation Outcome
+
+The 2026-06-11 end-of-day validation is complete.
+
+- [x] Confirmed branch `rlm-memory-bank` at
+  `506bd21ffd53531a0cac442093ccce403e8b3891`.
+- [x] Confirmed the working tree contains uncommitted Phase 4 module, config,
+  tests, and research-note updates.
+- [x] Confirmed no diff in protected training paths, `MemGenModel.generate()`,
+  runner, interaction managers, or the existing GSM8K configuration.
+- [x] Passed `py_compile` for the repaired model/runner, Phase 4 module, smoke
+  harness, and unit tests.
+- [x] Passed all 16 LatentMemoryBank unit tests.
+- [x] Re-read the accepted Phase 3 JSONL artifact: 20 predictions, one summary,
+  and `compute_reward=0.60`.
+- [x] Re-read the EXP-20260611-007 golden replay artifacts: three predictions,
+  one summary, and sample IDs 0, 1, and 2.
+- [x] Reconfirmed stored adapter evidence: Weaver 112/112, Trigger 112/112, with
+  zero missing, unexpected, shape, or value mismatches.
+- [x] Reconfirmed `BUG-0001` and `BUG-0002` remain fixed.
+- [x] Reconfirmed the Phase 4 module is standalone and disabled by default.
+- [x] Did not run inference, implement integration, or enter Phase 5.
+
 ## Files Audited in Phase 1
 
 - `main.py`
@@ -185,8 +240,8 @@ Phase 3 is complete.
   a global model lifetime.
 - A future memory-bank design should use explicit inference-only state passing,
   not persistent global memory on `MemGenModel`.
-- Baseline trust is still blocked by `BUG-0001`; this does not block code audit,
-  but it does block scientific baseline claims.
+- At Phase 1 closeout, baseline trust was blocked by `BUG-0001`; the later
+  Repair Phase resolved it before Phase 3.
 
 ## Key Phase 2 Conclusions
 
@@ -205,9 +260,8 @@ Phase 3 is complete.
 - A script-only harness that kept the original model and interaction logic but
   bypassed the broken recorder produced a completion and wrote
   `manual_answer.json`.
-- `BUG-0001` remains open: official LoRA/adapters still report missing trained
-  keys under the current nested PEFT loading path, so no Phase 2 output may be
-  treated as a valid baseline.
+- At Phase 2 closeout, `BUG-0001` remained open and no Phase 2 output was valid
+  as a baseline; the later Repair Phase resolved it before Phase 3.
 
 ## Environment Alignment Conclusions
 
@@ -246,12 +300,18 @@ Phase 3 is complete.
 | 2026-06-11 | Temporary Repair Phase | Completed | `BUG-0001` and `BUG-0002` fixed; one-sample official static smoke wrote a non-empty `answer.json` with exact adapter tensor verification |
 | 2026-06-11 | Temporary Repair Review and Sanity Check | Completed | Core repair diff reviewed; training files unchanged; three-sample official static eval produced three predictions plus one summary |
 | 2026-06-11 | Phase 3 - Original MemGen Baseline | Completed | Fixed 20-sample baseline accepted at `compute_reward=0.60`; three golden cases replayed with exact token/mask hashes |
+| 2026-06-11 | Phase 4 - LatentMemoryBank Module Skeleton | Completed | Standalone disabled-by-default bank added; 16 unit tests passed after cleanup; production inference and training paths remain disconnected |
+| 2026-06-11 | Phase 4 cleanup | Completed | Clarified replace fallback and write-step semantics; retrieval-copy isolation covered; 16 unit tests passed |
+| 2026-06-11 | End-of-Day Validation | Completed | Compilation and 16 unit tests passed; Repair and baseline artifacts revalidated; Phase 4 remains isolated and ready to commit |
 
 ## Session Handoff
 
-- Phase 3 is complete and the fixed-subset Original MemGen baseline is accepted.
-- Primary baseline run: `EXP-20260611-006`.
-- Golden replay verification: `EXP-20260611-007`.
-- The accepted metric applies only to GSM8K test indices 0 through 19 under the
-  frozen command and environment; it is not a full-test result.
-- Do not enter Phase 4 without explicit approval.
+- Phase 4 is complete.
+- The memory bank exists only as a standalone, unit-tested skeleton.
+- `latent_memory_bank.enabled` defaults to `false`.
+- No production inference or training path imports or calls the module.
+- Phase 3 baseline and golden artifacts remain the compatibility oracle.
+- Current Phase 4 work is ready to commit; the working tree is not yet clean.
+- Next suggested phase is Phase 5: Version A Integration — Reasoner Injection
+  Only, after explicit approval.
+- Do not enter Phase 5 without explicit approval.

@@ -20,6 +20,9 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0011 | 2026-06-11 | accepted | Restore checkpoint adapters on the existing PEFT model after deleting constructor placeholders |
 | DEC-0012 | 2026-06-11 | accepted | Preserve the static recorder batch contract by flattening only rank-nested gather results |
 | DEC-0013 | 2026-06-11 | accepted | Accept a fixed first-20 GSM8K test subset as the Phase 3 development baseline |
+| DEC-0014 | 2026-06-11 | accepted | Keep the Phase 4 memory bank standalone, session-owned, and disabled by default |
+| DEC-0015 | 2026-06-11 | accepted | Detach and clone every stored latent, with explicit storage and retrieval conversion |
+| DEC-0016 | 2026-06-11 | accepted | Use mean-pooled cosine retrieval with recency decay and bounded replacement skeletons |
 
 ## Decision Template
 
@@ -227,6 +230,80 @@ IDs and append superseding decisions rather than silently rewriting history.
   - three golden samples replayed with exact response and mask hashes
 - Related experiments: `EXP-20260611-006`, `EXP-20260611-007`
 
+### DEC-0014: Standalone Session-Local Phase 4 Skeleton
+
+- Date: 2026-06-11
+- Status: accepted
+- Context: Phase 4 must create a testable module without changing original
+  inference or training behavior.
+- Decision:
+  - each `LatentMemoryBank` instance owns one session's slots
+  - there is no global registry or cross-sample storage
+  - `enabled` defaults to `false`
+  - the module is not exported from `memgen.model` and is not imported by any
+    production inference or training path
+  - Phase 4 accepts only batch size 1 tensor inputs
+- Alternatives considered:
+  - attach a bank field to `MemGenModel`
+  - add the config directly to existing GSM8K configuration
+  - create a process-global bank
+- Rationale: Physical module isolation is the strongest guarantee that Phase 4
+  cannot alter the accepted Original MemGen baseline.
+- Consequences: Phase 5 must explicitly design lifecycle ownership and inference
+  plumbing before the bank can be used.
+- Verification: repository search found no production references; importing
+  `MemGenModel` does not load the new module.
+- End-of-day verification: compilation and 16/16 unit tests passed; production
+  inference, existing GSM8K configuration, and protected training paths still
+  have no Phase 4 integration diff.
+- Related experiment: `EXP-20260611-008`
+
+### DEC-0015: Detached Storage and Explicit Tensor Conversion
+
+- Date: 2026-06-11
+- Status: accepted
+- Context: Stored latent tensors must not retain inference computation graphs or
+  rely on implicit device/dtype movement.
+- Decision:
+  - `write()` stores `detach().clone()`
+  - retrieval returns detached clones
+  - original device and dtype are recorded
+  - `storage_device` is explicitly `cpu` or `same`
+  - retrieval accepts explicit output `device` and `dtype`
+- Alternatives considered:
+  - store original tensor references
+  - automatically follow the current model device without recording conversion
+- Rationale: Detached copies prevent graph retention and explicit conversion
+  makes future CPU/GPU transfer costs and precision behavior auditable.
+- Consequences: CPU storage may add transfer latency in later phases; that cost
+  must be measured after inference integration.
+- Verification: tests mutate source tensors after write, inspect grad
+  properties, and validate output dtype/device.
+- Related experiment: `EXP-20260611-008`
+
+### DEC-0016: Minimal Retrieval and Capacity Policies
+
+- Date: 2026-06-11
+- Status: accepted
+- Context: Phase 4 needs deterministic mechanics without claiming an optimal
+  retrieval algorithm.
+- Decision:
+  - query: mean of the most recent `pool_last_n` hidden tokens
+  - key: mean of all tokens in one memory slot
+  - score: cosine similarity multiplied by exponential age decay
+  - retrieval: `threshold`, `topk`, or `threshold_topk`
+  - full-bank update: reject under `append`, replace lowest score under
+    `replace`, or replace oldest under `replace_oldest`
+- Alternatives considered:
+  - learned query/key projections
+  - attention aggregation
+  - immediate implementation of paper ablations
+- Rationale: These policies expose necessary research controls while remaining
+  small enough to validate independently.
+- Consequences: Phase 8 must compare these choices; Phase 4 makes no performance
+  claim.
+- Related experiment: `EXP-20260611-008`
+
 ### DEC-0005: Primary Baseline Comparator
 
 - Date: 2026-06-11
@@ -255,5 +332,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Alternatives considered: Accepting outputs because generation can continue.
 - Rationale: Such outputs would mostly represent random/unadapted components and
   cannot support scientific comparison.
-- Consequences: The Phase 0 baseline gate remains closed pending `BUG-0001`.
+- Consequences at decision time: The baseline gate remained closed pending
+  `BUG-0001`; the later Repair Phase resolved the bug and Phase 3 opened the
+  gate.
 - Related experiments: `EXP-20260611-001`

@@ -76,6 +76,10 @@ Do not delete resolved entries.
   - `EXP-20260611-006` again loaded both adapters with exact 112/112 key, shape,
     and value matches.
   - No missing or unexpected trained keys appeared across 20 completed samples.
+- End-of-day verification:
+  - `EXP-20260611-006/verification.json` remains readable and records Weaver
+    112/112 and Trigger 112/112.
+  - Missing, unexpected, shape-mismatch, and value-mismatch lists remain empty.
 
 #### 修复说明（中文）
 
@@ -170,6 +174,10 @@ component.model.set_adapter(adapter_name)
   - `EXP-20260611-006` wrote 20 prediction records and one summary without
     recorder errors.
   - All samples completed and the output remained valid JSONL.
+- End-of-day verification:
+  - The existing Phase 3 `answer.json` remains non-empty and parses as 20
+    prediction JSONL records plus one summary record.
+  - The summary remains readable with `compute_reward=0.60`.
 
 #### 修复说明（中文）
 

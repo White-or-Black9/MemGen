@@ -15,6 +15,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0006 | 2026-06-11 | accepted | Keep the baseline gate closed until all official LoRA tensors load without mismatch |
 | DEC-0007 | 2026-06-11 | accepted | Until later approval, memory remains session-local and memory-bank experiments default to batch size 1 |
 | DEC-0008 | 2026-06-11 | accepted | Future memory-bank state should be owned by the interaction session and passed explicitly into inference |
+| DEC-0009 | 2026-06-11 | accepted | Use the `memgen` environment plus local cached snapshot paths for smoke verification; treat `base` as unsupported for MemGen runs |
 
 ## Decision Template
 
@@ -101,6 +102,32 @@ IDs and append superseding decisions rather than silently rewriting history.
   - session reset must clear all bank contents
   - disabled path must remain numerically identical
   - no training caller should observe new persistent state
+
+### DEC-0009: Recommended Smoke-Test Runtime
+
+- Date: 2026-06-11
+- Status: accepted
+- Context: Phase 2 showed that the inherited shell environment points Hugging
+  Face traffic at `hf-mirror.com` through a local proxy, the current `base`
+  environment uses Python 3.13.9, and sandboxed execution hides CUDA from
+  PyTorch.
+- Decision: For smoke verification of the original MemGen project, use
+  `/home/baishilong/miniconda3/envs/memgen` with Python 3.10.20, clear inherited
+  proxy/HF endpoint variables for offline runs, and point model names at the
+  local cached Qwen snapshot path when network access is unavailable.
+- Alternatives considered:
+  - using the current `base` environment
+  - relying on repo-name resolution through proxy/mirror settings
+- Rationale: The recommended environment is the only one observed to initialize
+  FlashAttention-backed models and reach GPU generation consistently during
+  Phase 2.
+- Consequences:
+  - future smoke or repair verification should start from the `memgen`
+    environment
+  - `base` should not be treated as a supported MemGen runtime
+- Verification required:
+  - cached model path loads without network access
+  - CUDA is visible to PyTorch in the chosen execution context
 
 ### DEC-0005: Primary Baseline Comparator
 

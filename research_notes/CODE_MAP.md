@@ -1,123 +1,403 @@
 # Code Map
 
-Verified during Phase 0 on revision
-`5e59fee296092fa056f140b38a07b927651ffdb5`.
+Phase 1 audit completed on revision
+`7a13d0abb8bdfcb851421d164a9a8223af22a55f`.
 
-## Repository Entry Points
+This document records the verified inference path, the protected training
+boundaries, and the likely integration points for a later session-level
+LatentMemoryBank. This phase used code reading only. No experiment was run.
 
-| Area | Path | Symbol/Command | Role | Verified |
-|---|---|---|---|---|
-| CLI | `main.py` | `main()` | Load config, data, model, runner; dispatch train/evaluate | Yes |
-| Configuration | `common/config.py` | `Config` | OmegaConf load and CLI override merge | Yes |
-| Model construction | `memgen/model/modeling_memgen.py` | `MemGenModel.from_config()` | Load reasoner, Weaver, Trigger, and checkpoint | Yes |
-| Inference orchestration | `memgen/runner.py` | `MemGenRunner.evaluate()` | Select static or dynamic evaluation | Yes |
-| Static session | `interactions/singleturn_interaction.py` | `run_agent_loop()` | One `generate()` call per sample batch | Yes |
-| Dynamic session | `interactions/multiturn_interaction.py` | `run_agent_loop()` | Rebuild full chat history and call `generate()` each turn | Yes |
-| Core generation | `memgen/model/modeling_memgen.py` | `MemGenModel.generate()` | Trigger, Weaver latent injection, reasoner generation | Yes |
-| Static metrics | `memgen/utils.py` | `StaticEvalRecorder` | Per-example JSONL plus summary metrics | Yes |
-| Dynamic metrics | `memgen/utils.py` | `DynamicEvalRecorder` | Conversation log plus average reward | Yes |
+## 1. Inference Entry and Main Dispatch
 
-## Inference Data Flow
+### CLI entry
+
+- File: `main.py`
+- Main function: `main()`
+- Verified flow:
+  1. parse CLI args with `parse_args()`
+  2. load merged config with `Config(args)`
+  3. set random seed via `set_seed(config.run.seed)`
+  4. derive `working_dir`
+  5. initialize logger
+  6. build dataset through `get_data_builder(...)`
+  7. build model through `MemGenModel.from_config(config.model)`
+  8. construct `MemGenRunner`
+  9. dispatch by `config.run.mode`
+
+### Evaluation dispatch
+
+- File: `memgen/runner.py`
+- Main evaluation entry: `MemGenRunner.evaluate()`
+- Verified branch:
+  - `env_card == ENV_CARD.STATIC` -> `_static_evaluate()`
+  - `env_card == ENV_CARD.DYNAMIC` -> `_dynamic_evaluate()`
+
+## 2. Configuration Loading Flow
+
+### Config object
+
+- File: `common/config.py`
+- Main class: `Config`
+- Verified loading flow:
+  1. `OmegaConf.load(args.cfg_path)` reads the YAML file.
+  2. CLI overrides are converted into a dotlist by `_convert_to_dot_list`.
+  3. `runner`, `model`, and `dataset` sections are merged with CLI overrides.
+  4. `Config.to_dict()` returns a plain container for downstream builder code.
+
+### Runtime config handoff
+
+- `main.py` passes:
+  - `config.run` to runner creation
+  - `config.dataset` to data builder
+  - `config.model` to `MemGenModel.from_config`
+- `MemGenRunner._parse_configs()` converts `run` config into
+  `InteractionConfig`, including:
+  - `batch_size`
+  - `max_prompt_length`
+  - `max_response_length`
+  - `max_turns`
+  - `temperature`
+  - `weaver_do_sample`
+  - `trigger_do_sample`
+  - `output_dir = os.path.join(self.working_dir, "evaluate")`
+
+## 3. Session / Sample / Episode Boundaries
+
+### Static evaluation boundary
+
+- File: `memgen/runner.py`
+- Function: `_static_evaluate()`
+- One DataLoader item is one sample.
+- `SingleTurnInteractionManager.run_agent_loop()` handles one batch of prompts.
+- For Phase 1 planning, a safe session boundary is one call to
+  `run_agent_loop()`.
+
+### Dynamic evaluation boundary
+
+- File: `memgen/runner.py`
+- Function: `_dynamic_evaluate()`
+- Each task instance is converted into one environment object through
+  `_set_batch_envs()`.
+- File: `interactions/multiturn_interaction.py`
+- Function: `MultiTurnInteractionManager.run_agent_loop()`
+- Verified loop:
+  - initializes `inter_histories`
+  - tracks `active_mask`
+  - iterates `for step in range(self.config.max_turns)`
+  - rebuilds chat history each turn
+  - calls `generate()` each turn
+- Therefore:
+  - sample boundary = one environment instance
+  - episode/session boundary = one full `run_agent_loop()`
+  - turn boundary = one iteration of the `for step` loop
+
+### Practical implication for memory-bank design
+
+- The safest reset point is the interaction-manager session boundary.
+- Until explicitly approved later, memory must remain session-local and must not
+  cross sample boundaries.
+
+## 4. Inference Pipeline Map
 
 ```text
-main.py
+main.py:main()
   -> Config
   -> get_data_builder(...).get_dataset_dict()
   -> MemGenModel.from_config()
   -> MemGenRunner.evaluate()
-     -> STATIC: DataLoader -> SingleTurnInteractionManager.run_agent_loop()
-     -> DYNAMIC: env instances -> MultiTurnInteractionManager.run_agent_loop()
+     -> STATIC: _static_evaluate()
+        -> DataLoader
+        -> tokenizer.apply_chat_template(...)
+        -> InteractionDataProto.from_single_prompts(...)
+        -> SingleTurnInteractionManager.run_agent_loop()
         -> MemGenModel.generate()
-           -> _should_augment()
-           -> reasoner_to_weaver
-           -> Weaver.augment_prompt() / augment_inference()
-           -> weaver_to_reasoner
-           -> latent embeddings appended to reasoner input
-           -> generated token IDs
-        -> task reward/metric recorder
+        -> StaticEvalRecorder
+     -> DYNAMIC: _dynamic_evaluate()
+        -> _set_batch_envs()
+        -> InteractionDataProto(init_prompts=..., envs=...)
+        -> MultiTurnInteractionManager.run_agent_loop()
+        -> MemGenModel.generate() for each turn
+        -> env.step(...)
+        -> DynamicEvalRecorder
 ```
 
-## Latent Tensor Flow
+## 5. Trigger Call Site
 
-- Reasoner token embeddings: `[B, L, H_reasoner]`.
-- `reasoner_to_weaver`: maps to `[B, L, H_weaver]`.
-- Weaver appends learned query latents and returns
-  `[B_selected, K, H_weaver]`.
-- `weaver_to_reasoner`: maps memory to
-  `[B_selected, K, H_reasoner]`.
-- Latents are appended to `current_inputs_embeds`; they are not token IDs.
-- Any new bank should store a clearly selected representation and preserve dtype,
-  device, sample ownership, and insertion semantics.
+### Trigger decision path
 
-## State and Lifecycle
+- Main file: `memgen/model/modeling_memgen.py`
+- Main function: `MemGenModel.generate()`
+- Trigger decision call:
+  `augment_decision = self._should_augment(...)`
 
-- Static sample boundary: one item from `_static_evaluate()`'s test DataLoader.
-- Static session boundary: one `SingleTurnInteractionManager.run_agent_loop()` call.
-- Dynamic sample boundary: one environment instance created in `_set_batch_envs()`.
-- Dynamic session boundary: one complete `MultiTurnInteractionManager.run_agent_loop()`.
-- Dynamic turn boundary: each iteration rebuilds chat history and calls
-  `MemGenModel.generate()` again.
-- Existing persistent model state: `MemGenModel.state`, used for training-mode
-  instruction/conversation detection; no inference memory bank exists.
-- Existing inference-local state: embeddings, masks, KV cache, and augmentation
-  counts are local variables inside `generate()` and are discarded on return.
-- Required Phase 1 reset point: start/end of one interaction manager session, not
-  process lifetime and not global model lifetime.
-- Phase 1 batch rule: default and validate `batch_size=1`.
+### Trigger implementation path
 
-## Protected Training Boundaries
+- File: `memgen/model/modeling_utils.py`
+- Function: `_should_augment(...)`
+- Verified behavior:
+  - builds candidate subset using `candidate_mask`
+  - selects the current hidden position
+  - calls `trigger(...)` on selected rows
+  - returns a boolean-like augmentation decision tensor
 
-### Weaver
+### Trigger tensor notes
 
-- Runner entry: `MemGenRunner._create_weaver_trainer()` and `train()`.
-- Trainers: `trl.SFTTrainer` and
-  `memgen/trainer/weaver_grpo_trainer.py`.
-- Model training path: `MemGenModel.forward()`, `_instructional_forward()`,
-  `_conversational_forward()`, and `_forward()`.
-- Parameter controls: `fix_component()` / `open_component()`.
+- File: `memgen/model/trigger.py`
+- Trigger head output shape: `[batch_size, seq_len, 2]`
+- This shape is explicit in code.
 
-### Trigger
+## 6. Weaver Call Site
 
-- Runner entry: `MemGenRunner._create_trigger_trainer()` and `train()`.
-- Trainer: `memgen/trainer/trigger_grpo_trainer.py`.
-- Training signal: `generate(return_augmentation_mask=True)`.
-- Parameter controls: `fix_component()` / `open_component()`.
+### Training path reference only
 
-### Files Protected From Phase 1 Changes
+- File: `memgen/model/modeling_memgen.py`
+- Function: `_forward(...)`
+- Verified calls:
+  - `weaver_inputs_embeds = self.reasoner_to_weaver(current_inputs_embeds)`
+  - `self.weaver.augment_prompt(...)` or
+    `self.weaver.augment_inference(...)`
 
-- `memgen/trainer/**`
+### Inference path used by evaluation
+
+- File: `memgen/model/modeling_memgen.py`
+- Function: `generate()`
+- Verified call sequence:
+  1. `candidate_inputs_embeds` selected from reasoner inputs
+  2. `weaver_inputs_embeds = self.reasoner_to_weaver(candidate_inputs_embeds)`
+  3. `self.weaver.augment_prompt(...)` or
+     `self.weaver.augment_inference(...)`
+  4. `latent_inputs_embeds = self.weaver_to_reasoner(weaver_hidden_states)`
+
+## 7. Latent Memory Generation and Injection
+
+### Latent generation site
+
+- File: `memgen/model/modeling_memgen.py`
+- Function: `generate()`
+- Verified source variable names:
+  - `candidate_inputs_embeds`
+  - `weaver_inputs_embeds`
+  - `weaver_hidden_states`
+  - `latent_inputs_embeds`
+
+### Latent injection into Reasoner
+
+- File: `memgen/model/modeling_memgen.py`
+- Function: `generate()`
+- Verified operation:
+  - `candidate_inputs_embeds = torch.cat([candidate_inputs_embeds, latent_inputs_embeds], dim=1)`
+- The augmented candidate tensors are then merged back into full-batch tensors,
+  after which the reasoner generates the next token.
+
+### Training-path reference
+
+- File: `memgen/model/modeling_memgen.py`
+- Function: `_forward(...)`
+- Verified operation:
+  - `latent_inputs_embeds` is concatenated into `current_inputs_embeds`
+  - `current_attention_mask` is extended accordingly
+
+## 8. Key Variables and Tensor Shapes
+
+Shapes below are marked explicit when directly stated by code, or
+`inferred from code` when deduced from surrounding operations.
+
+### Reasoner-side embeddings
+
+- Variable: `inputs_embeds`
+- Location: `MemGenModel.generate()`
+- Shape: `[B, L, H_reasoner]` (`inferred from code`)
+  - code unpacks `B, _, hidden_size = inputs_embeds.shape`
+
+### Trigger output
+
+- Variable: trigger logits
+- Location: `memgen/model/trigger.py`
+- Shape: `[B, L, 2]` (explicit in code)
+
+### Weaver augmentation tensors
+
+- File: `memgen/model/weaver.py`
+- Internal method: `_augment(...)`
+- Input:
+  - `inputs_embeds`: `[B, L, H_weaver]` (`inferred from code`)
+  - `latents`: `[K, H_weaver]` (`inferred from code`)
+- Output:
+  - `latents_hidden_states`: `[B, K, H_weaver]` (`inferred from code`)
+  - `latents_mask`: `[B, K]` (`inferred from code`)
+  - `latents_position_ids`: `[B, K]` (`inferred from code`)
+
+### Reasoner re-injected latents
+
+- Variable: `latent_inputs_embeds`
+- Location: `MemGenModel.generate()`
+- Shape: `[B_selected, K, H_reasoner]` (`inferred from code`)
+
+### Augmentation bookkeeping
+
+- Variable: `augmentation_pos`
+- Location: `MemGenModel.generate()`
+- Shape: `[B, max_new_tokens]` (`inferred from code`)
+
+### Forward-pass accumulation
+
+- Variables:
+  - `current_inputs_embeds`
+  - `current_attention_mask`
+- Location: `MemGenModel._forward(...)`
+- Initial shapes:
+  - `current_inputs_embeds`: `[B, 0, H_reasoner]` (`inferred from code`)
+  - `current_attention_mask`: `[B, 0]` (`inferred from code`)
+
+## 9. Generation Outputs and Evaluation Hooks
+
+### Static outputs
+
+- File: `memgen/runner.py`
+- Function: `_static_evaluate()`
+- Interaction output fields:
+  - `responses`
+  - `input_ids`
+  - `attention_mask`
+  - `info_mask`
+- Responses are decoded with the tokenizer.
+- Recorder:
+  - file: `memgen/utils.py`
+  - class: `StaticEvalRecorder`
+- Output artifact:
+  - `evaluate/answer.json`
+- Static recorder writes per-example JSON lines and a final summary record.
+
+### Dynamic outputs
+
+- File: `memgen/runner.py`
+- Function: `_dynamic_evaluate()`
+- Recorder:
+  - file: `memgen/utils.py`
+  - class: `DynamicEvalRecorder`
+- Output artifact:
+  - `evaluate/conversations.txt`
+- Dynamic recorder writes:
+  - conversation transcript
+  - per-item reward
+  - final average reward
+
+### TensorBoard hook
+
+- File: `memgen/utils.py`
+- Helper: `create_tensorboard(save_dir)`
+- Output directory:
+  - `<run_dir>/runs`
+
+## 10. Weaver / Trigger Training Boundaries
+
+These are protected boundaries under the current research scope and should not
+be modified for the inference-only memory-bank phases.
+
+### Runner-level training entry points
+
+- `memgen/runner.py`
+  - `MemGenRunner.train()`
+  - `MemGenRunner._create_weaver_trainer()`
+  - `MemGenRunner._create_trigger_trainer()`
+
+### Trainer implementations
+
+- `memgen/trainer/weaver_grpo_trainer.py`
+- `memgen/trainer/trigger_grpo_trainer.py`
+
+### Model training path
+
+- `memgen/model/modeling_memgen.py`
+  - `forward()`
+  - `_instructional_forward()`
+  - `_conversational_forward()`
+  - `_forward()`
+
+### Parameter-freeze / parameter-open controls
+
+- `memgen/model/modeling_utils.py`
+  - `fix_component()`
+  - `open_component()`
+
+### Training scripts and launch wrappers
+
 - `scripts/train/**`
 - `scripts/weaver_sft.sh`
 - `scripts/weaver_grpo.sh`
 - `scripts/trigger_train.sh`
-- Training branches of `MemGenRunner.train()` and `MemGenModel.forward()`
 
-## Candidate Inference Integration Points
+## 11. Candidate LatentMemoryBank Integration Points
 
-| Candidate | Advantages | Risks | Decision |
-|---|---|---|---|
-| `MemGenModel.generate()` optional argument/state object | Closest to latent creation and insertion | Easy to leak state through model instance; shared by Trigger training rollout | Conditional candidate |
-| `InteractionManager.run_agent_loop()` session object | Owns static/dynamic session lifecycle and reset | Does not directly own latent tensors | Preferred lifecycle owner |
-| Global field on `MemGenModel` | Simple | Cross-sample/process leakage and training interference | Rejected |
+### Candidate A: session-owned object in interaction manager
 
-The likely Phase 1 design is an explicit session-local memory object owned by the
-interaction lifecycle and passed into inference-only generation. This remains a
-proposal until Phase 1 is approved.
+- Possible owners:
+  - `SingleTurnInteractionManager.run_agent_loop()`
+  - `MultiTurnInteractionManager.run_agent_loop()`
+- Advantage:
+  - aligns naturally with session reset semantics
+  - lower risk of cross-sample leakage
+  - keeps training path untouched
+- Risk:
+  - requires explicit plumbing into `MemGenModel.generate()`
+  - interface design must avoid silently mutating disabled path
 
-## Evaluation Outputs
+### Candidate B: optional memory-state argument to `MemGenModel.generate()`
 
-- Static: `.cache/evaluate/<dataset>/<model>/<run>/evaluate/answer.json`.
-- Static headline metric key: `compute_reward`, mean direction `higher`.
-- Dynamic: `.cache/evaluate/<dataset>/<model>/<run>/evaluate/conversations.txt`.
-- Dynamic headline metric: final average reward, direction `higher`.
-- TensorBoard is written under each run directory.
+- Advantage:
+  - closest to latent creation and latent injection sites
+  - simplest place to keep retrieval/update logic numerically consistent
+- Risk:
+  - easy to accidentally persist state on the model instance
+  - must be carefully isolated from training callers and trigger rollouts
 
-## Verified Commands
+### Candidate C: global field on `MemGenModel`
 
-```bash
-/home/baishilong/miniconda3/envs/memgen/bin/python main.py --help
-/home/baishilong/miniconda3/envs/memgen/bin/python -m compileall -q \
-  main.py common data interactions memgen
-```
+- Advantage:
+  - implementation convenience only
+- Risk:
+  - cross-sample leakage
+  - unclear reset semantics
+  - higher chance of contaminating training or multi-sample inference
+- Assessment:
+  - not acceptable under current constraints
 
-Full baseline execution is currently blocked by `BUG-0001`.
+## 12. Phase 1 Risk Assessment
+
+### High-risk areas
+
+1. Session reset semantics
+   - Dynamic evaluation rebuilds prompts every turn and re-calls `generate()`.
+   - A bank attached to the wrong lifecycle can easily leak memory across
+     episodes.
+
+2. Disabled-path equivalence
+   - `generate()` currently performs augmentation inline.
+   - Any new conditional branch must be strictly no-op when disabled.
+
+3. Shape / device / dtype compatibility
+   - Latents cross `reasoner_to_weaver` and `weaver_to_reasoner`.
+   - A bank storing post-Weaver or post-reasoner latents must make device and
+     dtype transitions explicit.
+
+4. Batch semantics
+   - Current interaction code supports batching.
+   - Memory-bank experiments therefore need conservative default
+     `batch_size=1` until later approval.
+
+5. Baseline trust
+   - `BUG-0001` remains open.
+   - Architectural audit can proceed, but baseline equivalence claims cannot be
+     trusted until loader correctness is fixed.
+
+## 13. Recommended Phase 1 Output
+
+The audit supports the following working conclusion for later implementation:
+
+- lifecycle owner: interaction-manager session
+- model API: explicit optional session-memory argument into inference-only
+  `generate()`
+- forbidden approach: persistent global memory on `MemGenModel`
+- protected scope: no changes to Weaver or Trigger training code paths
+
+This is an audit conclusion only. No implementation is performed in Phase 1.

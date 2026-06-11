@@ -14,6 +14,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0005 | 2026-06-11 | accepted | Use official Qwen2.5-1.5B GSM8K Weaver-SFT as the primary comparator |
 | DEC-0006 | 2026-06-11 | accepted | Keep the baseline gate closed until all official LoRA tensors load without mismatch |
 | DEC-0007 | 2026-06-11 | accepted | Until later approval, memory remains session-local and memory-bank experiments default to batch size 1 |
+| DEC-0008 | 2026-06-11 | accepted | Future memory-bank state should be owned by the interaction session and passed explicitly into inference |
 
 ## Decision Template
 
@@ -76,6 +77,30 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Status: accepted
 - Decision: Execute one approved Phase, update required notes, then pause.
 - Consequence: No automatic progression to the next Phase.
+
+### DEC-0008: Session-Owned Inference Memory State
+
+- Date: 2026-06-11
+- Status: accepted
+- Context: Phase 1 code audit shows that static and dynamic evaluations both
+  call `MemGenModel.generate()` repeatedly inside interaction-manager lifecycles,
+  while session reset semantics live outside the model object.
+- Decision: If a LatentMemoryBank is added later, its lifecycle owner should be
+  the interaction-manager session, and any memory state should be passed
+  explicitly into inference rather than persisted as a global field on
+  `MemGenModel`.
+- Alternatives considered:
+  - storing persistent memory directly on `MemGenModel`
+  - attaching memory only inside `generate()` local variables
+- Rationale: Session ownership matches the verified reset boundary, reduces
+  cross-sample leakage risk, and keeps training code paths isolated.
+- Consequences:
+  - future integration should add explicit inference-only state plumbing
+  - global model-level memory is rejected under current constraints
+- Verification required:
+  - session reset must clear all bank contents
+  - disabled path must remain numerically identical
+  - no training caller should observe new persistent state
 
 ### DEC-0005: Primary Baseline Comparator
 

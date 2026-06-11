@@ -2,11 +2,11 @@
 
 ## Current State
 
-- Current Phase: Phase 0 - Research Memory System and Repository Snapshot
+- Current Phase: Phase 1 - Code Map and Inference Pipeline Audit
 - Status: `completed`
 - Last updated: 2026-06-11
-- Stop condition: Reached; Phase 0 closeout only.
-- Next suggested Phase: Phase 1 - Code Map and Inference Pipeline Audit
+- Stop condition: Reached; Phase 1 closeout only.
+- Next suggested Phase: Phase 2 - Original Project Smoke Test
 
 ## Research Goal
 
@@ -15,69 +15,71 @@ inference time without changing MemGen's training workflows.
 
 ## Phase 0 Outcome
 
-Phase 0 is complete under the current roadmap.
+Phase 0 remains complete under the current roadmap.
 
-- [x] Confirmed `research_notes/` exists.
-- [x] Confirmed required research note files exist:
-  `PLANS.md`, `PROGRESS.md`, `EXPERIMENTS.md`, `DECISIONS.md`, `TODO.md`,
-  `BUGS.md`, `CODE_MAP.md`, `BASELINE.md`, `METHOD.md`, `ABLATIONS.md`,
-  `PAPER_NOTES.md`, and `prompts/`.
-- [x] Confirmed the additional Chinese companion plan exists:
-  `research_notes/PLANS_zh.md`.
-- [x] Recorded the current repository snapshot.
-- [x] Recorded the current working environment snapshot.
-- [x] Modified research notes only. No core code or training workflow changed.
+## Phase 1 Outcome
 
-## Created Research Notes
+Phase 1 is complete.
 
-- `research_notes/PLANS.md`
-- `research_notes/PROGRESS.md`
-- `research_notes/EXPERIMENTS.md`
-- `research_notes/DECISIONS.md`
-- `research_notes/TODO.md`
-- `research_notes/BUGS.md`
-- `research_notes/CODE_MAP.md`
-- `research_notes/BASELINE.md`
-- `research_notes/METHOD.md`
-- `research_notes/ABLATIONS.md`
-- `research_notes/PAPER_NOTES.md`
-- `research_notes/prompts/`
-- `research_notes/PLANS_zh.md`
+- [x] Audited inference entry file and main dispatch.
+- [x] Audited config loading and runtime config handoff.
+- [x] Audited static and dynamic session/sample/episode boundaries.
+- [x] Located Trigger call sites.
+- [x] Located Weaver call sites.
+- [x] Located latent memory generation and Reasoner injection sites.
+- [x] Located generation outputs and evaluation hooks.
+- [x] Marked protected Weaver / Trigger training boundaries.
+- [x] Assessed candidate LatentMemoryBank integration points and risks.
+- [x] Updated research notes only. No core code or training workflow changed.
 
-## Repository Snapshot
+## Files Audited in Phase 1
+
+- `main.py`
+- `common/config.py`
+- `memgen/runner.py`
+- `interactions/base_interaction.py`
+- `interactions/singleturn_interaction.py`
+- `interactions/multiturn_interaction.py`
+- `memgen/model/modeling_memgen.py`
+- `memgen/model/modeling_utils.py`
+- `memgen/model/weaver.py`
+- `memgen/model/trigger.py`
+- `memgen/utils.py`
+- `data/__init__.py`
+- `data/base_builder.py`
+- `data/base_env.py`
+
+## Repository Snapshot at Phase 1 Closeout
 
 - Branch: `rlm-memory-bank`
-- Commit: `929e3c60035972700a7756cbbc348373aad373db`
-- Working tree has uncommitted changes: `yes`
-- Current visible uncommitted item during Phase 0 closeout:
-  `?? research_notes/PLANS_zh.md`
+- Commit: `7a13d0abb8bdfcb851421d164a9a8223af22a55f`
+- Working tree had uncommitted changes before Phase 1 note updates: `no`
+- Phase 1 modified research notes only: `yes`
 
-## Environment Snapshot
+## Key Phase 1 Conclusions
 
-- Current path: `/mnt/18T/baishilong/MemGen`
-- Python: `Python 3.13.9`
-- Conda environment name: `base`
-- Conda prefix: `/home/baishilong/miniconda3`
-- Readme/config files detected:
-  `README.md`, `requirements.txt`, `memgen.yml`, `configs/zero2.yaml`,
-  `configs/latent_memory/gpqa.yaml`, `configs/latent_memory/gsm8k.yaml`,
-  `configs/latent_memory/kodcode.yaml`, `configs/latent_memory/triviaqa.yaml`
-
-## Historical Evidence
-
-Previous audit and baseline-related notes remain in the repository as historical
-research evidence. They are not part of the Phase 0 definition in the current
-roadmap and were not advanced in this closeout pass.
+- Inference evaluation enters through `main.py -> MemGenRunner.evaluate()`.
+- Static and dynamic evaluations use different interaction managers, but both
+  funnel generation through `MemGenModel.generate()`.
+- Trigger gating, Weaver latent generation, and latent-to-Reasoner injection all
+  happen inside `MemGenModel.generate()` on the inference path.
+- The safest future memory reset boundary is the interaction-manager session, not
+  a global model lifetime.
+- A future memory-bank design should use explicit inference-only state passing,
+  not persistent global memory on `MemGenModel`.
+- Baseline trust is still blocked by `BUG-0001`; this does not block code audit,
+  but it does block scientific baseline claims.
 
 ## Phase History
 
 | Date | Phase | Outcome | Evidence |
 |---|---|---|---|
 | 2026-06-11 | Phase 0 - Research Memory System and Repository Snapshot | Completed | `research_notes/` structure confirmed; repository and environment snapshot recorded |
+| 2026-06-11 | Phase 1 - Code Map and Inference Pipeline Audit | Completed | `research_notes/CODE_MAP.md` updated with verified inference path, boundaries, tensor notes, and integration risks |
 
 ## Session Handoff
 
-- Phase 0 can now be treated as complete.
-- Do not enter implementation, smoke test, or baseline work without explicit
+- Phase 1 can now be treated as complete.
+- Do not enter smoke test, baseline, or implementation work without explicit
   approval for the next Phase.
-- Recommended next step: Phase 1 - Code Map and Inference Pipeline Audit.
+- Recommended next step: Phase 2 - Original Project Smoke Test.

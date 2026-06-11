@@ -2,12 +2,12 @@
 
 ## Current State
 
-- Current Phase: Temporary Repair Review and Sanity Check
+- Current Phase: Phase 3 - Original MemGen Baseline
 - Status: `completed`
 - Last updated: 2026-06-11
-- Stop condition: Reached; Repair Review only.
-- Next suggested Phase: Phase 3 - Original MemGen Baseline, after explicit
-  approval.
+- Stop condition: Reached; do not enter Phase 4 without explicit approval.
+- Next suggested Phase: Phase 4 - LatentMemoryBank Module Skeleton, after
+  explicit approval.
 
 ## Research Goal
 
@@ -126,6 +126,30 @@ The temporary Repair Review and Sanity Check is complete.
 - [x] Did not treat the three-sample reward as a baseline metric.
 - [x] Did not enter Phase 3.
 
+## Phase 3 Outcome
+
+Phase 3 is complete.
+
+- [x] Accepted `memgen-gsm8k-sft-official-v1` as the Original MemGen comparator.
+- [x] Fixed the comparison set to GSM8K `main/test` indices 0 through 19.
+- [x] Used seed 42, batch size 1, greedy decoding, and maximum response length
+  1024.
+- [x] Ran the official `Config -> MemGenModel.from_config ->
+  MemGenRunner.evaluate()` path.
+- [x] Produced 20 non-empty prediction records and one summary record.
+- [x] Recorded mean `compute_reward=0.60` on the fixed 20-sample subset.
+- [x] Reconfirmed exact 112/112 Weaver and 112/112 Trigger adapter loading.
+- [x] Recorded 1,722 Trigger decision calls, 20 Weaver prompt calls, and 43
+  Weaver inference calls.
+- [x] Recorded total latency 115.728 seconds, mean latency 5.786 seconds/sample,
+  and peak allocated CUDA memory 9,415,716,352 bytes.
+- [x] Replayed fixed samples 0, 1, and 2 and obtained identical response-token
+  and augmentation-mask SHA-256 hashes.
+- [x] Archived prediction, verification, TensorBoard, and metric-contract
+  artifacts under `outputs/baseline/`.
+- [x] Did not modify core method or training code in Phase 3.
+- [x] Did not enter Phase 4.
+
 ## Files Audited in Phase 1
 
 - `main.py`
@@ -221,12 +245,13 @@ The temporary Repair Review and Sanity Check is complete.
 | 2026-06-11 | Temporary Environment Alignment Phase | Completed | Existing `memgen` environment validated; CUDA/BF16 and local assets confirmed; no install or environment rebuild required |
 | 2026-06-11 | Temporary Repair Phase | Completed | `BUG-0001` and `BUG-0002` fixed; one-sample official static smoke wrote a non-empty `answer.json` with exact adapter tensor verification |
 | 2026-06-11 | Temporary Repair Review and Sanity Check | Completed | Core repair diff reviewed; training files unchanged; three-sample official static eval produced three predictions plus one summary |
+| 2026-06-11 | Phase 3 - Original MemGen Baseline | Completed | Fixed 20-sample baseline accepted at `compute_reward=0.60`; three golden cases replayed with exact token/mask hashes |
 
 ## Session Handoff
 
-- The temporary Repair Phase can be treated as complete.
-- `BUG-0001` and `BUG-0002` are fixed under the validated `memgen` environment.
-- `EXP-20260611-004` is a smoke verification only, not a scientific baseline.
-- `EXP-20260611-005` independently sanity-checks the repaired path on three
-  samples and is also not a scientific baseline.
-- Phase 3 prerequisites are satisfied, but Phase 3 requires explicit approval.
+- Phase 3 is complete and the fixed-subset Original MemGen baseline is accepted.
+- Primary baseline run: `EXP-20260611-006`.
+- Golden replay verification: `EXP-20260611-007`.
+- The accepted metric applies only to GSM8K test indices 0 through 19 under the
+  frozen command and environment; it is not a full-test result.
+- Do not enter Phase 4 without explicit approval.

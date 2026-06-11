@@ -19,6 +19,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0010 | 2026-06-11 | accepted | Preserve the existing validated `memgen` package set through the Repair Phase; do not rebuild or install dependencies without new evidence and approval |
 | DEC-0011 | 2026-06-11 | accepted | Restore checkpoint adapters on the existing PEFT model after deleting constructor placeholders |
 | DEC-0012 | 2026-06-11 | accepted | Preserve the static recorder batch contract by flattening only rank-nested gather results |
+| DEC-0013 | 2026-06-11 | accepted | Accept a fixed first-20 GSM8K test subset as the Phase 3 development baseline |
 
 ## Decision Template
 
@@ -196,6 +197,35 @@ IDs and append superseding decisions rather than silently rewriting history.
   semantics or any training workflow.
 - Related experiment: `EXP-20260611-004`
 - Related bug: `BUG-0002`
+
+### DEC-0013: Fixed 20-Sample Development Baseline
+
+- Date: 2026-06-11
+- Status: accepted
+- Context: Phase 3 requires a credible comparator before method implementation,
+  but a first full-test run would add cost without improving early disabled-path
+  and ablation iteration.
+- Decision: Accept GSM8K `main/test` indices 0 through 19 as the frozen Phase 3
+  development comparison set, with seed 42, batch size 1, greedy decoding, and
+  maximum response length 1024.
+- Alternatives considered:
+  - 50 fixed samples
+  - the full 1,319-sample test split
+  - retaining the 128-token smoke configuration
+- Rationale:
+  - 20 samples exercise repeated Trigger/Weaver augmentation and official metric
+    recording while keeping the first formal run bounded
+  - 1024 tokens matches the official eval setting and avoids smoke-test
+    truncation
+  - fixed contiguous IDs make later comparisons and replay unambiguous
+- Consequences:
+  - `compute_reward=0.60` is valid only for the fixed 20-sample subset
+  - every later comparison must use the same IDs and protocol
+  - larger runs may strengthen evidence but do not replace this oracle silently
+- Verification:
+  - 20/20 predictions plus one summary completed
+  - three golden samples replayed with exact response and mask hashes
+- Related experiments: `EXP-20260611-006`, `EXP-20260611-007`
 
 ### DEC-0005: Primary Baseline Comparator
 

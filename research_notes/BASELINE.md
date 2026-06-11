@@ -3,23 +3,27 @@
 ## Status
 
 - Acceptance target: `comparison_ready`
-- Current verdict: `ready_for_phase3`
-- Baseline gate: **closed**
-- Blocking defect: none for smoke execution; formal Phase 3 evidence is pending
+- Current verdict: `verified_match`
+- Baseline gate: **open**
+- Acceptance status: `comparison_ready`
+- Blocking defect: none
+- Accepted experiment: `EXP-20260611-006`
+- Golden replay: `EXP-20260611-007`
 - Failed smoke experiment: `EXP-20260611-001`
 - Successful repair smoke experiment: `EXP-20260611-004`
 
-The Repair Phase smoke is not a scientific baseline. No paper-facing or
-downstream comparison may use it as an aggregate result.
+The accepted metric is scoped to the fixed 20-sample GSM8K subset. It is the
+Original MemGen comparator for later LatentMemoryBank experiments using the same
+sample IDs and protocol.
 
 ## Baseline Identity
 
 - Baseline ID: `memgen-gsm8k-sft-official-v1`
 - Date selected: 2026-06-11
-- Code revision: `5e59fee296092fa056f140b38a07b927651ffdb5`
+- Core code revision: `c0f1f2c3d79828c2d4e4f74eb9756bfb50890653`
 - Upstream code parent: `7f1444f`
 - Branch: `rlm-memory-bank`
-- Working tree during audit: clean
+- Working tree during accepted run: evaluation-harness changes only
 - Model: `Qwen/Qwen2.5-1.5B-Instruct`
 - Dataset: `gsm8k`, configuration `main`, split `test`
 - MemGen checkpoint:
@@ -30,7 +34,10 @@ downstream comparison may use it as an aggregate result.
 - Primary metric: mean `compute_reward`, higher is better
 - Decoding: greedy, temperature `0.0`
 - Seed: `42`
-- Phase 1 default batch size: `1`
+- Batch size: `1`
+- Fixed comparison sample IDs: `0..19`
+- Maximum response length: `1024`
+- Accepted output: `outputs/baseline/EXP-20260611-006`
 
 ## Checkpoint Integrity
 
@@ -58,36 +65,40 @@ These hashes match the official Hugging Face LFS metadata.
 - Known deviation: repository manifests disagree on PyTorch CUDA build and TRL
   version. This must remain recorded until the baseline is accepted.
 
-## Reproduction Command
+## Accepted Reproduction Command
 
 The canonical full evaluation command is:
 
 ```bash
-CUDA_VISIBLE_DEVICES=7 \
-/home/baishilong/miniconda3/envs/memgen/bin/python \
-  -m accelerate.commands.launch \
-  --config_file=configs/zero2.yaml \
-  --num_processes=1 \
-  main.py \
+env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY \
+  CUDA_VISIBLE_DEVICES=0 \
+  TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 \
+  TOKENIZERS_PARALLELISM=false \
+  /home/baishilong/miniconda3/envs/memgen/bin/python \
+  -m scripts.eval.repair_phase2_smoke \
   --cfg-path configs/latent_memory/gsm8k.yaml \
-  --options \
-  model.model_name Qwen/Qwen2.5-1.5B-Instruct \
-  model.load_model_path .cache/baselines/memgen-gsm8k-sft/model \
-  model.max_prompt_aug_num 1 \
-  model.max_inference_aug_num 3 \
-  model.weaver.model_name Qwen/Qwen2.5-1.5B-Instruct \
-  model.weaver.prompt_latents_len 8 \
-  model.weaver.inference_latents_len 8 \
-  model.trigger.model_name Qwen/Qwen2.5-1.5B-Instruct \
-  model.trigger.active False \
-  run.mode evaluate \
-  run.interaction.batch_size 1 \
-  run.interaction.temperature 0.0 \
-  run.interaction.max_response_length 1024
+  --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 \
+  --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model \
+  --output-dir /mnt/18T/baishilong/MemGen/outputs/baseline/EXP-20260611-006 \
+  --sample-start 0 --sample-count 20 --max-response-length 1024
 ```
 
-`BUG-0001` and `BUG-0002` are repaired. Execute the full baseline only in an
-explicitly approved Phase 3.
+The harness still constructs `Config`, calls `MemGenModel.from_config()`, and
+executes `MemGenRunner.evaluate()`; it adds verification and fixed-subset
+selection without bypassing the official evaluator.
+
+## Accepted Results
+
+| Metric | Value |
+|---|---:|
+| Mean `compute_reward` | 0.60 |
+| Correct / total | 12 / 20 |
+| Total latency | 115.728 s |
+| Mean latency/sample | 5.786 s |
+| Peak allocated CUDA memory | 9,415,716,352 bytes |
+| Trigger decision calls | 1,722 |
+| Weaver prompt calls | 20 |
+| Weaver inference calls | 43 |
 
 ## Repair Smoke Evidence
 
@@ -135,15 +146,25 @@ After `BUG-0001` is fixed:
 4. Re-run each case and require identical token and mask hashes.
 5. Use these artifacts as the disabled-feature equivalence oracle in Phase 1.
 
-## Metrics
+## Artifacts
 
-| Metric | Current Value | Status |
-|---|---:|---|
-| Mean `compute_reward` on GSM8K test | Not measured | Blocked |
-| Golden token hash | Not established | Blocked |
-| Latency per sample | Not established | Blocked |
-| Peak CUDA memory | Not established | Blocked |
-| Throughput | Not established | Blocked |
+- Predictions:
+  `outputs/baseline/EXP-20260611-006/evaluate/answer.json`
+- Verification, adapter checks, token hashes, masks, latency, and memory:
+  `outputs/baseline/EXP-20260611-006/verification.json`
+- Canonical comparison contract:
+  `outputs/baseline/EXP-20260611-006/json/metric_contract.json`
+- Golden replay:
+  `outputs/baseline/EXP-20260611-007/verification.json`
+
+## Scope
+
+- This baseline is accepted for comparisons on GSM8K test indices 0 through 19.
+- Later variants must use the same sample IDs, seed, checkpoint, decoding
+  parameters, evaluator, and batch size.
+- The value 0.60 must not be reported as full-test GSM8K accuracy.
+- A 50-sample or full-test run is optional stronger evidence, not required to
+  begin method development.
 
 ## Acceptance Criteria
 
@@ -152,7 +173,7 @@ After `BUG-0001` is fixed:
 - [x] Official checkpoint files are local and hash-verified.
 - [x] Canonical metric contract exists.
 - [x] Checkpoint loads all trained adapter tensors.
-- [ ] Full baseline command completes.
-- [ ] Metrics and raw outputs are archived.
-- [ ] Deterministic golden cases are established.
-- [ ] Baseline is accepted as `comparison_ready`.
+- [x] Baseline command completes.
+- [x] Metrics and raw outputs are archived.
+- [x] Deterministic golden cases are established.
+- [x] Baseline is accepted as `comparison_ready`.

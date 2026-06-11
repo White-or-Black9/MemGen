@@ -1,5 +1,7 @@
 import argparse
+import hashlib
 import json
+import math
 import time
 import warnings
 from pathlib import Path
@@ -17,12 +19,16 @@ from memgen.runner import MemGenRunner
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Run the repaired Phase 2 smoke test.")
+    parser = argparse.ArgumentParser(
+        description="Run verified original MemGen static evaluation."
+    )
     parser.add_argument("--cfg-path", default="configs/latent_memory/gsm8k.yaml")
     parser.add_argument("--model-path", required=True)
     parser.add_argument("--checkpoint-path", required=True)
     parser.add_argument("--output-dir", required=True)
-    parser.add_argument("--sample-count", type=int, choices=range(2, 6), default=3)
+    parser.add_argument("--sample-start", type=int, default=0)
+    parser.add_argument("--sample-count", type=int, default=3)
+    parser.add_argument("--max-response-length", type=int, default=128)
     return parser.parse_args()
 
 
@@ -67,10 +73,24 @@ def install_generation_trace(model, trace):
 
     def tracked_generate(self, *args, **kwargs):
         kwargs["return_augmentation_mask"] = True
+        torch.cuda.synchronize()
+        start = time.perf_counter()
         output_ids, augmentation_mask = original_generate(*args, **kwargs)
-        trace["augmentation_masks"].append(
-            augmentation_mask.detach().cpu().tolist()
-        )
+        torch.cuda.synchronize()
+        input_ids = args[0] if args else kwargs["input_ids"]
+        response_ids = output_ids[:, input_ids.size(1):].detach().cpu().contiguous()
+        augmentation_mask = augmentation_mask.detach().cpu().contiguous()
+        trace["generation_records"].append({
+            "response_token_count": int(response_ids.ne(model.tokenizer.pad_token_id).sum()),
+            "response_token_sha256": hashlib.sha256(
+                response_ids.numpy().tobytes()
+            ).hexdigest(),
+            "augmentation_mask_sha256": hashlib.sha256(
+                augmentation_mask.numpy().tobytes()
+            ).hexdigest(),
+            "augmentation_mask": augmentation_mask.tolist(),
+            "generation_latency_seconds": time.perf_counter() - start,
+        })
         return output_ids
 
     model._should_augment = MethodType(tracked_should_augment, model)
@@ -87,6 +107,8 @@ def main():
     checkpoint_path = Path(args.checkpoint_path).resolve()
     output_dir = Path(args.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
+    if args.sample_start < 0 or args.sample_count <= 0:
+        raise ValueError("sample-start must be non-negative and sample-count positive")
 
     config_args = SimpleNamespace(
         cfg_path=args.cfg_path,
@@ -118,7 +140,7 @@ def main():
             "run.interaction.temperature",
             "0.0",
             "run.interaction.max_response_length",
-            "128",
+            str(args.max_response_length),
             "run.interaction.weaver_do_sample",
             "False",
             "run.interaction.trigger_do_sample",
@@ -174,14 +196,17 @@ def main():
         config=config_dict,
         working_dir=str(output_dir),
     )
-    runner.test_dataset = runner.test_dataset.select(range(args.sample_count))
+    sample_ids = list(
+        range(args.sample_start, args.sample_start + args.sample_count)
+    )
+    runner.test_dataset = runner.test_dataset.select(sample_ids)
 
     trace = {
         "trigger_active": model.trigger.active,
         "trigger_decision_calls": 0,
         "weaver_prompt_calls": 0,
         "weaver_inference_calls": 0,
-        "augmentation_masks": [],
+        "generation_records": [],
     }
     install_generation_trace(model, trace)
 
@@ -197,22 +222,39 @@ def main():
     answer_records = [json.loads(line) for line in answer_lines]
     prediction_count = sum("completion" in record for record in answer_records)
     summary_count = sum("summary_metrics" in record for record in answer_records)
+    prediction_records = [
+        record for record in answer_records if "completion" in record
+    ]
+    summary_records = [
+        record for record in answer_records if "summary_metrics" in record
+    ]
     if prediction_count != args.sample_count or summary_count != 1:
         raise RuntimeError(
             "Unexpected answer.json structure: "
             f"predictions={prediction_count}, summaries={summary_count}"
         )
+    if any(not record["completion"].strip() for record in prediction_records):
+        raise RuntimeError("At least one prediction is empty")
+    summary_metrics = summary_records[0]["summary_metrics"]
+    if any(not math.isfinite(float(value)) for value in summary_metrics.values()):
+        raise RuntimeError(f"Non-finite summary metric found: {summary_metrics}")
+    if len(trace["generation_records"]) != args.sample_count:
+        raise RuntimeError(
+            "Generation trace count does not match sample count: "
+            f"{len(trace['generation_records'])} != {args.sample_count}"
+        )
     verification = {
         "config_file": str(Path(args.cfg_path).resolve()),
         "model_path": model_path,
         "checkpoint_path": str(checkpoint_path),
-        "dataset": f"gsm8k/main test[0:{args.sample_count}]",
+        "dataset": "gsm8k/main test",
+        "sample_ids": sample_ids,
         "sample_count": args.sample_count,
         "seed": 42,
         "batch_size": 1,
         "decoding": {
             "temperature": 0.0,
-            "max_response_length": 128,
+            "max_response_length": args.max_response_length,
             "weaver_do_sample": False,
             "trigger_do_sample": False,
         },
@@ -222,12 +264,51 @@ def main():
         "answer_line_count": len(answer_lines),
         "prediction_count": prediction_count,
         "summary_count": summary_count,
+        "summary_metrics": summary_metrics,
         "answer_nonempty": answer_path.stat().st_size > 0,
         "latency_seconds": latency,
+        "latency_per_sample_seconds": latency / args.sample_count,
         "peak_cuda_memory_bytes": torch.cuda.max_memory_allocated(),
     }
     (output_dir / "verification.json").write_text(
         json.dumps(verification, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    contract_dir = output_dir / "json"
+    contract_dir.mkdir(parents=True, exist_ok=True)
+    metric_contract = {
+        "baseline_id": "memgen-gsm8k-sft-official-v1",
+        "task": "GSM8K mathematical reasoning",
+        "dataset": {
+            "name": "gsm8k",
+            "config": "main",
+            "split": "test",
+            "sample_ids": sample_ids,
+        },
+        "evaluation_path": (
+            "Config -> MemGenModel.from_config -> MemGenRunner.evaluate()"
+        ),
+        "metrics": {
+            "compute_reward": {
+                "description": "Exact-answer reward computed by the official GSM8K environment",
+                "direction": "higher_is_better",
+                "origin_path": str(answer_path),
+                "required": True,
+            }
+        },
+        "seed": 42,
+        "batch_size": 1,
+        "decoding": verification["decoding"],
+        "model_path": model_path,
+        "checkpoint_path": str(checkpoint_path),
+        "config_file": verification["config_file"],
+        "known_deviations": [
+            f"Uses a fixed {args.sample_count}-sample test subset rather than "
+            "the full GSM8K test split."
+        ],
+    }
+    (contract_dir / "metric_contract.json").write_text(
+        json.dumps(metric_contract, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
     print(json.dumps(verification, indent=2, ensure_ascii=False))

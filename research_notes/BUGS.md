@@ -72,6 +72,10 @@ Do not delete resolved entries.
   - No missing, unexpected, shape-mismatched, or value-mismatched entries
     reappeared.
   - Protected training files had no git diff.
+- Phase 3 verification:
+  - `EXP-20260611-006` again loaded both adapters with exact 112/112 key, shape,
+    and value matches.
+  - No missing or unexpected trained keys appeared across 20 completed samples.
 
 #### 修复说明（中文）
 
@@ -162,6 +166,10 @@ component.model.set_adapter(adapter_name)
     record through the official recorder path.
   - No `KeyError: 0` or output collation error reappeared.
   - Trigger and Weaver augmentation tracing remained active for all samples.
+- Phase 3 verification:
+  - `EXP-20260611-006` wrote 20 prediction records and one summary without
+    recorder errors.
+  - All samples completed and the output remained valid JSONL.
 
 #### 修复说明（中文）
 

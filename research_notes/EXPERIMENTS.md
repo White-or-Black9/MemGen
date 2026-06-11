@@ -12,6 +12,8 @@ overwrite prior records; append a new entry.
 | EXP-20260611-003 | 2026-06-11 | Environment Alignment | Is the existing `memgen` environment suitable for the Repair Phase without package changes? | `completed` | Imports, dependency check, CUDA/BF16, config, model snapshot, checkpoint, and dataset cache validated; no install required |
 | EXP-20260611-004 | 2026-06-11 | Temporary Repair | Do the minimal adapter-loader and static-recorder fixes unblock the official one-sample smoke path? | `completed` | Both adapters matched 112/112 tensors exactly; official static eval wrote a non-empty answer file |
 | EXP-20260611-005 | 2026-06-11 | Repair Review | Do the repaired loader and recorder remain correct across three sequential batch-size-1 samples? | `completed` | Three predictions plus one summary were written; adapter and augmentation checks passed |
+| EXP-20260611-006 | 2026-06-11 | Phase 3 | What is Original MemGen performance on the fixed 20-sample GSM8K comparison subset? | `completed` | 20/20 predictions completed; mean `compute_reward=0.60` |
+| EXP-20260611-007 | 2026-06-11 | Phase 3 | Are the fixed golden outputs deterministic under exact replay? | `completed` | Samples 0-2 reproduced identical response-token and augmentation-mask hashes |
 
 ## Recorded Experiments
 
@@ -436,6 +438,116 @@ env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY \
 - The fixes remain suitable for proceeding to an explicitly approved Phase 3.
 - Baseline gate remains closed.
 - Related bugs: `BUG-0001`, `BUG-0002`
+
+### EXP-20260611-006: Original MemGen Fixed-Subset Baseline
+
+- Phase: Phase 3 - Original MemGen Baseline
+- Status: `completed`
+- Baseline ID: `memgen-gsm8k-sft-official-v1`
+- Date: 2026-06-11
+- Git branch: `rlm-memory-bank`
+- Core code revision: `c0f1f2c3d79828c2d4e4f74eb9756bfb50890653`
+- Working tree during run: evaluation-harness changes only
+- Environment:
+  `/home/baishilong/miniconda3/envs/memgen/bin/python`
+- Config: `configs/latent_memory/gsm8k.yaml`
+- Model path:
+  `/home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306`
+- Checkpoint:
+  `/mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model`
+- Dataset cache:
+  `/home/baishilong/.cache/huggingface/datasets/gsm8k/main/0.0.0/740312add88f781978c0658806c59bc2815b9866`
+- Split and sample IDs: GSM8K `main/test`, indices 0 through 19
+- Sample count: 20
+- Seed: 42
+- Batch size: 1
+- Decoding: greedy, temperature 0.0, maximum response length 1024, Weaver and
+  Trigger sampling disabled
+- Output directory: `outputs/baseline/EXP-20260611-006`
+- Prediction file:
+  `outputs/baseline/EXP-20260611-006/evaluate/answer.json`
+- Verification file:
+  `outputs/baseline/EXP-20260611-006/verification.json`
+- Metric contract:
+  `outputs/baseline/EXP-20260611-006/json/metric_contract.json`
+- Command:
+
+```bash
+env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY \
+  CUDA_VISIBLE_DEVICES=0 \
+  TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 \
+  TOKENIZERS_PARALLELISM=false \
+  /home/baishilong/miniconda3/envs/memgen/bin/python \
+  -m scripts.eval.repair_phase2_smoke \
+  --cfg-path configs/latent_memory/gsm8k.yaml \
+  --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 \
+  --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model \
+  --output-dir /mnt/18T/baishilong/MemGen/outputs/baseline/EXP-20260611-006 \
+  --sample-start 0 --sample-count 20 --max-response-length 1024
+```
+
+#### Results
+
+- Prediction records: 20/20, all non-empty.
+- Summary records: 1.
+- Mean `compute_reward`: 0.60.
+- Correct samples: 12; incorrect samples: 8.
+- Incorrect sample IDs: 7, 8, 11, 12, 13, 14, 15, 19.
+- All 20 completions contained a boxed answer.
+- Response length: minimum 53, maximum 235, mean 134.35 tokens.
+- No sample reached the 1024-token limit.
+- Weaver adapter: exact 112/112 tensor match.
+- Trigger adapter: exact 112/112 tensor match.
+- Missing/unexpected/shape/value mismatches: all zero.
+- Adapter-related loading warnings: zero.
+- Trigger decision calls: 1,722.
+- Weaver prompt augmentation calls: 20.
+- Weaver inference augmentation calls: 43.
+- Total evaluation latency: 115.728 seconds.
+- Mean evaluation latency: 5.786 seconds/sample.
+- Peak allocated CUDA memory: 9,415,716,352 bytes.
+- No NaN, OOM, CUDA error, empty completion, or incomplete sample.
+
+#### Artifact Hashes
+
+- `answer.json`:
+  `b8e824b4c82c9fc0e6dcfd35b56bd96f26390756ceefef57ee2c35a36e21baea`
+- `verification.json`:
+  `da94bf8f27fbc67472c30dce35e001bdc054ee7fe59a357bbf1c84e65a6bd333`
+- `metric_contract.json`:
+  `facf67c5ff4d0742d6640583c41714a4ec767e70c976b767a0ae9e198e7e0026`
+
+#### Interpretation
+
+This is the accepted Original MemGen comparison point for later
+LatentMemoryBank experiments on the same fixed subset. It is not an estimate of
+full GSM8K test performance.
+
+### EXP-20260611-007: Golden-Case Deterministic Replay
+
+- Phase: Phase 3 - Original MemGen Baseline
+- Status: `completed`
+- Purpose: Replay fixed test indices 0, 1, and 2 under the exact baseline
+  configuration.
+- Core code revision: `c0f1f2c3d79828c2d4e4f74eb9756bfb50890653`
+- Sample count: 3
+- Seed: 42
+- Batch size: 1
+- Decoding: greedy, maximum response length 1024
+- Output directory: `outputs/baseline/EXP-20260611-007`
+- Result: all three response-token hashes and all three augmentation-mask hashes
+  exactly matched `EXP-20260611-006`.
+- Sample 0 response/mask:
+  `b263835e26587cffe0d540125dc63a6acf27e924dfa9d5cb45885ce4081218f0` /
+  `7dcc914e338423f3616d3d0139ac0df8a959cc0117c4343fb577c26bfd0b1cb4`
+- Sample 1 response/mask:
+  `560a6a6ffca3241005289a07d36b7c7820b6e13dea354e2beaf5b81e7f67849a` /
+  `d042e76299bf72b3847744d4f3b0633de65ede4c6115c40f974188f495fc575b`
+- Sample 2 response/mask:
+  `dc2bbbddf83b56513d68a590277761b46e097eeaf71fec3429f1715ddd0f20fe` /
+  `d6e708979b29292866684d928520c151868f06f891f456161ef56c9daca185e4`
+- Conclusion: deterministic golden evidence established for later disabled-path
+  equivalence tests.
 
 ## Experiment Template
 

@@ -2,95 +2,82 @@
 
 ## Current State
 
-- Current activity: Research plan revision
+- Current Phase: Phase 0 - Research Memory System and Repository Snapshot
 - Status: `completed`
 - Last updated: 2026-06-11
-- Stop condition: Reached; no implementation or experiment Phase started.
-- Required user decision: Review and confirm the revised 11-Phase roadmap.
+- Stop condition: Reached; Phase 0 closeout only.
+- Next suggested Phase: Phase 1 - Code Map and Inference Pipeline Audit
 
 ## Research Goal
 
 Add an optional session-level Retrieval-Augmented Recurrent Latent Memory Bank at
 inference time without changing MemGen's training workflows.
 
-## Latest Planning Update
+## Phase 0 Outcome
 
-- [x] Replaced the previous five-stage roadmap with Phases 0 through 10.
-- [x] Separated repository snapshot, code audit, smoke test, and accepted baseline.
-- [x] Separated the module skeleton, Version A integration, disabled equivalence,
-  stability/debug, ablations, Version B, and paper consolidation.
-- [x] Added the mandatory experiment logging standard.
-- [x] Added standardized output directories for baseline, Version A, Version B,
-  and ablation artifacts.
-- [x] Refined the memory-locality constraint so it applies until a later Phase
-  explicitly approves broader sharing or larger batch experiments.
-- [x] Tightened Phase 3, 4, 5, and 8 plan text for golden-case control, skeleton
-  isolation, explicit latent detachment/device-dtype handling, and minimum
-  ablation coverage.
-- [x] Modified documentation only; no core code or training workflow changed.
-- [x] Ran no new experiment and did not attempt to repair `BUG-0001`.
+Phase 0 is complete under the current roadmap.
 
-This planning update does not retroactively declare any newly numbered Phase
-complete. Existing audit evidence remains available and will be reconciled when
-the corresponding Phase is explicitly approved.
+- [x] Confirmed `research_notes/` exists.
+- [x] Confirmed required research note files exist:
+  `PLANS.md`, `PROGRESS.md`, `EXPERIMENTS.md`, `DECISIONS.md`, `TODO.md`,
+  `BUGS.md`, `CODE_MAP.md`, `BASELINE.md`, `METHOD.md`, `ABLATIONS.md`,
+  `PAPER_NOTES.md`, and `prompts/`.
+- [x] Confirmed the additional Chinese companion plan exists:
+  `research_notes/PLANS_zh.md`.
+- [x] Recorded the current repository snapshot.
+- [x] Recorded the current working environment snapshot.
+- [x] Modified research notes only. No core code or training workflow changed.
 
-## Evidence From Before the Roadmap Revision
+## Created Research Notes
 
-The following work was performed under the previous roadmap. It is retained as
-evidence but is not automatically counted as completion of any newly numbered
-Phase:
+- `research_notes/PLANS.md`
+- `research_notes/PROGRESS.md`
+- `research_notes/EXPERIMENTS.md`
+- `research_notes/DECISIONS.md`
+- `research_notes/TODO.md`
+- `research_notes/BUGS.md`
+- `research_notes/CODE_MAP.md`
+- `research_notes/BASELINE.md`
+- `research_notes/METHOD.md`
+- `research_notes/ABLATIONS.md`
+- `research_notes/PAPER_NOTES.md`
+- `research_notes/prompts/`
+- `research_notes/PLANS_zh.md`
 
-- [x] Mapped CLI, configuration, inference, latent, session, and output paths.
-- [x] Identified protected Weaver and Trigger training boundaries.
-- [x] Selected the official Qwen2.5-1.5B GSM8K Weaver-SFT comparator.
-- [x] Downloaded and hash-verified the required official checkpoint assets.
-- [x] Defined the metric contract and disabled-feature compatibility contract.
-- [x] Verified CLI parsing, config override parsing, and Python compilation.
+## Repository Snapshot
 
-The prior baseline acceptance attempt remains unresolved:
+- Branch: `rlm-memory-bank`
+- Commit: `929e3c60035972700a7756cbbc348373aad373db`
+- Working tree has uncommitted changes: `yes`
+- Current visible uncommitted item during Phase 0 closeout:
+  `?? research_notes/PLANS_zh.md`
 
-- [ ] Official LoRA adapter tensors load correctly.
-- [ ] Full GSM8K baseline completes.
-- [ ] Deterministic golden outputs are archived.
-- [ ] Baseline is accepted as `comparison_ready`.
+## Environment Snapshot
 
-## Blocking Evidence
+- Current path: `/mnt/18T/baishilong/MemGen`
+- Python: `Python 3.13.9`
+- Conda environment name: `base`
+- Conda prefix: `/home/baishilong/miniconda3`
+- Readme/config files detected:
+  `README.md`, `requirements.txt`, `memgen.yml`, `configs/zero2.yaml`,
+  `configs/latent_memory/gpqa.yaml`, `configs/latent_memory/gsm8k.yaml`,
+  `configs/latent_memory/kodcode.yaml`, `configs/latent_memory/triviaqa.yaml`
 
-- `EXP-20260611-001` failed before generation.
-- `BUG-0001` shows that `MemGenModel.from_pretrained()` re-wraps an already
-  LoRA-wrapped base and skips all trained adapter keys.
-- Continuing despite the warning would produce an invalid scientific comparator.
+## Historical Evidence
 
-## Protected Boundaries Confirmed
-
-- No core or training code was modified during the prior audit.
-- Weaver training files and commands remain unchanged.
-- Trigger training files and commands remain unchanged.
-- No Phase in the revised roadmap has been started.
-
-## Current Board
-
-- Current mainline: establish a trusted original MemGen comparator.
-- Incumbent comparator: `memgen-gsm8k-sft-official-v1`.
-- Latest decisive result: official adapter loading is broken.
-- Active blocker: `BUG-0001`.
-- Stale route to ignore: treating a warning-producing run as a valid baseline.
-- Next decision scope: narrow inference checkpoint-loader repair and regression
-  verification only.
-- Compute budget class: small; one GPU smoke followed by one full GSM8K baseline.
+Previous audit and baseline-related notes remain in the repository as historical
+research evidence. They are not part of the Phase 0 definition in the current
+roadmap and were not advanced in this closeout pass.
 
 ## Phase History
 
 | Date | Phase | Outcome | Evidence |
 |---|---|---|---|
-| 2026-06-11 | Memory system initialization | Completed | `research_notes/` templates |
-| 2026-06-11 | Audit and baseline attempt under previous roadmap | Blocked at baseline acceptance | `CODE_MAP.md`, `BASELINE.md`, `BUG-0001`, `EXP-20260611-001` |
-| 2026-06-11 | Research plan revision | Completed | Revised `PLANS.md`; documentation only |
+| 2026-06-11 | Phase 0 - Research Memory System and Repository Snapshot | Completed | `research_notes/` structure confirmed; repository and environment snapshot recorded |
 
 ## Session Handoff
 
-- Review the revised Phases 0 through 10 in `PLANS.md`.
-- Existing `BUG-0001`, baseline notes, and audit evidence remain valid inputs to
-  future planning.
-- Do not start, repair, implement, or run any revised Phase until the user
-  explicitly confirms the next Phase.
+- Phase 0 can now be treated as complete.
+- Do not enter implementation, smoke test, or baseline work without explicit
+  approval for the next Phase.
+- Recommended next step: Phase 1 - Code Map and Inference Pipeline Audit.

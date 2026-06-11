@@ -9,10 +9,11 @@ IDs and append superseding decisions rather than silently rewriting history.
 |---|---|---|---|
 | DEC-0001 | 2026-06-11 | accepted | Modify inference only; preserve Weaver and Trigger training workflows |
 | DEC-0002 | 2026-06-11 | accepted | Disabled memory bank must preserve exact original behavior |
-| DEC-0003 | 2026-06-11 | accepted | Phase 1 memory is session-local, non-shared, and defaults to batch size 1 |
+| DEC-0003 | 2026-06-11 | superseded | Early isolation rule for Phase 1 only |
 | DEC-0004 | 2026-06-11 | accepted | Execute one Phase at a time and pause after completion |
 | DEC-0005 | 2026-06-11 | accepted | Use official Qwen2.5-1.5B GSM8K Weaver-SFT as the primary comparator |
 | DEC-0006 | 2026-06-11 | accepted | Keep the baseline gate closed until all official LoRA tensors load without mismatch |
+| DEC-0007 | 2026-06-11 | accepted | Until later approval, memory remains session-local and memory-bank experiments default to batch size 1 |
 
 ## Decision Template
 
@@ -49,9 +50,25 @@ IDs and append superseding decisions rather than silently rewriting history.
 ### DEC-0003: Phase 1 Isolation
 
 - Date: 2026-06-11
-- Status: accepted
+- Status: superseded
 - Decision: Do not share memory across samples in Phase 1; default to `batch_size=1`.
-- Consequence: Memory lifecycle must be explicitly bound to one session/sample.
+- Consequence: Historical scope note only.
+
+### DEC-0007: Pre-Approval Isolation Rule
+
+- Date: 2026-06-11
+- Status: accepted
+- Context: The roadmap now allows the session-local and small-batch constraint to
+  span multiple early phases rather than only Phase 1.
+- Decision: Until explicitly approved in a later phase, memory must remain
+  session-local, must not be shared across samples, and memory-bank experiments
+  default to `batch_size=1`.
+- Alternatives considered: limiting the rule to Phase 1 only.
+- Rationale: The broader rule better protects disabled-path compatibility,
+  reproducibility, and leakage control while the method is still being stabilized.
+- Consequences: Any request to share memory across samples or increase batch size
+  for memory-bank experiments requires explicit later-phase approval.
+- Supersedes: `DEC-0003`
 
 ### DEC-0004: Phase Execution Gate
 

@@ -80,6 +80,10 @@ Do not delete resolved entries.
   - `EXP-20260611-006/verification.json` remains readable and records Weaver
     112/112 and Trigger 112/112.
   - Missing, unexpected, shape-mismatch, and value-mismatch lists remain empty.
+- Phase 6 regression check:
+  - `EXP-20260612-013` again recorded Weaver `112/112` and Trigger `112/112`
+    with zero missing, unexpected, shape, or value mismatches.
+  - No adapter-loading regression reappeared on the frozen 20-sample baseline.
 
 #### 修复说明（中文）
 
@@ -178,6 +182,11 @@ component.model.set_adapter(adapter_name)
   - The existing Phase 3 `answer.json` remains non-empty and parses as 20
     prediction JSONL records plus one summary record.
   - The summary remains readable with `compute_reward=0.60`.
+- Phase 6 regression check:
+  - `EXP-20260612-013` reproduced the frozen 20-sample baseline with exact
+    response-token hashes, augmentation-mask hashes, and Trigger/Weaver call
+    counts.
+  - No recorder regression reappeared.
 
 #### 修复说明（中文）
 

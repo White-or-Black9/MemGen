@@ -25,6 +25,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0016 | 2026-06-11 | accepted | Use mean-pooled cosine retrieval with recency decay and bounded replacement skeletons |
 | DEC-0017 | 2026-06-12 | accepted | Phase 5 keeps the bank interaction-owned and passes it explicitly into `MemGenModel.generate()` |
 | DEC-0018 | 2026-06-12 | accepted | Version A stores reasoner-space latents and injects retrieved memory only into the Reasoner path |
+| DEC-0019 | 2026-06-12 | accepted | Phase 6 disabled-path equivalence requires exact baseline hashes, metrics, and augmentation call counts on the frozen 20-sample comparator |
 
 ## Decision Template
 
@@ -313,6 +314,37 @@ IDs and append superseding decisions rather than silently rewriting history.
   - written memory matches Reasoner-space latent tensors
   - disabled-path hashes and call counts remain exact
 - Related experiments: `EXP-20260612-010`, `EXP-20260612-011`
+
+### DEC-0019: Phase 6 Equivalence Acceptance Standard
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: Phase 6 needs a clear pass/fail rule for disabled-path equivalence so
+  that any regression becomes a blocking bug rather than an informal judgment.
+- Decision: Treat Phase 6 as passing only if the disabled-path run on frozen
+  GSM8K test IDs `0..19` matches `EXP-20260611-006` exactly on:
+  - response-token SHA-256 hashes
+  - augmentation-mask SHA-256 hashes
+  - prediction count and summary-record presence
+  - summary `compute_reward`
+  - Trigger decision call count
+  - Weaver prompt augmentation call count
+  - Weaver inference augmentation call count
+  - adapter loading integrity
+  - absence of any constructed memory-bank debug state
+- Alternatives considered:
+  - metric-only comparison
+  - hash-only comparison on a smaller golden subset
+  - allowing call-count drift if outputs remained identical
+- Rationale: The frozen 20-sample baseline is the accepted development oracle,
+  and exact matching across outputs plus control-flow statistics is the strongest
+  practical disabled-path guarantee before later enabled-path studies.
+- Consequences:
+  - any mismatch is a blocking regression
+  - no enabled-path claim is implied by a Phase 6 pass
+  - passing Phase 6 only authorizes consideration of later phases, not their
+    automatic execution
+- Related experiments: `EXP-20260612-013`
 
 ### DEC-0015: Detached Storage and Explicit Tensor Conversion
 

@@ -2,11 +2,11 @@
 
 ## Current State
 
-- Current Phase: Phase 5 - Version A Integration
+- Current Phase: Phase 6 - Disabled-Feature Equivalence Test
 - Status: `completed`
 - Last updated: 2026-06-12
-- Stop condition: Reached; do not enter Phase 6 without explicit approval.
-- Next suggested Phase: Phase 6 - Disabled-Feature Equivalence Test, after explicit approval.
+- Stop condition: Reached; do not enter Phase 7 without explicit approval.
+- Next suggested Phase: Phase 7 - Version A Stability and Debug Experiment, after explicit approval.
 
 ## Research Goal
 
@@ -221,6 +221,35 @@ Phase 5 is complete.
 - [x] Did not modify `memgen/trainer/**`, `scripts/train/**`, Weaver training
   logic, Trigger training logic, or implement Version B.
 - [x] Did not enter Phase 6.
+
+## Phase 6 Outcome
+
+Phase 6 is complete.
+
+- [x] Ran a 20-sample disabled-path equivalence test on GSM8K test IDs `0..19`
+  against the frozen Phase 3 baseline `EXP-20260611-006`.
+- [x] Used seed `42`, batch size `1`, greedy decoding, and maximum response
+  length `1024`.
+- [x] Kept `latent_memory_bank` disabled and verified `memory_bank_debug=null`.
+- [x] Confirmed `answer.json` remained non-empty and contained exactly 20
+  prediction records plus one summary record.
+- [x] Confirmed summary `compute_reward=0.60`, matching
+  `EXP-20260611-006` exactly.
+- [x] Confirmed every response-token SHA-256 hash matched the frozen baseline.
+- [x] Confirmed every augmentation-mask SHA-256 hash matched the frozen
+  baseline.
+- [x] Confirmed Trigger decision calls matched exactly: `1722`.
+- [x] Confirmed Weaver prompt augmentation calls matched exactly: `20`.
+- [x] Confirmed Weaver inference augmentation calls matched exactly: `43`.
+- [x] Reconfirmed adapter loading integrity:
+  Weaver `112/112`, Trigger `112/112`, with zero missing, unexpected, shape, or
+  value mismatches.
+- [x] Re-ran `git diff --check`, `py_compile`, and full `unittest`; all passed.
+- [x] Confirmed no diff under `memgen/trainer/**`, `scripts/train/**`,
+  `memgen/model/weaver.py`, or `memgen/model/trigger.py`.
+- [x] Found no disabled-path regression and no new blocking bug.
+- [x] Did not modify core method code in this phase.
+- [x] Did not enter Phase 7.
 
 ## End-of-Day Validation Outcome
 

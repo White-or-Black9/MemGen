@@ -135,6 +135,26 @@ With `latent_memory_bank.enabled=false`:
 - Weaver and Trigger training files, parameters, commands, and checkpoints remain
   untouched.
 
+## Phase 6 Disabled-Path Validation
+
+Validated on 2026-06-12 by `EXP-20260612-013` against the accepted frozen
+baseline `EXP-20260611-006`.
+
+- `answer.json` remained non-empty and contained 20 predictions plus one
+  summary.
+- `compute_reward=0.60` matched exactly.
+- All 20 response-token hashes matched exactly.
+- All 20 augmentation-mask hashes matched exactly.
+- Trigger decision calls matched exactly: `1722`.
+- Weaver prompt augmentation calls matched exactly: `20`.
+- Weaver inference augmentation calls matched exactly: `43`.
+- Adapter integrity remained exact: Weaver `112/112`, Trigger `112/112`.
+- `memory_bank_debug` was `null`, confirming that no bank was constructed on the
+  disabled path.
+
+Verdict: disabled-path compatibility is now system-validated for the accepted
+20-sample baseline protocol.
+
 ## Required Golden Evidence
 
 After `BUG-0001` is fixed:

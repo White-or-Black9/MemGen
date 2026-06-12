@@ -18,6 +18,7 @@ overwrite prior records; append a new entry.
 | EXP-20260611-009 | 2026-06-11 | End-of-Day Validation | Are the Repair fixes, Phase 3 baseline artifacts, and Phase 4 skeleton ready for commit and later continuation? | `completed` | Compilation and 16/16 tests passed; baseline/golden artifacts and adapter evidence remained complete; Phase 4 remained isolated |
 | EXP-20260612-010 | 2026-06-12 | Phase 5 | Does `latent_memory_bank.enabled=false` preserve the exact Phase 3 golden behavior after Version A integration? | `completed` | Samples 0-2 matched Phase 3 response-token hashes, augmentation-mask hashes, and Trigger/Weaver call counts exactly |
 | EXP-20260612-011 | 2026-06-12 | Phase 5 | Does enabled Version A run on one sample without crashing and produce separate memory write/retrieve bookkeeping? | `completed` | One-sample debug completed with 4 writes, 3 retrievals, 24 retrieved latent tokens, 32 new latent tokens, and 4 resident slots |
+| EXP-20260612-013 | 2026-06-12 | Phase 6 | Does the full 20-sample disabled path remain exactly equivalent to the frozen Phase 3 baseline? | `completed` | All 20 response-token hashes, all 20 augmentation-mask hashes, summary metric, and Trigger/Weaver call counts matched `EXP-20260611-006` exactly |
 
 ## Recorded Experiments
 
@@ -352,6 +353,86 @@ overwrite prior records; append a new entry.
 - Scope note: This is a mechanism debug only. It must not be treated as a
   performance or quality claim relative to the baseline.
 - Related decisions: `DEC-0017`, `DEC-0018`
+
+### EXP-20260612-013: Phase 6 Full Disabled-Path Equivalence
+
+- Phase: 6
+- Status: `completed`
+- Research question: After Phase 5 integration, does the disabled path remain
+  exactly equivalent to the frozen 20-sample Phase 3 baseline
+  `EXP-20260611-006`?
+- Hypothesis: With `latent_memory_bank` disabled, the official evaluation path
+  should reproduce every frozen baseline artifact and control-flow statistic on
+  GSM8K test IDs `0..19`.
+- Baseline/comparator: `EXP-20260611-006`
+- Git branch: `rlm-memory-bank`
+- Working tree state: no Phase 6 core-code changes; only existing Phase 5 code
+  and note updates present
+- Environment:
+  `/home/baishilong/miniconda3/envs/memgen`, Python `3.10.20`, PyTorch
+  `2.12.0+cu126`, single NVIDIA RTX A6000 via `CUDA_VISIBLE_DEVICES=7`
+- Config file: `configs/latent_memory/gsm8k.yaml`
+- Optional config override:
+  `run.latent_memory_bank.enabled=false`
+- Model path:
+  `/home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306`
+- Checkpoint path:
+  `/mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model`
+- Dataset path:
+  `/home/baishilong/.cache/huggingface/datasets/gsm8k/main/0.0.0/740312add88f781978c0658806c59bc2815b9866`
+- Dataset and split: cached `gsm8k/main`, test samples `0..19`
+- Random seed: `42`
+- Batch size: `1`
+- Decoding: greedy, temperature `0.0`, max response length `1024`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=7 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase5_memory_bank_debug --cfg-path configs/latent_memory/gsm8k.yaml --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/baseline/EXP-20260612-013-phase6-disabled-equivalence --sample-start 0 --sample-count 20 --max-response-length 1024 --reference-verification outputs/baseline/EXP-20260611-006/verification.json`
+- Output directory:
+  `outputs/baseline/EXP-20260612-013-phase6-disabled-equivalence`
+- Prediction file:
+  `outputs/baseline/EXP-20260612-013-phase6-disabled-equivalence/evaluate/answer.json`
+- Verification file:
+  `outputs/baseline/EXP-20260612-013-phase6-disabled-equivalence/verification.json`
+
+#### Equivalence criteria
+
+- `answer.json` exists and is non-empty
+- prediction count is `20`
+- one summary record exists
+- summary `compute_reward` matches the baseline exactly
+- every response-token SHA-256 hash matches the baseline record-by-record
+- every augmentation-mask SHA-256 hash matches the baseline record-by-record
+- Trigger decision call count matches exactly
+- Weaver prompt augmentation call count matches exactly
+- Weaver inference augmentation call count matches exactly
+- adapter verification remains exact and has zero missing, unexpected, shape, or
+  value mismatches
+- `memory_bank_debug` remains `null`, proving no bank was constructed
+
+#### Observations
+
+- `answer.json` was non-empty and contained 20 prediction records plus one
+  summary record.
+- Summary `compute_reward=0.60`, matching `EXP-20260611-006`.
+- All 20 response-token hashes matched `EXP-20260611-006` exactly.
+- All 20 augmentation-mask hashes matched `EXP-20260611-006` exactly.
+- Trigger decision calls matched exactly: `1722`.
+- Weaver prompt calls matched exactly: `20`.
+- Weaver inference calls matched exactly: `43`.
+- Weaver adapter verification remained `112/112`.
+- Trigger adapter verification remained `112/112`.
+- Missing, unexpected, shape-mismatch, and value-mismatch lists remained empty.
+- `memory_bank_debug` was `null`.
+- Total latency was `96.615` seconds; peak allocated CUDA memory was
+  `9,415,716,352` bytes.
+
+#### Conclusion
+
+- Hypothesis supported: yes
+- Interpretation: The disabled path remains exactly equivalent to the frozen
+  20-sample Phase 3 baseline under the accepted comparator protocol.
+- Consequence: Phase 5 integration does not introduce a disabled-path
+  regression on the accepted baseline.
+- Related decisions: `DEC-0002`, `DEC-0017`, `DEC-0018`, `DEC-0019`
   - no `HF_ENDPOINT` was present in the final alignment shell
 - Manifest differences:
   - README specifies Python 3.10

@@ -1,13 +1,13 @@
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 import math
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 import torch
 import torch.nn.functional as F
 
 
-UpdatePolicy = Literal["append", "replace", "replace_oldest"]
+UpdatePolicy = Literal["append", "replace", "replace_oldest", "thread_update"]
 RetrievePolicy = Literal["threshold", "topk", "threshold_topk"]
 StorageDevice = Literal["cpu", "same"]
 
@@ -41,9 +41,15 @@ class LatentMemoryBankConfig:
             raise ValueError("decay_alpha must be non-negative")
         if self.pool_last_n <= 0:
             raise ValueError("pool_last_n must be greater than zero")
-        if self.update_policy not in {"append", "replace", "replace_oldest"}:
+        if self.update_policy not in {
+            "append",
+            "replace",
+            "replace_oldest",
+            "thread_update",
+        }:
             raise ValueError(
-                "update_policy must be append, replace, or replace_oldest"
+                "update_policy must be append, replace, replace_oldest, "
+                "or thread_update"
             )
         if self.retrieve_policy not in {
             "threshold",
@@ -85,6 +91,18 @@ class LatentMemorySlot:
         }
 
 
+@dataclass(frozen=True)
+class LatentMemoryRetrievalResult:
+    slots: List[LatentMemorySlot]
+    scores: Tuple[float, ...]
+    max_score: Optional[float]
+    argmax_index: Optional[int]
+    threshold_passed: bool
+    retrieved_indices: Tuple[int, ...]
+    retrieved_scores: Tuple[float, ...]
+    bank_step: int
+
+
 class LatentMemoryBank:
     """Session-local latent memory storage and retrieval skeleton.
 
@@ -106,6 +124,11 @@ class LatentMemoryBank:
         self._rejected_write_count = 0
         self._last_update_action: Optional[str] = None
         self._update_action_trace: List[str] = []
+        self._thread_insert_count = 0
+        self._matched_replace_count = 0
+        self._capacity_evict_count = 0
+        self._last_write_back: Optional[Dict[str, Any]] = None
+        self._write_back_trace: List[Dict[str, Any]] = []
 
     def __len__(self) -> int:
         return len(self._slots)
@@ -125,6 +148,11 @@ class LatentMemoryBank:
         self._rejected_write_count = 0
         self._last_update_action = None
         self._update_action_trace = []
+        self._thread_insert_count = 0
+        self._matched_replace_count = 0
+        self._capacity_evict_count = 0
+        self._last_write_back = None
+        self._write_back_trace = []
 
     def build_query(self, hidden_states: torch.Tensor) -> torch.Tensor:
         states = self._normalize_memory_tensor(hidden_states, "hidden_states")
@@ -143,8 +171,31 @@ class LatentMemoryBank:
         dtype: Optional[torch.dtype] = None,
     ) -> List[LatentMemorySlot]:
         """Return detached slot copies that cannot mutate bank-owned state."""
+        return self.retrieve_with_context(
+            query_or_hidden_states,
+            device=device,
+            dtype=dtype,
+        ).slots
+
+    def retrieve_with_context(
+        self,
+        query_or_hidden_states: torch.Tensor,
+        *,
+        device: Optional[Union[str, torch.device]] = None,
+        dtype: Optional[torch.dtype] = None,
+    ) -> LatentMemoryRetrievalResult:
+        """Return detached slot copies plus full-bank retrieval scores."""
         if not self.config.enabled or not self._slots:
-            return []
+            return LatentMemoryRetrievalResult(
+                slots=[],
+                scores=(),
+                max_score=None,
+                argmax_index=None,
+                threshold_passed=False,
+                retrieved_indices=(),
+                retrieved_scores=(),
+                bank_step=self._step,
+            )
 
         if not isinstance(query_or_hidden_states, torch.Tensor):
             raise TypeError("query_or_hidden_states must be a torch.Tensor")
@@ -176,18 +227,27 @@ class LatentMemoryBank:
             score = similarity * math.exp(-self.config.decay_alpha * age)
             scored_slots.append((score, index, slot))
 
-        scored_slots.sort(key=lambda item: item[0], reverse=True)
+        scores = [0.0] * len(self._slots)
+        for score, index, _ in scored_slots:
+            scores[index] = score
+
+        # Equal scores retain the lower original slot index.
+        scored_slots.sort(key=lambda item: (-item[0], item[1]))
+        max_score, argmax_index, _ = scored_slots[0]
+        selected_slots = scored_slots
         if self.config.retrieve_policy in {"threshold", "threshold_topk"}:
-            scored_slots = [
-                item for item in scored_slots if item[0] >= self.config.threshold
+            selected_slots = [
+                item
+                for item in selected_slots
+                if item[0] >= self.config.threshold
             ]
         if self.config.retrieve_policy in {"topk", "threshold_topk"}:
-            scored_slots = scored_slots[: self.config.top_k]
+            selected_slots = selected_slots[: self.config.top_k]
 
         output_device = torch.device(device) if device is not None else query.device
         output_dtype = dtype if dtype is not None else query.dtype
         retrieved = []
-        for score, _, slot in scored_slots:
+        for score, _, slot in selected_slots:
             slot.last_access_step = self._step
             slot.access_count += 1
             slot.last_score = score
@@ -212,7 +272,16 @@ class LatentMemoryBank:
             )
         self._memory_retrieve_count += 1
         self._retrieved_latent_count += sum(slot.memory.shape[0] for slot in retrieved)
-        return retrieved
+        return LatentMemoryRetrievalResult(
+            slots=retrieved,
+            scores=tuple(scores),
+            max_score=max_score,
+            argmax_index=argmax_index,
+            threshold_passed=max_score >= self.config.threshold,
+            retrieved_indices=tuple(index for _, index, _ in selected_slots),
+            retrieved_scores=tuple(score for score, _, _ in selected_slots),
+            bank_step=self._step,
+        )
 
     def write(
         self,
@@ -221,6 +290,11 @@ class LatentMemoryBank:
     ) -> bool:
         if not self.config.enabled:
             return False
+        if self.config.update_policy == "thread_update":
+            raise ValueError(
+                "write does not support update_policy='thread_update'; "
+                "use write_back instead"
+            )
 
         normalized = self._normalize_memory_tensor(memory, "memory")
         if (
@@ -232,28 +306,7 @@ class LatentMemoryBank:
             self._update_action_trace.append(self._last_update_action)
             return False
 
-        original_device = str(normalized.device)
-        original_dtype = str(normalized.dtype)
-        stored_memory = normalized.detach().clone()
-        if self.config.storage_device == "cpu":
-            stored_memory = stored_memory.to("cpu")
-        stored_key = self.build_key(stored_memory).to(
-            device=stored_memory.device,
-            dtype=stored_memory.dtype,
-        ).clone()
-
-        self._step += 1
-        self._memory_write_count += 1
-        self._new_latent_count += stored_memory.shape[0]
-        new_slot = LatentMemorySlot(
-            memory=stored_memory,
-            key=stored_key,
-            metadata=deepcopy(metadata or {}),
-            created_step=self._step,
-            last_access_step=self._step,
-            original_device=original_device,
-            original_dtype=original_dtype,
-        )
+        new_slot = self._create_slot(normalized, metadata)
 
         if len(self._slots) < self.config.max_slots:
             self._slots.append(new_slot)
@@ -292,6 +345,110 @@ class LatentMemoryBank:
         self._update_action_trace.append(self._last_update_action)
         return True
 
+    def write_back(
+        self,
+        memory: torch.Tensor,
+        retrieval_result: LatentMemoryRetrievalResult,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> bool:
+        if not self.config.enabled:
+            return False
+        if self.config.update_policy != "thread_update":
+            raise ValueError(
+                "write_back requires update_policy='thread_update'"
+            )
+        if not isinstance(retrieval_result, LatentMemoryRetrievalResult):
+            raise TypeError(
+                "retrieval_result must be a LatentMemoryRetrievalResult"
+            )
+        if retrieval_result.bank_step != self._step:
+            raise ValueError(
+                "stale retrieval_result: "
+                f"bank_step={retrieval_result.bank_step}, current_step={self._step}"
+            )
+        if len(retrieval_result.scores) != len(self._slots):
+            raise ValueError(
+                "retrieval_result scores do not match current bank slot count"
+            )
+
+        matched = (
+            bool(self._slots)
+            and retrieval_result.max_score is not None
+            and retrieval_result.max_score >= self.config.threshold
+        )
+        matched_index = retrieval_result.argmax_index
+        if matched and (
+            matched_index is None
+            or matched_index < 0
+            or matched_index >= len(self._slots)
+        ):
+            raise ValueError(
+                "retrieval_result.argmax_index is invalid for matched replacement"
+            )
+
+        normalized = self._normalize_memory_tensor(memory, "memory")
+        new_slot = self._create_slot(normalized, metadata)
+
+        replaced_slot_index = None
+        replaced_slot_score = None
+        evicted_slot_index = None
+        inserted_new_thread = False
+
+        if not self._slots:
+            self._slots.append(new_slot)
+            self._append_count += 1
+            self._thread_insert_count += 1
+            write_action = "insert"
+            update_reason = "empty_bank"
+            inserted_new_thread = True
+        elif matched:
+            replaced_slot_index = matched_index
+            replaced_slot_score = retrieval_result.max_score
+            self._slots[matched_index] = new_slot
+            self._replace_count += 1
+            self._matched_replace_count += 1
+            write_action = "replace_matched"
+            update_reason = "matched_thread"
+        elif len(self._slots) < self.config.max_slots:
+            self._slots.append(new_slot)
+            self._append_count += 1
+            self._thread_insert_count += 1
+            write_action = "insert"
+            update_reason = "new_thread"
+            inserted_new_thread = True
+        else:
+            evicted_slot_index = min(
+                range(len(self._slots)),
+                key=lambda index: self._slots[index].created_step,
+            )
+            self._slots[evicted_slot_index] = new_slot
+            self._replace_count += 1
+            self._thread_insert_count += 1
+            self._capacity_evict_count += 1
+            write_action = "evict_oldest_insert"
+            update_reason = "new_thread_bank_full"
+            inserted_new_thread = True
+
+        event = {
+            "matched_slot_index": matched_index,
+            "max_score": retrieval_result.max_score,
+            "threshold_passed": retrieval_result.threshold_passed,
+            "retrieved_indices": list(retrieval_result.retrieved_indices),
+            "retrieved_scores": list(retrieval_result.retrieved_scores),
+            "write_action": write_action,
+            "replaced_slot_index": replaced_slot_index,
+            "replaced_slot_score": replaced_slot_score,
+            "evicted_slot_index": evicted_slot_index,
+            "update_reason": update_reason,
+            "inserted_new_thread": inserted_new_thread,
+            "retrieval_bank_step": retrieval_result.bank_step,
+        }
+        self._last_update_action = write_action
+        self._update_action_trace.append(write_action)
+        self._last_write_back = deepcopy(event)
+        self._write_back_trace.append(deepcopy(event))
+        return True
+
     def debug_summary(self) -> Dict[str, Any]:
         return {
             "config": asdict(self.config),
@@ -307,6 +464,11 @@ class LatentMemoryBank:
             "rejected_write_count": self._rejected_write_count,
             "last_update_action": self._last_update_action,
             "update_action_trace": list(self._update_action_trace),
+            "thread_insert_count": self._thread_insert_count,
+            "matched_replace_count": self._matched_replace_count,
+            "capacity_evict_count": self._capacity_evict_count,
+            "last_write_back": deepcopy(self._last_write_back),
+            "write_back_trace": deepcopy(self._write_back_trace),
             "slots": [slot.debug_summary() for slot in self._slots],
         }
 
@@ -330,6 +492,34 @@ class LatentMemoryBank:
                 for slot in self._slots
             ],
         }
+
+    def _create_slot(
+        self,
+        normalized: torch.Tensor,
+        metadata: Optional[Dict[str, Any]],
+    ) -> LatentMemorySlot:
+        original_device = str(normalized.device)
+        original_dtype = str(normalized.dtype)
+        stored_memory = normalized.detach().clone()
+        if self.config.storage_device == "cpu":
+            stored_memory = stored_memory.to("cpu")
+        stored_key = self.build_key(stored_memory).to(
+            device=stored_memory.device,
+            dtype=stored_memory.dtype,
+        ).clone()
+
+        self._step += 1
+        self._memory_write_count += 1
+        self._new_latent_count += stored_memory.shape[0]
+        return LatentMemorySlot(
+            memory=stored_memory,
+            key=stored_key,
+            metadata=deepcopy(metadata or {}),
+            created_step=self._step,
+            last_access_step=self._step,
+            original_device=original_device,
+            original_dtype=original_dtype,
+        )
 
     @staticmethod
     def _normalize_memory_tensor(

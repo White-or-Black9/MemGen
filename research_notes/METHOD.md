@@ -6,8 +6,10 @@ Session-Level Retrieval-Augmented Recurrent Latent Memory Bank for MemGen Infere
 
 ## Research Question
 
-Can an optional session-local latent memory bank improve recurrent inference
-without retraining Weaver or Trigger and without changing disabled-path behavior?
+Can a session-local latent memory bank help MemGen explicitly preserve,
+retrieve, and update early useful latent memories for later reuse in multi-turn,
+long-trajectory, or context-truncated inference, without retraining Weaver or
+Trigger?
 
 ## Scope
 
@@ -21,8 +23,8 @@ without retraining Weaver or Trigger and without changing disabled-path behavior
 
 - Modifying Weaver or Trigger training.
 - Training a globally shared memory.
-- Connecting the bank to production inference in Phase 4.
-- Implementing Version B in Phase 5.
+- Historical Phase 4 scope excluded production inference integration.
+- Historical Phase 5 scope excluded Version B.
 
 ## Conceptual Pipeline
 
@@ -40,9 +42,10 @@ current input/state
 
 Implementation: `memgen/model/latent_memory_bank.py`
 
-The Phase 4 implementation is standalone. It is not imported by
+At Phase 4 closeout, the implementation was standalone and was not imported by
 `memgen/model/__init__.py`, `MemGenModel`, `generate()`, interaction managers,
-the runner, trainers, or training scripts.
+the runner, trainers, or training scripts. This is a historical isolation
+statement; Phase 5 later connected the bank to inference.
 
 ### Public Types
 
@@ -61,8 +64,12 @@ the runner, trainers, or training scripts.
   return detached cloned slot copies on an explicit output device/dtype. The
   tensors and metadata are independent of bank-owned state, so caller mutation
   cannot modify stored slots.
+- `retrieve_with_context(...)`: return cloned slots plus full-bank scores,
+  current argmax information, selected indices, and the bank step.
 - `write(memory, metadata=None)`: validate, detach, clone, optionally move to
   CPU, and store or replace one slot.
+- `write_back(memory, retrieval_result, metadata=None)`: apply the
+  Version A-aligned `thread_update` policy using the current retrieval context.
 - `debug_summary()`: JSON-like configuration and slot metadata summary.
 - `state_dict()`: detached debug snapshot, not a trainer checkpoint format.
 
@@ -70,7 +77,8 @@ the runner, trainers, or training scripts.
 
 - Hidden states and memory accept `[tokens, hidden]` or
   `[1, tokens, hidden]`.
-- Batch dimensions greater than one are rejected in Phase 4.
+- Enabled memory-bank operation currently rejects batch dimensions greater than
+  one; Phase 4 established this tensor contract.
 - A pre-pooled retrieval query may use `[hidden]`.
 - Tensors must be floating point and have no empty dimensions.
 - Hidden sizes must match between query and stored keys.
@@ -81,7 +89,7 @@ the runner, trainers, or training scripts.
 - `storage_device=cpu` explicitly moves stored values and keys to CPU.
 - Retrieval explicitly converts values and keys to requested device/dtype.
 
-### Retrieval Skeleton
+### Current Version A-simple Retrieval Skeleton
 
 ```text
 query = mean(hidden_states[-pool_last_n:])
@@ -91,13 +99,52 @@ score_i = cosine(query, key_i) * exp(-decay_alpha * age_i)
 ```
 
 `_step` counts successful memory writes. It is not a generation-token counter,
-and recency decay in this skeleton therefore measures age in memory-write steps.
+dialogue-turn counter, or retrieval-call counter. Current decay therefore
+measures slot age in successful memory-write steps:
+
+```text
+delta_t_i = current_memory_write_step - slot_i.created_step
+```
+
+This is write-age decay. It is not the intended Version B definition of turns
+since the slot was last retrieved. Although retrieval updates
+`last_access_step`, current scoring does not use that field.
 
 Policies:
 
 - `topk`: keep the highest `top_k` scores.
 - `threshold`: keep every score at or above `threshold`.
 - `threshold_topk`: threshold first, then keep at most `top_k`.
+
+Current `threshold_topk` returns an empty result when no slot reaches the
+threshold. It does not fall back to the single best slot. Consequently, Phase
+8A groups G1 and G4 compare current write-age decay against no decay; they do
+not compare last-retrieved decay against no decay.
+
+#### Structured Retrieval Context
+
+Step 2 adds `LatentMemoryRetrievalResult` and
+`retrieve_with_context(...)` without changing retrieval or write semantics.
+The result records:
+
+- detached cloned `slots`
+- full-bank `scores` in original slot-index order
+- pre-filter `max_score` and `argmax_index`
+- `threshold_passed`
+- post-filter `retrieved_indices` and `retrieved_scores`
+- the current memory-write `bank_step`
+
+Threshold and top-k filtering only determine the returned slots and retrieved
+indices. Even when threshold filtering returns no slots, the full scores,
+maximum score, and argmax index remain available for a future write-back
+decision. Equal scores choose the lowest original slot index. The legacy
+`retrieve(...)` API remains a wrapper that returns only
+`retrieve_with_context(...).slots`.
+
+At Step 2 closeout, this context was preparatory plumbing only and `write()`
+did not consume it. Step 3 later added `write_back(...)` and `thread_update`
+without changing the legacy `write()` policies. Fallback top-1 and
+last-retrieved decay remain unimplemented.
 
 ### Update Skeleton
 
@@ -108,14 +155,47 @@ Policies:
   the oldest slot by `created_step`.
 - `replace_oldest`: replace the earliest-created slot.
 
+### Version A-Aligned Thread-Aware Write-Back
+
+Step 3 adds `update_policy=thread_update` and
+`write_back(memory, retrieval_result, metadata=None)`. This policy consumes the
+structured result from the current query and applies:
+
+```text
+if M is empty:
+    insert m_t
+elif max_score >= threshold:
+    replace slot[argmax_index] with m_t
+elif len(M) < max_slots:
+    insert m_t as a new thread
+else:
+    evict the oldest slot and insert m_t as a new thread
+```
+
+Matched replacement occurs even when unused capacity remains. New-thread
+insertion and capacity eviction are distinct from matched replacement, and the
+decision never uses slot `last_score`. `retrieval_result.bank_step` must match
+the current bank step so that a write-back cannot consume stale slot indices.
+
+In `MemGenModel.generate()`, only the `thread_update` policy uses
+`retrieve_with_context(...)` followed by `write_back(...)`. Retrieved slots
+remain Reasoner-only supports; Weaver still receives only the original current
+context and produces a reasoner-space latent for write-back.
+
+This is a Version A-aligned write-back variant, not Version B. It does not add
+fallback top-1, last-retrieved decay, or retrieved-memory input to Weaver.
+Legacy `append`, `replace`, and `replace_oldest` behavior remains on
+`retrieve(...)` plus `write(...)`.
+
 ### Disabled Behavior
 
 When `enabled=false`:
 
 - `write()` returns `False` and stores nothing.
 - `retrieve()` returns an empty list.
-- No production code constructs the class in Phase 4, so original MemGen
-  inference has no additional state, calls, or numerical operations.
+- At Phase 4 closeout no production code constructed the class. In the current
+  integration, disabled sessions still do not construct a bank, so original
+  MemGen inference has no additional memory retrieval or write operations.
 
 ## Phase 5 Version A Integration
 
@@ -145,21 +225,97 @@ Implementation:
 - A new session or episode creates a fresh bank; memory cannot leak across
   calls.
 
-### Version A Injection Rule
+## Version A: Conservative Reasoner-Only Memory Injection
+
+Purpose: provide a low-risk mechanism and stability test while preserving the
+original Weaver input distribution.
+
+Let `M` be the session-local memory bank and `s_i` the configured score for
+slot `m_i`.
+
+```text
+if M is empty:
+    R_t = empty
+else:
+    compute s_i for every slot
+    if max_i(s_i) >= tau:
+        R_t = {m_i | s_i >= tau}, bounded by the configured top_k policy
+    else:
+        R_t = empty
+```
+
+Version A has no fallback top-1. If `R_t` is empty, inference falls back to the
+original MemGen augmentation behavior and injects only the newly generated
+latent `m_t`.
 
 When Trigger decides to augment:
 
 1. Build the retrieval query from the current Reasoner-side candidate inputs.
 2. Retrieve prior reasoner-space latent memories from the session-local bank.
-3. Send only the original candidate inputs through `reasoner_to_weaver()` and
-   Weaver augmentation.
+3. Keep Weaver input equal to the original current context `H_t`; retrieved
+   memory never enters Weaver or `reasoner_to_weaver()`.
 4. Project Weaver outputs back to Reasoner space as `latent_inputs_embeds`.
-5. Inject Reasoner tokens in this order:
-   `[retrieved_reasoner_latents; new_reasoner_latents]`.
-6. Write only the new reasoner-space `latent_inputs_embeds` into the bank.
+5. If `R_t` is non-empty, inject
+   `[retrieved_reasoner_latents; new_reasoner_latents]` into Reasoner.
+6. If `R_t` is empty, inject only the new reasoner-space latent `m_t`.
+7. Whenever Trigger fires and Weaver produces `m_t`, write the new
+   reasoner-space `latent_inputs_embeds` back to the session-local bank,
+   regardless of whether retrieval returned any slot.
 
 Retrieved memory is never passed into Weaver and never participates in
 `reasoner_to_weaver()`.
+
+The implementation and experiments from Phase 5 through Phase 8A belong to
+this conservative Version A-simple definition. Steps 2 through 4 subsequently
+added the Version A-aligned `thread_update` write-back variant while retaining
+Reasoner-only injection, write-age decay, and no fallback top-1.
+
+## Version B: Full Retrieval-Augmented Recurrent Latent Update
+
+Purpose: implement the full proposed `retrieve -> revise/generate -> write-back`
+method.
+
+Let `M` be the session-local bank and let:
+
+```text
+delta_t_i = number of dialogue turns since slot i was last retrieved
+s_i = cosine(q_t, key_i) * exp(-alpha * delta_t_i)
+```
+
+Retrieval is defined as:
+
+```text
+if M is empty:
+    R_t = empty
+else if max_i(s_i) >= tau:
+    R_t = {m_i | s_i >= tau}
+else:
+    R_t = {m_argmax}
+```
+
+Version B therefore includes fallback top-1 whenever the bank is non-empty but
+no slot reaches the threshold. Retrieved slots update an explicit
+`last_retrieved_turn` or `last_retrieved_step`, and later decay is computed from
+that retrieval event rather than slot creation.
+
+When Trigger fires:
+
+1. Build query `q_t` from the current context.
+2. Retrieve `R_t` using the method-aligned last-retrieved-turn score.
+3. Feed retrieved memory together with current context into Weaver, using
+   `[R_t; H_t]` or an equivalent explicit concatenation.
+4. Let Weaver revise or integrate retrieved supports with current context to
+   generate a new latent `m_t`.
+5. Continue Reasoner inference with the newly generated `m_t`; raw retrieved
+   memory need not also be injected into Reasoner.
+6. Apply matched write-back:
+   - if `M` is empty, insert `m_t`
+   - if `max_i(s_i) < tau`, insert `m_t` as a new thread/topic
+   - otherwise replace the argmax-matched slot with `m_t` to update the current
+     thread
+
+Version B is not implemented. No Phase 5 through Phase 8A result is evidence
+for Version B.
 
 ### Phase 5 Debug Bookkeeping
 
@@ -259,7 +415,11 @@ is not merged into current runtime configuration in Phase 4.
 
 ## Current Limitations
 
-- No Version B behavior.
+- Current Version A-simple uses write-age decay, not last-retrieved-turn decay.
+- Current Version A-simple has no fallback top-1.
+- The original Version A-simple policies have no matched-slot thread update;
+  the optional Version A-aligned `thread_update` variant now provides it.
+- Current Version A-simple is not the full proposed Version B.
 - No multi-sample batch support.
 - No persistence contract for experiment checkpoints.
 - No learned query, key, aggregation, or update function.
@@ -267,24 +427,93 @@ is not merged into current runtime configuration in Phase 4.
 - No enabled-path performance claim; Phase 5 only establishes mechanism and
   compatibility.
 
-## End-of-Day Isolation Status
+## Current Validation Status
 
 Validated on 2026-06-12:
 
-- The standalone skeleton plus Phase 5 integration passes 24 unit and
-  integration tests.
+- The current suite passes 47/47 unit and integration tests.
 - `latent_memory_bank.enabled=false` exactly reproduces the accepted Phase 3
-  golden response-token and augmentation-mask hashes on samples `0..2`.
+  golden response-token and augmentation-mask hashes on the full 20-sample
+  Phase 6 check, and again on samples `0..2` after Step 3.
 - Existing GSM8K configuration remains unchanged and valid when the optional
   config subtree is absent.
 - All Weaver/Trigger training paths remain unchanged.
-- Version A integration is present and Version B has not started.
+- Version A-simple and Version A-aligned `thread_update` are present.
+- Current retrieval still uses write-age decay and no fallback top-1.
+- Version B has not started.
 
 ## Open Questions
 
 - Which latent representation is the most stable retrieval key/value?
-- Should Version A retrieve before prompt augmentation, inference augmentation,
-  or both?
+- How should Version B combine retrieved memory with current Weaver input?
 - How should retrieved slots be aggregated before Reasoner injection?
-- Which retrieval/update rule gives useful gains at acceptable overhead?
-- Which slot score should drive `replace` after real inference queries exist?
+- Should turn-aware decay use dialogue turns, retrieval calls, or another
+  explicit event clock?
+- How should matched-slot thread update behave when multiple slots exceed the
+  threshold?
+- Which target-task context-truncation regime best exposes useful early-memory
+  reuse?
+
+## Step 4 Thread-Update Mechanism Validation
+
+`EXP-20260612-024` validates the Version A-aligned `thread_update` policy on one
+real GSM8K inference session. The trace observed one `empty_bank` insertion
+followed by three `matched_thread` replacements. Weaver input token counts
+remained identical to reasoner-to-Weaver input token counts, while stored
+latents remained `[8, 1536]` reasoner-space tensors.
+
+The real smoke did not observe low-score new-thread insertion or capacity
+eviction. Those branches remain covered by deterministic unit tests. This
+mixed evidence is sufficient for mechanism validation but not for any
+performance claim. Retrieval still uses write-age decay, has no fallback
+top-1, and does not send retrieved memory into Weaver.
+
+## Phase 8A Pilot Ablation Protocol
+
+Validated on 2026-06-12:
+
+- Purpose:
+  - run a short single-turn sanity and negative pilot for Version A-simple
+  - confirm that the current retrieval/recency/update variants run stably
+  - record early negative directionality without treating GSM8K as the primary
+    target task
+- Non-goals:
+  - no paper-level performance claim
+  - no latest-k or random retrieval in this pilot
+  - no Version B
+- Fixed runtime contract:
+  - dataset `gsm8k/main/test`
+  - sample IDs `0..19`
+  - `sample_count=20`
+  - `seed=42`
+  - `batch_size=1`
+  - greedy decoding
+  - `max_response_length=1024`
+  - same model path
+  - same checkpoint path
+  - same base config file `configs/latent_memory/gsm8k.yaml`
+- Compared groups:
+  - `G0`: disabled anchor
+  - `G1`: Version A anchor
+  - `G4`: cosine retrieval without recency decay
+  - `G6`: append-only update
+  - `G7`: replace update
+- Required reporting for enabled groups:
+  - `compute_reward`
+  - correct / total
+  - prediction count and summary count
+  - total latency
+  - mean latency per sample
+  - peak CUDA memory
+  - Trigger/Weaver call counts
+  - aggregated memory debug counts across sessions
+  - per-session `initial_slots`
+  - confirmation that retrieved memory remains Reasoner-only
+  - confirmation that stored latents remain reasoner-space tensors
+- Pilot interpretation rule:
+  - negative results are valid outcomes and must be recorded directly
+  - no 20-sample result may be written up as a final method-quality claim
+  - GSM8K single-turn evaluation is not aligned with the primary multi-turn,
+    long-trajectory, or context-truncation hypothesis
+  - Phase 8A should not be expanded directly into the main experiment without
+    changing to an aligned target task

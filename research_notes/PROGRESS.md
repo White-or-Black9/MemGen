@@ -2,11 +2,21 @@
 
 ## Current State
 
-- Current Phase: Phase 7 - Version A Stability and Debug Experiment
+- Current status: Version A-aligned `thread_update` completed; target-task
+  baseline planning is next.
 - Status: `completed`
 - Last updated: 2026-06-12
-- Stop condition: Reached; do not enter Phase 8 without explicit approval.
-- Next suggested Phase: Phase 8 - Version A Analysis and Targeted Ablations, after explicit approval.
+- Decay/fallback implementation audit: `completed`
+- Method/plan alignment update: `completed`
+- Step 2 structured retrieval context: `completed`
+- Step 3 thread-aware write-back: `completed`
+- Step 4 thread-update mechanism smoke: `completed`
+  (`EXP-20260612-024`)
+- Stop condition: Reached; do not enter a new implementation or experiment
+  phase without explicit approval.
+- Next recommended step: complete notes review and commit preparation, then plan
+  and establish an Original MemGen / disabled-memory TriviaQA baseline. Version
+  B remains not started.
 
 ## Research Goal
 
@@ -446,7 +456,10 @@ The 2026-06-11 end-of-day validation is complete.
 | 2026-06-11 | Phase 4 cleanup | Completed | Clarified replace fallback and write-step semantics; retrieval-copy isolation covered; 16 unit tests passed |
 | 2026-06-11 | End-of-Day Validation | Completed | Compilation and 16 unit tests passed; Repair and baseline artifacts revalidated; Phase 4 remains isolated and ready to commit |
 
-## Session Handoff
+## Historical Phase 4 Session Handoff
+
+This section preserves the Phase 4 closeout state and is not the current
+project status.
 
 - Phase 4 is complete.
 - The memory bank exists only as a standalone, unit-tested skeleton.
@@ -457,3 +470,150 @@ The 2026-06-11 end-of-day validation is complete.
 - Next suggested phase is Phase 5: Version A Integration — Reasoner Injection
   Only, after explicit approval.
 - Do not enter Phase 5 without explicit approval.
+
+## 2026-06-12 - Phase 8A Core Ablation Pilot
+
+- Status: `completed`
+- Overall result: `PASS`
+- Scope:
+  - Pilot only
+  - GSM8K test sample IDs `0..19`
+  - `sample_count=20`
+  - `seed=42`
+  - `batch_size=1`
+  - greedy decoding
+  - `max_response_length=1024`
+  - no latest-k retrieval
+  - no random retrieval
+  - no Version B
+- Compared groups:
+  - `G0` disabled anchor: reused `EXP-20260612-013` with frozen baseline
+    reference `EXP-20260611-006`
+  - `G1` Version A anchor: `EXP-20260612-019`
+  - `G4` cosine retrieval without recency decay: `EXP-20260612-020`
+  - `G6` append-only update: `EXP-20260612-021`
+  - `G7` replace update: `EXP-20260612-022`
+- Outcomes:
+  - `G0`: `compute_reward=0.60` (`12/20`)
+  - `G1`: `compute_reward=0.50` (`10/20`)
+  - `G4`: `compute_reward=0.50` (`10/20`)
+  - `G6`: `compute_reward=0.50` (`10/20`)
+  - `G7`: `compute_reward=0.50` (`10/20`)
+- Stability/debug observations:
+  - all enabled groups produced non-empty `answer.json`
+  - all enabled groups wrote `20` predictions and `1` summary
+  - no crash, NaN, OOM, CUDA error, or shape/device/dtype mismatch
+  - all enabled groups kept `initial_slots=0` for every session
+  - no cross-sample leakage observed
+  - retrieved memory remained Reasoner-only in all enabled groups because
+    `weaver_input_token_counts` matched
+    `reasoner_to_weaver_input_token_counts`
+  - stored latent memories remained reasoner-space `[8, 1536]` tensors
+  - `slot_count` never exceeded `4`, so `max_slots=8` was not saturated in
+    this pilot
+- Interpretation:
+  - this pilot does not support any performance claim
+  - on this 20-sample slice, all enabled variants underperformed the disabled
+    anchor by the same observed margin
+  - within this pilot, removing current write-age decay or switching among the
+    currently implemented update-policy settings did not change
+    `compute_reward`
+  - update-policy behavior was not effectively separated because
+    `max_slots=8` was not saturated and `replace_count=0`
+  - current `threshold_topk` has no fallback top-1
+  - current decay is write-age decay, not last-retrieved-turn decay
+- Next-step recommendation:
+  - do not expand GSM8K directly as the primary main experiment
+  - plan a trusted TriviaQA disabled baseline before enabled-memory runs
+  - after target-task stability, evaluate method-aligned Version A variants
+    before considering Version B
+- Gate:
+  - do not treat Phase 8A as a paper-level result
+  - Phase 8B has not started
+  - Phase 9 has not started
+
+## 2026-06-12 - Step 2 Structured Retrieval Context
+
+- Status: `completed`
+- Added immutable `LatentMemoryRetrievalResult`.
+- Added `retrieve_with_context(...)` with:
+  - full-bank scores in original slot-index order
+  - pre-filter maximum score and argmax index
+  - threshold-pass status
+  - filtered retrieved indices and scores
+  - current memory-write bank step
+- Kept `retrieve(...)` as the legacy slot-list API.
+- Preserved current write-age scoring, threshold-without-fallback behavior,
+  detached retrieval copies, and all existing write/update policies.
+- Did not modify `MemGenModel.generate()`.
+- Did not implement matched-thread write-back, fallback top-1, or
+  last-retrieved decay.
+- Step 3 remains gated on explicit approval.
+
+## 2026-06-12 - Step 3 Thread-Aware Write-Back
+
+- Status: `completed`
+- Added `update_policy=thread_update`.
+- Added `write_back(memory, retrieval_result, metadata=None)`.
+- Implemented:
+  - empty bank -> insert
+  - high current-query score -> replace current argmax slot
+  - low score with capacity -> insert new thread
+  - low score at capacity -> evict oldest and insert new thread
+- Added stale retrieval-step and matched-index validation.
+- Added separate debug counts and event traces for thread insertion, matched
+  replacement, and capacity eviction.
+- Integrated only the `thread_update` policy with
+  `retrieve_with_context(...)` and `write_back(...)` in generation.
+- Preserved Reasoner-only retrieved-memory injection and unchanged Weaver
+  inputs.
+- Preserved legacy update policies, no-fallback threshold retrieval,
+  write-age decay, and the disabled path.
+- Validation:
+  - `py_compile` passed for the modified model and test files
+  - full unit discovery passed `47/47`
+  - `git diff --check` passed
+  - disabled golden replay
+    `EXP-20260612-023-step3-disabled-replay` matched
+    `EXP-20260611-007` on all three response-token hashes, all three
+    augmentation-mask hashes, Trigger calls (`193`), Weaver prompt calls (`3`),
+    and Weaver inference calls (`8`)
+  - disabled sessions created no memory bank and exposed no memory debug state
+- Did not enter Version B.
+- Step 4 smoke remains gated on explicit approval.
+
+## 2026-06-12 - Step 4 Thread-Update Mechanism Validation
+
+- Status: `completed`
+- Experiment: `EXP-20260612-024`
+- Output:
+  `outputs/latent_bank_vA/EXP-20260612-024-thread-update-smoke/`
+- Real enabled inference:
+  - one GSM8K test sample completed
+  - non-empty answer file, one prediction, one summary
+  - no crash, NaN, OOM, CUDA, shape, device, or dtype error
+  - `memory_write_count=4`
+  - `memory_retrieve_count=3`
+  - `thread_insert_count=1`
+  - `matched_replace_count=3`
+  - `capacity_evict_count=0`
+  - observed update reasons: one `empty_bank`, three `matched_thread`
+- Boundaries:
+  - Weaver input counts matched reasoner-to-Weaver input counts exactly
+  - retrieved memory remained Reasoner-only
+  - stored latent shape remained `[8, 1536]`
+  - session began with `initial_slots=0`
+- Controlled branch evidence:
+  - four targeted tests passed for empty insert, low-score new-thread insert,
+    high-score matched replacement, and full-bank oldest eviction
+  - full test discovery passed `47/47`
+  - `git diff --check` passed
+- Scope:
+  - no Step 4 code modification was needed
+  - no disabled-path rerun was required because no core or generate logic
+    changed during Step 4
+  - this is mechanism validation, not a performance result
+  - no fallback top-1 or last-retrieved decay
+  - Version B has not started
+- Recommendation:
+  - return to TriviaQA baseline planning before adding further method variants

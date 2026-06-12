@@ -12,6 +12,15 @@ Do not delete resolved entries.
 | BUG-0003 | 2026-06-11 | medium | `open` | Checked-in environment specifications disagree on Python, CUDA, and package versions |
 | BUG-0004 | 2026-06-11 | low | `open` | PATH-level `conda` wrapper has a CRLF shebang and cannot execute |
 
+## Current Blocking Status
+
+- No current blocking bug is known for the validated
+  `/home/baishilong/miniconda3/envs/memgen` workflow or the completed
+  Version A-aligned `thread_update` mechanism.
+- `BUG-0003` and `BUG-0004` remain environment-maintenance issues. They do not
+  block current work because commands use the validated environment's Python
+  executable directly.
+
 ## Recorded Bugs
 
 ## Phase 7 Stability Check
@@ -322,3 +331,35 @@ examples = dict
 - Latent shape, device, dtype, or precision mismatch.
 - Added latency or memory use is not measured.
 - Results cannot be reproduced from recorded commands.
+
+## 2026-06-12 Phase 8A Pilot Audit
+
+- No new blocker was found during Phase 8A.
+- All enabled pilot groups (`G1`, `G4`, `G6`, `G7`) completed without:
+  - crash
+  - NaN
+  - OOM
+  - CUDA error
+  - shape/device/dtype mismatch
+  - cross-sample leakage
+  - retrieved-memory-to-Weaver leakage
+- `slot_count` stayed within `max_slots` in all pilot runs.
+- `BUG-0001` and `BUG-0002` showed no regression in this phase.
+
+## 2026-06-12 Method-Alignment Caveats
+
+These are design and interpretation caveats, not implementation bugs:
+
+- Current Version A-simple decay is write-age decay:
+  `current_memory_write_step - created_step`.
+  It differs from the intended Version B definition based on dialogue turns
+  since the slot was last retrieved.
+- Current Version A-simple `threshold_topk` intentionally returns an empty set
+  when no score reaches the threshold. It has no fallback top-1.
+- Original Version A-simple policies do not implement matched-slot replacement
+  as a semantic thread update; the optional Version A-aligned
+  `thread_update` policy now does.
+- GSM8K is short and single-turn, so Phase 8A does not test the primary
+  multi-turn, long-trajectory, or context-truncation hypothesis.
+- No new blocker was found, but the research plan must transition to an aligned
+  target task and explicit method variants before further main experiments.

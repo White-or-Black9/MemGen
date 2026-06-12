@@ -24,6 +24,12 @@ overwrite prior records; append a new entry.
 | EXP-20260612-016 | 2026-06-12 | Phase 7 | Do three enabled single-turn sessions remain isolated and stable on GSM8K samples 0..2? | `completed` | All three sessions started with `initial_slots=0`; no cross-sample leakage, no tensor errors, and slot count stayed within bounds |
 | EXP-20260612-017 | 2026-06-12 | Phase 7 | Does enabled Version A remain stable on a bounded five-sample run without exceeding slot limits? | `completed` | Five enabled sessions completed without crash or leakage; slot count never exceeded 4 and no replacement-policy activation was needed |
 | EXP-20260612-018 | 2026-06-12 | Phase 7 Supplement | Can the real enabled inference path be forced to trigger replacement by lowering `max_slots` to 2? | `completed` | One enabled sample completed with `memory_write_count=4`, `slot_count=2`, and `update_action_trace=[append, append, replace, replace]` |
+| EXP-20260612-019 | 2026-06-12 | Phase 8A G1 | Does the Version A-simple anchor run stably on the fixed GSM8K pilot slice? | `completed` | Stable 20-sample run; `compute_reward=0.50` (`10/20`) |
+| EXP-20260612-020 | 2026-06-12 | Phase 8A G4 | What changes when current write-age decay is disabled? | `completed` | Stable 20-sample run; `compute_reward=0.50` (`10/20`); this is not a last-retrieved-decay comparison |
+| EXP-20260612-021 | 2026-06-12 | Phase 8A G6 | Does append-only update run stably on the pilot slice? | `completed` | Stable 20-sample run; `compute_reward=0.50` (`10/20`); capacity did not saturate |
+| EXP-20260612-022 | 2026-06-12 | Phase 8A G7 | Does the legacy replace policy run stably on the pilot slice? | `completed` | Stable 20-sample run; `compute_reward=0.50` (`10/20`); `replace_count=0` |
+| EXP-20260612-023-step3-disabled-replay | 2026-06-12 | Step 3 | Does disabled behavior remain exact after `thread_update` integration? | `completed` | Samples 0-2 exactly matched frozen response-token hashes, augmentation-mask hashes, and Trigger/Weaver call counts |
+| EXP-20260612-024-thread-update-smoke | 2026-06-12 | Step 4 | Does Version A-aligned `thread_update` operate correctly on the real enabled inference path? | `completed` | Mechanism smoke only: one empty-bank insert and three current-argmax matched replacements; Reasoner-only and reasoner-space boundaries held |
 
 ## Recorded Experiments
 
@@ -1173,3 +1179,351 @@ full GSM8K test performance.
 - [ ] Raw outputs retained.
 - [ ] Metrics can be regenerated.
 - [ ] Failures and exclusions documented.
+
+## Phase 8A - Core Ablation Pilot
+
+### Protocol
+
+- Date: 2026-06-12
+- Scope: pilot only; not a performance experiment
+- Dataset: `gsm8k/main/test`
+- Sample IDs: `0..19`
+- Sample count: `20`
+- Seed: `42`
+- Batch size: `1`
+- Decoding: greedy
+- Max response length: `1024`
+- Shared config path: `configs/latent_memory/gsm8k.yaml`
+- Shared model path:
+  `/home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306`
+- Shared checkpoint path:
+  `/mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model`
+- Output root: `outputs/ablations/`
+
+### Group Table
+
+| Group | Experiment | Config difference | compute_reward | Correct / Total | Total latency (s) | Mean latency (s/sample) | Peak CUDA memory (bytes) |
+|---|---|---|---:|---:|---:|---:|---:|
+| G0 | `EXP-20260612-013` | disabled anchor | 0.60 | 12 / 20 | 96.615 | 4.831 | 9,415,716,352 |
+| G1 | `EXP-20260612-019` | enabled, `decay_alpha=0.05`, `update_policy=replace_oldest` | 0.50 | 10 / 20 | 296.500 | 14.825 | 9,420,448,256 |
+| G4 | `EXP-20260612-020` | enabled, `decay_alpha=0.0`, `update_policy=replace_oldest` | 0.50 | 10 / 20 | 239.576 | 11.979 | 9,420,448,256 |
+| G6 | `EXP-20260612-021` | enabled, `decay_alpha=0.05`, `update_policy=append` | 0.50 | 10 / 20 | 295.256 | 14.763 | 9,420,448,256 |
+| G7 | `EXP-20260612-022` | enabled, `decay_alpha=0.05`, `update_policy=replace` | 0.50 | 10 / 20 | 293.830 | 14.691 | 9,420,448,256 |
+
+### G0: Disabled Anchor Reuse
+
+- Status: `reused`, not rerun
+- Comparator artifacts:
+  - accepted baseline: `EXP-20260611-006`
+  - current-harness disabled equivalence: `EXP-20260612-013`
+- Rationale: Phase 6 already verified current disabled-path equivalence against
+  the frozen Phase 3 baseline, so this pilot reused the validated disabled
+  anchor instead of spending another full 20-sample run.
+- Output directory:
+  `outputs/baseline/EXP-20260612-013-phase6-disabled-equivalence`
+- Key results:
+  - `answer.json` non-empty
+  - prediction count `20`
+  - summary count `1`
+  - `compute_reward=0.60`
+  - correct / total `12 / 20`
+  - Trigger decision calls `1722`
+  - Weaver prompt calls `20`
+  - Weaver inference calls `43`
+  - no memory bank constructed
+  - `memory_bank_debug=null`
+
+### EXP-20260612-019: G1 Version A Anchor
+
+- Status: `completed`
+- Output directory:
+  `outputs/ablations/EXP-20260612-019-phase8a-g1-anchor`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=7 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase5_memory_bank_debug --cfg-path configs/latent_memory/gsm8k.yaml --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/ablations/EXP-20260612-019-phase8a-g1-anchor --sample-start 0 --sample-count 20 --max-response-length 1024 --memory-enabled --memory-max-slots 8 --memory-top-k 1 --memory-threshold 0.7 --memory-decay-alpha 0.05 --memory-update-policy replace_oldest --memory-retrieve-policy threshold_topk`
+- Config:
+  - `enabled=true`
+  - `retrieve_policy=threshold_topk`
+  - `top_k=1`
+  - `threshold=0.7`
+  - `decay_alpha=0.05`
+  - `update_policy=replace_oldest`
+  - `max_slots=8`
+- Results:
+  - `answer.json` non-empty
+  - prediction count `20`
+  - summary count `1`
+  - `compute_reward=0.50`
+  - correct / total `10 / 20`
+  - total latency `296.500 s`
+  - mean latency `14.825 s/sample`
+  - peak CUDA memory `9,420,448,256` bytes
+  - Trigger decision calls `1439`
+  - Weaver prompt calls `20`
+  - Weaver inference calls `50`
+- Aggregated memory debug:
+  - `memory_write_count=70`
+  - `memory_retrieve_count=50`
+  - `retrieved_latent_count=392`
+  - `new_latent_count=560`
+  - `max observed slot_count=4`
+  - `append_count=70`
+  - `replace_count=0`
+  - `rejected_write_count=0`
+  - every session started with `initial_slots=0`
+- Boundary checks:
+  - no cross-sample leakage observed
+  - `weaver_input_token_counts` matched
+    `reasoner_to_weaver_input_token_counts`
+  - stored latents stayed in reasoner space with hidden size `1536`
+  - no crash, NaN, OOM, CUDA error, or shape/device/dtype mismatch
+
+### EXP-20260612-020: G4 Cosine Retrieval Without Recency Decay
+
+- Status: `completed`
+- Output directory:
+  `outputs/ablations/EXP-20260612-020-phase8a-g4-cosine-no-decay`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=7 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase5_memory_bank_debug --cfg-path configs/latent_memory/gsm8k.yaml --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/ablations/EXP-20260612-020-phase8a-g4-cosine-no-decay --sample-start 0 --sample-count 20 --max-response-length 1024 --memory-enabled --memory-max-slots 8 --memory-top-k 1 --memory-threshold 0.7 --memory-decay-alpha 0.0 --memory-update-policy replace_oldest --memory-retrieve-policy threshold_topk`
+- Config difference from G1:
+  - `decay_alpha=0.0`
+- Results:
+  - `answer.json` non-empty
+  - prediction count `20`
+  - summary count `1`
+  - `compute_reward=0.50`
+  - correct / total `10 / 20`
+  - total latency `239.576 s`
+  - mean latency `11.979 s/sample`
+  - peak CUDA memory `9,420,448,256` bytes
+  - Trigger decision calls `1434`
+  - Weaver prompt calls `20`
+  - Weaver inference calls `50`
+- Aggregated memory debug:
+  - `memory_write_count=70`
+  - `memory_retrieve_count=50`
+  - `retrieved_latent_count=392`
+  - `new_latent_count=560`
+  - `max observed slot_count=4`
+  - `append_count=70`
+  - `replace_count=0`
+  - `rejected_write_count=0`
+  - every session started with `initial_slots=0`
+- Boundary checks:
+  - no cross-sample leakage observed
+  - retrieved memory remained Reasoner-only
+  - stored latents stayed in reasoner space with hidden size `1536`
+  - no crash, NaN, OOM, CUDA error, or shape/device/dtype mismatch
+
+### EXP-20260612-021: G6 Append-Only Update
+
+- Status: `completed`
+- Output directory:
+  `outputs/ablations/EXP-20260612-021-phase8a-g6-append`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=7 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase5_memory_bank_debug --cfg-path configs/latent_memory/gsm8k.yaml --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/ablations/EXP-20260612-021-phase8a-g6-append --sample-start 0 --sample-count 20 --max-response-length 1024 --memory-enabled --memory-max-slots 8 --memory-top-k 1 --memory-threshold 0.7 --memory-decay-alpha 0.05 --memory-update-policy append --memory-retrieve-policy threshold_topk`
+- Config difference from G1:
+  - `update_policy=append`
+- Results:
+  - `answer.json` non-empty
+  - prediction count `20`
+  - summary count `1`
+  - `compute_reward=0.50`
+  - correct / total `10 / 20`
+  - total latency `295.256 s`
+  - mean latency `14.763 s/sample`
+  - peak CUDA memory `9,420,448,256` bytes
+  - Trigger decision calls `1439`
+  - Weaver prompt calls `20`
+  - Weaver inference calls `50`
+- Aggregated memory debug:
+  - `memory_write_count=70`
+  - `memory_retrieve_count=50`
+  - `retrieved_latent_count=392`
+  - `new_latent_count=560`
+  - `max observed slot_count=4`
+  - `append_count=70`
+  - `replace_count=0`
+  - `rejected_write_count=0`
+  - every session started with `initial_slots=0`
+- Boundary checks:
+  - no cross-sample leakage observed
+  - retrieved memory remained Reasoner-only
+  - stored latents stayed in reasoner space with hidden size `1536`
+  - no crash, NaN, OOM, CUDA error, or shape/device/dtype mismatch
+
+### EXP-20260612-022: G7 Replace Update
+
+- Status: `completed`
+- Output directory:
+  `outputs/ablations/EXP-20260612-022-phase8a-g7-replace`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=7 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase5_memory_bank_debug --cfg-path configs/latent_memory/gsm8k.yaml --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/ablations/EXP-20260612-022-phase8a-g7-replace --sample-start 0 --sample-count 20 --max-response-length 1024 --memory-enabled --memory-max-slots 8 --memory-top-k 1 --memory-threshold 0.7 --memory-decay-alpha 0.05 --memory-update-policy replace --memory-retrieve-policy threshold_topk`
+- Config difference from G1:
+  - `update_policy=replace`
+- Results:
+  - `answer.json` non-empty
+  - prediction count `20`
+  - summary count `1`
+  - `compute_reward=0.50`
+  - correct / total `10 / 20`
+  - total latency `293.830 s`
+  - mean latency `14.691 s/sample`
+  - peak CUDA memory `9,420,448,256` bytes
+  - Trigger decision calls `1439`
+  - Weaver prompt calls `20`
+  - Weaver inference calls `50`
+- Aggregated memory debug:
+  - `memory_write_count=70`
+  - `memory_retrieve_count=50`
+  - `retrieved_latent_count=392`
+  - `new_latent_count=560`
+  - `max observed slot_count=4`
+  - `append_count=70`
+  - `replace_count=0`
+  - `rejected_write_count=0`
+  - every session started with `initial_slots=0`
+- Boundary checks:
+  - no cross-sample leakage observed
+  - retrieved memory remained Reasoner-only
+  - stored latents stayed in reasoner space with hidden size `1536`
+  - no crash, NaN, OOM, CUDA error, or shape/device/dtype mismatch
+
+### Pilot Interpretation
+
+- `G0` vs `G1`:
+  - on this 20-sample pilot, enabled Version A anchor underperformed the
+    disabled anchor (`0.50` vs `0.60`)
+  - this is a pilot observation only, not a final claim
+- `G1` vs `G4`:
+  - removing current write-age decay did not change `compute_reward` on this
+    slice
+  - G4 reduced latency relative to G1 in this pilot
+  - this comparison is not last-retrieved-turn decay versus no decay
+- `G1` vs `G6`:
+  - append-only update matched G1 on `compute_reward`
+  - no capacity pressure appeared because no session exceeded `4` slots
+- `G1` vs `G7`:
+  - score-based `replace` matched G1 on `compute_reward`
+  - `replace_count=0` because `max_slots=8` was not reached in this pilot
+
+### Pilot Conclusion
+
+- Phase 8A pilot status: `pass`
+- All currently implemented groups ran stably on the 20-sample slice.
+- No new blocker was observed.
+- Quantitative observation:
+  - disabled G0: `compute_reward=0.60`, `12/20`
+  - enabled G1/G4/G6/G7: `compute_reward=0.50`, `10/20`
+  - every enabled variant underperformed the disabled anchor on this pilot
+- Stability observation:
+  - all enabled variants completed without runtime or tensor-contract failure
+  - no cross-sample leakage or retrieved-memory-to-Weaver leakage was observed
+- Update-policy interpretation:
+  - no session saturated `max_slots=8`
+  - `replace_count=0` in G1, G4, G6, and G7
+  - Phase 8A therefore did not produce an effective update-policy comparison
+- Retrieval interpretation:
+  - current decay is write-age decay measured in successful memory writes
+  - current `threshold_topk` has no fallback top-1
+  - G1/G4 compare write-age decay against no decay
+- Scope:
+  - Phase 8A is a short single-turn sanity and negative pilot
+  - it is not aligned with the primary multi-turn, long-trajectory, or
+    context-truncation hypothesis
+  - it is not evidence that the full unimplemented Version B method fails
+- Next-step motivation:
+  - do not expand GSM8K directly into the primary main experiment
+  - establish a dynamic multi-turn TriviaQA baseline
+  - evaluate method-aligned Version A variants only after target-task stability
+    is established
+
+### EXP-20260612-023-step3-disabled-replay: Step 3 Disabled Replay
+
+- Step: 3
+- Status: `completed`
+- Purpose: Compatibility verification after integrating
+  `update_policy=thread_update`; this is not a performance experiment.
+- Dataset: cached `gsm8k/main/test`, sample IDs `0..2`
+- Runtime:
+  - `sample_count=3`
+  - `seed=42`
+  - `batch_size=1`
+  - greedy decoding
+  - `max_response_length=1024`
+- Output:
+  `outputs/latent_bank_vA/EXP-20260612-023-step3-disabled-replay/`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=7 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase5_memory_bank_debug --cfg-path configs/latent_memory/gsm8k.yaml --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/latent_bank_vA/EXP-20260612-023-step3-disabled-replay --sample-start 0 --sample-count 3 --max-response-length 1024`
+- Frozen comparator: `EXP-20260611-007`
+- Results:
+  - three predictions plus one summary
+  - all response-token hashes matched exactly
+  - all augmentation-mask hashes matched exactly
+  - Trigger decision calls matched at `193`
+  - Weaver prompt calls matched at `3`
+  - Weaver inference calls matched at `8`
+  - no memory bank was constructed
+  - `memory_bank_debug=null`
+- Interpretation:
+  - Step 3 did not change disabled-path behavior
+  - this replay is compatibility evidence only
+
+### EXP-20260612-024-thread-update-smoke: Thread-Update Mechanism Smoke
+
+- Step: 4
+- Status: `completed`
+- Purpose: Mechanism validation only; this is not a performance experiment.
+- Dataset: cached `gsm8k/main/test`, sample ID `0`
+- Runtime:
+  - `sample_count=1`
+  - `seed=42`
+  - `batch_size=1`
+  - greedy decoding
+  - `max_response_length=1024`
+- Memory configuration:
+  - `enabled=true`
+  - `update_policy=thread_update`
+  - `retrieve_policy=threshold_topk`
+  - `threshold=0.7`
+  - `top_k=1`
+  - `max_slots=8`
+  - `decay_alpha=0.05`
+- Output:
+  `outputs/latent_bank_vA/EXP-20260612-024-thread-update-smoke/`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=7 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase5_memory_bank_debug --cfg-path configs/latent_memory/gsm8k.yaml --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/latent_bank_vA/EXP-20260612-024-thread-update-smoke --sample-start 0 --sample-count 1 --max-response-length 1024 --memory-enabled --memory-max-slots 8 --memory-top-k 1 --memory-threshold 0.7 --memory-decay-alpha 0.05 --memory-update-policy thread_update --memory-retrieve-policy threshold_topk`
+- Artifact checks:
+  - non-empty `evaluate/answer.json`
+  - prediction count `1`
+  - summary count `1`
+  - no crash, NaN, OOM, CUDA, shape, device, or dtype error
+- Memory results:
+  - `memory_write_count=4`
+  - `memory_retrieve_count=3`
+  - `thread_insert_count=1`
+  - `matched_replace_count=3`
+  - `capacity_evict_count=0`
+  - final `slot_count=1`
+  - observed reasons:
+    `empty_bank`, `matched_thread`, `matched_thread`, `matched_thread`
+  - `new_thread` and `new_thread_bank_full` were not observed in this real
+    one-sample smoke
+- Controlled mechanism evidence:
+  - `empty_bank -> insert`: unit test passed
+  - low score, available capacity -> `new_thread`: unit test passed
+  - high score -> `replace_matched` / `matched_thread`: unit test passed and
+    observed in real inference
+  - low score, full bank -> `evict_oldest_insert` /
+    `new_thread_bank_full`: unit test passed
+- Boundary checks:
+  - Weaver input token counts exactly matched reasoner-to-Weaver input token
+    counts: `[96, 116, 140, 193]`
+  - retrieved memory therefore remained Reasoner-only
+  - stored latent shape was `[8, 1536]`, confirming reasoner-space storage
+  - session started with `initial_slots=0`
+- Interpretation:
+  - Version A-aligned `thread_update` mechanism is operational
+  - this run does not establish accuracy or performance benefit
+  - current retrieval still has no fallback top-1
+  - current decay remains write-age decay
+  - Version B has not started

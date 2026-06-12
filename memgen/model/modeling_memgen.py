@@ -490,6 +490,23 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                 candidate_attention_mask = current_attention_mask[augment_indices]
                 candidate_position_ids = current_position_ids[augment_indices]
 
+                retrieval_result = None
+                use_thread_update = (
+                    latent_memory_bank is not None
+                    and getattr(
+                        getattr(latent_memory_bank, "config", None),
+                        "update_policy",
+                        None,
+                    )
+                    == "thread_update"
+                )
+                if use_thread_update:
+                    retrieval_result = latent_memory_bank.retrieve_with_context(
+                        candidate_inputs_embeds.detach(),
+                        device=device,
+                        dtype=current_inputs_embeds.dtype,
+                    )
+
                 # 映射到 weaver 空间，生成 latent memory
                 weaver_inputs_embeds = self.reasoner_to_weaver(candidate_inputs_embeds)
                 if i == 0:
@@ -515,11 +532,14 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                         else weaver.inference_latents_num
                     )
                 else:
-                    retrieved_slots = latent_memory_bank.retrieve(
-                        candidate_inputs_embeds.detach(),
-                        device=device,
-                        dtype=current_inputs_embeds.dtype,
-                    )
+                    if use_thread_update:
+                        retrieved_slots = retrieval_result.slots
+                    else:
+                        retrieved_slots = latent_memory_bank.retrieve(
+                            candidate_inputs_embeds.detach(),
+                            device=device,
+                            dtype=current_inputs_embeds.dtype,
+                        )
                     if retrieved_slots:
                         retrieved_memory = torch.cat(
                             [slot.memory for slot in retrieved_slots], dim=0
@@ -552,7 +572,13 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                         candidate_attention_mask = torch.cat(
                             [candidate_attention_mask, attn_mask], dim=1
                         )
-                    latent_memory_bank.write(latent_inputs_embeds.detach())
+                    if use_thread_update:
+                        latent_memory_bank.write_back(
+                            latent_inputs_embeds.detach(),
+                            retrieval_result,
+                        )
+                    else:
+                        latent_memory_bank.write(latent_inputs_embeds.detach())
                     pad_len = candidate_inputs_embeds.size(1) - current_inputs_embeds.size(1)
 
                 # 合并增强和未增强的序列

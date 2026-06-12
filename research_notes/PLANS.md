@@ -105,34 +105,121 @@ optional session-level Retrieval-Augmented Recurrent Latent Memory Bank.
 - Measure latency and memory overhead.
 - Repair only Version A defects within this Phase.
 
-### Phase 8: Core Ablation Experiments
+### Phase 8A: GSM8K Version A-simple Short Single-Turn Pilot
 
-- Evaluate retrieval on/off, write/update on/off, capacity, top-k, eviction,
-  aggregation, and recurrent update choices.
-- Compare every variant against the frozen original baseline and Version A.
-- Keep datasets, checkpoints, seeds, decoding, and sample counts controlled.
-- Minimum required ablations:
-  `original MemGen`, `latest-k retrieval`, `random retrieval`,
-  `cosine retrieval`, `cosine retrieval without recency decay`,
-  `cosine retrieval with recency decay`, `append-only update`,
-  `replace update`.
-- Record negative results and failure cases.
+- Status: `completed`
+- Purpose:
+  - sanity-check the conservative Reasoner-only mechanism
+  - record stable execution and negative pilot evidence
+- Result:
+  - disabled G0 scored `0.60` (`12/20`)
+  - enabled G1/G4/G6/G7 scored `0.50` (`10/20`)
+  - all enabled variants were stable
+- Interpretation:
+  - this is not main evidence for the final method
+  - GSM8K is short and single-turn, so it does not test the primary
+    multi-turn, long-trajectory, or context-truncation hypothesis
+  - G1/G4 compare current write-age decay against no decay, not
+    last-retrieved-turn decay against no decay
 
-### Phase 9: Version B Integration — Weaver Input Retrieval
+### Phase 8B: Method / Implementation Alignment
 
-- Extend retrieval so selected memory can condition Weaver input generation.
-- Preserve Version A as a separately selectable comparator.
-- Keep all changes inference-only and session-local.
-- Re-run disabled-feature equivalence and targeted stability checks.
+- Status: `completed`
+- Completed alignment work:
+  - documented Version A-simple, Version A-aligned, and Version B separately
+  - recorded that current decay is write-age decay, not
+    last-retrieved-turn decay
+  - recorded that current `threshold_topk` has no fallback top-1
+  - implemented structured retrieval context
+  - implemented and mechanism-tested Version A-aligned
+    `update_policy=thread_update`
+- Remaining method variants, not yet implemented:
+  - `last_retrieved_decay`
+  - `threshold_topk_with_fallback_top1`
+- Version B remains out of scope.
 
-### Phase 10: Paper-Level Evidence Consolidation
+### Phase 8C: Target Task Transition
 
-- Consolidate baseline, Version A, Version B, ablations, efficiency, robustness,
-  and failure analysis.
+- Status: `proposed`
+- Immediate execution order:
+  - complete notes cleanup and read-only review
+  - prepare and approve a commit for completed Version A-aligned work
+  - plan the TriviaQA baseline protocol
+  - run a minimal TriviaQA Original MemGen / disabled-memory smoke
+- Move primary evaluation away from GSM8K.
+- Use TriviaQA as the next candidate because the current repository implements
+  it as a dynamic multi-turn search/answer environment with `max_turns=5`,
+  growing interaction history, and observation truncation.
+- Establish a trusted Original MemGen / disabled-memory baseline on TriviaQA.
+- Validate model, checkpoint, dataset, retrieval backend, output schema, reward,
+  latency, and session/turn traces before enabled-memory comparisons.
+
+### Phase 8D: TriviaQA Version A-Aligned Smoke
+
+- Status: `proposed`
+- Run the current Reasoner-only Version A-aligned `thread_update` path on
+  TriviaQA after the disabled baseline smoke is stable.
+- Verify that one session-local bank persists across turns and resets across
+  episodes.
+- Check whether memories written in early turns are retrieved and used in later
+  turns.
+- Record context growth, observation truncation, retrieval/write events,
+  latency, memory, and failures.
+- Make no performance claim until disabled and enabled runs are stable and
+  reproducible.
+
+### Phase 8E: Method-Aligned Version A Variants
+
+- Status: `proposed`
+- Already completed:
+  - matched-slot replacement / `thread_update`
+- Consider only after the TriviaQA disabled baseline and Version A-aligned
+  smoke are stable:
+  - last-retrieved-turn decay
+  - fallback top-1 for a non-empty bank
+- Preserve Version A-simple as a separately selectable comparator.
+- Re-run disabled equivalence and targeted multi-turn stability checks for every
+  semantic change.
+
+### Phase 8F: TriviaQA Targeted Ablations
+
+- Status: `proposed`
+- Compare:
+  - disabled Original MemGen
+  - Version A-simple
+  - Version A with last-retrieved decay
+  - Version A with fallback top-1
+  - Version A with matched-slot update
+  - threshold sweeps
+  - top-k sweeps
+- Focus analysis on multi-turn, long-trajectory, and context-truncation
+  behavior.
+- Do not use GSM8K as the primary evidence for these hypotheses.
+
+### Phase 9: Version B Implementation
+
+- Status: `proposed`
+- Begin only after Version A variants on TriviaQA provide sufficient evidence.
+- Implement the full `retrieve -> Weaver revise/generate -> matched write-back`
+  method.
+- Feed retrieved memory into Weaver with current context.
+- Include fallback top-1, last-retrieved-turn decay, and matched-slot/thread
+  update according to the frozen Version B specification.
+- Preserve Version A-simple and method-aligned Version A variants as explicit
+  comparators.
+- Test Weaver-input distribution risk, disabled-path equivalence, multi-turn
+  stability, and Version A versus Version B.
+
+### Phase 10: Paper-Level Consolidation
+
+- Status: `proposed`
+- Consolidate target-task main results, controlled ablations, efficiency,
+  memory behavior, failure analysis, and limitations.
 - Trace every claim, table, and figure to experiment IDs and raw artifacts.
-- Freeze method definitions, limitations, reproducibility instructions, and
-  paper-facing evidence.
-- Do not promote unsupported hypotheses to claims.
+- Freeze method definitions, reproducibility instructions, and paper-facing
+  evidence.
+- Do not promote GSM8K pilot observations or unsupported hypotheses to final
+  claims.
 
 ## Experiment Logging Standard
 

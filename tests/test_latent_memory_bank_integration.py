@@ -8,7 +8,10 @@ from interactions.base_interaction import InteractionConfig, InteractionDataProt
 from interactions.multiturn_interaction import MultiTurnInteractionManager
 from interactions.singleturn_interaction import SingleTurnInteractionManager
 from memgen.model.latent_memory_bank import LatentMemoryBank, LatentMemoryBankConfig
-from memgen.model.latent_memory_bank import LatentMemorySlot
+from memgen.model.latent_memory_bank import (
+    LatentMemoryRetrievalResult,
+    LatentMemorySlot,
+)
 from memgen.model.modeling_memgen import MemGenModel
 
 
@@ -209,6 +212,35 @@ class FakeMemoryBank:
 
     def write(self, memory, metadata=None):
         self.write_calls.append(memory.detach().clone())
+        return True
+
+
+class FakeThreadUpdateMemoryBank:
+    def __init__(self, retrieval_result):
+        self.config = SimpleNamespace(update_policy="thread_update")
+        self.retrieval_result = retrieval_result
+        self.retrieve_calls = []
+        self.write_back_calls = []
+
+    def retrieve_with_context(
+        self,
+        query_or_hidden_states,
+        *,
+        device=None,
+        dtype=None,
+    ):
+        self.retrieve_calls.append({
+            "query": query_or_hidden_states.detach().clone(),
+            "device": device,
+            "dtype": dtype,
+        })
+        return self.retrieval_result
+
+    def write_back(self, memory, retrieval_result, metadata=None):
+        self.write_back_calls.append({
+            "memory": memory.detach().clone(),
+            "retrieval_result": retrieval_result,
+        })
         return True
 
 
@@ -457,6 +489,78 @@ class LatentMemoryBankIntegrationTest(unittest.TestCase):
         )
 
         self.assertEqual(model.reasoner.recorded_inputs[0].dtype, torch.float64)
+
+    def test_generate_thread_update_uses_current_context_and_write_back(self):
+        model = build_fake_memgen()
+        retrieved_memory = torch.tensor([[7.0, 8.0]], dtype=torch.float32)
+        retrieved_slot = LatentMemorySlot(
+            memory=retrieved_memory,
+            key=retrieved_memory.mean(dim=0),
+        )
+        retrieval_result = LatentMemoryRetrievalResult(
+            slots=[retrieved_slot],
+            scores=(1.0,),
+            max_score=1.0,
+            argmax_index=0,
+            threshold_passed=True,
+            retrieved_indices=(0,),
+            retrieved_scores=(1.0,),
+            bank_step=1,
+        )
+        bank = FakeThreadUpdateMemoryBank(retrieval_result)
+        generation_config = GenerationConfig(
+            max_new_tokens=1,
+            temperature=0.0,
+            pad_token_id=0,
+            eos_token_id=99,
+        )
+        generation_config.weaver_do_sample = False
+        generation_config.trigger_do_sample = False
+
+        MemGenModel.generate(
+            model,
+            input_ids=torch.tensor([[1]], dtype=torch.long),
+            attention_mask=torch.ones((1, 1), dtype=torch.long),
+            generation_config=generation_config,
+            latent_memory_bank=bank,
+        )
+
+        expected_prompt_embed = torch.tensor([[[1.0, 2.0]]])
+        expected_new_latent = torch.tensor(
+            [[[11.0, 11.0], [12.0, 12.0]]]
+        )
+        expected_reasoner_input = torch.cat(
+            [
+                expected_prompt_embed,
+                retrieved_memory.unsqueeze(0),
+                expected_new_latent,
+            ],
+            dim=1,
+        )
+        self.assertEqual(len(bank.retrieve_calls), 1)
+        self.assertEqual(len(bank.write_back_calls), 1)
+        self.assertIs(
+            bank.write_back_calls[0]["retrieval_result"],
+            retrieval_result,
+        )
+        self.assertTrue(
+            torch.equal(
+                bank.write_back_calls[0]["memory"],
+                expected_new_latent,
+            )
+        )
+        self.assertTrue(
+            torch.equal(
+                model.weaver.prompt_inputs[0],
+                expected_prompt_embed + 100,
+            )
+        )
+        self.assertTrue(
+            torch.equal(
+                model.reasoner.recorded_inputs[0],
+                expected_reasoner_input,
+            )
+        )
 
     def test_generate_rejects_enabled_batch_size_greater_than_one(self):
         model = build_fake_memgen()

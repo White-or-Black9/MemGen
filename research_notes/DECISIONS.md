@@ -28,6 +28,17 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0019 | 2026-06-12 | accepted | Phase 6 disabled-path equivalence requires exact baseline hashes, metrics, and augmentation call counts on the frozen 20-sample comparator |
 | DEC-0020 | 2026-06-12 | accepted | Phase 7 enabled-path stability passes only on bounded session-local debug evidence and without performance claims |
 | DEC-0021 | 2026-06-12 | accepted | Phase 7 replacement-path evidence may use debug-only CLI overrides, but must stay on the real enabled inference path |
+| DEC-0022 | 2026-06-12 | accepted | Define Version A as conservative Reasoner-only memory injection without fallback top-1 |
+| DEC-0023 | 2026-06-12 | accepted | Define Version B as full retrieval-to-Weaver recurrent latent update with fallback top-1 and matched-slot write-back |
+| DEC-0024 | 2026-06-12 | accepted | Do not interpret current write-age decay as last-retrieved-turn decay |
+| DEC-0025 | 2026-06-12 | accepted | Treat Phase 8A GSM8K as a sanity and negative pilot, not main method evidence |
+| DEC-0026 | 2026-06-12 | accepted | Move primary evaluation focus toward TriviaQA dynamic multi-turn inference |
+| DEC-0027 | 2026-06-12 | accepted | Add structured retrieval context without changing retrieval or write/update semantics |
+| DEC-0028 | 2026-06-12 | accepted | Add thread_update as a method-aligned Version A write-back policy |
+| DEC-0029 | 2026-06-12 | accepted | Accept bounded real-path plus controlled-test evidence for thread_update mechanism validation |
+| DEC-0030 | 2026-06-12 | accepted | Reuse the verified Phase 6 disabled anchor for Phase 8A |
+| DEC-0031 | 2026-06-12 | accepted | Treat Phase 8A as a stability-first pilot rather than a final performance experiment |
+| DEC-0032 | 2026-06-12 | accepted | Complete Version A-aligned thread_update and gate Version B behind a TriviaQA target-task baseline |
 
 ## Decision Template
 
@@ -491,3 +502,261 @@ IDs and append superseding decisions rather than silently rewriting history.
   `BUG-0001`; the later Repair Phase resolved the bug and Phase 3 opened the
   gate.
 - Related experiments: `EXP-20260611-001`
+
+### DEC-0030: Phase 8A Reuses the Verified Disabled Anchor
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: Phase 8A needs a disabled comparator but Phase 6 already verified
+  exact disabled-path equivalence on the same 20 GSM8K test IDs.
+- Decision:
+  - reuse `EXP-20260612-013` as the current-harness disabled anchor
+  - continue to cite `EXP-20260611-006` as the frozen original baseline
+  - do not spend another full disabled rerun unless the harness or disabled
+    path changes
+- Alternatives considered:
+  - rerun G0 again only for table symmetry
+- Rationale: Phase 6 already established that the current disabled path matches
+  the frozen baseline exactly, so reusing that anchor preserves rigor without
+  duplicating compute.
+- Consequences:
+  - Phase 8A can focus its compute budget on enabled variants
+  - any future disabled rerun becomes necessary only if disabled-path semantics
+    or the reporting harness changes
+- Related experiments:
+  - `EXP-20260611-006`
+  - `EXP-20260612-013`
+
+### DEC-0031: Treat Phase 8A as a Stability-First Pilot
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: The current repository supports a small set of Version A controls,
+  but broader retrieval variants such as latest-k and random are not yet
+  implemented.
+- Decision:
+  - Phase 8A compares only currently implemented groups `G0`, `G1`, `G4`,
+    `G6`, and `G7`
+  - the first pass stays on the fixed 20-sample slice `0..19`
+  - negative or flat results are recorded directly
+  - no pilot result is treated as a final performance conclusion
+- Alternatives considered:
+  - implement more retrieval policies immediately
+  - skip the pilot and jump straight to a larger main ablation
+- Rationale: A narrow pilot reduces moving parts, verifies that current controls
+  behave cleanly, and gives an early signal before widening the protocol.
+- Consequences:
+  - after the method audit, the next expansion should transition to an aligned
+    dynamic multi-turn target rather than directly scaling GSM8K
+  - new retrieval policies remain separately gated design variants
+- Related experiments:
+  - `EXP-20260612-019`
+  - `EXP-20260612-020`
+  - `EXP-20260612-021`
+  - `EXP-20260612-022`
+
+### DEC-0022: Conservative Version A Definition
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: Phase 5 through Phase 8A implemented a low-risk mechanism whose
+  retrieved memories stay outside Weaver.
+- Decision:
+  - Version A is conservative Reasoner-only memory injection
+  - if the bank is empty, retrieval returns empty
+  - if no score reaches threshold, retrieval returns empty
+  - Version A has no fallback top-1
+  - Weaver receives only current context `H_t`
+  - Reasoner receives `[R_t; m_t]` when retrieval succeeds, otherwise only
+    newly generated `m_t`
+  - every Weaver-generated `m_t` is written back when Trigger fires
+- Rationale: This definition matches the implemented behavior and preserves the
+  original Weaver input distribution.
+- Consequences:
+  - Phase 5 through Phase 8A results are Version A-simple results
+  - they must not be described as evidence for the full proposed method
+- Related experiments:
+  - `EXP-20260612-011`
+  - `EXP-20260612-015`
+  - `EXP-20260612-019`
+
+### DEC-0023: Full Version B Definition
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: The original method proposal requires retrieved memory to influence
+  generation of the next recurrent latent and to support thread-aware updates.
+- Decision:
+  - Version B performs `retrieve -> Weaver revise/generate -> write-back`
+  - a non-empty bank falls back to the argmax slot when no score reaches
+    threshold
+  - retrieved memory enters Weaver together with current context
+  - Reasoner continues with the newly generated latent `m_t`
+  - write-back inserts a new slot for a new thread and replaces the matched
+    argmax slot for an existing thread
+  - decay uses turns since last retrieval and updates explicit
+    `last_retrieved_turn` or `last_retrieved_step`
+- Rationale: This separates the full research method from the conservative
+  integration used for early compatibility and stability work.
+- Consequences:
+  - Version B remains unimplemented
+  - Version B requires separate implementation, compatibility, stability, and
+    target-task evidence
+
+### DEC-0024: Current Decay Is Write-Age Decay
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: Read-only implementation audit found that current scoring uses
+  `_step - created_step`, while `_step` counts successful writes.
+- Decision:
+  - describe current decay as write-age exponential decay
+  - do not call it last-retrieved-turn decay
+  - describe Phase 8A G1 versus G4 as write-age decay versus no decay
+- Rationale: Retrieval does update `last_access_step`, but current scoring does
+  not use that field and does not count dialogue turns.
+- Consequences:
+  - method-aligned last-retrieved decay becomes an explicit future variant
+  - prior experimental values remain valid, but their interpretation is
+    narrowed
+- Related experiments:
+  - `EXP-20260612-019`
+  - `EXP-20260612-020`
+
+### DEC-0025: Phase 8A Is Sanity and Negative Pilot Evidence
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: Phase 8A used 20 short single-turn GSM8K samples and found stable but
+  lower enabled results.
+- Decision:
+  - treat Phase 8A as a short single-turn sanity and negative pilot
+  - record the observed enabled underperformance directly
+  - do not interpret it as failure of the full Version B method
+  - do not expand it directly into the primary main experiment without a
+    target-task change
+- Rationale: GSM8K does not test the primary multi-turn, long-trajectory, or
+  context-truncation hypothesis.
+- Consequences:
+  - Phase 8A remains useful stability and negative evidence
+  - the next main-evidence plan must use a better-aligned task
+- Related experiments:
+  - `EXP-20260612-013`
+  - `EXP-20260612-019`
+  - `EXP-20260612-020`
+  - `EXP-20260612-021`
+  - `EXP-20260612-022`
+
+### DEC-0026: TriviaQA as the Next Primary Target Candidate
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: Repository audit found that TriviaQA is the available dynamic task
+  with repeated search/answer turns, growing interaction history, and
+  observation truncation.
+- Decision: Shift the next primary evaluation focus toward TriviaQA, beginning
+  with Original MemGen and disabled-memory baseline planning.
+- Alternatives considered:
+  - continue scaling GSM8K
+  - use static GPQA
+  - use static KodCode
+- Rationale: TriviaQA is better aligned with session-local persistence, reuse
+  across turns, long trajectories, and context truncation.
+- Consequences:
+  - establish a trusted TriviaQA baseline before enabled comparisons
+  - verify retrieval backend and dynamic-evaluation reproducibility before
+    claiming method evidence
+  - Phase 9 remains gated behind Version A evidence on the target task
+
+### DEC-0027: Structured Retrieval Context Before Write-Back Changes
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: A future matched-thread write-back policy needs the current query's
+  complete slot scores, maximum score, argmax slot, and filtered retrieval
+  selection. The legacy `retrieve()` API exposes only cloned selected slots.
+- Decision:
+  - add immutable `LatentMemoryRetrievalResult`
+  - add `retrieve_with_context(...)`
+  - preserve full scores in original bank slot order
+  - compute `max_score` and `argmax_index` before threshold/top-k filtering
+  - use the lowest original slot index to break equal-score ties
+  - keep `retrieve(...)` as a compatibility wrapper returning only `.slots`
+- Rationale: This creates an explicit, testable handoff for a later write-back
+  step while isolating the change from current inference and update behavior.
+- Consequences:
+  - current `write()` and all existing update policies remain unchanged
+  - no `thread_update`, fallback top-1, or last-retrieved decay is introduced
+  - `MemGenModel.generate()` remains unchanged and does not yet consume the
+    structured result
+
+### DEC-0028: Method-Aligned Version A Thread Update
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: Existing update policies are capacity-driven and cannot express
+  low-similarity new-thread insertion versus high-similarity matched-thread
+  replacement.
+- Decision:
+  - add `update_policy=thread_update`
+  - add `write_back(memory, retrieval_result, metadata=None)`
+  - replace the current argmax slot when `max_score >= threshold`, regardless
+    of remaining capacity
+  - insert a new slot when similarity is below threshold
+  - when a new-thread insertion finds a full bank, evict the oldest slot as a
+    separate capacity-management action
+  - reject stale retrieval contexts by requiring matching bank steps
+- Rationale: The update must use the current query's structured retrieval
+  result rather than mutable or stale slot `last_score` state.
+- Consequences:
+  - existing `append`, `replace`, and `replace_oldest` semantics remain intact
+  - retrieved memory remains Reasoner-only and Weaver input remains unchanged
+  - this remains Version A and does not implement fallback top-1,
+    last-retrieved decay, or Version B retrieval-to-Weaver behavior
+
+### DEC-0029: Thread-Update Mechanism Validation Standard
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: A one-sample real inference smoke may not naturally exercise every
+  score and capacity branch, and enlarging GSM8K is not justified for a
+  mechanism-only check.
+- Decision:
+  - require at least one real enabled inference session to validate runtime,
+    write-back traces, Reasoner-only injection, and reasoner-space storage
+  - allow deterministic unit tests to supply branch evidence not observed in
+    that bounded real session
+  - do not treat the resulting evidence as a performance experiment
+- Rationale: This validates actual integration while avoiding an unnecessary
+  larger run on a task that is not aligned with the primary research
+  hypothesis.
+- Consequences:
+  - `EXP-20260612-024` observes `empty_bank` and `matched_thread` in real
+    inference
+  - unit tests validate `new_thread` and `new_thread_bank_full`
+  - the next main activity should return to target-task planning rather than
+    scaling the GSM8K smoke
+
+### DEC-0032: Gate Version B Behind the TriviaQA Baseline
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: Steps 2 through 4 completed structured retrieval context,
+  Version A-aligned `thread_update`, disabled replay, and bounded real-path
+  mechanism validation. The project still lacks a baseline on its intended
+  dynamic multi-turn target.
+- Decision:
+  - treat Version A-aligned `thread_update` implementation as completed
+  - complete notes review and commit preparation before further experiments
+  - plan and establish the TriviaQA Original MemGen / disabled-memory baseline
+    next
+  - do not enter Version B before the target-task baseline is stable
+- Rationale: Target-task evidence is now a larger research gap than additional
+  mechanism expansion.
+- Consequences:
+  - TriviaQA baseline planning is the next research activity
+  - last-retrieved decay and fallback top-1 remain later Version A variants
+  - retrieved-memory-to-Weaver Version B remains not started
+- Related experiments:
+  - `EXP-20260612-023-step3-disabled-replay`
+  - `EXP-20260612-024-thread-update-smoke`

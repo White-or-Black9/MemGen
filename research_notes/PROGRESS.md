@@ -2,11 +2,11 @@
 
 ## Current State
 
-- Current Phase: Phase 6 - Disabled-Feature Equivalence Test
+- Current Phase: Phase 7 - Version A Stability and Debug Experiment
 - Status: `completed`
 - Last updated: 2026-06-12
-- Stop condition: Reached; do not enter Phase 7 without explicit approval.
-- Next suggested Phase: Phase 7 - Version A Stability and Debug Experiment, after explicit approval.
+- Stop condition: Reached; do not enter Phase 8 without explicit approval.
+- Next suggested Phase: Phase 8 - Version A Analysis and Targeted Ablations, after explicit approval.
 
 ## Research Goal
 
@@ -250,6 +250,79 @@ Phase 6 is complete.
 - [x] Found no disabled-path regression and no new blocking bug.
 - [x] Did not modify core method code in this phase.
 - [x] Did not enter Phase 7.
+
+## Phase 7 Outcome
+
+Phase 7 is complete.
+
+- [x] Ran only enabled-path bounded debug and stability checks; no performance
+  claim was made.
+- [x] Kept seed `42`, batch size `1`, greedy decoding, and maximum response
+  length `1024`.
+- [x] Confirmed `git status` was clean before the run and protected training
+  paths had no diff.
+- [x] Re-ran `git diff --check`, `py_compile`, and full `unittest`; all passed.
+- [x] Ran Tier 1 smoke on one GSM8K test sample in enabled mode.
+- [x] Ran Tier 2 small stability on GSM8K test samples `0..2` in enabled mode.
+- [x] Ran Tier 3 bounded capacity on GSM8K test samples `0..4` in enabled mode.
+- [x] Confirmed all enabled runs wrote non-empty `answer.json` files with the
+  expected prediction count plus one summary record.
+- [x] Confirmed no crash, NaN, OOM, CUDA error, shape mismatch, device mismatch,
+  or dtype mismatch was observed in any Tier.
+- [x] Confirmed each single-turn session started with `initial_slots=0`.
+- [x] Confirmed no cross-sample leakage across Tier 2 or Tier 3 sessions.
+- [x] Confirmed retrieved memory remained Reasoner-only; Weaver input token
+  counts always matched `reasoner_to_weaver` input token counts.
+- [x] Confirmed stored latent memories remained reasoner-space tensors with
+  hidden size `1536`.
+- [x] Confirmed slot storage remained explicit: CPU storage, original device
+  `cuda:0`, original dtype `torch.bfloat16`, stored dtype `torch.bfloat16`.
+- [x] Confirmed `slot_count` never exceeded `max_slots=8`.
+- [x] Observed no replacement-policy activation in this bounded run because the
+  largest per-session slot count was `4`.
+- [x] Ran a post-Phase-7 capacity-trigger supplement with `max_slots=2` on one
+  real enabled session and confirmed replacement activation in the real
+  inference path.
+- [x] Confirmed the supplement recorded `append_count=2`, `replace_count=2`,
+  `rejected_write_count=0`, and
+  `update_action_trace=["append", "append", "replace", "replace"]`.
+- [x] Confirmed the supplement kept `final slot_count=2 <= max_slots=2` while
+  `memory_write_count=4 > max_slots`.
+- [x] Resolved the only outstanding Phase 7 warning: replacement policy is now
+  observed in the real enabled debug path.
+- [x] Recorded Tier 1 stats: writes `4`, retrieves `3`, retrieved latents `24`,
+  new latents `32`, slot count `4`, latency `8.658 s`, peak CUDA memory
+  `9,385,351,168` bytes.
+- [x] Recorded Tier 2 per-session stats:
+  sample 0 -> writes `4`, retrieves `3`, retrieved latents `24`, new latents
+  `32`, slot count `4`;
+  sample 1 -> writes `2`, retrieves `1`, retrieved latents `8`, new latents
+  `16`, slot count `2`;
+  sample 2 -> writes `4`, retrieves `3`, retrieved latents `24`, new latents
+  `32`, slot count `4`;
+  total latency `14.066 s`, mean latency `4.689 s/sample`, peak CUDA memory
+  `9,385,351,168` bytes.
+- [x] Recorded Tier 3 per-session stats:
+  sample 0 -> writes `4`, retrieves `3`, retrieved latents `24`, new latents
+  `32`, slot count `4`;
+  sample 1 -> writes `2`, retrieves `1`, retrieved latents `8`, new latents
+  `16`, slot count `2`;
+  sample 2 -> writes `4`, retrieves `3`, retrieved latents `24`, new latents
+  `32`, slot count `4`;
+  sample 3 -> writes `2`, retrieves `1`, retrieved latents `8`, new latents
+  `16`, slot count `2`;
+  sample 4 -> writes `4`, retrieves `3`, retrieved latents `24`, new latents
+  `32`, slot count `4`;
+  total latency `21.562 s`, mean latency `4.312 s/sample`, peak CUDA memory
+  `9,395,434,496` bytes.
+- [x] Found no new blocking bug in Phase 7.
+- [x] Modified only the debug harness and research notes in this Phase.
+- [x] Added debug-only bank summary fields and debug-harness CLI overrides for
+  capacity-trigger validation; no disabled-path or training-path semantics were
+  changed.
+- [x] Did not modify `memgen/trainer/**`, `scripts/train/**`, Weaver training
+  logic, Trigger training logic, or implement Version B.
+- [x] Did not enter Phase 8.
 
 ## End-of-Day Validation Outcome
 

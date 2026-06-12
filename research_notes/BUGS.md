@@ -14,6 +14,27 @@ Do not delete resolved entries.
 
 ## Recorded Bugs
 
+## Phase 7 Stability Check
+
+- Date: 2026-06-12
+- Status: no new blocker
+- Evidence:
+  - `EXP-20260612-015` Tier 1 smoke completed with one enabled session,
+    `initial_slots=0`, and no tensor/runtime failure.
+  - `EXP-20260612-016` Tier 2 stability completed with three independent
+    sessions; each started from `initial_slots=0` and no cross-sample leakage
+    was observed.
+  - `EXP-20260612-017` Tier 3 bounded capacity completed with five independent
+    sessions; `slot_count` never exceeded `4/8` and no replacement-policy or
+    leakage anomaly was observed.
+  - `EXP-20260612-018` capacity-trigger supplement forced
+    `max_slots=2` in the real enabled path and recorded
+    `update_action_trace=["append", "append", "replace", "replace"]`,
+    resolving the remaining replacement-path warning without exposing a new
+    blocker.
+- Scope note: This is a bounded enabled-path debug result only. It does not
+  supersede later analysis or ablation phases.
+
 ### BUG-0001: Nested PEFT Loading Skips Official LoRA Weights
 
 - Date found: 2026-06-11

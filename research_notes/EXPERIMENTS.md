@@ -19,6 +19,11 @@ overwrite prior records; append a new entry.
 | EXP-20260612-010 | 2026-06-12 | Phase 5 | Does `latent_memory_bank.enabled=false` preserve the exact Phase 3 golden behavior after Version A integration? | `completed` | Samples 0-2 matched Phase 3 response-token hashes, augmentation-mask hashes, and Trigger/Weaver call counts exactly |
 | EXP-20260612-011 | 2026-06-12 | Phase 5 | Does enabled Version A run on one sample without crashing and produce separate memory write/retrieve bookkeeping? | `completed` | One-sample debug completed with 4 writes, 3 retrievals, 24 retrieved latent tokens, 32 new latent tokens, and 4 resident slots |
 | EXP-20260612-013 | 2026-06-12 | Phase 6 | Does the full 20-sample disabled path remain exactly equivalent to the frozen Phase 3 baseline? | `completed` | All 20 response-token hashes, all 20 augmentation-mask hashes, summary metric, and Trigger/Weaver call counts matched `EXP-20260611-006` exactly |
+| EXP-20260612-014 | 2026-06-12 | Phase 7 | Does enabled Tier 1 smoke run complete before adding per-session debug trace? | `completed_with_caveats` | One-sample enabled run succeeded, then was superseded by `EXP-20260612-015` to capture session-level initial-slot evidence |
+| EXP-20260612-015 | 2026-06-12 | Phase 7 | Does enabled Tier 1 smoke run complete with correct Version A debug and session-local evidence? | `completed` | One-sample enabled run completed with `initial_slots=0`, 4 writes, 3 retrievals, 24 retrieved latent tokens, and Reasoner-only injection evidence |
+| EXP-20260612-016 | 2026-06-12 | Phase 7 | Do three enabled single-turn sessions remain isolated and stable on GSM8K samples 0..2? | `completed` | All three sessions started with `initial_slots=0`; no cross-sample leakage, no tensor errors, and slot count stayed within bounds |
+| EXP-20260612-017 | 2026-06-12 | Phase 7 | Does enabled Version A remain stable on a bounded five-sample run without exceeding slot limits? | `completed` | Five enabled sessions completed without crash or leakage; slot count never exceeded 4 and no replacement-policy activation was needed |
+| EXP-20260612-018 | 2026-06-12 | Phase 7 Supplement | Can the real enabled inference path be forced to trigger replacement by lowering `max_slots` to 2? | `completed` | One enabled sample completed with `memory_write_count=4`, `slot_count=2`, and `update_action_trace=[append, append, replace, replace]` |
 
 ## Recorded Experiments
 
@@ -914,6 +919,249 @@ full GSM8K test performance.
 - Follow-up:
 - Related decision IDs:
 - Artifacts:
+
+### EXP-20260612-014: Phase 7 Tier 1 Pre-Trace Smoke
+
+- Phase: 7
+- Status: `completed_with_caveats`
+- Research question: Does enabled Version A complete a bounded one-sample smoke
+  run before adding per-session trace capture?
+- Baseline/comparator: none; debug only
+- Sample IDs: `0`
+- Sample count: `1`
+- Seed: `42`
+- Batch size: `1`
+- Output directory:
+  `outputs/latent_bank_vA/EXP-20260612-014-phase7-tier1-smoke`
+- Key result: the run succeeded with 4 writes, 3 retrievals, 24 retrieved
+  latents, 32 new latents, and 4 resident slots, but it did not yet expose
+  session-level `initial_slots`, so it was superseded for durable Phase 7
+  evidence by `EXP-20260612-015`.
+
+### EXP-20260612-015: Phase 7 Tier 1 Enabled Smoke
+
+- Phase: 7
+- Status: `completed`
+- Research question: Can enabled Version A complete a one-sample bounded smoke
+  run with session-local debug evidence?
+- Baseline/comparator: none; debug only
+- Sample IDs: `0`
+- Sample count: `1`
+- Seed: `42`
+- Batch size: `1`
+- Decoding: greedy, temperature `0.0`, max response length `1024`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=7 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase5_memory_bank_debug --cfg-path configs/latent_memory/gsm8k.yaml --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/latent_bank_vA/EXP-20260612-015-phase7-tier1-smoke --sample-start 0 --sample-count 1 --max-response-length 1024 --memory-enabled`
+- Output directory:
+  `outputs/latent_bank_vA/EXP-20260612-015-phase7-tier1-smoke`
+- Prediction file:
+  `outputs/latent_bank_vA/EXP-20260612-015-phase7-tier1-smoke/evaluate/answer.json`
+- Verification file:
+  `outputs/latent_bank_vA/EXP-20260612-015-phase7-tier1-smoke/verification.json`
+
+#### Observations
+
+- `answer.json` contained one prediction and one summary record.
+- No crash, NaN, OOM, CUDA error, or shape/device/dtype mismatch occurred.
+- Session trace recorded `initial_slots=0`.
+- Adapter verification remained exact: Weaver `112/112`, Trigger `112/112`.
+- Final bank stats:
+  - `memory_write_count=4`
+  - `memory_retrieve_count=3`
+  - `retrieved_latent_count=24`
+  - `new_latent_count=32`
+  - `slot_count=4`
+- Stored latent tensors were reasoner-space `[8, 1536]` tensors.
+- Stored slot metadata remained explicit:
+  - `storage_device=cpu`
+  - `storage_dtype=torch.bfloat16`
+  - `original_device=cuda:0`
+  - `original_dtype=torch.bfloat16`
+- `weaver_input_token_counts` matched `reasoner_to_weaver_input_token_counts`
+  exactly, which is consistent with retrieved memory not entering Weaver.
+- Total latency: `8.658 s`
+- Peak allocated CUDA memory: `9,385,351,168` bytes
+- Auxiliary summary metric: `compute_reward=1.0`
+
+#### Conclusion
+
+- Hypothesis supported: yes
+- Interpretation: Enabled Version A completed a bounded one-sample run with the
+  expected write/retrieve behavior and session-local initialization evidence.
+- Scope note: This is a mechanism/stability check only, not a performance
+  result.
+
+### EXP-20260612-016: Phase 7 Tier 2 Small Stability
+
+- Phase: 7
+- Status: `completed`
+- Research question: Do three enabled single-turn sessions remain isolated and
+  stable on GSM8K samples `0..2`?
+- Baseline/comparator: none; debug only
+- Sample IDs: `0..2`
+- Sample count: `3`
+- Seed: `42`
+- Batch size: `1`
+- Decoding: greedy, temperature `0.0`, max response length `1024`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=7 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase5_memory_bank_debug --cfg-path configs/latent_memory/gsm8k.yaml --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/latent_bank_vA/EXP-20260612-016-phase7-tier2-stability --sample-start 0 --sample-count 3 --max-response-length 1024 --memory-enabled`
+- Output directory:
+  `outputs/latent_bank_vA/EXP-20260612-016-phase7-tier2-stability`
+- Prediction file:
+  `outputs/latent_bank_vA/EXP-20260612-016-phase7-tier2-stability/evaluate/answer.json`
+- Verification file:
+  `outputs/latent_bank_vA/EXP-20260612-016-phase7-tier2-stability/verification.json`
+
+#### Observations
+
+- `answer.json` contained three prediction records and one summary record.
+- Each recorded session started with `initial_slots=0`.
+- Session bank ids differed across all three samples.
+- No cross-sample leakage was observed.
+- Per-session bank summaries:
+  - sample 0: writes `4`, retrieves `3`, retrieved latents `24`, new latents
+    `32`, slot count `4`
+  - sample 1: writes `2`, retrieves `1`, retrieved latents `8`, new latents
+    `16`, slot count `2`
+  - sample 2: writes `4`, retrieves `3`, retrieved latents `24`, new latents
+    `32`, slot count `4`
+- `slot_count` never exceeded `max_slots=8`.
+- No crash, NaN, OOM, CUDA error, shape mismatch, device mismatch, or dtype
+  mismatch occurred.
+- `weaver_input_token_counts` matched `reasoner_to_weaver_input_token_counts`
+  exactly.
+- Total latency: `14.066 s`
+- Mean latency: `4.689 s/sample`
+- Peak allocated CUDA memory: `9,385,351,168` bytes
+- Auxiliary summary metric: `compute_reward=0.6666666666666666`
+
+#### Conclusion
+
+- Hypothesis supported: yes
+- Interpretation: Enabled Version A remained session-local and stable across
+  three independent single-turn samples.
+- Scope note: This is a bounded stability check only, not a comparative reward
+  result.
+
+### EXP-20260612-017: Phase 7 Tier 3 Bounded Capacity
+
+- Phase: 7
+- Status: `completed`
+- Research question: Does enabled Version A remain stable on a bounded
+  five-sample run without exceeding slot limits or showing leakage?
+- Baseline/comparator: none; debug only
+- Sample IDs: `0..4`
+- Sample count: `5`
+- Seed: `42`
+- Batch size: `1`
+- Decoding: greedy, temperature `0.0`, max response length `1024`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=7 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase5_memory_bank_debug --cfg-path configs/latent_memory/gsm8k.yaml --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/latent_bank_vA/EXP-20260612-017-phase7-tier3-capacity --sample-start 0 --sample-count 5 --max-response-length 1024 --memory-enabled`
+- Output directory:
+  `outputs/latent_bank_vA/EXP-20260612-017-phase7-tier3-capacity`
+- Prediction file:
+  `outputs/latent_bank_vA/EXP-20260612-017-phase7-tier3-capacity/evaluate/answer.json`
+- Verification file:
+  `outputs/latent_bank_vA/EXP-20260612-017-phase7-tier3-capacity/verification.json`
+
+#### Observations
+
+- `answer.json` contained five prediction records and one summary record.
+- All five recorded sessions started with `initial_slots=0`.
+- No cross-sample leakage was observed.
+- Per-session bank summaries:
+  - sample 0: writes `4`, retrieves `3`, retrieved latents `24`, new latents
+    `32`, slot count `4`
+  - sample 1: writes `2`, retrieves `1`, retrieved latents `8`, new latents
+    `16`, slot count `2`
+  - sample 2: writes `4`, retrieves `3`, retrieved latents `24`, new latents
+    `32`, slot count `4`
+  - sample 3: writes `2`, retrieves `1`, retrieved latents `8`, new latents
+    `16`, slot count `2`
+  - sample 4: writes `4`, retrieves `3`, retrieved latents `24`, new latents
+    `32`, slot count `4`
+- `slot_count` never exceeded `4`; therefore the configured replacement policy
+  was not triggered in this bounded run.
+- No crash, NaN, OOM, CUDA error, shape mismatch, device mismatch, or dtype
+  mismatch occurred.
+- `weaver_input_token_counts` matched `reasoner_to_weaver_input_token_counts`
+  exactly.
+- Total latency: `21.562 s`
+- Mean latency: `4.312 s/sample`
+- Peak allocated CUDA memory: `9,395,434,496` bytes
+- Auxiliary summary metric: `compute_reward=0.8`
+
+#### Conclusion
+
+- Hypothesis supported: yes
+- Interpretation: Enabled Version A remained stable in a bounded five-sample
+  run and did not expose leakage or capacity overruns.
+- Scope note: No method-quality claim follows from this debug result.
+
+### EXP-20260612-018: Phase 7 Capacity-Trigger Supplement
+
+- Phase: 7 supplement
+- Status: `completed`
+- Research question: Can the real enabled Version A inference path be forced to
+  trigger replacement by lowering `max_slots` to `2`?
+- Baseline/comparator: none; debug only
+- Sample IDs: `0`
+- Sample count: `1`
+- Seed: `42`
+- Batch size: `1`
+- Decoding: greedy, temperature `0.0`, max response length `1024`
+- Memory overrides:
+  - `max_slots=2`
+  - `update_policy=replace_oldest`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=7 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase5_memory_bank_debug --cfg-path configs/latent_memory/gsm8k.yaml --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/latent_bank_vA/EXP-20260612-018-phase7-capacity-trigger --sample-start 0 --sample-count 1 --max-response-length 1024 --memory-enabled --memory-max-slots 2 --memory-update-policy replace_oldest`
+- Output directory:
+  `outputs/latent_bank_vA/EXP-20260612-018-phase7-capacity-trigger`
+- Prediction file:
+  `outputs/latent_bank_vA/EXP-20260612-018-phase7-capacity-trigger/evaluate/answer.json`
+- Verification file:
+  `outputs/latent_bank_vA/EXP-20260612-018-phase7-capacity-trigger/verification.json`
+
+#### Observations
+
+- `answer.json` contained one prediction and one summary record.
+- No crash, NaN, OOM, CUDA error, or shape/device/dtype mismatch occurred.
+- Session trace recorded `initial_slots=0`.
+- Adapter verification remained exact: Weaver `112/112`, Trigger `112/112`.
+- Final bank stats:
+  - `memory_write_count=4`
+  - `memory_retrieve_count=3`
+  - `retrieved_latent_count=24`
+  - `new_latent_count=32`
+  - `slot_count=2`
+  - `append_count=2`
+  - `replace_count=2`
+  - `rejected_write_count=0`
+  - `last_update_action=replace`
+  - `update_action_trace=["append", "append", "replace", "replace"]`
+- This run therefore satisfied both trigger conditions:
+  - `memory_write_count > max_slots`
+  - `replace_count > 0`
+- Stored latent tensors remained reasoner-space `[8, 1536]` tensors.
+- Stored slot metadata remained explicit:
+  - `storage_device=cpu`
+  - `storage_dtype=torch.bfloat16`
+  - `original_device=cuda:0`
+  - `original_dtype=torch.bfloat16`
+- `weaver_input_token_counts` matched `reasoner_to_weaver_input_token_counts`
+  exactly, which is consistent with retrieved memory not entering Weaver.
+- Total latency: `8.563 s`
+- Peak allocated CUDA memory: `9,385,351,168` bytes
+- Auxiliary summary metric: `compute_reward=1.0`
+
+#### Conclusion
+
+- Hypothesis supported: yes
+- Interpretation: The real enabled Version A inference path can trigger
+  replacement cleanly under bounded debug conditions when `max_slots` is
+  lowered to `2`.
+- Scope note: This supplement verifies capacity/replacement behavior only. It
+  is not a performance experiment and makes no baseline-improvement claim.
 
 ## Reproducibility Checklist
 

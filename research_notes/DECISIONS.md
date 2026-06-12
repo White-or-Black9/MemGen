@@ -26,6 +26,8 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0017 | 2026-06-12 | accepted | Phase 5 keeps the bank interaction-owned and passes it explicitly into `MemGenModel.generate()` |
 | DEC-0018 | 2026-06-12 | accepted | Version A stores reasoner-space latents and injects retrieved memory only into the Reasoner path |
 | DEC-0019 | 2026-06-12 | accepted | Phase 6 disabled-path equivalence requires exact baseline hashes, metrics, and augmentation call counts on the frozen 20-sample comparator |
+| DEC-0020 | 2026-06-12 | accepted | Phase 7 enabled-path stability passes only on bounded session-local debug evidence and without performance claims |
+| DEC-0021 | 2026-06-12 | accepted | Phase 7 replacement-path evidence may use debug-only CLI overrides, but must stay on the real enabled inference path |
 
 ## Decision Template
 
@@ -345,6 +347,71 @@ IDs and append superseding decisions rather than silently rewriting history.
   - passing Phase 6 only authorizes consideration of later phases, not their
     automatic execution
 - Related experiments: `EXP-20260612-013`
+
+### DEC-0020: Phase 7 Enabled-Path Stability Acceptance Standard
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: Phase 7 needs a bounded pass/fail rule for enabled Version A that
+  checks mechanism stability without turning the phase into a performance study.
+- Decision: Treat Phase 7 as passing only if bounded enabled runs complete
+  without crash, NaN, OOM, CUDA error, shape mismatch, device mismatch, or
+  dtype mismatch; each single-turn session starts from `initial_slots=0`; no
+  cross-sample leakage appears; stored slot tensors remain reasoner-space
+  latents; `slot_count` never exceeds `max_slots`; and the debug trace remains
+  consistent with retrieved memory staying out of Weaver.
+- Alternatives considered:
+  - judge Phase 7 primarily by reward or accuracy changes
+  - skip session-level trace capture and rely only on final bank summaries
+  - extend Phase 7 directly into longer or larger enabled runs
+- Rationale: Enabled Version A still needs mechanism validation more than
+  quality comparison. Session-local isolation and tensor correctness are the
+  main claims at this stage.
+- Consequences:
+  - reward and `compute_reward` may be recorded as auxiliary outputs only
+  - bounded tiers are sufficient for a pass when all invariants hold
+  - larger enabled studies belong to later approved phases
+- Verification required:
+  - one-sample Tier 1 smoke
+  - three-sample Tier 2 session-isolation check
+  - five-sample Tier 3 bounded-capacity check
+- Related experiments:
+  - `EXP-20260612-015`
+  - `EXP-20260612-016`
+  - `EXP-20260612-017`
+
+### DEC-0021: Phase 7 Replacement-Path Supplement Standard
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: Phase 7 passed with one warning because the bounded five-sample run
+  did not naturally reach `max_slots=8`, so the real enabled replacement path
+  was not observed directly.
+- Decision: A Phase 7 supplement may lower memory-bank capacity through
+  debug-harness-only CLI overrides, provided the run still uses the real
+  enabled inference path, fixed seed, batch size `1`, the frozen GSM8K config
+  file, and no training or baseline artifacts are changed.
+- Alternatives considered:
+  - leave the warning unresolved and defer replacement-path evidence to a later
+    phase
+  - modify the main config file to force lower capacity
+  - add a synthetic non-inference test instead of using the real enabled path
+- Rationale: Lowering `max_slots` in the debug harness is the smallest way to
+  trigger replacement in the real mechanism without turning the supplement into
+  a broader experiment or mutating the frozen baseline config.
+- Consequences:
+  - the supplement remains a mechanism check, not a performance study
+  - debug-only CLI overrides are allowed for capacity-trigger evidence
+  - disabled-path equivalence evidence remains untouched because no disabled
+    branch or generate semantics changed
+- Verification required:
+  - `memory_write_count > max_slots`
+  - `slot_count <= max_slots`
+  - explicit replacement evidence such as `replace_count > 0` or
+    `update_action_trace`
+  - no runtime or tensor-contract failure
+- Related experiments:
+  - `EXP-20260612-018`
 
 ### DEC-0015: Detached Storage and Explicit Tensor Conversion
 

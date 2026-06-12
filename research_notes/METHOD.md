@@ -170,9 +170,47 @@ The bank debug summary now records:
 - `retrieved_latent_count`
 - `new_latent_count`
 - `slot_count`
+- `append_count`
+- `replace_count`
+- `rejected_write_count`
+- `last_update_action`
+- `update_action_trace`
 
 These counters stay separate so retrieved latents and new Weaver-produced
 latents are not conflated.
+
+For Phase 7 capacity-trigger supplements, the debug harness also accepts
+bounded CLI-only overrides for:
+
+- `max_slots`
+- `top_k`
+- `threshold`
+- `decay_alpha`
+- `update_policy`
+- `retrieve_policy`
+
+These are debug-only runtime overrides inside
+`scripts/eval/phase5_memory_bank_debug.py`. They do not modify
+`configs/latent_memory/gsm8k.yaml` or the frozen baseline configuration.
+
+## Phase 7 Stability Criteria
+
+Phase 7 treats enabled Version A as stable only if all of the following hold in
+bounded debug runs:
+
+- every run completes without crash, NaN, OOM, CUDA error, shape mismatch,
+  device mismatch, or dtype mismatch
+- every single-turn session starts from `initial_slots=0`
+- no cross-sample leakage appears across repeated single-turn sessions
+- stored slot tensors remain reasoner-space latents with hidden size `1536`
+- stored slot metadata preserves explicit storage/original device and dtype
+- `slot_count` never exceeds `max_slots`
+- `weaver_input_token_counts` matches
+  `reasoner_to_weaver_input_token_counts`, which is the Phase 7 trace used to
+  confirm that retrieved memory does not enter Weaver
+
+Phase 7 records latency and peak CUDA memory as overhead/debug context only. It
+does not treat enabled-path reward or accuracy as a performance claim.
 
 ### Disabled-Path Contract
 

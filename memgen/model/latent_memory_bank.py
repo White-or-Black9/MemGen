@@ -101,6 +101,11 @@ class LatentMemoryBank:
         self._memory_retrieve_count = 0
         self._retrieved_latent_count = 0
         self._new_latent_count = 0
+        self._append_count = 0
+        self._replace_count = 0
+        self._rejected_write_count = 0
+        self._last_update_action: Optional[str] = None
+        self._update_action_trace: List[str] = []
 
     def __len__(self) -> int:
         return len(self._slots)
@@ -115,6 +120,11 @@ class LatentMemoryBank:
         self._memory_retrieve_count = 0
         self._retrieved_latent_count = 0
         self._new_latent_count = 0
+        self._append_count = 0
+        self._replace_count = 0
+        self._rejected_write_count = 0
+        self._last_update_action = None
+        self._update_action_trace = []
 
     def build_query(self, hidden_states: torch.Tensor) -> torch.Tensor:
         states = self._normalize_memory_tensor(hidden_states, "hidden_states")
@@ -217,6 +227,9 @@ class LatentMemoryBank:
             len(self._slots) >= self.config.max_slots
             and self.config.update_policy == "append"
         ):
+            self._rejected_write_count += 1
+            self._last_update_action = "reject_append_full"
+            self._update_action_trace.append(self._last_update_action)
             return False
 
         original_device = str(normalized.device)
@@ -244,6 +257,9 @@ class LatentMemoryBank:
 
         if len(self._slots) < self.config.max_slots:
             self._slots.append(new_slot)
+            self._append_count += 1
+            self._last_update_action = "append"
+            self._update_action_trace.append(self._last_update_action)
             return True
         if self.config.update_policy == "replace_oldest":
             replace_index = min(
@@ -271,6 +287,9 @@ class LatentMemoryBank:
                     ),
                 )
         self._slots[replace_index] = new_slot
+        self._replace_count += 1
+        self._last_update_action = "replace"
+        self._update_action_trace.append(self._last_update_action)
         return True
 
     def debug_summary(self) -> Dict[str, Any]:
@@ -283,6 +302,11 @@ class LatentMemoryBank:
             "memory_retrieve_count": self._memory_retrieve_count,
             "retrieved_latent_count": self._retrieved_latent_count,
             "new_latent_count": self._new_latent_count,
+            "append_count": self._append_count,
+            "replace_count": self._replace_count,
+            "rejected_write_count": self._rejected_write_count,
+            "last_update_action": self._last_update_action,
+            "update_action_trace": list(self._update_action_trace),
             "slots": [slot.debug_summary() for slot in self._slots],
         }
 
@@ -317,7 +341,7 @@ class LatentMemoryBank:
         if tensor.ndim == 3:
             if tensor.shape[0] != 1:
                 raise ValueError(
-                    f"{name} only supports batch_size=1 in Phase 4; "
+                    f"{name} currently supports batch_size=1 only; "
                     f"received shape {tuple(tensor.shape)}"
                 )
             tensor = tensor.squeeze(0)

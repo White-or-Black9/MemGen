@@ -218,6 +218,48 @@ class LatentMemoryBankTest(unittest.TestCase):
         self.assertEqual(bank.debug_summary()["memory_write_count"], 0)
         self.assertEqual(bank.debug_summary()["memory_retrieve_count"], 0)
 
+    def test_debug_summary_records_append_replace_and_reject_actions(self):
+        replace_bank = LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                max_slots=2,
+                update_policy="replace_oldest",
+            )
+        )
+        replace_bank.write(torch.ones(1, 2))
+        replace_bank.write(torch.ones(1, 2) * 2)
+        replace_bank.write(torch.ones(1, 2) * 3)
+        replace_summary = replace_bank.debug_summary()
+        self.assertEqual(replace_summary["append_count"], 2)
+        self.assertEqual(replace_summary["replace_count"], 1)
+        self.assertEqual(replace_summary["rejected_write_count"], 0)
+        self.assertEqual(
+            replace_summary["update_action_trace"],
+            ["append", "append", "replace"],
+        )
+        self.assertEqual(replace_summary["last_update_action"], "replace")
+
+        append_bank = LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                max_slots=1,
+                update_policy="append",
+            )
+        )
+        append_bank.write(torch.ones(1, 2))
+        self.assertFalse(append_bank.write(torch.ones(1, 2) * 2))
+        append_summary = append_bank.debug_summary()
+        self.assertEqual(append_summary["append_count"], 1)
+        self.assertEqual(append_summary["replace_count"], 0)
+        self.assertEqual(append_summary["rejected_write_count"], 1)
+        self.assertEqual(
+            append_summary["update_action_trace"],
+            ["append", "reject_append_full"],
+        )
+        self.assertEqual(
+            append_summary["last_update_action"], "reject_append_full"
+        )
+
     def test_build_query_uses_recent_tokens(self):
         bank = LatentMemoryBank(
             LatentMemoryBankConfig(enabled=True, pool_last_n=2)

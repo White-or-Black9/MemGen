@@ -2,6 +2,7 @@ import argparse
 import hashlib
 import json
 import math
+import sys
 import time
 import warnings
 from pathlib import Path
@@ -30,6 +31,12 @@ def parse_args():
     parser.add_argument("--sample-count", type=int, default=3)
     parser.add_argument("--max-response-length", type=int, default=1024)
     parser.add_argument("--memory-enabled", action="store_true")
+    parser.add_argument("--memory-max-slots", type=int, default=8)
+    parser.add_argument("--memory-top-k", type=int, default=1)
+    parser.add_argument("--memory-threshold", type=float, default=0.7)
+    parser.add_argument("--memory-decay-alpha", type=float, default=0.05)
+    parser.add_argument("--memory-update-policy", default="replace_oldest")
+    parser.add_argument("--memory-retrieve-policy", default="threshold_topk")
     parser.add_argument(
         "--reference-verification",
         default="outputs/baseline/EXP-20260611-007/verification.json",
@@ -118,6 +125,39 @@ def install_generation_trace(model, trace):
     )
 
 
+def install_session_trace(generation_manager, trace):
+    original_create = generation_manager._create_session_memory_bank
+    original_run_agent_loop = generation_manager.run_agent_loop
+
+    def tracked_create(self, actual_batch_size):
+        bank = original_create(actual_batch_size)
+        trace["session_runs"].append(
+            {
+                "actual_batch_size": int(actual_batch_size),
+                "bank_created": bank is not None,
+                "initial_slots": len(bank) if bank is not None else None,
+                "bank_id": id(bank) if bank is not None else None,
+            }
+        )
+        return bank
+
+    def tracked_run_agent_loop(self, *args, **kwargs):
+        previous_count = len(trace["session_runs"])
+        result = original_run_agent_loop(*args, **kwargs)
+        if len(trace["session_runs"]) > previous_count:
+            trace["session_runs"][-1]["final_memory_bank_debug"] = (
+                self.latest_memory_bank_debug
+            )
+        return result
+
+    generation_manager._create_session_memory_bank = MethodType(
+        tracked_create, generation_manager
+    )
+    generation_manager.run_agent_loop = MethodType(
+        tracked_run_agent_loop, generation_manager
+    )
+
+
 def build_config_args(args, model_path, checkpoint_path):
     options = [
         "model.model_name",
@@ -157,19 +197,19 @@ def build_config_args(args, model_path, checkpoint_path):
         "run.latent_memory_bank.batch_size",
         "1",
         "run.latent_memory_bank.max_slots",
-        "8",
+        str(args.memory_max_slots),
         "run.latent_memory_bank.top_k",
-        "1",
+        str(args.memory_top_k),
         "run.latent_memory_bank.threshold",
-        "0.7",
+        str(args.memory_threshold),
         "run.latent_memory_bank.decay_alpha",
-        "0.05",
+        str(args.memory_decay_alpha),
         "run.latent_memory_bank.pool_last_n",
         "64",
         "run.latent_memory_bank.retrieve_policy",
-        "threshold_topk",
+        args.memory_retrieve_policy,
         "run.latent_memory_bank.update_policy",
-        "replace_oldest",
+        args.memory_update_policy,
         "run.latent_memory_bank.storage_device",
         "cpu",
         "run.latent_memory_bank.debug",
@@ -255,8 +295,10 @@ def main():
         "weaver_input_token_counts": [],
         "reasoner_to_weaver_input_token_counts": [],
         "generation_records": [],
+        "session_runs": [],
     }
     install_generation_trace(model, trace)
+    install_session_trace(runner.generation_manager, trace)
 
     torch.cuda.reset_peak_memory_stats()
     torch.cuda.synchronize()
@@ -281,6 +323,7 @@ def main():
     verification = {
         "phase": "Phase 5",
         "mode": "enabled_debug" if args.memory_enabled else "disabled_golden_replay",
+        "command": " ".join(sys.argv),
         "config_file": str(Path(args.cfg_path).resolve()),
         "model_path": model_path,
         "checkpoint_path": str(checkpoint_path),

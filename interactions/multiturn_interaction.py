@@ -146,6 +146,7 @@ class MultiTurnInteractionManager(InteractionManager):
         assert "init_prompts" in gen_batch.no_tensor_batch
         assert "envs" in gen_batch.no_tensor_batch
         batch_size = len(gen_batch.no_tensor_batch["init_prompts"])
+        memory_bank = self._create_session_memory_bank(actual_batch_size=batch_size)
 
         rollings = gen_batch
         rollings.no_tensor_batch["inter_histories"] = [[] for _ in range(batch_size)]
@@ -177,6 +178,7 @@ class MultiTurnInteractionManager(InteractionManager):
                 input_ids=inputs["input_ids"],
                 attention_mask=inputs["attention_mask"],
                 generation_config=self.generation_config,
+                latent_memory_bank=memory_bank,
             ).to("cpu")
 
             # postprocess: 提取回复，处理 EOS，环境后处理
@@ -200,6 +202,8 @@ class MultiTurnInteractionManager(InteractionManager):
             rollings.no_tensor_batch["inter_histories"] = interaction_histories
 
         # build final outputs
+        if memory_bank is not None:
+            self.latest_memory_bank_debug = memory_bank.debug_summary()
         final_outputs = self._build_final_outputs(rollings)
         return final_outputs
 

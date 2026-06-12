@@ -28,7 +28,9 @@ class LatentMemoryBankConfig:
 
     def __post_init__(self) -> None:
         if self.batch_size != 1:
-            raise ValueError("Phase 4 only supports batch_size=1")
+            raise ValueError(
+                "LatentMemoryBank currently supports batch_size=1 only"
+            )
         if self.max_slots <= 0:
             raise ValueError("max_slots must be greater than zero")
         if self.top_k <= 0:
@@ -95,6 +97,10 @@ class LatentMemoryBank:
         self._slots: List[LatentMemorySlot] = []
         # Counts successful memory writes, not generation tokens.
         self._step = 0
+        self._memory_write_count = 0
+        self._memory_retrieve_count = 0
+        self._retrieved_latent_count = 0
+        self._new_latent_count = 0
 
     def __len__(self) -> int:
         return len(self._slots)
@@ -105,6 +111,10 @@ class LatentMemoryBank:
     def clear(self) -> None:
         self._slots.clear()
         self._step = 0
+        self._memory_write_count = 0
+        self._memory_retrieve_count = 0
+        self._retrieved_latent_count = 0
+        self._new_latent_count = 0
 
     def build_query(self, hidden_states: torch.Tensor) -> torch.Tensor:
         states = self._normalize_memory_tensor(hidden_states, "hidden_states")
@@ -190,6 +200,8 @@ class LatentMemoryBank:
                     original_dtype=slot.original_dtype,
                 )
             )
+        self._memory_retrieve_count += 1
+        self._retrieved_latent_count += sum(slot.memory.shape[0] for slot in retrieved)
         return retrieved
 
     def write(
@@ -218,6 +230,8 @@ class LatentMemoryBank:
         ).clone()
 
         self._step += 1
+        self._memory_write_count += 1
+        self._new_latent_count += stored_memory.shape[0]
         new_slot = LatentMemorySlot(
             memory=stored_memory,
             key=stored_key,
@@ -265,6 +279,10 @@ class LatentMemoryBank:
             "enabled": self.config.enabled,
             "step": self._step,
             "slot_count": len(self._slots),
+            "memory_write_count": self._memory_write_count,
+            "memory_retrieve_count": self._memory_retrieve_count,
+            "retrieved_latent_count": self._retrieved_latent_count,
+            "new_latent_count": self._new_latent_count,
             "slots": [slot.debug_summary() for slot in self._slots],
         }
 

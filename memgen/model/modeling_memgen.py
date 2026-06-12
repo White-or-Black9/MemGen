@@ -1,7 +1,7 @@
 import logging
 import os
 import random
-from typing import Union
+from typing import Optional, Union
 
 import torch
 import torch.nn as nn
@@ -409,6 +409,7 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
         attention_mask: torch.Tensor,
         generation_config: GenerationConfig = None,
         return_augmentation_mask: bool = False,
+        latent_memory_bank: Optional[object] = None,
         **kwargs
     ) -> Union[torch.LongTensor, tuple[torch.LongTensor, torch.LongTensor]]:
         """
@@ -448,6 +449,10 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
         inputs_embeds = reasoner.get_input_embeddings()(input_ids)
         B, _, hidden_size = inputs_embeds.shape
         device = inputs_embeds.device
+        if latent_memory_bank is not None and B != 1:
+            raise ValueError(
+                "latent_memory_bank-enabled generate currently supports batch_size=1 only"
+            )
 
         # 初始化生成循环
         current_inputs_embeds = inputs_embeds
@@ -496,10 +501,59 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                         weaver_inputs_embeds, candidate_attention_mask, candidate_position_ids
                     )
                 latent_inputs_embeds = self.weaver_to_reasoner(weaver_hidden_states)
-
-                # 注入 latent 到序列中
-                candidate_inputs_embeds = torch.cat([candidate_inputs_embeds, latent_inputs_embeds], dim=1)
-                candidate_attention_mask = torch.cat([candidate_attention_mask, attn_mask], dim=1)
+                if latent_memory_bank is None:
+                    # Preserve the original disabled path exactly.
+                    candidate_inputs_embeds = torch.cat(
+                        [candidate_inputs_embeds, latent_inputs_embeds], dim=1
+                    )
+                    candidate_attention_mask = torch.cat(
+                        [candidate_attention_mask, attn_mask], dim=1
+                    )
+                    pad_len = (
+                        weaver.prompt_latents_num
+                        if i == 0
+                        else weaver.inference_latents_num
+                    )
+                else:
+                    retrieved_slots = latent_memory_bank.retrieve(
+                        candidate_inputs_embeds.detach(),
+                        device=device,
+                        dtype=current_inputs_embeds.dtype,
+                    )
+                    if retrieved_slots:
+                        retrieved_memory = torch.cat(
+                            [slot.memory for slot in retrieved_slots], dim=0
+                        ).unsqueeze(0)
+                        retrieved_attention_mask = torch.ones(
+                            (1, retrieved_memory.size(1)),
+                            device=device,
+                            dtype=current_attention_mask.dtype,
+                        )
+                        candidate_inputs_embeds = torch.cat(
+                            [
+                                candidate_inputs_embeds,
+                                retrieved_memory,
+                                latent_inputs_embeds,
+                            ],
+                            dim=1,
+                        )
+                        candidate_attention_mask = torch.cat(
+                            [
+                                candidate_attention_mask,
+                                retrieved_attention_mask,
+                                attn_mask,
+                            ],
+                            dim=1,
+                        )
+                    else:
+                        candidate_inputs_embeds = torch.cat(
+                            [candidate_inputs_embeds, latent_inputs_embeds], dim=1
+                        )
+                        candidate_attention_mask = torch.cat(
+                            [candidate_attention_mask, attn_mask], dim=1
+                        )
+                    latent_memory_bank.write(latent_inputs_embeds.detach())
+                    pad_len = candidate_inputs_embeds.size(1) - current_inputs_embeds.size(1)
 
                 # 合并增强和未增强的序列
                 new_len = candidate_inputs_embeds.size(1)
@@ -514,7 +568,6 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                 if len(non_augment_indices) > 0:
                     non_aug_inputs_embeds = current_inputs_embeds[non_augment_indices]
                     non_aug_attention_mask = current_attention_mask[non_augment_indices]
-                    pad_len = weaver.prompt_latents_num if i == 0 else weaver.inference_latents_num
                     non_aug_inputs_embeds, non_aug_attention_mask, _ = self._left_pad(
                         non_aug_inputs_embeds, non_aug_attention_mask, None, pad_len
                     )

@@ -124,13 +124,19 @@ class SingleTurnInteractionManager(InteractionManager):
         rollings_active = {
             k: v for k, v in rollings.batch.items()
         }
+        memory_bank = self._create_session_memory_bank(
+            actual_batch_size=rollings_active["input_ids"].size(0)
+        )
 
         # model generation: 调用 MemGenModel.generate()
         gen_output = self.actor_rollout_wg.generate(
             rollings_active["input_ids"],
             rollings_active["attention_mask"],
             generation_config=self.generation_config,
+            latent_memory_bank=memory_bank,
         )
+        if memory_bank is not None:
+            self.latest_memory_bank_debug = memory_bank.debug_summary()
         responses_ids = gen_output[:, rollings_active["input_ids"].size(1):]
         responses_ids = self.tensor_fn.erase_after_first_eos(responses_ids, self.tokenizer.eos_token_id)
 

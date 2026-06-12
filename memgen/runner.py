@@ -524,4 +524,5 @@ class MemGenRunner:
             output_dir=os.path.join(self.working_dir, "evaluate"),
             weaver_do_sample=interaction_configs.get("weaver_do_sample", False),
             trigger_do_sample=interaction_configs.get("trigger_do_sample", False),
+            latent_memory_bank=configs.get("latent_memory_bank"),
         )

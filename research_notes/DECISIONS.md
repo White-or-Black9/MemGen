@@ -23,6 +23,8 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0014 | 2026-06-11 | accepted | Keep the Phase 4 memory bank standalone, session-owned, and disabled by default |
 | DEC-0015 | 2026-06-11 | accepted | Detach and clone every stored latent, with explicit storage and retrieval conversion |
 | DEC-0016 | 2026-06-11 | accepted | Use mean-pooled cosine retrieval with recency decay and bounded replacement skeletons |
+| DEC-0017 | 2026-06-12 | accepted | Phase 5 keeps the bank interaction-owned and passes it explicitly into `MemGenModel.generate()` |
+| DEC-0018 | 2026-06-12 | accepted | Version A stores reasoner-space latents and injects retrieved memory only into the Reasoner path |
 
 ## Decision Template
 
@@ -257,6 +259,60 @@ IDs and append superseding decisions rather than silently rewriting history.
   inference, existing GSM8K configuration, and protected training paths still
   have no Phase 4 integration diff.
 - Related experiment: `EXP-20260611-008`
+
+### DEC-0017: Interaction-Owned Phase 5 Runtime State
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: Phase 5 must integrate the bank into inference without storing any
+  cross-session state on `MemGenModel`, and without forcing existing baseline
+  configs to change.
+- Decision: The interaction manager owns the session-local bank for the duration
+  of one `run_agent_loop()` call and passes it explicitly into
+  `MemGenModel.generate(...)`.
+- Alternatives considered:
+  - storing the bank on `MemGenModel`
+  - storing the bank as a long-lived runner field
+  - restructuring the entire config system around a required memory-bank schema
+- Rationale: This matches the verified reset boundary, preserves session
+  isolation, and keeps the configuration change optional and minimal.
+- Consequences:
+  - single-turn calls create one bank per sample session
+  - multi-turn calls create one bank per episode
+  - disabled mode can skip bank construction entirely
+- Verification required:
+  - no cross-sample leakage across repeated `run_agent_loop()` calls
+  - no enabled-path access when `batch_size > 1`
+  - disabled-path golden replay remains exact
+- Related experiments: `EXP-20260612-010`, `EXP-20260612-011`
+
+### DEC-0018: Reasoner-Space Version A Storage and Injection
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: Phase 5 only permits Reasoner-side retrieval and injection; retrieved
+  memory must not enter Weaver, and stored latent dimensionality must already
+  match the Reasoner path.
+- Decision:
+  - retrieve using Reasoner-side candidate inputs
+  - store only `latent_inputs_embeds` after `weaver_to_reasoner(...)`
+  - inject retrieved memories only into the Reasoner sequence
+  - keep the disabled path on the original branch
+- Alternatives considered:
+  - storing `weaver_hidden_states`
+  - sending retrieved memory through `reasoner_to_weaver()`
+  - unifying enabled and disabled branches behind one shared tensor pipeline
+- Rationale: Storing Reasoner-space latents avoids hidden-size mismatch and
+  keeps Version A tightly scoped to Reasoner injection.
+- Consequences:
+  - retrieved memory and new latent memory require separate mask bookkeeping
+  - debug counters must distinguish retrieved and newly generated latents
+  - Version B remains a separate future phase
+- Verification required:
+  - retrieved memory never reaches Weaver inputs
+  - written memory matches Reasoner-space latent tensors
+  - disabled-path hashes and call counts remain exact
+- Related experiments: `EXP-20260612-010`, `EXP-20260612-011`
 
 ### DEC-0015: Detached Storage and Explicit Tensor Conversion
 

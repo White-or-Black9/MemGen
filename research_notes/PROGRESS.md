@@ -2,11 +2,11 @@
 
 ## Current State
 
-- Current Phase: Phase 4 - LatentMemoryBank Module Skeleton
+- Current Phase: Phase 5 - Version A Integration
 - Status: `completed`
-- Last updated: 2026-06-11
-- Stop condition: Reached; do not enter Phase 5 without explicit approval.
-- Next suggested Phase: Phase 5 - Version A Integration, after explicit approval.
+- Last updated: 2026-06-12
+- Stop condition: Reached; do not enter Phase 6 without explicit approval.
+- Next suggested Phase: Phase 6 - Disabled-Feature Equivalence Test, after explicit approval.
 
 ## Research Goal
 
@@ -181,6 +181,46 @@ Phase 4 is complete.
 - [x] Confirmed importing `MemGenModel` does not load the memory-bank module.
 - [x] Did not modify existing GSM8K configuration or original inference behavior.
 - [x] Did not enter Phase 5.
+
+## Phase 5 Outcome
+
+Phase 5 is complete.
+
+- [x] Integrated the optional LatentMemoryBank into inference only.
+- [x] Kept the bank session-local and owned by each interaction-manager
+  `run_agent_loop()` call.
+- [x] Used one bank per single-turn session and one bank shared across all turns
+  in one multi-turn episode.
+- [x] Passed the bank explicitly into `MemGenModel.generate()` and did not store
+  any bank object on `MemGenModel`.
+- [x] Preserved the original disabled path by keeping
+  `latent_memory_bank=None` / `enabled=false` on the original code branch with no
+  new retrieval, write, mask, or tensor-packaging work.
+- [x] Implemented Version A retrieval so retrieved memory is injected only into
+  the Reasoner path and is never passed into `reasoner_to_weaver()`,
+  `augment_prompt()`, or `augment_inference()`.
+- [x] Wrote only reasoner-space `latent_inputs_embeds` into the bank after
+  `weaver_to_reasoner(...)`.
+- [x] Added explicit retrieved-memory attention-mask handling and separate debug
+  bookkeeping for `memory_write_count`, `memory_retrieve_count`,
+  `retrieved_latent_count`, `new_latent_count`, and `slot_count`.
+- [x] Rejected `enabled=true` evaluation with `batch_size > 1` and kept
+  disabled mode unrestricted.
+- [x] Added lightweight integration tests for disabled no-op, empty-bank no-op,
+  session reset, no cross-sample leakage, Reasoner-only injection,
+  reasoner-space writes, dtype/device compatibility, and enabled batch-size
+  rejection.
+- [x] Passed `py_compile`, full `unittest`, and `git diff --check`.
+- [x] Ran disabled-path golden replay `EXP-20260612-010` on GSM8K samples
+  `0..2`; response-token hashes, augmentation-mask hashes, Trigger call count,
+  Weaver prompt count, and Weaver inference count matched
+  `EXP-20260611-007` exactly.
+- [x] Ran enabled debug `EXP-20260612-011` on GSM8K sample `0`; the run did not
+  crash and recorded 4 writes, 3 retrievals, 24 retrieved latent tokens,
+  32 newly written latent tokens, and 4 resident slots.
+- [x] Did not modify `memgen/trainer/**`, `scripts/train/**`, Weaver training
+  logic, Trigger training logic, or implement Version B.
+- [x] Did not enter Phase 6.
 
 ## End-of-Day Validation Outcome
 

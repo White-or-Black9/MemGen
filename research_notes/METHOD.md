@@ -22,7 +22,7 @@ without retraining Weaver or Trigger and without changing disabled-path behavior
 - Modifying Weaver or Trigger training.
 - Training a globally shared memory.
 - Connecting the bank to production inference in Phase 4.
-- Implementing Version A or Version B in Phase 4.
+- Implementing Version B in Phase 5.
 
 ## Conceptual Pipeline
 
@@ -117,6 +117,76 @@ When `enabled=false`:
 - No production code constructs the class in Phase 4, so original MemGen
   inference has no additional state, calls, or numerical operations.
 
+## Phase 5 Version A Integration
+
+Implementation:
+
+- `interactions/base_interaction.py`
+- `interactions/singleturn_interaction.py`
+- `interactions/multiturn_interaction.py`
+- `memgen/runner.py`
+- `memgen/model/modeling_memgen.py`
+
+### Runtime Wiring
+
+- `run.latent_memory_bank` is an optional runner config subtree.
+- Existing baseline configs remain valid because the subtree may be absent.
+- Each interaction-manager `run_agent_loop()` creates one local bank only when
+  `enabled=true`.
+- The bank is passed explicitly into `MemGenModel.generate(...)` as
+  `latent_memory_bank=...`.
+- `MemGenModel` does not keep any persistent bank field.
+
+### Session Lifecycle
+
+- Single-turn static evaluation: one bank per `run_agent_loop()` call.
+- Multi-turn dynamic evaluation: one bank shared across all turns in one
+  `run_agent_loop()` episode.
+- A new session or episode creates a fresh bank; memory cannot leak across
+  calls.
+
+### Version A Injection Rule
+
+When Trigger decides to augment:
+
+1. Build the retrieval query from the current Reasoner-side candidate inputs.
+2. Retrieve prior reasoner-space latent memories from the session-local bank.
+3. Send only the original candidate inputs through `reasoner_to_weaver()` and
+   Weaver augmentation.
+4. Project Weaver outputs back to Reasoner space as `latent_inputs_embeds`.
+5. Inject Reasoner tokens in this order:
+   `[retrieved_reasoner_latents; new_reasoner_latents]`.
+6. Write only the new reasoner-space `latent_inputs_embeds` into the bank.
+
+Retrieved memory is never passed into Weaver and never participates in
+`reasoner_to_weaver()`.
+
+### Phase 5 Debug Bookkeeping
+
+The bank debug summary now records:
+
+- `memory_write_count`
+- `memory_retrieve_count`
+- `retrieved_latent_count`
+- `new_latent_count`
+- `slot_count`
+
+These counters stay separate so retrieved latents and new Weaver-produced
+latents are not conflated.
+
+### Disabled-Path Contract
+
+When `latent_memory_bank` is absent or `enabled=false`:
+
+- interaction managers do not construct a bank
+- `MemGenModel.generate()` receives `latent_memory_bank=None`
+- the original latent-injection branch remains intact
+- no new retrieval, write, attention-mask, list-wrapping, or tensor-padding
+  code runs on the disabled path
+
+This branch passed exact golden replay against `EXP-20260611-007` in
+`EXP-20260612-010`.
+
 ## Phase 4 Configuration
 
 ```yaml
@@ -151,25 +221,26 @@ is not merged into current runtime configuration in Phase 4.
 
 ## Current Limitations
 
-- No inference integration.
-- No Version A or Version B behavior.
+- No Version B behavior.
 - No multi-sample batch support.
 - No persistence contract for experiment checkpoints.
 - No learned query, key, aggregation, or update function.
 - No cross-session or cross-sample memory.
-- No GPU integration test; conversion behavior is unit-tested on CPU.
+- No enabled-path performance claim; Phase 5 only establishes mechanism and
+  compatibility.
 
 ## End-of-Day Isolation Status
 
-Validated on 2026-06-11:
+Validated on 2026-06-12:
 
-- The standalone skeleton passes all 16 unit tests.
-- `latent_memory_bank.enabled` remains `false` in its separate default template.
-- `MemGenModel.generate()`, runner, interaction managers, and model exports do
-  not reference or construct `LatentMemoryBank`.
-- Existing GSM8K configuration and all Weaver/Trigger training paths remain
-  unchanged.
-- Phase 5 integration has not started.
+- The standalone skeleton plus Phase 5 integration passes 24 unit and
+  integration tests.
+- `latent_memory_bank.enabled=false` exactly reproduces the accepted Phase 3
+  golden response-token and augmentation-mask hashes on samples `0..2`.
+- Existing GSM8K configuration remains unchanged and valid when the optional
+  config subtree is absent.
+- All Weaver/Trigger training paths remain unchanged.
+- Version A integration is present and Version B has not started.
 
 ## Open Questions
 

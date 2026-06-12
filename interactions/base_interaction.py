@@ -34,6 +34,7 @@ class InteractionConfig:
     output_dir: Optional[str] = None
     weaver_do_sample: bool = False
     trigger_do_sample: bool = False
+    latent_memory_bank: Optional[dict] = None
 
 
 @dataclass
@@ -98,6 +99,26 @@ class InteractionManager(ABC):
         self.generation_config.trigger_do_sample = self.config.trigger_do_sample
 
         logging.info(f"Weaver do sample: {self.generation_config.weaver_do_sample}, Trigger do sample: {self.generation_config.trigger_do_sample}")
+        self.latest_memory_bank_debug = None
+
+    def _create_session_memory_bank(self, actual_batch_size: int):
+        config_dict = self.config.latent_memory_bank
+        self.latest_memory_bank_debug = None
+        if not config_dict or not config_dict.get("enabled", False):
+            return None
+        if self.config.batch_size != 1 or actual_batch_size != 1:
+            raise ValueError(
+                "Phase 5 latent_memory_bank only supports batch_size=1 when enabled"
+            )
+
+        from memgen.model.latent_memory_bank import (
+            LatentMemoryBank,
+            LatentMemoryBankConfig,
+        )
+
+        bank = LatentMemoryBank(LatentMemoryBankConfig(**config_dict))
+        bank.reset()
+        return bank
 
     @abstractmethod
     def run_agent_loop(self, gen_batch: InteractionDataProto) -> InteractionDataProto:

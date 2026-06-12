@@ -209,11 +209,14 @@ class LatentMemoryBankTest(unittest.TestCase):
     def test_reset_clears_memory_and_step(self):
         bank = LatentMemoryBank(LatentMemoryBankConfig(enabled=True))
         bank.write(torch.ones(2, 3))
+        bank.retrieve(torch.ones(2, 3))
 
         bank.reset()
 
         self.assertEqual(len(bank), 0)
         self.assertEqual(bank.debug_summary()["step"], 0)
+        self.assertEqual(bank.debug_summary()["memory_write_count"], 0)
+        self.assertEqual(bank.debug_summary()["memory_retrieve_count"], 0)
 
     def test_build_query_uses_recent_tokens(self):
         bank = LatentMemoryBank(

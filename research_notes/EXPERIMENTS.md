@@ -16,6 +16,8 @@ overwrite prior records; append a new entry.
 | EXP-20260611-007 | 2026-06-11 | Phase 3 | Are the fixed golden outputs deterministic under exact replay? | `completed` | Samples 0-2 reproduced identical response-token and augmentation-mask hashes |
 | EXP-20260611-008 | 2026-06-11 | Phase 4 | Does the standalone memory-bank skeleton satisfy its tensor, retrieval, capacity, and isolation contracts? | `completed` | 16/16 unit tests passed after cleanup; production inference and training references remained absent |
 | EXP-20260611-009 | 2026-06-11 | End-of-Day Validation | Are the Repair fixes, Phase 3 baseline artifacts, and Phase 4 skeleton ready for commit and later continuation? | `completed` | Compilation and 16/16 tests passed; baseline/golden artifacts and adapter evidence remained complete; Phase 4 remained isolated |
+| EXP-20260612-010 | 2026-06-12 | Phase 5 | Does `latent_memory_bank.enabled=false` preserve the exact Phase 3 golden behavior after Version A integration? | `completed` | Samples 0-2 matched Phase 3 response-token hashes, augmentation-mask hashes, and Trigger/Weaver call counts exactly |
+| EXP-20260612-011 | 2026-06-12 | Phase 5 | Does enabled Version A run on one sample without crashing and produce separate memory write/retrieve bookkeeping? | `completed` | One-sample debug completed with 4 writes, 3 retrievals, 24 retrieved latent tokens, 32 new latent tokens, and 4 resident slots |
 
 ## Recorded Experiments
 
@@ -216,8 +218,140 @@ overwrite prior records; append a new entry.
     create a lock file under the read-only home cache; the same command
     succeeded outside the sandbox without downloading data
 - Environment variables:
-  - `HTTP_PROXY` and `HTTPS_PROXY` target `127.0.0.1:7898`
-  - `NO_PROXY` only covers localhost
+- `HTTP_PROXY` and `HTTPS_PROXY` target `127.0.0.1:7898`
+- `NO_PROXY` only covers localhost
+
+### EXP-20260612-010: Phase 5 Disabled-Path Golden Replay
+
+- Phase: 5
+- Status: `completed`
+- Research question: After Version A integration, does
+  `latent_memory_bank.enabled=false` preserve the accepted Phase 3 golden
+  behavior exactly?
+- Hypothesis: The disabled path should remain byte-for-byte identical to
+  `EXP-20260611-007` on samples `0..2`.
+- Baseline/comparator: `EXP-20260611-007`
+- Git branch: `rlm-memory-bank`
+- Working tree state: uncommitted Phase 5 inference-only integration, tests,
+  validation script, and research-note updates
+- Environment:
+  `/home/baishilong/miniconda3/envs/memgen`, Python `3.10.20`, PyTorch
+  `2.12.0+cu126`, single NVIDIA RTX A6000 via `CUDA_VISIBLE_DEVICES=7`
+- Config file: `configs/latent_memory/gsm8k.yaml`
+- Optional config override:
+  `run.latent_memory_bank.enabled=false`
+- Model path:
+  `/home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306`
+- Checkpoint path:
+  `/mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model`
+- Dataset path:
+  `/home/baishilong/.cache/huggingface/datasets/gsm8k/main/0.0.0/740312add88f781978c0658806c59bc2815b9866`
+- Dataset and split: cached `gsm8k/main`, test samples `0..2`
+- Random seed: `42`
+- Batch size: `1`
+- Decoding: greedy, temperature `0.0`, max response length `1024`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=7 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase5_memory_bank_debug --cfg-path configs/latent_memory/gsm8k.yaml --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/latent_bank_vA/EXP-20260612-010-disabled-replay --sample-start 0 --sample-count 3 --max-response-length 1024`
+- Output directory:
+  `outputs/latent_bank_vA/EXP-20260612-010-disabled-replay`
+- Prediction file:
+  `outputs/latent_bank_vA/EXP-20260612-010-disabled-replay/evaluate/answer.json`
+- Verification file:
+  `outputs/latent_bank_vA/EXP-20260612-010-disabled-replay/verification.json`
+
+#### Observations
+
+- Adapter verification remained exact: Weaver `112/112`, Trigger `112/112`.
+- Response-token SHA-256 hashes matched `EXP-20260611-007` exactly for all
+  three records.
+- Augmentation-mask SHA-256 hashes matched `EXP-20260611-007` exactly for all
+  three records.
+- Trigger decision calls matched exactly: `193`.
+- Weaver prompt calls matched exactly: `3`.
+- Weaver inference calls matched exactly: `8`.
+- `memory_bank_debug` remained `null`, confirming no bank was created on the
+  disabled path.
+- `answer.json` contained three prediction records and one summary record.
+- Summary metric on this three-sample subset was `compute_reward=1.0`.
+- Total latency was `18.026` seconds; peak allocated CUDA memory was
+  `9,391,621,120` bytes.
+
+#### Conclusion
+
+- Hypothesis supported: yes
+- Interpretation: The disabled Version A path preserved the accepted golden
+  behavior exactly on samples `0..2`.
+- Scope note: This is an equivalence check only; it does not replace a future
+  broader Phase 6 disabled-path campaign.
+- Related decisions: `DEC-0002`, `DEC-0017`, `DEC-0018`
+
+### EXP-20260612-011: Phase 5 Enabled Version A Debug
+
+- Phase: 5
+- Status: `completed`
+- Research question: Can enabled Version A run on a real GSM8K sample, write and
+  retrieve session-local reasoner-space memories, and keep the mechanism within
+  the intended scope?
+- Hypothesis: One-sample enabled debug should complete without crashing and
+  should record separate write/retrieve bookkeeping.
+- Baseline/comparator: none; debug only
+- Git branch: `rlm-memory-bank`
+- Working tree state: uncommitted Phase 5 inference-only integration, tests,
+  validation script, and research-note updates
+- Environment:
+  `/home/baishilong/miniconda3/envs/memgen`, Python `3.10.20`, PyTorch
+  `2.12.0+cu126`, single NVIDIA RTX A6000 via `CUDA_VISIBLE_DEVICES=7`
+- Config file: `configs/latent_memory/gsm8k.yaml`
+- Optional config override:
+  `run.latent_memory_bank.enabled=true`
+- Model path:
+  `/home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306`
+- Checkpoint path:
+  `/mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model`
+- Dataset path:
+  `/home/baishilong/.cache/huggingface/datasets/gsm8k/main/0.0.0/740312add88f781978c0658806c59bc2815b9866`
+- Dataset and split: cached `gsm8k/main`, test sample `0`
+- Random seed: `42`
+- Batch size: `1`
+- Decoding: greedy, temperature `0.0`, max response length `1024`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=7 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase5_memory_bank_debug --cfg-path configs/latent_memory/gsm8k.yaml --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/latent_bank_vA/EXP-20260612-011-enabled-debug --sample-start 0 --sample-count 1 --max-response-length 1024 --memory-enabled`
+- Output directory:
+  `outputs/latent_bank_vA/EXP-20260612-011-enabled-debug`
+- Prediction file:
+  `outputs/latent_bank_vA/EXP-20260612-011-enabled-debug/evaluate/answer.json`
+- Verification file:
+  `outputs/latent_bank_vA/EXP-20260612-011-enabled-debug/verification.json`
+
+#### Observations
+
+- Adapter verification remained exact: Weaver `112/112`, Trigger `112/112`.
+- The run completed without crash on one sample.
+- `memory_bank_debug` recorded:
+  - `memory_write_count=4`
+  - `memory_retrieve_count=3`
+  - `retrieved_latent_count=24`
+  - `new_latent_count=32`
+  - `slot_count=4`
+- Stored slots remained in Reasoner hidden size `1536` and were stored on CPU
+  with original source device recorded as `cuda:0`.
+- Weaver prompt and inference call counts were `1` and `3`.
+- The trace recorded identical token counts for `reasoner_to_weaver` inputs and
+  Weaver inputs on every augmentation call, consistent with retrieved memory not
+  being passed into Weaver.
+- `answer.json` contained one prediction record and one summary record.
+- Summary metric on this one-sample debug run was `compute_reward=1.0`.
+- Total latency was `9.255` seconds; peak allocated CUDA memory was
+  `9,385,351,168` bytes.
+
+#### Conclusion
+
+- Hypothesis supported: yes
+- Interpretation: Enabled Version A mechanism works on a real sample and records
+  separate write/retrieve statistics without touching training code.
+- Scope note: This is a mechanism debug only. It must not be treated as a
+  performance or quality claim relative to the baseline.
+- Related decisions: `DEC-0017`, `DEC-0018`
   - no `HF_ENDPOINT` was present in the final alignment shell
 - Manifest differences:
   - README specifies Python 3.10

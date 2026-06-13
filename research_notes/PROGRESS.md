@@ -617,3 +617,175 @@ project status.
   - Version B has not started
 - Recommendation:
   - return to TriviaQA baseline planning before adding further method variants
+
+## 2026-06-12 - Phase 8C-alt Controlled Multi-Turn Mechanism Evaluation
+
+- Status: `completed_with_negative_smoke`
+- Scope:
+  - added a harness-only deterministic three-turn evaluation
+  - Turn 3 reconstructs the visible prompt from system instruction plus the
+    current query, excluding Turn 1 and Turn 2 history
+  - this is a mechanism study and cannot replace TriviaQA
+- Implementation:
+  - added `scripts/eval/phase8c_controlled_memory.py`
+  - added `tests/test_controlled_multiturn_memory.py`
+  - did not modify core model, Weaver, Trigger, runner, interaction managers,
+    trainers, training scripts, or baseline configuration
+- Validation:
+  - `py_compile` passed
+  - full unit discovery passed `56/56`
+  - `git diff --check` passed
+- Smoke experiments:
+  - `EXP-20260612-025`: failed because the first harness revision did not move
+    the model to CUDA before FlashAttention; fixed in the harness only
+  - `EXP-20260612-026`: G0 disabled completed one three-turn episode, passed
+    all leakage checks, created no bank, and scored `0/1`
+  - `EXP-20260612-027`: G2 `thread_update` completed one three-turn episode,
+    passed all leakage checks, kept one bank across turns, and scored `0/1`
+- G2 mechanism evidence:
+  - slot counts after turns: `[1, 2, 3]`
+  - `memory_write_count=12`
+  - `memory_retrieve_count=11`
+  - `retrieved_latent_count=72`
+  - `new_latent_count=96`
+  - `thread_insert_count=3`
+  - `matched_replace_count=9`
+  - `capacity_evict_count=0`
+  - stored hidden sizes remained `1536`
+  - Weaver input counts matched reasoner-to-Weaver input counts
+- Interpretation:
+  - the controlled session lifecycle and Version A-aligned mechanism operate
+    across three independent prompt calls
+  - neither G0 nor G2 produced a tagged exact answer in this one-episode smoke
+  - the negative smoke does not establish method failure because the harness
+    uses a GSM8K-trained checkpoint on an out-of-distribution synthetic task
+  - no fallback top-1, last-retrieved decay, or Version B was introduced
+
+## 2026-06-13 - G3 Oracle-Visible One-Episode Smoke
+
+- Status: `completed_with_protocol_failure`
+- Experiment: `EXP-20260613-001`
+- Output:
+  `outputs/controlled_memory/EXP-20260613-001-controlled-g3-oracle-visible/`
+- Configuration:
+  - group `G3_oracle_visible`
+  - one deterministic exact-code episode
+  - `seed=42`, `batch_size=1`, greedy decoding
+  - `max_response_length=64`
+  - memory disabled and `oracle_visible=true`
+- Oracle prompt checks:
+  - Turn 3 visibly included the early fact and gold value `770487`
+  - Turn 3 prompt length was `90` tokens
+  - oracle-visible content was expected and was not treated as leakage
+- Result:
+  - raw Turn 3 response was
+    `The access code for Project Lumen is 770487.`
+  - the response contained the correct gold value but omitted the required
+    `<answer>...</answer>` tags
+  - strict parser output was `null`, so exact match was `0/1`
+  - the episode remained structurally valid and completed without runtime error
+- Interpretation:
+  - the checkpoint can read the visible oracle fact and produce the correct
+    answer content
+  - the current tagged-output protocol is not reliably followed by this
+    checkpoint, so G0/G2 strict exact-match failures are confounded by the
+    prompt/parser contract
+  - G3 is an oracle visible-context control, not a memory-method result and not
+    a fair comparison with G0/G2
+  - this controlled study does not replace TriviaQA
+  - no harness, core model, Weaver, Trigger, trainer, or training-script code
+    was changed
+  - no fallback top-1, last-retrieved decay, or Version B was introduced
+- Recommendation:
+  - audit the prompt/parser scoring contract before running G1 or any larger
+    controlled pilot
+
+## 2026-06-13 - Controlled Parser Calibration
+
+- Status: `implemented`
+- Scope:
+  - modified only the controlled harness, its tests, and research notes
+  - did not run G0, G1, G2, G3, or a small pilot
+  - did not modify core model, Weaver, Trigger, runner, interactions, trainers,
+    or training scripts
+- Prompt contract:
+  - all groups now receive the same final instruction:
+    `Return exactly one line: <answer>VALUE</answer>. Do not include any other
+    text.`
+  - G0/G1/G2 still exclude the early fact and gold value from Turn 3
+  - G3 still includes the early fact and gold value as an oracle-visible
+    positive control
+- Scoring contract:
+  - `strict_exact_match` uses only the last complete
+    `<answer>...</answer>` span
+  - `relaxed_exact_match` reuses the strict candidate when available
+  - exact-code fallback accepts exactly one standalone six-digit candidate
+  - zero candidates produce `none`; multiple candidates produce `ambiguous`
+  - semantic-relation fallback normalizes only the complete short response
+    after stripping outer quotes and one terminal punctuation mark
+  - no LLM judge, gold substring search, gold-guided candidate selection, or
+    fuzzy semantic matching is allowed
+  - legacy `exact_match` remains only as a deprecated alias for
+    `strict_exact_match`
+- Artifact contract:
+  - turn and episode records now include strict and relaxed parsed answers,
+    parser success flags, parser mode, and both exact-match metrics
+  - summary and verification records now include strict/relaxed counts and
+    rates plus parser-success counts
+- Evidence reclassification:
+  - `EXP-20260612-026`, `EXP-20260612-027`, and `EXP-20260613-001` are
+    pre-parser-calibration smoke runs
+  - they remain useful for runtime, leakage, bank-lifecycle, and boundary
+    evidence, but are not calibrated comparison results
+- Validation:
+  - targeted controlled-harness tests passed `22/22`
+  - `py_compile` passed for the harness and controlled test module
+  - full unit discovery passed `69/69`
+  - `git diff --check` passed
+- Scope boundaries:
+  - controlled evaluation remains a mechanism study and does not replace
+    TriviaQA
+  - no fallback top-1, last-retrieved decay, or Version B was introduced
+
+## 2026-06-13 - Calibrated G0/G2/G3 One-Episode Smokes
+
+- Status: `completed`
+- Pre-run validation:
+  - full unit discovery passed `69/69`
+  - `git diff --check` passed
+  - no protected core, Weaver, Trigger, runner, interaction, trainer, or
+    training-script diff was present
+- Shared protocol:
+  - frozen calibrated prompt and dual strict/relaxed scoring
+  - one deterministic exact-code episode
+  - `seed=42`, `batch_size=1`, greedy decoding
+  - `max_response_length=64`
+- `EXP-20260613-002` calibrated G0:
+  - Turn 3 excluded the early fact and gold value
+  - no bank was created
+  - raw response contained the unique wrong code `123456`
+  - strict exact match `0/1`; relaxed exact match `0/1`
+- `EXP-20260613-003` calibrated G2:
+  - one bank persisted across all three turns
+  - slots after turns were `[1, 2, 3]`
+  - 12 writes, 11 retrievals, 3 thread inserts, and 9 matched replacements
+  - retrieved memory remained Reasoner-only
+  - stored latent hidden sizes remained `1536`
+  - raw response contained the unique wrong code `123456`
+  - strict exact match `0/1`; relaxed exact match `0/1`
+- `EXP-20260613-004` calibrated G3:
+  - Turn 3 included the oracle-visible early fact and gold value `770487`
+  - raw response was
+    `The access code for Project Lumen is 770487.`
+  - strict parser failed because tags were absent
+  - relaxed parser extracted the unique code `770487`
+  - strict exact match `0/1`; relaxed exact match `1/1`
+- Interpretation:
+  - the calibrated parser distinguishes format compliance from deterministic
+    answer correctness as intended
+  - G3 validates the oracle-visible prompt and relaxed exact-code extraction
+  - under relaxed exact match, neither G0 nor G2 recovered the hidden fact in
+    this one-episode smoke
+  - this is mechanism-level evidence only and is not a performance conclusion
+  - controlled evaluation does not replace TriviaQA
+  - no fallback top-1, last-retrieved decay, or Version B was introduced

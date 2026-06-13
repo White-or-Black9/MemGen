@@ -30,6 +30,13 @@ overwrite prior records; append a new entry.
 | EXP-20260612-022 | 2026-06-12 | Phase 8A G7 | Does the legacy replace policy run stably on the pilot slice? | `completed` | Stable 20-sample run; `compute_reward=0.50` (`10/20`); `replace_count=0` |
 | EXP-20260612-023-step3-disabled-replay | 2026-06-12 | Step 3 | Does disabled behavior remain exact after `thread_update` integration? | `completed` | Samples 0-2 exactly matched frozen response-token hashes, augmentation-mask hashes, and Trigger/Weaver call counts |
 | EXP-20260612-024-thread-update-smoke | 2026-06-12 | Step 4 | Does Version A-aligned `thread_update` operate correctly on the real enabled inference path? | `completed` | Mechanism smoke only: one empty-bank insert and three current-argmax matched replacements; Reasoner-only and reasoner-space boundaries held |
+| EXP-20260612-025 | 2026-06-12 | Phase 8C-alt | Can the first controlled G0 harness revision run on the real checkpoint? | `failed` | Harness left the model on CPU, causing a FlashAttention CPU-backend error; no core defect |
+| EXP-20260612-026 | 2026-06-12 | Phase 8C-alt | Does the controlled three-turn disabled path run without visible-history leakage? | `pre_parser_calibration_smoke` | Runtime/leakage smoke only; old strict-only exact match was `0/1` |
+| EXP-20260612-027 | 2026-06-12 | Phase 8C-alt | Does Version A-aligned `thread_update` preserve one bank across controlled turns? | `pre_parser_calibration_smoke` | Lifecycle/boundary smoke only; slots `[1,2,3]`; old strict-only exact match was `0/1` |
+| EXP-20260613-001 | 2026-06-13 | Phase 8C-alt G3 | Can the checkpoint answer when the early fact is visible in the final oracle prompt and satisfy the tagged-output protocol? | `pre_parser_calibration_smoke` | Correct gold content was generated without tags; this motivated the frozen dual-metric parser contract |
+| EXP-20260613-002 | 2026-06-13 | Phase 8C-alt calibrated G0 | What does disabled memory produce under the frozen prompt/parser contract? | `completed` | Unique wrong code `123456`; strict `0/1`, relaxed `0/1`; no bank |
+| EXP-20260613-003 | 2026-06-13 | Phase 8C-alt calibrated G2 | Does calibrated G2 preserve lifecycle and recover the hidden fact? | `completed` | Slots `[1,2,3]`, 12 writes, 11 retrievals; unique wrong code `123456`; strict `0/1`, relaxed `0/1` |
+| EXP-20260613-004 | 2026-06-13 | Phase 8C-alt calibrated G3 | Does the calibrated oracle-visible control validate deterministic relaxed scoring? | `completed` | Correct untagged code `770487`; strict `0/1`, relaxed `1/1` |
 
 ## Recorded Experiments
 
@@ -1527,3 +1534,288 @@ full GSM8K test performance.
   - current retrieval still has no fallback top-1
   - current decay remains write-age decay
   - Version B has not started
+
+### EXP-20260612-025: Controlled G0 Initial Harness Failure
+
+- Phase: 8C-alt
+- Status: `failed`
+- Purpose: First real one-episode disabled smoke for the controlled harness.
+- Output:
+  `outputs/controlled_memory/EXP-20260612-025-controlled-g0-disabled/`
+- Result:
+  - model loading succeeded
+  - first Weaver prompt augmentation was reached
+  - FlashAttention failed because the harness converted model dtype but did
+    not move the model from CPU to CUDA
+- Resolution:
+  - fixed device placement in the harness only
+  - no MemGen core logic changed
+- Interpretation: Harness implementation failure, not a model or method result.
+
+### EXP-20260612-026: Controlled G0 Disabled Smoke
+
+- Phase: 8C-alt
+- Status: `pre_parser_calibration_smoke`
+- Evidence classification: runtime, leakage, and disabled-bank smoke only; not
+  a calibrated comparison result.
+- Purpose: Controlled multi-turn mechanism smoke, not a performance experiment.
+- Output:
+  `outputs/controlled_memory/EXP-20260612-026-controlled-g0-disabled/`
+- Configuration:
+  - group `G0_disabled`
+  - one deterministic exact-code episode
+  - three independent visible prompts
+  - Turn 3 excludes early fact, value, distractor, and previous-turn text
+  - `seed=42`, `batch_size=1`, greedy, `max_response_length=64`
+  - GSM8K Weaver-SFT checkpoint reused with an explicit distribution-mismatch
+    caveat
+- Results:
+  - three turns completed
+  - leakage pass `1/1`
+  - valid episodes `1/1`
+  - exact match `0/1`
+  - `bank_created=false`
+  - `memory_bank_debug=null`
+  - Trigger calls `135`
+  - Weaver prompt calls `3`
+  - Weaver inference calls `9`
+  - total episode latency `16.343 s`
+  - no crash, NaN, OOM, CUDA, shape, dtype, or device error
+- Interpretation:
+  - validates the controlled disabled protocol and leakage checks
+  - does not establish a task-level baseline or performance conclusion
+
+### EXP-20260612-027: Controlled G2 Thread-Update Smoke
+
+- Phase: 8C-alt
+- Status: `pre_parser_calibration_smoke`
+- Evidence classification: bank lifecycle and Reasoner-only boundary smoke
+  only; not a calibrated comparison result.
+- Purpose: Verify cross-turn Version A-aligned memory lifecycle and boundaries.
+- Output:
+  `outputs/controlled_memory/EXP-20260612-027-controlled-g2-thread-update/`
+- Configuration:
+  - group `G2_vA_thread_update`
+  - one deterministic exact-code episode
+  - same session-local bank across three independent visible prompts
+  - `seed=42`, `batch_size=1`, greedy, `max_response_length=64`
+  - write-age decay, no fallback top-1, Reasoner-only injection
+- Results:
+  - three turns completed
+  - leakage pass `1/1`
+  - valid episodes `1/1`
+  - exact match `0/1`
+  - one bank persisted across all turns
+  - slots after turns `[1, 2, 3]`
+  - `memory_write_count=12`
+  - `memory_retrieve_count=11`
+  - `retrieved_latent_count=72`
+  - `new_latent_count=96`
+  - `thread_insert_count=3`
+  - `matched_replace_count=9`
+  - `capacity_evict_count=0`
+  - stored latent hidden sizes were all `1536`
+  - Weaver input counts equaled reasoner-to-Weaver input counts
+  - Trigger calls `115`
+  - Weaver prompt calls `3`
+  - Weaver inference calls `9`
+  - total episode latency `13.959 s`
+  - no crash, NaN, OOM, CUDA, shape, dtype, or device error
+- Interpretation:
+  - confirms that the bank survives across controlled turns and that
+    `thread_update` executes on the real model path
+  - no tagged correct answer was produced
+  - this one synthetic episode cannot establish benefit or failure
+  - the GSM8K checkpoint is out of distribution for this task
+  - this remains Version A and is not Version B
+
+### EXP-20260613-001: Controlled G3 Oracle-Visible Smoke
+
+- Phase: 8C-alt G3
+- Status: `pre_parser_calibration_smoke`
+- Evidence classification: oracle-content and parser-contract diagnostic only;
+  not a calibrated comparison result.
+- Purpose: Test the visible-context oracle upper bound and the controlled
+  prompt/parser protocol, not memory performance.
+- Output:
+  `outputs/controlled_memory/EXP-20260613-001-controlled-g3-oracle-visible/`
+- Configuration:
+  - group `G3_oracle_visible`
+  - one deterministic exact-code episode
+  - Turn 3 visibly included the early fact and gold answer
+  - `seed=42`, `batch_size=1`, greedy, `max_response_length=64`
+  - memory disabled, `oracle_visible=true`
+  - same model and checkpoint as `EXP-20260612-026` and
+    `EXP-20260612-027`
+- Command:
+  `env -u HF_ENDPOINT -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY CUDA_VISIBLE_DEVICES=0 TRANSFORMERS_OFFLINE=1 HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TOKENIZERS_PARALLELISM=false /home/baishilong/miniconda3/envs/memgen/bin/python -m scripts.eval.phase8c_controlled_memory --model-path /home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --checkpoint-path /mnt/18T/baishilong/MemGen/.cache/baselines/memgen-gsm8k-sft/model --output-dir /mnt/18T/baishilong/MemGen/outputs/controlled_memory/EXP-20260613-001-controlled-g3-oracle-visible --group G3_oracle_visible --sample-count 1 --seed 42 --max-response-length 64 --batch-size 1 --memory-mode disabled`
+- Results:
+  - all five required artifacts were generated
+  - `answer.json` was non-empty
+  - valid episodes `1/1`
+  - Turn 3 prompt contained the early fact and gold value `770487`
+  - Turn 3 prompt length was `90` tokens
+  - raw Turn 3 response:
+    `The access code for Project Lumen is 770487.`
+  - response contained no `<answer>...</answer>` span
+  - parser returned `null`
+  - strict exact match `0/1`
+  - no bank was created
+  - Trigger calls `116`
+  - Weaver prompt calls `3`
+  - Weaver inference calls `7`
+  - total episode latency `5.477 s`
+  - no crash, non-finite metric, OOM, CUDA, shape, dtype, or device error
+- Execution note:
+  - the first invocation used the script path directly and stopped before model
+    loading with `ModuleNotFoundError: common`
+  - rerunning the unchanged harness through
+    `python -m scripts.eval.phase8c_controlled_memory` resolved the import-path
+    issue
+  - no partial artifact was created by the failed invocation
+- Interpretation:
+  - the checkpoint can extract and state the correct answer when it is visible
+  - the strict tagged parser does not recognize the semantically correct raw
+    answer because the checkpoint ignored the requested output tags
+  - current controlled exact-match results are therefore confounded by
+    instruction-format compliance
+  - G3 is not memory evidence, is not a fair G0/G2 comparator, and does not
+    replace TriviaQA
+  - Version B, fallback top-1, and last-retrieved decay remain unimplemented
+- Follow-up:
+  - audit and pre-register the prompt/parser scoring contract before G1 or a
+    larger controlled pilot
+
+### 2026-06-13 Controlled Parser Calibration
+
+- Status: `implemented_without_experiment_run`
+- Purpose: Freeze one deterministic scoring contract before any controlled
+  group comparison.
+- Implementation:
+  - strict parser accepts only the last complete `<answer>...</answer>` span
+  - relaxed parser first reuses a strict candidate
+  - exact-code fallback accepts exactly one standalone six-digit number
+  - multiple six-digit candidates are `ambiguous`; zero candidates are `none`
+  - semantic fallback evaluates only a normalized complete short response
+  - legacy `exact_match` is a deprecated alias for `strict_exact_match`
+- Prohibited scoring behavior:
+  - no gold answer is passed to the relaxed extractor
+  - no gold substring search or gold-guided candidate selection
+  - no LLM judge
+  - no fuzzy semantic matching
+- Artifact changes:
+  - episode and Turn 3 records include strict/relaxed parsed answers, parser
+    success flags, parser mode, and both exact-match metrics
+  - summaries and verification files include strict/relaxed counts and rates
+    plus parser-success counts
+- Prompt change:
+  - all groups use the same exact one-line tagged-output instruction
+  - only G3 includes the oracle-visible fact and value
+- Validation:
+  - no model experiment was run
+  - targeted controlled-harness tests passed `22/22`
+  - harness and controlled-test `py_compile` passed
+  - full unit discovery passed `69/69`
+  - `git diff --check` passed
+- Next evidence rule:
+  - G0/G2/G3 must be rerun under the frozen calibrated prompt and parser before
+    their accuracy metrics can be compared
+  - G1 and any small pilot remain gated
+- Scope:
+  - controlled evaluation remains mechanism evidence and does not replace
+    TriviaQA
+  - no fallback top-1, last-retrieved decay, or Version B was implemented
+
+### EXP-20260613-002: Calibrated G0 Disabled Smoke
+
+- Phase: 8C-alt calibrated G0
+- Status: `completed`
+- Output:
+  `outputs/controlled_memory/EXP-20260613-002-calibrated-g0-disabled/`
+- Configuration:
+  - group `G0_disabled`, memory mode `disabled`
+  - one deterministic exact-code episode
+  - `seed=42`, `batch_size=1`, greedy, `max_response_length=64`
+  - frozen calibrated prompt and dual strict/relaxed scoring
+- Results:
+  - valid episodes `1/1`; leakage checks passed
+  - Turn 3 excluded the early fact and gold value
+  - raw response:
+    `The access code for Project Lumen is 123456.`
+  - strict parser returned `null`
+  - relaxed parser returned `123456` with
+    `parser_mode=exact_code_single_candidate`
+  - strict exact match `0/1`; relaxed exact match `0/1`
+  - no bank was created and `memory_bank_debug=null`
+  - Trigger calls `116`; Weaver prompt calls `3`; Weaver inference calls `7`
+  - latency `5.668 s`
+  - no crash, non-finite metric, OOM, CUDA, shape, dtype, or device error
+- Interpretation:
+  - disabled memory did not recover the hidden fact in this one-episode smoke
+  - parser success does not imply answer correctness
+
+### EXP-20260613-003: Calibrated G2 Thread-Update Smoke
+
+- Phase: 8C-alt calibrated G2
+- Status: `completed`
+- Output:
+  `outputs/controlled_memory/EXP-20260613-003-calibrated-g2-thread-update/`
+- Configuration:
+  - group `G2_vA_thread_update`, memory mode `vA_thread_update`
+  - one deterministic exact-code episode
+  - `seed=42`, `batch_size=1`, greedy, `max_response_length=64`
+  - frozen calibrated prompt and dual strict/relaxed scoring
+  - write-age decay, no fallback top-1, Reasoner-only retrieval
+- Results:
+  - valid episodes `1/1`; leakage checks passed
+  - one bank persisted across all three turns
+  - slots after turns `[1, 2, 3]`; final slots `3`
+  - `memory_write_count=12`, `memory_retrieve_count=11`
+  - `thread_insert_count=3`, `matched_replace_count=9`
+  - `capacity_evict_count=0`
+  - stored latent hidden sizes `[1536, 1536, 1536]`
+  - Weaver input counts exactly matched reasoner-to-Weaver input counts
+  - raw response began with the unique wrong code `123456`
+  - strict parser returned `null`; relaxed parser returned `123456`
+  - strict exact match `0/1`; relaxed exact match `0/1`
+  - Trigger calls `115`; Weaver prompt calls `3`; Weaver inference calls `9`
+  - latency `5.853 s`
+  - no crash, non-finite metric, OOM, CUDA, shape, dtype, or device error
+- Interpretation:
+  - Version A-aligned lifecycle and boundaries remain operational
+  - G2 did not recover the hidden fact under relaxed scoring in this episode
+  - this is not evidence for or against unimplemented Version B
+
+### EXP-20260613-004: Calibrated G3 Oracle-Visible Smoke
+
+- Phase: 8C-alt calibrated G3
+- Status: `completed`
+- Output:
+  `outputs/controlled_memory/EXP-20260613-004-calibrated-g3-oracle-visible/`
+- Configuration:
+  - group `G3_oracle_visible`, memory mode `disabled`
+  - one deterministic exact-code episode
+  - `seed=42`, `batch_size=1`, greedy, `max_response_length=64`
+  - frozen calibrated prompt and dual strict/relaxed scoring
+- Results:
+  - valid episodes `1/1`
+  - Turn 3 included the early fact and gold value `770487`
+  - raw response:
+    `The access code for Project Lumen is 770487.`
+  - strict parser returned `null` because answer tags were absent
+  - relaxed parser returned `770487` with
+    `parser_mode=exact_code_single_candidate`
+  - strict exact match `0/1`; relaxed exact match `1/1`
+  - no bank was created
+  - Trigger calls `116`; Weaver prompt calls `3`; Weaver inference calls `7`
+  - latency `5.589 s`
+  - no crash, non-finite metric, OOM, CUDA, shape, dtype, or device error
+- Interpretation:
+  - the oracle-visible prompt exposes enough information for a correct raw
+    answer
+  - relaxed exact-code extraction works as pre-registered
+  - strict output-format compliance remains poor for this checkpoint
+  - G3 is an upper-bound protocol control, not a memory-method result
+  - controlled evaluation remains a mechanism study and does not replace
+    TriviaQA
+  - no fallback top-1, last-retrieved decay, or Version B was introduced

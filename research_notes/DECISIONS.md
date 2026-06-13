@@ -39,6 +39,8 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0030 | 2026-06-12 | accepted | Reuse the verified Phase 6 disabled anchor for Phase 8A |
 | DEC-0031 | 2026-06-12 | accepted | Treat Phase 8A as a stability-first pilot rather than a final performance experiment |
 | DEC-0032 | 2026-06-12 | accepted | Complete Version A-aligned thread_update and gate Version B behind a TriviaQA target-task baseline |
+| DEC-0033 | 2026-06-12 | accepted | Use a controlled three-turn fallback only as mechanism evidence while TriviaQA infrastructure is blocked |
+| DEC-0034 | 2026-06-13 | accepted | Freeze strict and deterministic relaxed scoring before controlled group comparison |
 
 ## Decision Template
 
@@ -760,3 +762,61 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Related experiments:
   - `EXP-20260612-023-step3-disabled-replay`
   - `EXP-20260612-024-thread-update-smoke`
+
+### DEC-0033: Controlled Multi-Turn Fallback Is Mechanism Evidence Only
+
+- Date: 2026-06-12
+- Status: accepted
+- Context: TriviaQA cannot currently run because its checkpoint, datasets, and
+  retrieval service are unavailable, while cross-turn memory persistence still
+  needs a bounded real-model check.
+- Decision:
+  - add a harness-only deterministic three-turn evaluation
+  - strictly remove prior visible history from the final query
+  - compare disabled, Version A-simple, and Version A-aligned modes only when
+    explicitly run
+  - treat all results as mechanism or sanity evidence
+  - do not substitute this protocol for a real dynamic target-task baseline
+- Rationale: The controlled task isolates lifecycle and leakage behavior at low
+  infrastructure cost without changing MemGen core logic.
+- Consequences:
+  - synthetic exact match cannot support a main performance claim
+  - GSM8K-checkpoint distribution mismatch must accompany every result
+  - negative outcomes do not reject Version B or the full research hypothesis
+  - TriviaQA remains the intended target-task route when infrastructure exists
+- Related experiments:
+  - `EXP-20260612-025`
+  - `EXP-20260612-026`
+  - `EXP-20260612-027`
+
+### DEC-0034: Freeze the Controlled Prompt and Dual-Metric Parser Contract
+
+- Date: 2026-06-13
+- Status: accepted
+- Context: `EXP-20260613-001` generated the correct visible oracle answer but
+  omitted `<answer>` tags, causing the strict-only parser to report `0/1`.
+- Decision:
+  - use one strengthened one-line tagged-output instruction for all groups
+  - report both `strict_exact_match` and `relaxed_exact_match`
+  - keep strict parsing limited to complete answer tags
+  - allow exact-code relaxed extraction only for exactly one standalone
+    six-digit candidate
+  - treat multiple exact-code candidates as ambiguous
+  - evaluate semantic fallback only as normalized complete-response exact match
+  - prohibit gold-aware extraction, LLM judges, and fuzzy semantic matching
+  - retain legacy `exact_match` only as a deprecated strict-metric alias
+- Rationale: The policy separates format compliance from deterministic answer
+  correctness without adding subjective scoring or gold-guided extraction.
+- Consequences:
+  - the same frozen prompt and parser must be used by G0/G1/G2/G3
+  - `EXP-20260612-026`, `EXP-20260612-027`, and `EXP-20260613-001` are
+    pre-parser-calibration smoke runs, not final comparison results
+  - calibrated G0/G2/G3 one-episode reruns are required before considering G1
+    or a larger controlled pilot
+  - controlled evaluation remains a mechanism study and does not replace
+    TriviaQA
+  - fallback top-1, last-retrieved decay, and Version B remain unimplemented
+- Related experiments:
+  - `EXP-20260612-026`
+  - `EXP-20260612-027`
+  - `EXP-20260613-001`

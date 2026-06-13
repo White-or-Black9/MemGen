@@ -468,6 +468,112 @@ mixed evidence is sufficient for mechanism validation but not for any
 performance claim. Retrieval still uses write-age decay, has no fallback
 top-1, and does not send retrieved memory into Weaver.
 
+## Phase 8C-alt Controlled Multi-Turn Mechanism Study
+
+The controlled protocol is an infrastructure-light fallback while the
+TriviaQA checkpoint, data, and retrieval service remain unavailable. Each
+episode uses three separate generation calls:
+
+1. expose a synthetic session-specific early fact
+2. expose an unrelated distractor
+3. reconstruct the visible prompt from only the system instruction and query
+
+The Turn 3 prompt is invalid if it contains the early fact, gold value,
+distractor, or previous-turn instruction text. Enabled groups reuse one
+session-local bank across all three calls, while each new episode creates a
+fresh bank.
+
+Groups:
+
+- `G0_disabled`: no bank
+- `G1_vA_simple`: Reasoner-only memory with legacy `replace_oldest`
+- `G2_vA_thread_update`: Reasoner-only memory with `thread_update`
+- `G3_oracle_visible`: optional visible-fact control, not a fair memory
+  comparator
+
+The protocol records exact match, prompt leakage, bank lifecycle, retrieval
+scores, write-back traces, Trigger/Weaver calls, reasoner-space storage, and
+Reasoner-only input boundaries.
+
+Evidence limits:
+
+- this is a mechanism study and cannot replace TriviaQA
+- the available GSM8K checkpoint is out of distribution for synthetic
+  multi-turn fact retention
+- a positive result would show only a controlled mechanism signal
+- a negative result cannot reject the full proposed method
+- retrieval remains write-age based with no fallback top-1
+- retrieved memory remains outside Weaver, so this is not Version B
+
+The G3 oracle-visible control is an upper-bound protocol check rather than a
+memory group. Its Turn 3 prompt intentionally contains the early fact and gold
+value, so those fields are expected and are not leakage. `EXP-20260613-001`
+showed that the checkpoint can generate the correct visible answer content
+while omitting the required `<answer>...</answer>` wrapper. Under the current
+strict parser this produces `final_answer=null` and exact match `0/1`.
+Therefore, controlled exact match currently combines semantic answer accuracy
+with tagged-format compliance. The prompt/parser scoring contract must be
+audited before interpreting G0, G1, or G2 exact-match differences or launching
+a larger controlled pilot.
+
+### Frozen Controlled Scoring Contract
+
+Effective after the 2026-06-13 parser calibration, every controlled group uses
+the same final output instruction:
+
+```text
+Return exactly one line:
+<answer>VALUE</answer>
+Do not include any other text.
+```
+
+G0/G1/G2 still receive only the current query in Turn 3. G3 additionally
+receives the early fact and gold value as its explicitly oracle-visible
+positive control.
+
+Every episode records two pre-registered metrics:
+
+- `strict_exact_match`
+  - parse only complete `<answer>...</answer>` spans
+  - use the last span when multiple spans exist
+  - apply normalized string exact match to the parsed span
+- `relaxed_exact_match`
+  - first reuse the strict candidate when one exists
+  - for `exact_code`, accept exactly one standalone six-digit number from the
+    raw response
+  - return `none` when no six-digit candidate exists
+  - return `ambiguous` when multiple six-digit candidates exist
+  - for `semantic_relation`, strip outer whitespace, one pair of outer quotes,
+    and one terminal punctuation mark from the complete response, then apply
+    normalized string exact match
+
+The relaxed extractor does not accept the gold answer as an input. Gold is used
+only after extraction for final metric comparison. The protocol forbids LLM
+judges, gold substring search, gold-guided candidate selection, and fuzzy
+semantic matching. A verbose semantic sentence is therefore not accepted as a
+short direct answer merely because it contains the gold phrase.
+
+Turn and episode artifacts record:
+
+- `parsed_answer_strict`
+- `parsed_answer_relaxed`
+- `strict_parser_success`
+- `relaxed_parser_success`
+- `parser_mode`
+- `strict_exact_match`
+- `relaxed_exact_match`
+
+`parser_mode` is one of `strict_tag`, `exact_code_single_candidate`,
+`semantic_full_response`, `none`, or `ambiguous`. The legacy `exact_match`
+field is retained only as a deprecated alias for `strict_exact_match`.
+Summaries and verification artifacts report both metric counts and rates plus
+both parser-success counts.
+
+`EXP-20260612-026`, `EXP-20260612-027`, and `EXP-20260613-001` predate this
+frozen contract. They are pre-parser-calibration smoke evidence only and must
+not be used as calibrated group comparisons. Their runtime, leakage,
+bank-lifecycle, and boundary traces remain valid for those narrower purposes.
+
 ## Phase 8A Pilot Ablation Protocol
 
 Validated on 2026-06-12:

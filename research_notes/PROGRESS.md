@@ -831,3 +831,98 @@ project status.
   - this is a one-episode mechanism smoke only, not a performance conclusion
   - controlled evaluation does not replace TriviaQA
   - no fallback top-1, last-retrieved decay, or Version B was introduced
+
+## Phase 8C-alt Closeout and TriviaQA Restart Plan
+
+### Controlled Study Purpose
+
+- Phase 8C-alt was a mechanism study.
+- It provided a low-cost way to validate memory lifecycle, boundary behavior,
+  parser behavior, and artifact generation while TriviaQA infrastructure was
+  unavailable.
+
+### Why This Study Was Needed
+
+- TriviaQA checkpoint was unavailable.
+- TriviaQA / AgentBank data caches were unavailable or unverified.
+- Retrieval service and search index were unavailable.
+- Despite those blockers, Version A-simple and Version A-aligned
+  `thread_update` still needed a bounded cross-turn runtime check.
+
+### What It Validated
+
+- the controlled harness runs end to end
+- calibrated strict / relaxed parser behavior works
+- G1 legacy Version A-simple path runs
+- G2 Version A-aligned `thread_update` path runs
+- G2 preserves Reasoner-only injection
+- stored latent hidden size remains `1536`
+- G3 oracle-visible positive control reaches relaxed exact match `1/1`
+
+### What It Did Not Validate
+
+- no target-task performance claim
+- no general memory benefit claim
+- no TriviaQA result
+- no Version B result
+- no fallback top-1
+- no last-retrieved decay
+
+### G0/G1/G2/G3 Closeout
+
+| Group | Meaning | Strict EM | Relaxed EM | Main outcome |
+|---|---|---:|---:|---|
+| G0 | disabled | 0/1 | 0/1 | wrong unique code; no bank |
+| G1 | Version A-simple | 0/1 | 0/1 | wrong unique code; legacy path runs |
+| G2 | Version A-aligned thread_update | 0/1 | 0/1 | wrong unique code; thread-aware path runs |
+| G3 | oracle-visible control | 0/1 | 1/1 | correct untagged code recovered by relaxed parser |
+
+### G1 vs G2 Memory Behavior
+
+- G1 uses `update_policy=replace_oldest`.
+- G1 slot trace is `[4, 8, 8]`.
+- G1 fills to capacity and then uses legacy replacement.
+- G2 uses `update_policy=thread_update`.
+- G2 slot trace is `[1, 2, 3]`.
+- G2 thread inserts are `3`.
+- G2 matched replacements are `9`.
+- Both preserve Reasoner-only injection and `1536` hidden-size storage.
+
+### Current Interpretation
+
+- G0/G1/G2 scoring `0/1` does not show the method is invalid because this is a
+  single synthetic deterministic episode and the checkpoint is
+  out-of-distribution for the task.
+- G3 is not a memory result because Turn 3 explicitly contains the early fact
+  and gold value.
+- Controlled study results do not replace TriviaQA.
+- A small pilot is not recommended now unless later work explicitly needs more
+  synthetic mechanism evidence.
+
+### Current Research State
+
+- Version A-simple: implemented and runnable; mechanism smoke complete; no
+  positive task evidence.
+- Version A-aligned thread_update: implemented and runnable; boundaries
+  validated; no positive task evidence.
+- Controlled mechanism study: complete.
+- TriviaQA: still blocked at infrastructure level.
+- Version B: not started.
+
+### Phase 8D TriviaQA Restart Checklist
+
+- verify official TriviaQA checkpoint
+- verify `mandarjoshi/trivia_qa` cache
+- verify `Solaris99/AgentBank/triviaqa` cache
+- verify `127.0.0.1:8001/retrieve`
+- verify Search-R1 / Wikipedia index
+- prevent silent `Cannot find corresponding pages` fallback
+- design dynamic single-sample harness with structured `answer.json`
+- only after the disabled baseline is stable, run Version A-aligned enabled
+  smoke
+
+### Final Closeout Decision
+
+- Phase 8C-alt is closed as a mechanism-study node.
+- The next main track is Phase 8D TriviaQA infrastructure.
+- Do not enter Version B yet.

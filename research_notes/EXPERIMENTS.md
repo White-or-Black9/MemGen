@@ -37,6 +37,7 @@ overwrite prior records; append a new entry.
 | EXP-20260613-002 | 2026-06-13 | Phase 8C-alt calibrated G0 | What does disabled memory produce under the frozen prompt/parser contract? | `completed` | Unique wrong code `123456`; strict `0/1`, relaxed `0/1`; no bank |
 | EXP-20260613-003 | 2026-06-13 | Phase 8C-alt calibrated G2 | Does calibrated G2 preserve lifecycle and recover the hidden fact? | `completed` | Slots `[1,2,3]`, 12 writes, 11 retrievals; unique wrong code `123456`; strict `0/1`, relaxed `0/1` |
 | EXP-20260613-004 | 2026-06-13 | Phase 8C-alt calibrated G3 | Does the calibrated oracle-visible control validate deterministic relaxed scoring? | `completed` | Correct untagged code `770487`; strict `0/1`, relaxed `1/1` |
+| EXP-20260613-005 | 2026-06-13 | Phase 8C-alt calibrated G1 | Does the calibrated Version A-simple legacy path run correctly as a one-episode mechanism smoke? | `completed` | Legacy `replace_oldest` path ran with slot trace `[4,8,8]`; unique wrong code `123456`; strict `0/1`, relaxed `0/1` |
 
 ## Recorded Experiments
 
@@ -1816,6 +1817,55 @@ full GSM8K test performance.
   - relaxed exact-code extraction works as pre-registered
   - strict output-format compliance remains poor for this checkpoint
   - G3 is an upper-bound protocol control, not a memory-method result
+  - controlled evaluation remains a mechanism study and does not replace
+    TriviaQA
+  - no fallback top-1, last-retrieved decay, or Version B was introduced
+
+### EXP-20260613-005: Calibrated G1 Version A-Simple Smoke
+
+- Phase: 8C-alt calibrated G1
+- Status: `completed`
+- Output:
+  `outputs/controlled_memory/EXP-20260613-005-calibrated-g1-vA-simple/`
+- Configuration:
+  - group `G1_vA_simple`, memory mode `vA_simple`
+  - one deterministic exact-code episode
+  - `seed=42`, `batch_size=1`, greedy, `max_response_length=64`
+  - frozen calibrated prompt and dual strict/relaxed scoring
+  - write-age decay, no fallback top-1, Reasoner-only retrieval
+  - legacy update policy `replace_oldest`
+- Results:
+  - valid episodes `1/1`
+  - Turn 3 excluded the early fact and gold value
+  - raw response began with the unique wrong code `123456`
+  - strict parser returned `null`
+  - relaxed parser returned `123456` with
+    `parser_mode=exact_code_single_candidate`
+  - strict exact match `0/1`; relaxed exact match `0/1`
+- Memory behavior:
+  - one bank persisted across all three turns
+  - slot trace was `[4, 8, 8]`
+  - final slot count was `8`
+  - `memory_write_count=12`
+  - `memory_retrieve_count=11`
+  - `update_action_trace` showed eight `append` actions followed by four
+    legacy `replace` actions
+  - `thread_update` was not used
+  - stored latent hidden sizes were eight `1536`-dimensional tensors
+  - Weaver input counts exactly matched reasoner-to-Weaver input counts
+  - retrieved memory therefore remained Reasoner-only
+- Runtime:
+  - Trigger calls `132`
+  - Weaver prompt calls `3`
+  - Weaver inference calls `9`
+  - latency `6.162 s`
+  - no crash, non-finite metric, OOM, CUDA, shape, dtype, or device error
+- Interpretation:
+  - the calibrated harness executes the legacy Version A-simple path correctly
+  - this one-episode smoke is a mechanism check only and does not support a
+    performance claim
+  - comparisons against G0/G2/G3 should remain cautious because all results are
+    single synthetic episodes on an out-of-distribution checkpoint
   - controlled evaluation remains a mechanism study and does not replace
     TriviaQA
   - no fallback top-1, last-retrieved decay, or Version B was introduced

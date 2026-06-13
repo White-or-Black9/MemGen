@@ -789,3 +789,45 @@ project status.
   - this is mechanism-level evidence only and is not a performance conclusion
   - controlled evaluation does not replace TriviaQA
   - no fallback top-1, last-retrieved decay, or Version B was introduced
+
+## 2026-06-13 - Calibrated G1 Version A-Simple One-Episode Smoke
+
+- Status: `completed`
+- Experiment: `EXP-20260613-005`
+- Output:
+  `outputs/controlled_memory/EXP-20260613-005-calibrated-g1-vA-simple/`
+- Configuration:
+  - group `G1_vA_simple`
+  - memory mode `vA_simple`
+  - one deterministic exact-code episode
+  - `seed=42`, `batch_size=1`, greedy decoding
+  - `max_response_length=64`
+  - frozen calibrated prompt and dual strict/relaxed scoring
+- Results:
+  - valid episodes `1/1`
+  - Turn 3 excluded the early fact and gold value
+  - raw response contained the unique wrong code `123456`
+  - strict parser returned `null`
+  - relaxed parser extracted `123456`
+  - strict exact match `0/1`; relaxed exact match `0/1`
+- Memory behavior:
+  - one bank persisted across all three turns
+  - slot trace was `[4, 8, 8]`; final slot count was `8`
+  - `memory_write_count=12`
+  - `memory_retrieve_count=11`
+  - legacy `replace_oldest` update path remained active
+  - `thread_update` was not used
+  - retrieved memory remained Reasoner-only
+  - Weaver input counts matched reasoner-to-Weaver input counts
+  - stored latent hidden sizes remained eight `1536`-dimensional tensors
+- Runtime:
+  - Trigger calls `132`
+  - Weaver prompt calls `3`
+  - Weaver inference calls `9`
+  - latency `6.162 s`
+  - no crash, non-finite metric, OOM, CUDA, shape, dtype, or device error
+- Interpretation:
+  - the calibrated harness can execute the legacy Version A-simple path
+  - this is a one-episode mechanism smoke only, not a performance conclusion
+  - controlled evaluation does not replace TriviaQA
+  - no fallback top-1, last-retrieved decay, or Version B was introduced

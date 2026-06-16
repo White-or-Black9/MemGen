@@ -168,14 +168,16 @@
 已完成：
 
 - 区分 Version A-simple、Version A-aligned、Version B。
-- 记录当前 decay 是 write-age decay。
+- 先记录并确认历史当前 decay 是 write-age decay。
 - 记录 threshold_topk 没有 fallback top-1。
 - 实现 structured retrieval context。
 - 实现并验证 thread_update。
+- Phase R2 已将当前 Version A-aligned 修订为 last-retrieved decay。
+- Phase R2 已将 full-bank `new_thread` eviction 修订为
+  largest `last_retrieved_age`。
 
-尚未实现：
+仍未实现：
 
-- last_retrieved_decay
 - threshold_topk_with_fallback_top1
 
 Version B 仍然不在范围内。
@@ -184,11 +186,14 @@ Version B 仍然不在范围内。
 
 ## Phase 8C：Target Task Transition（迁移到目标任务）
 
+状态：已部分完成；notes review / commit preparation 已完成，target-task
+infrastructure preparation 仍未完成。
+
 执行顺序：
 
-1. 清理 notes。
-2. review 并提交 Version A-aligned 工作。
-3. 规划 TriviaQA baseline。
+1. 清理并统一 notes。
+2. 规划 TriviaQA baseline / infrastructure。
+3. 准备 disabled single-sample structured harness。
 4. 运行 Original MemGen / disabled-memory smoke。
 
 将主要评测从 GSM8K 转移到 TriviaQA。
@@ -205,7 +210,9 @@ TriviaQA 是动态多轮搜索环境，具有：
 
 ---
 
-## Phase 8D：TriviaQA Version A-Aligned Smoke
+## Phase 8D / R4：Further Validation and Test Environment Preparation
+
+状态：当前下一阶段。
 
 在开始之前必须：
 
@@ -217,7 +224,12 @@ TriviaQA 是动态多轮搜索环境，具有：
 - 防止 silent fallback。
 - 定义 sample_count=1 的 dynamic harness 和结构化 answer.json。
 
-之后：
+执行顺序：
+
+- 先验证 disabled baseline path。
+- 只有在 disabled path 稳定后，才运行 Version A-aligned enabled smoke。
+
+之后的 enabled smoke 目标：
 
 - 运行 Version A-aligned thread_update。
 - 验证 session 内 memory 是否跨 turn 保留。
@@ -231,9 +243,14 @@ TriviaQA 是动态多轮搜索环境，具有：
 
 ## Phase 8E：Method-Aligned Version A Variants
 
+状态：部分 superseded。
+
+已完成：
+
+- Version A-aligned last-retrieved-turn decay（Phase R2）
+
 仅在 TriviaQA baseline 稳定后考虑：
 
-- last-retrieved-turn decay
 - fallback top-1
 
 Version A-simple 保留作为对照组。
@@ -248,7 +265,7 @@ Version A-simple 保留作为对照组。
 
 - disabled Original MemGen
 - Version A-simple
-- Version A + last-retrieved decay
+- Version A-aligned current（已包含 last-retrieved decay）
 - Version A + fallback top-1
 - Version A + matched-slot update
 - threshold sweep
@@ -266,7 +283,10 @@ Version A-simple 保留作为对照组。
 
 ## Phase 9：Version B
 
-只有在 TriviaQA 上证明 Version A 有足够价值之后才开始。
+状态：deferred future work，不是当前下一步。
+
+只有在 TriviaQA 上证明 Version A 有足够价值之后才开始；当前不做
+进一步设计和实现。
 
 实现完整流程：
 
@@ -276,7 +296,7 @@ retrieve     ↓ Weaver revise / generate     ↓ matched write-back
 
 - retrieval 输入 Weaver。
 - 包含 fallback top-1。
-- 包含 last-retrieved-turn decay。
+- 可能包含 turn-aware / retrieval-aware decay 的更完整设计。
 - 包含 matched-slot/thread update。
 
 同时保留 Version A-simple 和 Version A 作为对照组。

@@ -2,10 +2,11 @@
 
 ## 当前状态
 
-- 当前状态：Phase R2 已将 Version A-aligned `thread_update` 修订为
-  last-retrieved decay；下一步仍是目标任务 baseline / infrastructure 规划。
+- 当前状态：Version A-aligned 已实现、已提交，并已在 Phase R2 修订为
+  last-retrieved decay；当前没有 target-task main result。
 - 状态：`completed`
-- 最后更新：2026-06-12
+- 最后更新：2026-06-16
+- Canonical revision：`c95e2bd feat: revise Version A-aligned decay to last-retrieved age`
 - 衰减 / fallback 实现审计：`completed`
 - 方法 / 计划对齐更新：`completed`
 - Step 2 结构化检索上下文：`completed`
@@ -13,9 +14,28 @@
 - Step 4 thread-update 机制 smoke：`completed`
   (`EXP-20260612-024`)
 - Phase R2 last-retrieved decay revision：`completed`
+- Phase R2-fix retrieval-step / write_back clarification：`completed`
+- 当前标准状态：
+  - Version A-aligned current retrieval 使用 last-retrieved decay
+  - full-bank `new_thread` eviction 使用 largest `last_retrieved_age`
+  - no fallback top-1
+  - retrieved memory 保持 Reasoner-only，不进入 Weaver
+  - Version B 未开始
+  - Controlled mechanism study 已 closeout
+  - TriviaQA 仍无正式 baseline 或正式结果
+  - TriviaQA infrastructure 仍 blocked
+- 最新验证：
+  - `tests 76/76 passed`
+  - Phase R2 / R2-fix 只修改代码、tests 和 notes；没有运行正式实验
 - 停止条件：已达到；没有明确批准，不要进入新的实现或实验阶段。
-- 下一步建议：规划并建立 Original MemGen / disabled-memory TriviaQA baseline。
-  Version B 仍未开始。
+- 下一步建议：
+  - 继续做 testing environment preparation，而不是进入 Version B
+  - acquire / verify TriviaQA dataset cache
+  - acquire / verify checkpoint
+  - acquire / verify retrieval service / Search-R1 / Wikipedia index
+  - build dynamic single-sample structured harness
+  - run disabled baseline first
+  - run Version A-aligned enabled smoke only after disabled path is stable
 
 ## 研究目标
 
@@ -694,3 +714,23 @@ Phase 7 已完成。
 - 解释：
   - Phase 8A 和 Phase 8C-alt 的既有结果仍属于历史 write-age decay 版本
   - 本阶段没有产生 target-task performance claim
+
+## 2026-06-16 - Phase R2-fix Minor Follow-Up
+
+- 状态：`completed`
+- 范围：
+  - 只修复 R2 的两个 minor review issues
+  - 没有修改核心方法边界
+  - 没有运行正式实验
+- 修复内容：
+  - 添加 `retrieve()` vs `retrieve_with_context()` 的 retrieval-step 递增测试
+  - 明确 `write_back()` 创建 replacement / inserted slot 时使用
+    `retrieval_result.retrieval_step`
+  - 防止在额外 retrieval 发生后出现 `last_retrieved_step` 语义漂移
+- 验证：
+  - `python -m unittest discover -s tests -v` 通过 `76/76`
+  - `git diff --check` 通过
+- 边界：
+  - 没有引入 fallback top-1
+  - 没有让 retrieved memory 进入 Weaver
+  - 没有进入 Version B

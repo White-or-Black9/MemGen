@@ -144,7 +144,8 @@ decision. Equal scores choose the lowest original slot index. The legacy
 At Step 2 closeout, this context was preparatory plumbing only and `write()`
 did not consume it. Step 3 later added `write_back(...)` and `thread_update`
 without changing the legacy `write()` policies. Fallback top-1 and
-last-retrieved decay remain unimplemented.
+last-retrieved decay remained unimplemented at that historical closeout.
+This was superseded for the current Version A-aligned path by Phase R2.
 
 ### Update Skeleton
 
@@ -203,6 +204,22 @@ This is a Version A-aligned write-back/retrieval-decay variant, not Version B.
 It does not add fallback top-1 or retrieved-memory input to Weaver.
 Legacy `append`, `replace`, and `replace_oldest` behavior remains on
 `retrieve(...)` plus `write(...)`.
+
+### Version Comparison
+
+| Dimension | Version A-simple | Version A-aligned current | Version B deferred |
+|---|---|---|---|
+| retrieved memory enters Reasoner | yes | yes | yes |
+| retrieved memory enters Weaver | no | no | yes |
+| stored latent space | reasoner-space `latent_inputs_embeds` | reasoner-space `latent_inputs_embeds` | intended recurrent latent path; not implemented |
+| retrieval context | legacy `retrieve(...)` or historical structured context without aligned decay | `retrieve_with_context(...)` + full scores / argmax / selected indices | intended richer recurrent retrieval-to-Weaver context |
+| update policy | legacy `append` / `replace` / `replace_oldest` | `thread_update` with matched-thread replacement and new-thread insertion | deferred future recurrent retrieval-to-Weaver update |
+| decay type | write-age decay | last-retrieved decay | deferred future full method |
+| fallback top-1 | no | no | intended yes |
+| full-bank eviction | legacy policy-dependent; historical `replace_oldest` for simple baseline | `new_thread_bank_full` evicts largest `last_retrieved_age` with deterministic tie-break | deferred future design |
+| implementation status | implemented | implemented and committed in `c95e2bd` | not started |
+| experimental status | Phase 8A / 8C historical write-age evidence exists | no formal post-R2 target-task experiment yet; only code/tests validation | none |
+| allowed claims | mechanism / pilot / historical write-age evidence only | implemented mechanism with preserved boundaries; no target-task performance claim | no claim allowed |
 
 ### Disabled Behavior
 
@@ -449,9 +466,9 @@ is not merged into current runtime configuration in Phase 4.
 
 ## Current Validation Status
 
-Validated on 2026-06-12:
+Validated on 2026-06-16 after Phase R2 and R2-fix:
 
-- The current suite passes 47/47 unit and integration tests.
+- The current suite passes 76/76 unit, integration, and controlled-harness tests.
 - `latent_memory_bank.enabled=false` exactly reproduces the accepted Phase 3
   golden response-token and augmentation-mask hashes on the full 20-sample
   Phase 6 check, and again on samples `0..2` after Step 3.
@@ -461,7 +478,13 @@ Validated on 2026-06-12:
 - Version A-simple and Version A-aligned `thread_update` are present.
 - Current Version A-aligned retrieval uses last-retrieved decay and no fallback
   top-1; Version A-simple historical runs used write-age decay.
+- Current Version A-aligned full-bank `new_thread` eviction uses largest
+  `last_retrieved_age`, with ties broken by earlier `created_step` and then
+  lower slot index.
+- Current `write_back(...)` creates replacement / inserted slots using
+  `retrieval_result.retrieval_step`.
 - Version B has not started.
+- No target-task main result exists yet.
 
 ## Open Questions
 
@@ -525,7 +548,9 @@ Evidence limits:
   multi-turn fact retention
 - a positive result would show only a controlled mechanism signal
 - a negative result cannot reject the full proposed method
-- retrieval remains write-age based with no fallback top-1
+- retrieval remained write-age based with no fallback top-1 at that historical
+  controlled-study closeout; this was superseded for the current
+  Version A-aligned path by Phase R2
 - retrieved memory remains outside Weaver, so this is not Version B
 
 The G3 oracle-visible control is an upper-bound protocol check rather than a

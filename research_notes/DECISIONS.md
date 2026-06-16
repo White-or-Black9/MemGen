@@ -760,6 +760,9 @@ IDs and append superseding decisions rather than silently rewriting history.
   - TriviaQA baseline planning is the next research activity
   - last-retrieved decay and fallback top-1 remain later Version A variants
   - retrieved-memory-to-Weaver Version B remains not started
+- Update note:
+  - the "last-retrieved decay remains later" part was superseded for the
+    current Version A-aligned path by `DEC-0035`
 - Related experiments:
   - `EXP-20260612-023-step3-disabled-replay`
   - `EXP-20260612-024-thread-update-smoke`
@@ -817,6 +820,10 @@ IDs and append superseding decisions rather than silently rewriting history.
   - controlled evaluation remains a mechanism study and does not replace
     TriviaQA
   - fallback top-1, last-retrieved decay, and Version B remain unimplemented
+- Update note:
+  - the "last-retrieved decay remains unimplemented" part is historical at this
+    closeout and was later superseded for the current Version A-aligned path by
+    `DEC-0035`
 - Related experiments:
   - `EXP-20260612-026`
   - `EXP-20260612-027`
@@ -840,8 +847,13 @@ IDs and append superseding decisions rather than silently rewriting history.
     with largest `last_retrieved_age`
   - break eviction ties by earlier `created_step`, then lower slot index
   - keep `retrieval_result.bank_step` stale-context protection
+  - create replacement / inserted slots in `write_back(...)` using
+    `retrieval_result.retrieval_step` rather than the bank's latest retrieval
+    counter
 - Rationale: This aligns Version A-aligned decay and full-bank capacity behavior
   with actual retrieval reuse recency rather than slot creation age.
+- Clarification: Binding new slots to `retrieval_result.retrieval_step` avoids
+  semantic drift if another retrieval occurs before `write_back(...)`.
 - Consequences:
   - Version A-aligned no longer uses write-age decay
   - Version A-simple remains a historical / legacy baseline variant

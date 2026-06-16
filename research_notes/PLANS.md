@@ -257,6 +257,53 @@ Version A-simple 保留作为对照组。
 
 每次修改都必须重新验证 disabled 等价性。
 
+### Immediate Track A：TriviaQA Infra and Evaluation
+
+- prepare / verify TriviaQA dataset
+- prepare / verify checkpoint
+- prepare / verify retrieval service / index
+- build or adapt a dynamic single-sample structured harness
+- run disabled baseline first
+- run Version A-aligned enabled smoke second
+- then decide whether to scale
+
+定位：
+
+- TriviaQA remains the immediate repository-aligned target-task path
+- the goal is to observe the current Version A-aligned mechanism on a real
+  target task
+- no target-task claim is allowed until these runs are actually completed
+
+### Immediate Track B：Controlled Diagnostic Subset Design
+
+- small scale
+- mechanism diagnostic only
+- focus on revisit behavior and capacity pressure
+- explicitly test last-retrieved decay
+- explicitly test `last_retrieved_step` refresh semantics
+- explicitly test `last_retrieved_age`-based scoring
+- explicitly test selected / returned slots only updating
+  `last_retrieved_step`
+- explicitly test full-bank eviction by largest `last_retrieved_age`
+- explicitly preserve no fallback top-1
+- not a formal benchmark
+- not a performance claim
+
+定位：
+
+- this subset exists to expose Version A-aligned mechanism behavior that
+  TriviaQA may not clearly show
+- it does not replace TriviaQA as the main short-term evaluation path
+
+### Future Note
+
+- MemoryAgentBench and LongMemEval are future memory-oriented benchmark
+  candidates only
+- no current integration
+- no current implementation
+- no current detailed investigation or adoption design
+- user will investigate them later
+
 ---
 
 ## Phase 8F：TriviaQA Targeted Ablations（TriviaQA 消融实验）

@@ -42,6 +42,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0033 | 2026-06-12 | accepted | Use a controlled three-turn fallback only as mechanism evidence while TriviaQA infrastructure is blocked |
 | DEC-0034 | 2026-06-13 | accepted | Freeze strict and deterministic relaxed scoring before controlled group comparison |
 | DEC-0035 | 2026-06-16 | accepted | Revise Version A-aligned decay and full-bank eviction to last-retrieved semantics without entering Version B |
+| DEC-0036 | 2026-06-16 | accepted | Use TriviaQA-first evaluation with a controlled diagnostic subset |
 
 ## Decision Template
 
@@ -860,3 +861,55 @@ IDs and append superseding decisions rather than silently rewriting history.
   - no fallback top-1 is introduced
   - retrieved memory remains Reasoner-only and does not enter Weaver
   - Version B remains not started
+
+### DEC-0036: Use TriviaQA-First Evaluation with a Controlled Diagnostic Subset
+
+- Date: 2026-06-16
+- Status: accepted
+- Context: R3 notes cleanup completed after the Phase R2 Version A-aligned
+  last-retrieved revision. The repository still has no TriviaQA result and no
+  target-task performance claim for the current Version A-aligned mechanism.
+- Decision:
+  - the immediate main evaluation path is TriviaQA
+  - TriviaQA infrastructure should be continued because it is the current
+    repository-aligned path
+  - the immediate TriviaQA work should prepare or verify the dataset,
+    checkpoint, retrieval service or index, and dynamic single-sample
+    structured harness
+  - TriviaQA evaluation should run disabled baseline first, then
+    Version A-aligned enabled smoke or small evaluation, and only then decide
+    whether to scale
+  - a small controlled diagnostic subset should be designed to verify
+    Version A-aligned last-retrieved mechanisms that TriviaQA may not clearly
+    expose
+  - the controlled diagnostic subset should stay mechanism evidence only and
+    must not be treated as a formal target-task benchmark or performance claim
+  - the controlled diagnostic subset should explicitly focus on
+    last-retrieved decay, last_retrieved_step refresh,
+    last_retrieved_age-based scoring, selected or returned slots only updating
+    `last_retrieved_step`, full-bank eviction by largest
+    `last_retrieved_age`, and the absence of fallback top-1
+  - MemoryAgentBench and LongMemEval are recorded only as future
+    memory-oriented benchmark candidates
+  - integration of MemoryAgentBench and LongMemEval is deferred and is not a
+    current implementation task
+  - Version B remains deferred
+- Rationale:
+  - TriviaQA is already represented in the current repository through dynamic
+    task planning, environment expectations, and evaluation scripts
+  - the current Version A-aligned change now needs target-task evidence, so
+    TriviaQA should be prepared and tested before additional method expansion
+  - the mechanism-specific value of last-retrieved decay may not be directly
+    visible in TriviaQA outcomes alone
+  - therefore a small controlled diagnostic subset is needed for mechanism
+    verification without overstating its evidentiary scope
+  - MemoryAgentBench and LongMemEval may become stronger memory benchmarks
+    later, but they require separate future investigation
+- Consequences:
+  - next work focuses on TriviaQA infrastructure and a controlled diagnostic
+    design
+  - no target-task performance claim is allowed until TriviaQA evaluation is
+    actually run
+  - the controlled diagnostic subset is mechanism evidence only
+  - MemoryAgentBench and LongMemEval are not current implementation tasks
+  - no Version B work belongs to this stage

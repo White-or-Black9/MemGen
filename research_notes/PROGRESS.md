@@ -24,6 +24,13 @@
   - Controlled mechanism study 已 closeout
   - TriviaQA 仍无正式 baseline 或正式结果
   - TriviaQA infrastructure 仍 blocked
+  - concrete next-step plan 现为 TriviaQA-first evaluation 加上
+    controlled diagnostic subset design
+  - TriviaQA 仍是当前 immediate repository-aligned evaluation path
+  - controlled diagnostic subset 用于暴露 TriviaQA 可能不明显体现的
+    Version A-aligned last-retrieved mechanisms
+  - MemoryAgentBench / LongMemEval 只记录为 future candidates
+  - Version B 继续 deferred
 - 最新验证：
   - `tests 76/76 passed`
   - Phase R2 / R2-fix 只修改代码、tests 和 notes；没有运行正式实验
@@ -36,6 +43,9 @@
   - build dynamic single-sample structured harness
   - run disabled baseline first
   - run Version A-aligned enabled smoke only after disabled path is stable
+  - parallel planning track：design a small controlled diagnostic subset for
+    mechanism verification only
+  - keep MemoryAgentBench / LongMemEval as future benchmark candidates only
 
 ## 研究目标
 

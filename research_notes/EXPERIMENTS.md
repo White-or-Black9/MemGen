@@ -3,6 +3,22 @@
 Record every experiment, including failed, aborted, and exploratory runs. Never
 overwrite prior records; append a new entry.
 
+## Post-R2 Mechanism Boundary Note
+
+Phase R2 changed the current Version A-aligned mechanism from historical
+write-age decay to last-retrieved decay. This was a code / test / documentation
+revision, not a formal target-task experiment, and no formal experiment has
+been run after R2 yet.
+
+Interpretation boundary:
+
+- Phase 8A GSM8K pilot results remain historical write-age evidence.
+- Phase 8C-alt controlled G0/G1/G2/G3 results remain historical mechanism
+  evidence under the older write-age mechanism.
+- These pre-R2 runs must not be reinterpreted as last-retrieved-decay
+  experiments.
+- There is still no TriviaQA result and no target-task performance claim.
+
 ## Experiment Index
 
 | ID | Date | Phase | Question | Status | Key Result |

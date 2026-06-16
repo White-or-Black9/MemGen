@@ -21,6 +21,21 @@ Do not delete resolved entries.
   block current work because commands use the validated environment's Python
   executable directly.
 
+## Current Research / Infrastructure Blockers
+
+These are not R2 code bugs. They are current target-task and infrastructure
+blockers for the next TriviaQA stage:
+
+- official TriviaQA checkpoint is missing or not staged
+- TriviaQA dataset cache is missing or not staged
+- AgentBank TriviaQA cache is missing or not staged
+- retrieval service at `127.0.0.1:8001` is not verified
+- Search-R1 / Wikipedia index assets are not verified
+- the dynamic single-sample structured harness is missing or incomplete
+- the official dynamic path does not yet provide a trusted structured
+  `answer.json` workflow for the intended smoke protocol
+- silent `Cannot find corresponding pages` fallback remains a run-quality risk
+
 ## Recorded Bugs
 
 ## Phase 7 Stability Check
@@ -359,6 +374,9 @@ These are design and interpretation caveats, not implementation bugs:
 - Original Version A-simple policies do not implement matched-slot replacement
   as a semantic thread update; the optional Version A-aligned
   `thread_update` policy now does.
+- Phase R2 later superseded only the current Version A-aligned decay and
+  full-bank eviction behavior; it did not create a TriviaQA result and did not
+  enter Version B.
 - GSM8K is short and single-turn, so Phase 8A does not test the primary
   multi-turn, long-trajectory, or context-truncation hypothesis.
 - No new blocker was found, but the research plan must transition to an aligned

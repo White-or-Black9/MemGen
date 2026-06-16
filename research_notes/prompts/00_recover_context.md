@@ -30,7 +30,9 @@ Hard constraints:
 - Do not modify Weaver training.
 - Do not modify Trigger training.
 - latent_memory_bank.enabled=false must preserve exact original behavior.
-- Phase 1 has no cross-sample memory sharing and defaults to batch_size=1.
+- In the current approved memory-bank scope, do not allow cross-sample memory
+  sharing and default to batch_size=1 unless a later approved phase says
+  otherwise.
 - Execute only one Phase at a time.
 - Do not begin a new Phase without explicit user confirmation.
 

@@ -31,8 +31,8 @@ The plan must include:
 Hard constraints:
 - Inference-only method changes.
 - Exact original behavior when latent_memory_bank.enabled=false.
-- No cross-sample memory sharing in Phase 1.
-- Phase 1 defaults to batch_size=1.
+- No cross-sample memory sharing in the current approved memory-bank scope.
+- Default batch_size to 1 unless a later approved phase explicitly changes it.
 - Execute one Phase only, then pause.
 
 End with a concise approval request. Do not edit files or start execution.

@@ -13,8 +13,9 @@ During execution:
 - Keep changes limited to the approved Phase.
 - Do not modify Weaver training or Trigger training.
 - Preserve exact original behavior when latent_memory_bank.enabled=false.
-- In Phase 1, keep memory session-local with no cross-sample sharing.
-- In Phase 1, default batch_size to 1.
+- In the current approved memory-bank scope, keep memory session-local with no
+  cross-sample sharing unless a later phase explicitly changes this.
+- Default batch_size to 1 unless the approved phase explicitly changes it.
 - Add focused tests proportional to risk.
 - Record commands, revisions, configurations, seeds, outputs, and failures.
 

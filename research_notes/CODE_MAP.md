@@ -7,6 +7,12 @@ This document records the verified inference path, the protected training
 boundaries, and the likely integration points for a later session-level
 LatentMemoryBank. This phase used code reading only. No experiment was run.
 
+Historical scope note:
+
+- Sections 1 through 13 preserve the original Phase 1 code-reading audit.
+- The implemented memory-bank path was added later and is summarized in
+  Section 14 below.
+
 ## 1. Inference Entry and Main Dispatch
 
 ### CLI entry
@@ -401,3 +407,89 @@ The audit supports the following working conclusion for later implementation:
 - protected scope: no changes to Weaver or Trigger training code paths
 
 This is an audit conclusion only. No implementation is performed in Phase 1.
+
+## 14. Implemented Memory Bank Path
+
+This section records the current implemented Version A path after Phase 5
+integration and the Phase R2 / R2-fix revisions. It does not describe
+Version B.
+
+### Core Memory Module
+
+- File: `memgen/model/latent_memory_bank.py`
+- Main public types:
+  - `LatentMemoryBankConfig`
+  - `LatentMemorySlot`
+  - `LatentMemoryRetrievalResult`
+  - `LatentMemoryBank`
+- Main public methods:
+  - `retrieve(...)`
+  - `retrieve_with_context(...)`
+  - `write(...)`
+  - `write_back(...)`
+  - `debug_summary()`
+  - `state_dict()`
+
+### Current Retrieval and Update State
+
+- `_step` counts successful writes.
+- `_retrieval_step` counts enabled retrieval turns.
+- `last_retrieved_step` stores the last retrieval turn in which a slot was
+  actually selected / returned.
+- `last_retrieved_age` is derived as
+  `current_retrieval_step - slot.last_retrieved_step`.
+- Current Version A-aligned scoring uses last-retrieved decay rather than
+  write-age decay.
+- Only final selected / returned slots update `last_retrieved_step`.
+- `threshold_topk` still has no fallback top-1.
+
+### Current Full-Bank Eviction Rule
+
+- `write_back(...)` with `update_policy=thread_update` performs:
+  - matched-thread replacement when `max_score >= threshold`
+  - new-thread insertion when similarity is below threshold and capacity remains
+  - full-bank new-thread insertion by evicting the slot with largest
+    `last_retrieved_age`
+- Full-bank tie-break is deterministic:
+  - earlier `created_step`
+  - then lower slot index
+- New replacement / inserted slots created by `write_back(...)` bind
+  `last_retrieved_step` to `retrieval_result.retrieval_step`.
+
+### Runtime Wiring
+
+- Session owner:
+  - `SingleTurnInteractionManager.run_agent_loop()`
+  - `MultiTurnInteractionManager.run_agent_loop()`
+- One bank is created per interaction-manager session / episode when
+  `enabled=true`.
+- `MemGenModel` does not hold a persistent global bank field.
+- Enabled memory remains restricted to the current safe path:
+  `batch_size=1`.
+
+### Model Integration Boundary
+
+- File: `memgen/model/modeling_memgen.py`
+- Main inference hook: `MemGenModel.generate()`
+- Current behavior:
+  - the bank is passed in explicitly as a session-local argument
+  - retrieved memories are injected only into the Reasoner-side candidate path
+  - retrieved memories do not enter Weaver
+  - Weaver still receives only the current context-derived inputs
+  - stored memories are reasoner-space `latent_inputs_embeds` produced after
+    `weaver_to_reasoner(...)`
+- Therefore:
+  - no fallback top-1
+  - no Version B retrieval-to-Weaver behavior
+  - no training-path modification
+
+### Verification Coverage
+
+- `tests/test_latent_memory_bank.py`
+  - core retrieval, update, decay, eviction, and debug contracts
+- `tests/test_latent_memory_bank_integration.py`
+  - session-local lifecycle, disabled path, Reasoner-only injection, and
+    no-Weaver-leakage checks
+- `tests/test_controlled_multiturn_memory.py`
+  - controlled-harness schema and scoring-contract checks used by the
+    mechanism-study infrastructure

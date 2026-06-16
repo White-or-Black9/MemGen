@@ -9,7 +9,8 @@ Before running:
 - Record code revision, dirty state, environment, dataset/split, configuration,
   seeds, command, and output directory in research_notes/EXPERIMENTS.md.
 - Confirm the run does not modify Weaver or Trigger training.
-- Confirm memory is not shared across samples in Phase 1.
+- Confirm memory is not shared across samples in the current approved
+  memory-bank scope unless a later phase explicitly changes it.
 
 During the run:
 - Preserve raw logs and outputs.

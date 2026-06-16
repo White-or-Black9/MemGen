@@ -1,3 +1,32 @@
+"""
+Phase 5 LatentMemoryBank 验证脚本（debug harness）。
+
+功能：
+1. 支持 disabled 和 enabled 两种模式运行 GSM8K 评估
+2. disabled 模式：golden replay —— 对比 response token hash、augmentation mask hash、
+   Trigger/Weaver 调用计数，确保与 Phase 3 baseline 完全一致
+3. enabled 模式：记录 memory bank debug 摘要（write/retrieve/count/slot 等）
+4. 每次运行产出 verification.json（包含 adapter 校验、生成 trace、bank 摘要、answer.json 摘要）
+
+用法：
+  # disabled golden replay（与 Phase 3 baseline 对比）
+  python scripts/eval/phase5_memory_bank_debug.py \
+    --cfg-path configs/latent_memory/gsm8k.yaml \
+    --model-path <Qwen2.5-1.5B> \
+    --checkpoint-path <官方checkpoint目录> \
+    --output-dir outputs/phase5/disabled \
+    --sample-start 0 --sample-count 3
+
+  # enabled debug run
+  python scripts/eval/phase5_memory_bank_debug.py \
+    --cfg-path configs/latent_memory/gsm8k.yaml \
+    --model-path <Qwen2.5-1.5B> \
+    --checkpoint-path <官方checkpoint目录> \
+    --output-dir outputs/phase5/enabled \
+    --sample-start 0 --sample-count 1 \
+    --memory-enabled
+"""
+
 import argparse
 import hashlib
 import json
@@ -45,6 +74,7 @@ def parse_args():
 
 
 def verify_adapter(model, component, checkpoint_path, adapter_name):
+    """对比 runtime adapter 参数和 checkpoint 参数：检查 missing/unexpected/shape/value。"""
     runtime = get_peft_model_state_dict(component.model, adapter_name=adapter_name)
     saved = load_file(str(checkpoint_path))
     shared_keys = set(runtime) & set(saved)
@@ -66,6 +96,14 @@ def verify_adapter(model, component, checkpoint_path, adapter_name):
 
 
 def install_generation_trace(model, trace):
+    """在 MemGenModel 上安装 monkey-patch 以记录生成过程中的 trace 信息。
+
+    记录的字段：
+    - trigger_decision_calls: Trigger 被调用的次数
+    - weaver_prompt_calls / weaver_inference_calls: Weaver augment_prompt / augment_inference 调用次数
+    - weaver_input_token_counts / reasoner_to_weaver_input_token_counts: token 计数
+    - generation_records: 每次生成的 response token hash、augmentation mask hash、延迟
+    """
     original_should_augment = model._should_augment
     original_generate = model.generate
     original_augment_prompt = model.weaver.augment_prompt
@@ -126,6 +164,13 @@ def install_generation_trace(model, trace):
 
 
 def install_session_trace(generation_manager, trace):
+    """在 interaction manager 上安装 monkey-patch 以追踪 session/memory bank 生命周期。
+
+    记录每次 run_agent_loop() 的：
+    - bank 是否创建
+    - bank 的初始槽位数和 id（验证跨 session 隔离）
+    - final_memory_bank_debug
+    """
     original_create = generation_manager._create_session_memory_bank
     original_run_agent_loop = generation_manager.run_agent_loop
 
@@ -159,66 +204,43 @@ def install_session_trace(generation_manager, trace):
 
 
 def build_config_args(args, model_path, checkpoint_path):
+    """将 CLI 参数转换为 MemGen Config 需要的 CLI options 列表。"""
     options = [
-        "model.model_name",
-        model_path,
-        "model.load_model_path",
-        str(checkpoint_path),
-        "model.max_prompt_aug_num",
-        "1",
-        "model.max_inference_aug_num",
-        "3",
-        "model.weaver.model_name",
-        model_path,
-        "model.weaver.prompt_latents_len",
-        "8",
-        "model.weaver.inference_latents_len",
-        "8",
-        "model.trigger.model_name",
-        model_path,
-        "model.trigger.active",
-        "False",
-        "run.mode",
-        "evaluate",
-        "run.seed",
-        "42",
-        "run.interaction.batch_size",
-        "1",
-        "run.interaction.temperature",
-        "0.0",
-        "run.interaction.max_response_length",
-        str(args.max_response_length),
-        "run.interaction.weaver_do_sample",
-        "False",
-        "run.interaction.trigger_do_sample",
-        "False",
-        "run.latent_memory_bank.enabled",
-        str(args.memory_enabled),
-        "run.latent_memory_bank.batch_size",
-        "1",
-        "run.latent_memory_bank.max_slots",
-        str(args.memory_max_slots),
-        "run.latent_memory_bank.top_k",
-        str(args.memory_top_k),
-        "run.latent_memory_bank.threshold",
-        str(args.memory_threshold),
-        "run.latent_memory_bank.decay_alpha",
-        str(args.memory_decay_alpha),
-        "run.latent_memory_bank.pool_last_n",
-        "64",
-        "run.latent_memory_bank.retrieve_policy",
-        args.memory_retrieve_policy,
-        "run.latent_memory_bank.update_policy",
-        args.memory_update_policy,
-        "run.latent_memory_bank.storage_device",
-        "cpu",
-        "run.latent_memory_bank.debug",
-        "True",
+        "model.model_name", model_path,
+        "model.load_model_path", str(checkpoint_path),
+        "model.max_prompt_aug_num", "1",
+        "model.max_inference_aug_num", "3",
+        "model.weaver.model_name", model_path,
+        "model.weaver.prompt_latents_len", "8",
+        "model.weaver.inference_latents_len", "8",
+        "model.trigger.model_name", model_path,
+        "model.trigger.active", "False",
+        "run.mode", "evaluate",
+        "run.seed", "42",
+        "run.interaction.batch_size", "1",
+        "run.interaction.temperature", "0.0",
+        "run.interaction.max_response_length", str(args.max_response_length),
+        "run.interaction.weaver_do_sample", "False",
+        "run.interaction.trigger_do_sample", "False",
+        # ---- Phase 5: latent_memory_bank 配置 ----
+        "run.latent_memory_bank.enabled", str(args.memory_enabled),
+        "run.latent_memory_bank.batch_size", "1",
+        "run.latent_memory_bank.max_slots", str(args.memory_max_slots),
+        "run.latent_memory_bank.top_k", str(args.memory_top_k),
+        "run.latent_memory_bank.threshold", str(args.memory_threshold),
+        "run.latent_memory_bank.decay_alpha", str(args.memory_decay_alpha),
+        "run.latent_memory_bank.pool_last_n", "64",
+        "run.latent_memory_bank.retrieve_policy", args.memory_retrieve_policy,
+        "run.latent_memory_bank.update_policy", args.memory_update_policy,
+        "run.latent_memory_bank.storage_device", "cpu",
+        "run.latent_memory_bank.debug", "True",
     ]
     return SimpleNamespace(cfg_path=args.cfg_path, options=options)
 
 
 def compare_with_reference(reference_path, verification):
+    """Golden replay 校验：逐项对比 response token hash、augmentation mask hash、
+    Trigger/Weaver 调用计数，全部一致才算通过。"""
     reference = json.loads(Path(reference_path).read_text(encoding="utf-8"))
     current_trace = verification["generation_trace"]
     reference_trace = reference["generation_trace"]
@@ -241,6 +263,14 @@ def compare_with_reference(reference_path, verification):
 
 
 def main():
+    """
+    Phase 5 验证主流程：
+    1. 加载配置和模型（复用 repair 后的 adapter 加载路径）
+    2. 校验 adapter 参数完整性
+    3. 安装 generation trace 和 session trace（monkey-patch）
+    4. 运行 runner.evaluate()
+    5. 生成 verification.json（包含 adapter 校验、trace、bank 摘要、metrics 摘要）
+    """
     args = parse_args()
     model_path = str(Path(args.model_path).resolve())
     checkpoint_path = Path(args.checkpoint_path).resolve()
@@ -256,6 +286,7 @@ def main():
         warnings.simplefilter("always")
         model = MemGenModel.from_config(config_dict["model"])
 
+    # 校验 adapter 加载
     adapter_results = {
         "weaver": verify_adapter(
             model,
@@ -278,6 +309,7 @@ def main():
         or "unexpected" in str(item.message).lower()
     ]
 
+    # 构造 runner，限制数据集为指定 sample 范围
     runner = MemGenRunner(
         model=model,
         data_builder=data_builder,
@@ -287,6 +319,7 @@ def main():
     sample_ids = list(range(args.sample_start, args.sample_start + args.sample_count))
     runner.test_dataset = runner.test_dataset.select(sample_ids)
 
+    # 安装 trace（生成级 + session 级）
     trace = {
         "trigger_active": model.trigger.active,
         "trigger_decision_calls": 0,
@@ -307,6 +340,7 @@ def main():
     torch.cuda.synchronize()
     latency = time.perf_counter() - start
 
+    # 解析 answer.json
     answer_path = output_dir / "evaluate" / "answer.json"
     answer_lines = answer_path.read_text(encoding="utf-8").splitlines()
     answer_records = [json.loads(line) for line in answer_lines]
@@ -344,6 +378,8 @@ def main():
         "peak_cuda_memory_bytes": torch.cuda.max_memory_allocated(),
     }
 
+    # disabled 模式：golden replay 校验
+    # enabled 模式：验证 bank 状态
     if not args.memory_enabled:
         compare_with_reference(args.reference_verification, verification)
     else:

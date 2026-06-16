@@ -146,6 +146,8 @@ class MultiTurnInteractionManager(InteractionManager):
         assert "init_prompts" in gen_batch.no_tensor_batch
         assert "envs" in gen_batch.no_tensor_batch
         batch_size = len(gen_batch.no_tensor_batch["init_prompts"])
+        # Phase 5: 在 run_agent_loop 入口创建 session-local memory bank
+        # 整个 episode 内所有 turns 共享同一个 bank，episode 结束后随局部变量释放自动销毁
         memory_bank = self._create_session_memory_bank(actual_batch_size=batch_size)
 
         rollings = gen_batch
@@ -174,6 +176,7 @@ class MultiTurnInteractionManager(InteractionManager):
             )
 
             # agent rollout: 调用 model.generate()
+            # Phase 5: 传入 session-local bank，多轮共享同一个 bank
             gen_output = self.actor_rollout_wg.generate(
                 input_ids=inputs["input_ids"],
                 attention_mask=inputs["attention_mask"],
@@ -202,6 +205,7 @@ class MultiTurnInteractionManager(InteractionManager):
             rollings.no_tensor_batch["inter_histories"] = interaction_histories
 
         # build final outputs
+        # Phase 5: episode 结束时记录 memory bank debug 状态
         if memory_bank is not None:
             self.latest_memory_bank_debug = memory_bank.debug_summary()
         final_outputs = self._build_final_outputs(rollings)

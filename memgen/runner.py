@@ -524,5 +524,7 @@ class MemGenRunner:
             output_dir=os.path.join(self.working_dir, "evaluate"),
             weaver_do_sample=interaction_configs.get("weaver_do_sample", False),
             trigger_do_sample=interaction_configs.get("trigger_do_sample", False),
+            # Phase 5: 透传 latent_memory_bank 配置到 InteractionConfig
+            # 实际创建 bank 在 interaction manager 的 _create_session_memory_bank() 中
             latent_memory_bank=configs.get("latent_memory_bank"),
         )

@@ -1,233 +1,318 @@
-# Research Plan
+# Research Plan（研究计划）
 
-## Objective
+## Objective（研究目标）
 
-Maintain MemGen as a long-term research project and investigate an inference-only,
-optional session-level Retrieval-Augmented Recurrent Latent Memory Bank.
+将 MemGen 作为一个长期研究项目持续推进，并研究一种仅在推理阶段（inference-only）启用的、可选的（optional）、会话级（session-level）的 Retrieval-Augmented Recurrent Latent Memory Bank（检索增强循环潜在记忆库）。
 
-## Non-Negotiable Constraints
+---
 
-1. Do not modify the Weaver training workflow.
-2. Do not modify the Trigger training workflow.
-3. When `latent_memory_bank.enabled=false`, behavior must remain exactly unchanged.
-4. Until explicitly approved in a later phase, memory must remain session-local
-   and must not be shared across samples.
-5. Until explicitly approved in a later phase, memory-bank experiments default
-   to `batch_size=1`.
-6. Update `PROGRESS.md` after every completed Phase.
-7. Update `EXPERIMENTS.md` for every experiment.
-8. Update `DECISIONS.md` for every important design choice.
-9. Execute exactly one Phase at a time, then stop for user confirmation.
+# Non-Negotiable Constraints（不可违反的约束）
 
-## Phase Template
+1. 不得修改 Weaver 的训练流程。
+2. 不得修改 Trigger 的训练流程。
+3. 当 latent_memory_bank.enabled=false 时，系统行为必须与原始 MemGen 完全一致。
+4. 在后续阶段未获得明确批准之前，memory 必须保持 session-local（仅限当前会话），不得跨 sample 共享。
+5. 在后续阶段未获得明确批准之前，memory-bank 实验默认使用 batch_size=1。
+6. 每完成一个 Phase，都必须更新 PROGRESS.md。
+7. 每完成一个实验，都必须更新 EXPERIMENTS.md。
+8. 每做出一个重要设计决策，都必须更新 DECISIONS.md。
+9. 一次只能执行一个 Phase，完成后必须停止并等待用户确认。
 
-### Phase N: <Title>
+---
 
-- Status: `proposed | approved | in_progress | completed | blocked`
-- Goal:
-- Scope:
-- Explicitly out of scope:
-- Preconditions:
-- Files expected to change:
-- Implementation steps:
-- Verification:
-- Required note updates:
-- Exit criteria:
-- Rollback plan:
-- User approval:
+# Phase Template（阶段模板）
 
-## Initial Roadmap
+每个阶段应包含：
 
-### Phase 0: Research Memory System and Repository Snapshot
+- 状态（proposed | approved | in_progress | completed | blocked）
+- 目标（Goal）
+- 范围（Scope）
+- 明确不包含的内容（Out of scope）
+- 前置条件（Preconditions）
+- 预计修改的文件
+- 实现步骤
+- 验证方法
+- 必须更新的文档
+- 退出条件（Exit criteria）
+- 回滚方案（Rollback plan）
+- 用户批准（User approval）
 
-- Establish the durable `research_notes/` project memory system.
-- Record the research objective, constraints, workflow, and initial repository state.
-- Capture the branch, commit, working-tree status, environment, and available assets.
-- Do not modify core code or run substantive experiments.
+---
 
-### Phase 1: Code Map and Inference Pipeline Audit
+# Initial Roadmap（初始路线图）
 
-- Map inference entry points, configuration flow, session/sample boundaries,
-  latent representations, generation outputs, and evaluation hooks.
-- Identify Weaver and Trigger training boundaries that must remain unchanged.
-- Identify candidate inference-only integration points and their risks.
-- Update `CODE_MAP.md` using verified paths and symbols.
+## Phase 0：Research Memory System and Repository Snapshot（建立研究记忆系统与仓库快照）
 
-### Phase 2: Original Project Smoke Test
+- 建立长期保存的 research_notes/ 项目记忆系统。
+- 记录研究目标、约束条件、工作流程和仓库初始状态。
+- 记录当前分支、commit、工作区状态、环境和可用资源。
+- 不修改核心代码，不运行正式实验。
 
-- Verify the documented environment, dependencies, model loading, dataset loading,
-  and one minimal original-project inference path.
-- Use the smallest representative sample count and `batch_size=1`.
-- Record all warnings, failures, environment deviations, and output artifacts.
-- Do not treat a smoke test as an accepted scientific baseline.
+---
 
-### Phase 3: Original MemGen Baseline
+## Phase 1：Code Map and Inference Pipeline Audit（代码结构与推理流程审计）
 
-- Establish a trusted, reproducible original MemGen comparator.
-- Fix or route around baseline blockers only within an explicitly approved scope.
-- Record deterministic golden cases, task metrics, latency, and memory usage.
-- Golden cases must fix random seed, decoding parameters, sample IDs, model
-  checkpoint, and evaluation script.
-- Freeze the disabled-feature compatibility oracle for later phases.
+- 梳理 inference 入口、配置流、session/sample 边界、latent 表示、generation 输出和 evaluation hooks。
+- 明确 Weaver 与 Trigger 的训练边界不能修改。
+- 找到 inference-only 的最佳集成位置及风险。
+- 更新 CODE_MAP.md。
 
-### Phase 4: LatentMemoryBank Module Skeleton
+---
 
-- Add the standalone session-level memory-bank data model and configuration schema.
-- Keep `latent_memory_bank.enabled=false` as the default.
-- Implement lifecycle, validation, reset, capacity, and isolation scaffolding
-  without integrating it into original inference behavior.
-- No production inference code path should call the memory bank in this phase.
-- Add focused unit tests for the module skeleton.
+## Phase 2：Original Project Smoke Test（原项目 Smoke Test）
 
-### Phase 5: Version A Integration — Reasoner Injection Only
+- 验证环境、依赖、模型加载、数据加载以及最小推理流程。
+- 使用最小 sample 数量和 batch_size=1。
+- 记录 warning、失败信息和输出文件。
+- Smoke Test 不得作为正式 baseline。
 
-- Integrate the optional bank into inference only.
-- Retrieve stored latent memories and inject them into the Reasoner path.
-- Do not feed retrieved memory into Weaver inputs in Version A.
-- Keep memory local to one session/sample and default to `batch_size=1`.
-- All stored latent memories must be detached from the computation graph, and
-  device/dtype conversions must be explicit.
-- Leave Weaver and Trigger training workflows unchanged.
+---
 
-### Phase 6: Disabled-Feature Equivalence Test
+## Phase 3：Original MemGen Baseline（建立原始 MemGen 基线）
 
-- Compare the implementation with `latent_memory_bank.enabled=false` against the
-  frozen Phase 3 golden cases.
-- Require exact generated token IDs, augmentation masks, metrics, output schema,
-  and relevant tensor/control-flow invariants.
-- Treat any difference as a blocking regression.
+- 建立可信、可复现的 MemGen 对照组。
+- 如有必要，在批准范围内修复 baseline blocker。
+- 固定 golden case。
+- 固定随机种子、sample ID、checkpoint、解码参数和 evaluation script。
+- 记录 task metric、latency 和 memory usage。
+- 冻结 disabled-feature compatibility oracle。
 
-### Phase 7: Version A Stability and Debug Experiment
+---
 
-- Run bounded Version A experiments before performance claims.
-- Test session reset, no cross-sample leakage, empty memory, capacity limits,
-  dtype/device consistency, deterministic replay, and long-session behavior.
-- Measure latency and memory overhead.
-- Repair only Version A defects within this Phase.
+## Phase 4：LatentMemoryBank Module Skeleton（LatentMemoryBank 模块骨架）
 
-### Phase 8A: GSM8K Version A-simple Short Single-Turn Pilot
+- 增加独立的 Memory Bank 数据结构和配置。
+- 默认 latent_memory_bank.enabled=false。
+- 实现生命周期、reset、capacity、validation 和 isolation。
+- 本阶段不接入正式 inference。
+- 增加针对 Memory Bank 本身的单元测试。
 
-- Status: `completed`
-- Purpose:
-  - sanity-check the conservative Reasoner-only mechanism
-  - record stable execution and negative pilot evidence
-- Result:
-  - disabled G0 scored `0.60` (`12/20`)
-  - enabled G1/G4/G6/G7 scored `0.50` (`10/20`)
-  - all enabled variants were stable
-- Interpretation:
-  - this is not main evidence for the final method
-  - GSM8K is short and single-turn, so it does not test the primary
-    multi-turn, long-trajectory, or context-truncation hypothesis
-  - G1/G4 compare current write-age decay against no decay, not
-    last-retrieved-turn decay against no decay
+---
 
-### Phase 8B: Method / Implementation Alignment
+## Phase 5：Version A —— 仅注入 Reasoner
 
-- Status: `completed`
-- Completed alignment work:
-  - documented Version A-simple, Version A-aligned, and Version B separately
-  - recorded that current decay is write-age decay, not
-    last-retrieved-turn decay
-  - recorded that current `threshold_topk` has no fallback top-1
-  - implemented structured retrieval context
-  - implemented and mechanism-tested Version A-aligned
-    `update_policy=thread_update`
-- Remaining method variants, not yet implemented:
-  - `last_retrieved_decay`
-  - `threshold_topk_with_fallback_top1`
-- Version B remains out of scope.
+- Memory Bank 仅集成到 inference。
+- 检索 latent memory 并注入 Reasoner。
+- 禁止将检索结果输入 Weaver。
+- memory 保持 session-local。
+- 默认 batch_size=1。
+- 所有写入 memory 的 latent 必须 detach，并显式处理 device/dtype。
+- 不修改 Weaver 和 Trigger 的训练流程。
 
-### Phase 8C: Target Task Transition
+---
 
-- Status: `proposed`
-- Immediate execution order:
-  - complete notes cleanup and read-only review
-  - prepare and approve a commit for completed Version A-aligned work
-  - plan the TriviaQA baseline protocol
-  - run a minimal TriviaQA Original MemGen / disabled-memory smoke
-- Move primary evaluation away from GSM8K.
-- Use TriviaQA as the next candidate because the current repository implements
-  it as a dynamic multi-turn search/answer environment with `max_turns=5`,
-  growing interaction history, and observation truncation.
-- Establish a trusted Original MemGen / disabled-memory baseline on TriviaQA.
-- Validate model, checkpoint, dataset, retrieval backend, output schema, reward,
-  latency, and session/turn traces before enabled-memory comparisons.
+## Phase 6：Disabled Feature Equivalence Test（关闭功能等价性测试）
 
-### Phase 8D: TriviaQA Version A-Aligned Smoke
+比较：
 
-- Status: `proposed`
-- Run the current Reasoner-only Version A-aligned `thread_update` path on
-  TriviaQA after the disabled baseline smoke is stable.
-- Verify that one session-local bank persists across turns and resets across
-  episodes.
-- Check whether memories written in early turns are retrieved and used in later
-  turns.
-- Record context growth, observation truncation, retrieval/write events,
-  latency, memory, and failures.
-- Make no performance claim until disabled and enabled runs are stable and
-  reproducible.
+- latent_memory_bank.enabled=false
 
-### Phase 8E: Method-Aligned Version A Variants
+与
 
-- Status: `proposed`
-- Already completed:
-  - matched-slot replacement / `thread_update`
-- Consider only after the TriviaQA disabled baseline and Version A-aligned
-  smoke are stable:
-  - last-retrieved-turn decay
-  - fallback top-1 for a non-empty bank
-- Preserve Version A-simple as a separately selectable comparator.
-- Re-run disabled equivalence and targeted multi-turn stability checks for every
-  semantic change.
+- Phase 3 冻结的 baseline。
 
-### Phase 8F: TriviaQA Targeted Ablations
+要求完全一致：
 
-- Status: `proposed`
-- Compare:
-  - disabled Original MemGen
-  - Version A-simple
-  - Version A with last-retrieved decay
-  - Version A with fallback top-1
-  - Version A with matched-slot update
-  - threshold sweeps
-  - top-k sweeps
-- Focus analysis on multi-turn, long-trajectory, and context-truncation
-  behavior.
-- Do not use GSM8K as the primary evidence for these hypotheses.
+- token ids
+- augmentation masks
+- metrics
+- 输出格式
+- tensor/control-flow
 
-### Phase 9: Version B Implementation
+任何差异都视为阻塞性 regression。
 
-- Status: `proposed`
-- Begin only after Version A variants on TriviaQA provide sufficient evidence.
-- Implement the full `retrieve -> Weaver revise/generate -> matched write-back`
-  method.
-- Feed retrieved memory into Weaver with current context.
-- Include fallback top-1, last-retrieved-turn decay, and matched-slot/thread
-  update according to the frozen Version B specification.
-- Preserve Version A-simple and method-aligned Version A variants as explicit
-  comparators.
-- Test Weaver-input distribution risk, disabled-path equivalence, multi-turn
-  stability, and Version A versus Version B.
+---
 
-### Phase 10: Paper-Level Consolidation
+## Phase 7：Version A Stability and Debug Experiment（Version A 稳定性与调试）
 
-- Status: `proposed`
-- Consolidate target-task main results, controlled ablations, efficiency,
-  memory behavior, failure analysis, and limitations.
-- Trace every claim, table, and figure to experiment IDs and raw artifacts.
-- Freeze method definitions, reproducibility instructions, and paper-facing
-  evidence.
-- Do not promote GSM8K pilot observations or unsupported hypotheses to final
-  claims.
+验证：
 
-## Experiment Logging Standard
+- session reset
+- 无跨 sample 泄漏
+- 空 memory
+- capacity 上限
+- dtype/device 一致性
+- deterministic replay
+- 长 session 行为
 
-Every experiment, including failed, aborted, smoke, debug, and ablation runs,
-must be appended to `research_notes/EXPERIMENTS.md` with:
+记录：
 
-- date and experiment ID
-- git branch and commit hash
+- latency
+- memory overhead
+
+仅修复 Version A 缺陷。
+
+---
+
+## Phase 8A：GSM8K Version A-simple Pilot
+
+状态：已完成。
+
+结果：
+
+- G0（disabled）：0.60（12/20）
+- G1/G4/G6/G7（enabled）：0.50（10/20）
+
+解释：
+
+- 不能作为论文主要证据。
+- GSM8K 为短单轮任务，不适合验证长期 memory 假设。
+- 当前比较的是 write-age decay，而不是 last-retrieved-turn decay。
+
+---
+
+## Phase 8B：Method / Implementation Alignment（方法与实现对齐）
+
+状态：已完成。
+
+已完成：
+
+- 区分 Version A-simple、Version A-aligned、Version B。
+- 记录当前 decay 是 write-age decay。
+- 记录 threshold_topk 没有 fallback top-1。
+- 实现 structured retrieval context。
+- 实现并验证 thread_update。
+
+尚未实现：
+
+- last_retrieved_decay
+- threshold_topk_with_fallback_top1
+
+Version B 仍然不在范围内。
+
+---
+
+## Phase 8C：Target Task Transition（迁移到目标任务）
+
+执行顺序：
+
+1. 清理 notes。
+2. review 并提交 Version A-aligned 工作。
+3. 规划 TriviaQA baseline。
+4. 运行 Original MemGen / disabled-memory smoke。
+
+将主要评测从 GSM8K 转移到 TriviaQA。
+
+原因：
+
+TriviaQA 是动态多轮搜索环境，具有：
+
+- max_turns=5
+- 持续增长的 interaction history
+- observation truncation
+
+更适合作为长期 memory 的验证任务。
+
+---
+
+## Phase 8D：TriviaQA Version A-Aligned Smoke
+
+在开始之前必须：
+
+- 准备 TriviaQA checkpoint。
+- 准备 TriviaQA dataset cache。
+- 准备 AgentBank cache。
+- 验证 127.0.0.1:8001/retrieve。
+- 验证 Search-R1 / Wikipedia index。
+- 防止 silent fallback。
+- 定义 sample_count=1 的 dynamic harness 和结构化 answer.json。
+
+之后：
+
+- 运行 Version A-aligned thread_update。
+- 验证 session 内 memory 是否跨 turn 保留。
+- 验证 episode 间是否 reset。
+- 检查早期写入是否在后续 turn 被检索。
+- 记录 latency、memory 和 retrieval/write event。
+
+在 disabled 和 enabled 都稳定之前，不做性能结论。
+
+---
+
+## Phase 8E：Method-Aligned Version A Variants
+
+仅在 TriviaQA baseline 稳定后考虑：
+
+- last-retrieved-turn decay
+- fallback top-1
+
+Version A-simple 保留作为对照组。
+
+每次修改都必须重新验证 disabled 等价性。
+
+---
+
+## Phase 8F：TriviaQA Targeted Ablations（TriviaQA 消融实验）
+
+比较：
+
+- disabled Original MemGen
+- Version A-simple
+- Version A + last-retrieved decay
+- Version A + fallback top-1
+- Version A + matched-slot update
+- threshold sweep
+- top-k sweep
+
+重点分析：
+
+- 多轮行为
+- 长轨迹行为
+- context truncation
+
+不再使用 GSM8K 作为主要证据。
+
+---
+
+## Phase 9：Version B
+
+只有在 TriviaQA 上证明 Version A 有足够价值之后才开始。
+
+实现完整流程：
+
+retrieve     ↓ Weaver revise / generate     ↓ matched write-back
+
+特点：
+
+- retrieval 输入 Weaver。
+- 包含 fallback top-1。
+- 包含 last-retrieved-turn decay。
+- 包含 matched-slot/thread update。
+
+同时保留 Version A-simple 和 Version A 作为对照组。
+
+---
+
+## Phase 10：Paper-Level Consolidation（论文级整合）
+
+整合：
+
+- 主实验结果
+- 消融实验
+- 效率分析
+- memory 行为
+- failure analysis
+- limitations
+
+保证每个 claim 都能追溯到实验 ID 和原始 artifact。
+
+冻结：
+
+- 方法定义
+- 可复现说明
+- 论文证据
+
+不得把 GSM8K pilot 或未经验证的观察提升为最终论文结论。
+
+---
+
+# Experiment Logging Standard（实验记录规范）
+
+所有实验（包括失败、debug、smoke、ablation）必须记录：
+
+- 日期与实验 ID
+- git branch
+- commit hash
 - command
 - config file
 - model path
@@ -240,45 +325,44 @@ must be appended to `research_notes/EXPERIMENTS.md` with:
 - prediction file
 - metric file
 - latency
-- memory usage if available
-- notes and failures
+- memory usage（若可获得）
+- notes 和 failures
 
-Commands and paths must be recorded exactly enough to reproduce the run. Missing
-values must be written explicitly as `not available` with a reason rather than
-silently omitted.
+缺失值必须明确写成 not available 并说明原因。
 
-## Output Directory Standard
+---
 
-Experiment artifacts must be grouped by method family:
+# Output Directory Standard（输出目录规范）
 
-```text
-outputs/
-├── baseline/
-├── latent_bank_vA/
-├── latent_bank_vB/
-└── ablations/
-```
+outputs/ ├── baseline/ ├── latent_bank_vA/ ├── latent_bank_vB/ └── ablations/
 
-- `outputs/baseline/`: original-project smoke and accepted MemGen baseline artifacts.
-- `outputs/latent_bank_vA/`: Version A stability, debug, and main-run artifacts.
-- `outputs/latent_bank_vB/`: Version B stability and main-run artifacts.
-- `outputs/ablations/`: controlled ablation artifacts.
+说明：
 
-Each run should use a unique experiment-ID subdirectory and must not overwrite a
-previous run.
+- outputs/baseline/：原始 MemGen 和 baseline。
+- outputs/latent_bank_vA/：Version A 结果。
+- outputs/latent_bank_vB/：Version B 结果。
+- outputs/ablations/：消融实验结果。
 
-## Phase Gate
+每个实验必须使用唯一 Experiment ID，不得覆盖历史结果。
 
-Before execution:
+---
 
-- [ ] The Phase is explicitly approved by the user.
-- [ ] Scope and exit criteria are written.
-- [ ] Baseline and verification commands are known.
+# Phase Gate（阶段门控）
 
-After execution:
+## 开始执行前
 
-- [ ] Verification passed or failures are documented.
-- [ ] `PROGRESS.md` is updated.
-- [ ] Experiments are recorded in `EXPERIMENTS.md`.
-- [ ] Important choices are recorded in `DECISIONS.md`.
-- [ ] Work is paused for user confirmation.
+必须满足：
+
+- [ ] 用户明确批准该 Phase。
+- [ ] Scope 和 Exit Criteria 已明确。
+- [ ] Baseline 和验证命令已确定。
+
+## 执行结束后
+
+必须满足：
+
+- [ ] 验证通过（或失败已记录）。
+- [ ] 更新 PROGRESS.md。
+- [ ] 更新 EXPERIMENTS.md。
+- [ ] 更新 DECISIONS.md。
+- [ ] 停止执行，等待用户确认后才能进入下一 Phase。

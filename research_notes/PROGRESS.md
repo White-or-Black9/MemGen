@@ -1,649 +1,363 @@
-# Project Progress
+# 项目进展
 
-## Current State
+## 当前状态
 
-- Current status: Version A-aligned `thread_update` completed; target-task
-  baseline planning is next.
-- Status: `completed`
-- Last updated: 2026-06-12
-- Decay/fallback implementation audit: `completed`
-- Method/plan alignment update: `completed`
-- Step 2 structured retrieval context: `completed`
-- Step 3 thread-aware write-back: `completed`
-- Step 4 thread-update mechanism smoke: `completed`
+- 当前状态：Version A 对齐的 `thread_update` 已完成；下一步是目标任务 baseline 规划。
+- 状态：`completed`
+- 最后更新：2026-06-12
+- 衰减 / fallback 实现审计：`completed`
+- 方法 / 计划对齐更新：`completed`
+- Step 2 结构化检索上下文：`completed`
+- Step 3 线程感知写回：`completed`
+- Step 4 thread-update 机制 smoke：`completed`
   (`EXP-20260612-024`)
-- Stop condition: Reached; do not enter a new implementation or experiment
-  phase without explicit approval.
-- Next recommended step: complete notes review and commit preparation, then plan
-  and establish an Original MemGen / disabled-memory TriviaQA baseline. Version
-  B remains not started.
+- 停止条件：已达到；没有明确批准，不要进入新的实现或实验阶段。
+- 下一步建议：完成 notes review 和 commit 准备，然后规划并建立 Original MemGen / disabled-memory TriviaQA baseline。Version B 仍未开始。
 
-## Research Goal
+## 研究目标
 
-Add an optional session-level Retrieval-Augmented Recurrent Latent Memory Bank at
-inference time without changing MemGen's training workflows.
+在不改变 MemGen 训练流程的前提下，在推理时加入一个可选的 session-level Retrieval-Augmented Recurrent Latent Memory Bank。
 
-## Phase 0 Outcome
+## Phase 0 结果
 
-Phase 0 remains complete under the current roadmap.
+Phase 0 在当前路线图下仍然完成。
 
-## Phase 1 Outcome
+## Phase 1 结果
 
-Phase 1 is complete.
+Phase 1 已完成。
 
-- [x] Audited inference entry file and main dispatch.
-- [x] Audited config loading and runtime config handoff.
-- [x] Audited static and dynamic session/sample/episode boundaries.
-- [x] Located Trigger call sites.
-- [x] Located Weaver call sites.
-- [x] Located latent memory generation and Reasoner injection sites.
-- [x] Located generation outputs and evaluation hooks.
-- [x] Marked protected Weaver / Trigger training boundaries.
-- [x] Assessed candidate LatentMemoryBank integration points and risks.
-- [x] Updated research notes only. No core code or training workflow changed.
+- [x] 审计推理入口文件和主 dispatch。
+- [x] 审计配置加载和运行时配置传递。
+- [x] 审计静态和动态 session / sample / episode 边界。
+- [x] 定位 Trigger 调用位置。
+- [x] 定位 Weaver 调用位置。
+- [x] 定位 latent memory 生成和 Reasoner 注入位置。
+- [x] 定位生成输出和评估 hook。
+- [x] 标记受保护的 Weaver / Trigger 训练边界。
+- [x] 评估候选 LatentMemoryBank 集成点和风险。
+- [x] 只更新 research notes。没有修改核心代码或训练流程。
 
-## Phase 2 Outcome
+## Phase 2 结果
 
-Phase 2 is complete with blocking caveats.
+Phase 2 已完成，但有阻塞性 caveat。
 
-- [x] Checked environment, repository state, and runnable project environment.
-- [x] Located an official minimal evaluation route based on GSM8K + Qwen2.5-1.5B-Instruct + Weaver-SFT.
-- [x] Verified that the current `base` environment is not suitable for MemGen execution.
-- [x] Verified that the `memgen` environment can initialize the project correctly.
-- [x] Verified that local base-model and dataset caches are available offline.
-- [x] Ran the original evaluation path on 1 GSM8K sample through `Config -> MemGenModel.from_config -> MemGenRunner.evaluate()`.
-- [x] Confirmed that model loading, dataset loading, interaction setup, and generation start all work in the recommended environment.
-- [x] Confirmed that the official static-eval path currently fails at result recording, leaving `answer.json` empty.
-- [x] Confirmed separately that the original generation path can produce a completion when recorder logic is bypassed in a script-only harness.
-- [x] Reconfirmed that official LoRA loading is still not trustworthy; no smoke result from this Phase is a valid scientific baseline.
-- [x] Updated research notes only. No core code, Weaver training, or Trigger training logic changed.
+- [x] 检查环境、仓库状态和可运行项目环境。
+- [x] 找到一个官方最小评估路线：GSM8K + Qwen2.5-1.5B-Instruct + Weaver-SFT。
+- [x] 验证当前 `base` 环境不适合运行 MemGen。
+- [x] 验证 `memgen` 环境可以正确初始化项目。
+- [x] 验证本地 base-model 和 dataset cache 可以离线使用。
+- [x] 通过 `Config -> MemGenModel.from_config -> MemGenRunner.evaluate()` 在 1 个 GSM8K sample 上运行原始评估路径。
+- [x] 确认模型加载、数据集加载、交互设置和生成启动都能在推荐环境中工作。
+- [x] 确认官方 static-eval 路径当前在结果记录阶段失败，导致 `answer.json` 为空。
+- [x] 另外确认：当在 script-only harness 中绕过 recorder 逻辑时，原始生成路径可以产生 completion。
+- [x] 再次确认官方 LoRA 加载仍然不可信；本 Phase 的 smoke 结果不能作为有效科学 baseline。
+- [x] 只更新 research notes。没有修改核心代码、Weaver 训练或 Trigger 训练逻辑。
 
-## Temporary Environment Alignment Outcome
+## 临时环境对齐结果
 
-The temporary environment alignment phase is complete.
+临时环境对齐阶段已完成。
 
-- [x] Reviewed `README.md`, `requirements.txt`, `memgen.yml`, the official
-  Qwen2.5 GSM8K evaluation script, and the GSM8K configuration.
-- [x] Confirmed the active shell is the `base` environment with Python `3.13.9`
-  and must not be used to run MemGen.
-- [x] Confirmed the existing `memgen` environment is present at
-  `/home/baishilong/miniconda3/envs/memgen`.
-- [x] Confirmed the existing `memgen` Python is `3.10.20`, matching the README
-  setup instructions.
-- [x] Confirmed all required Python imports succeed and `pip check` reports no
-  broken requirements.
-- [x] Confirmed CUDA and BF16 are available from the `memgen` environment when
-  run outside the filesystem sandbox on one NVIDIA RTX A6000.
-- [x] Confirmed the GSM8K YAML, local Qwen snapshot, official MemGen checkpoint,
-  and local GSM8K dataset cache are readable.
-- [x] Determined that no environment recreation or package installation is
-  justified before the Repair Phase.
-- [x] Recorded environment specification drift and the broken PATH-level
-  `conda` shim.
-- [x] Modified research notes only. No project code or environment package was
-  changed.
+- [x] 阅读了 `README.md`、`requirements.txt`、`memgen.yml`、官方 Qwen2.5 GSM8K 评估脚本和 GSM8K 配置。
+- [x] 确认当前 shell 是 `base` 环境，Python 为 `3.13.9`，不能用于运行 MemGen。
+- [x] 确认已有 `memgen` 环境位于 `/home/baishilong/miniconda3/envs/memgen`。
+- [x] 确认已有 `memgen` Python 为 `3.10.20`，符合 README 安装说明。
+- [x] 确认所有必需 Python imports 成功，且 `pip check` 没有 broken requirements。
+- [x] 确认在文件系统 sandbox 外运行时，`memgen` 环境可以在一张 NVIDIA RTX A6000 上使用 CUDA 和 BF16。
+- [x] 确认 GSM8K YAML、本地 Qwen snapshot、官方 MemGen checkpoint 和本地 GSM8K dataset cache 可读。
+- [x] 判断在 Repair Phase 前没有必要重建环境或安装 package。
+- [x] 记录了环境规格漂移和损坏的 PATH-level `conda` shim。
+- [x] 只修改 research notes。没有修改项目代码或环境 package。
 
-## Temporary Repair Phase Outcome
+## 临时 Repair Phase 结果
 
-The temporary Repair Phase is complete.
+临时 Repair Phase 已完成。
 
-- [x] Reproduced `BUG-0001` with the original nested PEFT loading path.
-- [x] Confirmed that the original path expected 392 incorrectly nested adapter
-  keys while each official checkpoint contains 112 trained q/v LoRA tensors.
-- [x] Replaced only the checkpoint adapter restoration logic; initial Weaver and
-  Trigger training adapter construction remains unchanged.
-- [x] Verified all 112 Weaver and all 112 Trigger tensors against the official
-  safetensors with no missing, unexpected, shape-mismatched, or value-mismatched
-  entries.
-- [x] Reproduced `BUG-0002` as a caller/recorder contract mismatch: the runner
-  passed one string and one dictionary where the recorder requires two lists.
-- [x] Normalized gathered static-eval batches and preserved sample order and
-  metric semantics.
-- [x] Ran the official `Config -> MemGenModel.from_config ->
-  MemGenRunner.evaluate()` path on one GSM8K sample with seed 42 and batch size 1.
-- [x] Confirmed a non-empty `answer.json` with one prediction and one summary
-  record.
-- [x] Confirmed the generation path called the Trigger decision entry 85 times,
-  Weaver prompt augmentation once, and Weaver inference augmentation three
-  times.
-- [x] Did not modify Weaver training, Trigger training, training scripts,
-  dependencies, or environment packages.
-- [x] Did not enter Phase 3.
+- [x] 用原始 nested PEFT 加载路径复现 `BUG-0001`。
+- [x] 确认原始路径期望 392 个错误嵌套的 adapter keys，而每个官方 checkpoint 实际包含 112 个训练过的 q/v LoRA tensors。
+- [x] 只替换 checkpoint adapter 恢复逻辑；初始 Weaver 和 Trigger 训练 adapter 构造保持不变。
+- [x] 对照官方 safetensors 验证所有 112 个 Weaver 和所有 112 个 Trigger tensors，没有 missing、unexpected、shape mismatch 或 value mismatch。
+- [x] 复现 `BUG-0002`，其原因是 caller / recorder contract mismatch：runner 传入一个 string 和一个 dictionary，而 recorder 需要两个 lists。
+- [x] 规范化 gathered static-eval batches，并保持 sample 顺序和 metric 语义。
+- [x] 使用 seed 42 和 batch size 1，在一个 GSM8K sample 上运行官方 `Config -> MemGenModel.from_config -> MemGenRunner.evaluate()` 路径。
+- [x] 确认产生非空 `answer.json`，包含一条 prediction 和一条 summary record。
+- [x] 确认生成路径调用 Trigger decision entry 85 次、Weaver prompt augmentation 1 次、Weaver inference augmentation 3 次。
+- [x] 没有修改 Weaver training、Trigger training、训练脚本、依赖或环境 package。
+- [x] 没有进入 Phase 3。
 
-## Temporary Repair Review Outcome
+## Phase 3 结果
 
-The temporary Repair Review and Sanity Check is complete.
+Phase 3 已完成。
 
-- [x] Reviewed the complete core diff in `memgen/model/modeling_memgen.py` and
-  `memgen/runner.py`.
-- [x] Confirmed no diff under `memgen/trainer/`, `scripts/train/`, Weaver/Trigger
-  training scripts, or `memgen/model/modeling_utils.py`.
-- [x] Confirmed fresh Weaver SFT uses `load_model_path=null` and does not enter
-  the repaired checkpoint restoration branch.
-- [x] Confirmed checkpoint-driven runs keep the same control flow while now
-  restoring the trained adapter tensors correctly.
-- [x] Parameterized the Repair Phase smoke harness only; no additional core-code
-  change was required.
-- [x] Ran three GSM8K test samples with seed 42 and batch size 1 through
-  `Config -> MemGenModel.from_config -> MemGenRunner.evaluate()`.
-- [x] Confirmed `answer.json` contains exactly three non-empty prediction records
-  and one summary record.
-- [x] Reconfirmed exact 112/112 tensor matches for both Weaver and Trigger
-  adapters with no missing, unexpected, shape, or value mismatches.
-- [x] Confirmed aggregate generation tracing: 193 Trigger decision calls, three
-  Weaver prompt calls, and eight Weaver inference calls.
-- [x] Did not treat the three-sample reward as a baseline metric.
-- [x] Did not enter Phase 3.
+- [x] 接受 `memgen-gsm8k-sft-official-v1` 作为 Original MemGen comparator。
+- [x] 固定 comparison set 为 GSM8K `main/test` indices 0 到 19。
+- [x] 使用 seed 42、batch size 1、greedy decoding、maximum response length 1024。
+- [x] 运行官方 `Config -> MemGenModel.from_config -> MemGenRunner.evaluate()` 路径。
+- [x] 产生 20 条非空 prediction records 和 1 条 summary record。
+- [x] 在固定 20-sample 子集上记录 mean `compute_reward=0.60`。
+- [x] 再次确认 Weaver 和 Trigger adapter 精确加载：112/112。
+- [x] 记录 1,722 次 Trigger decision calls、20 次 Weaver prompt calls、43 次 Weaver inference calls。
+- [x] 记录总延迟 115.728 秒，平均延迟 5.786 秒 / sample，peak allocated CUDA memory 9,415,716,352 bytes。
+- [x] 重放固定 samples 0、1、2，并获得完全相同的 response-token 和 augmentation-mask SHA-256 hashes。
+- [x] 将 prediction、verification、TensorBoard 和 metric-contract artifacts 归档到 `outputs/baseline/`。
+- [x] Phase 3 没有修改核心方法或训练代码。
+- [x] 没有进入 Phase 4。
 
-## Phase 3 Outcome
+## Phase 4 结果
 
-Phase 3 is complete.
+Phase 4 已完成。
 
-- [x] Accepted `memgen-gsm8k-sft-official-v1` as the Original MemGen comparator.
-- [x] Fixed the comparison set to GSM8K `main/test` indices 0 through 19.
-- [x] Used seed 42, batch size 1, greedy decoding, and maximum response length
-  1024.
-- [x] Ran the official `Config -> MemGenModel.from_config ->
-  MemGenRunner.evaluate()` path.
-- [x] Produced 20 non-empty prediction records and one summary record.
-- [x] Recorded mean `compute_reward=0.60` on the fixed 20-sample subset.
-- [x] Reconfirmed exact 112/112 Weaver and 112/112 Trigger adapter loading.
-- [x] Recorded 1,722 Trigger decision calls, 20 Weaver prompt calls, and 43
-  Weaver inference calls.
-- [x] Recorded total latency 115.728 seconds, mean latency 5.786 seconds/sample,
-  and peak allocated CUDA memory 9,415,716,352 bytes.
-- [x] Replayed fixed samples 0, 1, and 2 and obtained identical response-token
-  and augmentation-mask SHA-256 hashes.
-- [x] Archived prediction, verification, TensorBoard, and metric-contract
-  artifacts under `outputs/baseline/`.
-- [x] Did not modify core method or training code in Phase 3.
-- [x] Did not enter Phase 4.
+- [x] 在 `memgen/model/latent_memory_bank.py` 中添加独立的 `LatentMemoryBankConfig`、`LatentMemorySlot` 和 `LatentMemoryBank`。
+- [x] 添加默认禁用的 `configs/latent_memory_bank/default.yaml`。
+- [x] 在 `tests/test_latent_memory_bank.py` 中添加 16 个标准库 unit tests。
+- [x] 实现 disabled 和 empty-bank 的 no-op 行为。
+- [x] 实现 recent-token mean query pooling 和 memory mean key pooling。
+- [x] 实现带 exponential recency decay 的 cosine similarity。
+- [x] 实现 threshold、top-k 和 threshold-plus-top-k retrieval。
+- [x] 实现 append、replace-lowest-score 和 replace-oldest capacity 行为。
+- [x] 强制 Phase 4 batch size 1 tensor shapes。
+- [x] 强制写入时 detach and clone，检索时 detached clone。
+- [x] 确认 caller 修改 retrieved tensors 或 nested metadata 不会改变 bank-owned slot state。
+- [x] 实现显式 storage 和 retrieval device / dtype movement。
+- [x] 定义 `_step` 为 successful memory-write count，而不是 generation-token count。
+- [x] 定义 `replace` 为 lowest-`last_score` replacement；当所有 slots 都 unscored 时 fallback 到 oldest slot。
+- [x] 添加 debug summary 和 detached state-dict-like snapshots。
+- [x] 通过 compilation、YAML parsing 和全部 16 个 unit tests。
+- [x] 确认 production inference、`generate()`、runner、trainer 和 training scripts 都没有 import 或 call 该 module。
+- [x] 确认 import `MemGenModel` 不会加载 memory-bank module。
+- [x] 没有修改现有 GSM8K 配置或原始推理行为。
+- [x] 没有进入 Phase 5。
 
-## Phase 4 Outcome
+## Phase 5 结果
 
-Phase 4 is complete.
+Phase 5 已完成。
 
-- [x] Added standalone `LatentMemoryBankConfig`, `LatentMemorySlot`, and
-  `LatentMemoryBank` in `memgen/model/latent_memory_bank.py`.
-- [x] Added disabled-by-default
-  `configs/latent_memory_bank/default.yaml`.
-- [x] Added 16 standard-library unit tests in
-  `tests/test_latent_memory_bank.py`.
-- [x] Implemented disabled and empty-bank no-op behavior.
-- [x] Implemented recent-token mean query pooling and memory mean key pooling.
-- [x] Implemented cosine similarity with exponential recency decay.
-- [x] Implemented threshold, top-k, and threshold-plus-top-k retrieval.
-- [x] Implemented append, replace-lowest-score, and replace-oldest capacity
-  behavior.
-- [x] Enforced Phase 4 batch size 1 tensor shapes.
-- [x] Enforced detach and clone on write and detached clone on retrieval.
-- [x] Confirmed caller mutation of retrieved tensors or nested metadata cannot
-  modify bank-owned slot state.
-- [x] Implemented explicit storage and retrieval device/dtype movement.
-- [x] Defined `_step` as successful memory-write count, not generation-token
-  count.
-- [x] Defined `replace` as lowest-`last_score` replacement with an oldest-slot
-  fallback when all slots are unscored.
-- [x] Added debug summary and detached state-dict-like snapshots.
-- [x] Passed compilation, YAML parsing, and all 16 unit tests.
-- [x] Confirmed production inference, `generate()`, runner, trainer, and training
-  scripts do not import or call the module.
-- [x] Confirmed importing `MemGenModel` does not load the memory-bank module.
-- [x] Did not modify existing GSM8K configuration or original inference behavior.
-- [x] Did not enter Phase 5.
+- [x] 将 optional LatentMemoryBank 只集成到 inference。
+- [x] 保持 bank 为 session-local，并由每次 interaction-manager `run_agent_loop()` 调用拥有。
+- [x] single-turn session 每个 session 使用一个 bank；multi-turn episode 内所有 turns 共享一个 bank。
+- [x] 将 bank 显式传入 `MemGenModel.generate()`，没有把任何 bank object 存在 `MemGenModel` 上。
+- [x] 通过保持 `latent_memory_bank=None` / `enabled=false` 在原始代码分支上，保留原始 disabled path，不进行新的 retrieval、write、mask 或 tensor-packaging 工作。
+- [x] 实现 Version A retrieval：retrieved memory 只注入 Reasoner 路径，永远不会传给 `reasoner_to_weaver()`、`augment_prompt()` 或 `augment_inference()`。
+- [x] 只把 `weaver_to_reasoner(...)` 之后的 reasoner-space `latent_inputs_embeds` 写入 bank。
+- [x] 添加显式 retrieved-memory attention-mask handling，以及单独的 debug bookkeeping：`memory_write_count`、`memory_retrieve_count`、`retrieved_latent_count`、`new_latent_count`、`slot_count`。
+- [x] 拒绝 `enabled=true` 且 `batch_size > 1` 的 evaluation，同时保持 disabled mode 不受限制。
+- [x] 添加轻量 integration tests：disabled no-op、empty-bank no-op、session reset、no cross-sample leakage、Reasoner-only injection、reasoner-space writes、dtype/device compatibility、enabled batch-size rejection。
+- [x] 通过 `py_compile`、完整 `unittest` 和 `git diff --check`。
+- [x] 在 GSM8K samples `0..2` 上运行 disabled-path golden replay `EXP-20260612-010`；response-token hashes、augmentation-mask hashes、Trigger call count、Weaver prompt count 和 Weaver inference count 都与 `EXP-20260611-007` 完全一致。
+- [x] 在 GSM8K sample `0` 上运行 enabled debug `EXP-20260612-011`；运行未崩溃，并记录 4 次 writes、3 次 retrievals、24 个 retrieved latent tokens、32 个 newly written latent tokens 和 4 个 resident slots。
+- [x] 没有修改 `memgen/trainer/**`、`scripts/train/**`、Weaver training logic、Trigger training logic，也没有实现 Version B。
+- [x] 没有进入 Phase 6。
 
-## Phase 5 Outcome
+## Phase 6 结果
 
-Phase 5 is complete.
+Phase 6 已完成。
 
-- [x] Integrated the optional LatentMemoryBank into inference only.
-- [x] Kept the bank session-local and owned by each interaction-manager
-  `run_agent_loop()` call.
-- [x] Used one bank per single-turn session and one bank shared across all turns
-  in one multi-turn episode.
-- [x] Passed the bank explicitly into `MemGenModel.generate()` and did not store
-  any bank object on `MemGenModel`.
-- [x] Preserved the original disabled path by keeping
-  `latent_memory_bank=None` / `enabled=false` on the original code branch with no
-  new retrieval, write, mask, or tensor-packaging work.
-- [x] Implemented Version A retrieval so retrieved memory is injected only into
-  the Reasoner path and is never passed into `reasoner_to_weaver()`,
-  `augment_prompt()`, or `augment_inference()`.
-- [x] Wrote only reasoner-space `latent_inputs_embeds` into the bank after
-  `weaver_to_reasoner(...)`.
-- [x] Added explicit retrieved-memory attention-mask handling and separate debug
-  bookkeeping for `memory_write_count`, `memory_retrieve_count`,
-  `retrieved_latent_count`, `new_latent_count`, and `slot_count`.
-- [x] Rejected `enabled=true` evaluation with `batch_size > 1` and kept
-  disabled mode unrestricted.
-- [x] Added lightweight integration tests for disabled no-op, empty-bank no-op,
-  session reset, no cross-sample leakage, Reasoner-only injection,
-  reasoner-space writes, dtype/device compatibility, and enabled batch-size
-  rejection.
-- [x] Passed `py_compile`, full `unittest`, and `git diff --check`.
-- [x] Ran disabled-path golden replay `EXP-20260612-010` on GSM8K samples
-  `0..2`; response-token hashes, augmentation-mask hashes, Trigger call count,
-  Weaver prompt count, and Weaver inference count matched
-  `EXP-20260611-007` exactly.
-- [x] Ran enabled debug `EXP-20260612-011` on GSM8K sample `0`; the run did not
-  crash and recorded 4 writes, 3 retrievals, 24 retrieved latent tokens,
-  32 newly written latent tokens, and 4 resident slots.
-- [x] Did not modify `memgen/trainer/**`, `scripts/train/**`, Weaver training
-  logic, Trigger training logic, or implement Version B.
-- [x] Did not enter Phase 6.
+- [x] 在 GSM8K test IDs `0..19` 上，对 frozen Phase 3 baseline `EXP-20260611-006` 运行 20-sample disabled-path equivalence test。
+- [x] 使用 seed `42`、batch size `1`、greedy decoding 和 maximum response length `1024`。
+- [x] 保持 `latent_memory_bank` disabled，并验证 `memory_bank_debug=null`。
+- [x] 确认 `answer.json` 非空，且包含恰好 20 条 prediction records 和 1 条 summary record。
+- [x] 确认 summary `compute_reward=0.60`，与 `EXP-20260611-006` 完全一致。
+- [x] 确认每个 response-token SHA-256 hash 都与 frozen baseline 匹配。
+- [x] 确认每个 augmentation-mask SHA-256 hash 都与 frozen baseline 匹配。
+- [x] 确认 Trigger decision calls 完全一致：`1722`。
+- [x] 确认 Weaver prompt augmentation calls 完全一致：`20`。
+- [x] 确认 Weaver inference augmentation calls 完全一致：`43`。
+- [x] 再次确认 adapter loading integrity：Weaver `112/112`、Trigger `112/112`，missing、unexpected、shape 或 value mismatch 都为 0。
+- [x] 重新运行 `git diff --check`、`py_compile` 和完整 `unittest`，全部通过。
+- [x] 确认 `memgen/trainer/**`、`scripts/train/**`、`memgen/model/weaver.py` 或 `memgen/model/trigger.py` 下没有 diff。
+- [x] 没有发现 disabled-path regression，也没有新的 blocking bug。
+- [x] 本阶段没有修改核心方法代码。
+- [x] 没有进入 Phase 7。
 
-## Phase 6 Outcome
+## Phase 7 结果
 
-Phase 6 is complete.
+Phase 7 已完成。
 
-- [x] Ran a 20-sample disabled-path equivalence test on GSM8K test IDs `0..19`
-  against the frozen Phase 3 baseline `EXP-20260611-006`.
-- [x] Used seed `42`, batch size `1`, greedy decoding, and maximum response
-  length `1024`.
-- [x] Kept `latent_memory_bank` disabled and verified `memory_bank_debug=null`.
-- [x] Confirmed `answer.json` remained non-empty and contained exactly 20
-  prediction records plus one summary record.
-- [x] Confirmed summary `compute_reward=0.60`, matching
-  `EXP-20260611-006` exactly.
-- [x] Confirmed every response-token SHA-256 hash matched the frozen baseline.
-- [x] Confirmed every augmentation-mask SHA-256 hash matched the frozen
-  baseline.
-- [x] Confirmed Trigger decision calls matched exactly: `1722`.
-- [x] Confirmed Weaver prompt augmentation calls matched exactly: `20`.
-- [x] Confirmed Weaver inference augmentation calls matched exactly: `43`.
-- [x] Reconfirmed adapter loading integrity:
-  Weaver `112/112`, Trigger `112/112`, with zero missing, unexpected, shape, or
-  value mismatches.
-- [x] Re-ran `git diff --check`, `py_compile`, and full `unittest`; all passed.
-- [x] Confirmed no diff under `memgen/trainer/**`, `scripts/train/**`,
-  `memgen/model/weaver.py`, or `memgen/model/trigger.py`.
-- [x] Found no disabled-path regression and no new blocking bug.
-- [x] Did not modify core method code in this phase.
-- [x] Did not enter Phase 7.
-
-## Phase 7 Outcome
-
-Phase 7 is complete.
-
-- [x] Ran only enabled-path bounded debug and stability checks; no performance
-  claim was made.
-- [x] Kept seed `42`, batch size `1`, greedy decoding, and maximum response
-  length `1024`.
-- [x] Confirmed `git status` was clean before the run and protected training
-  paths had no diff.
-- [x] Re-ran `git diff --check`, `py_compile`, and full `unittest`; all passed.
-- [x] Ran Tier 1 smoke on one GSM8K test sample in enabled mode.
-- [x] Ran Tier 2 small stability on GSM8K test samples `0..2` in enabled mode.
-- [x] Ran Tier 3 bounded capacity on GSM8K test samples `0..4` in enabled mode.
-- [x] Confirmed all enabled runs wrote non-empty `answer.json` files with the
-  expected prediction count plus one summary record.
-- [x] Confirmed no crash, NaN, OOM, CUDA error, shape mismatch, device mismatch,
-  or dtype mismatch was observed in any Tier.
-- [x] Confirmed each single-turn session started with `initial_slots=0`.
-- [x] Confirmed no cross-sample leakage across Tier 2 or Tier 3 sessions.
-- [x] Confirmed retrieved memory remained Reasoner-only; Weaver input token
-  counts always matched `reasoner_to_weaver` input token counts.
-- [x] Confirmed stored latent memories remained reasoner-space tensors with
-  hidden size `1536`.
-- [x] Confirmed slot storage remained explicit: CPU storage, original device
-  `cuda:0`, original dtype `torch.bfloat16`, stored dtype `torch.bfloat16`.
-- [x] Confirmed `slot_count` never exceeded `max_slots=8`.
-- [x] Observed no replacement-policy activation in this bounded run because the
-  largest per-session slot count was `4`.
-- [x] Ran a post-Phase-7 capacity-trigger supplement with `max_slots=2` on one
-  real enabled session and confirmed replacement activation in the real
-  inference path.
-- [x] Confirmed the supplement recorded `append_count=2`, `replace_count=2`,
-  `rejected_write_count=0`, and
-  `update_action_trace=["append", "append", "replace", "replace"]`.
-- [x] Confirmed the supplement kept `final slot_count=2 <= max_slots=2` while
-  `memory_write_count=4 > max_slots`.
-- [x] Resolved the only outstanding Phase 7 warning: replacement policy is now
-  observed in the real enabled debug path.
-- [x] Recorded Tier 1 stats: writes `4`, retrieves `3`, retrieved latents `24`,
-  new latents `32`, slot count `4`, latency `8.658 s`, peak CUDA memory
-  `9,385,351,168` bytes.
-- [x] Recorded Tier 2 per-session stats:
-  sample 0 -> writes `4`, retrieves `3`, retrieved latents `24`, new latents
-  `32`, slot count `4`;
-  sample 1 -> writes `2`, retrieves `1`, retrieved latents `8`, new latents
-  `16`, slot count `2`;
-  sample 2 -> writes `4`, retrieves `3`, retrieved latents `24`, new latents
-  `32`, slot count `4`;
-  total latency `14.066 s`, mean latency `4.689 s/sample`, peak CUDA memory
-  `9,385,351,168` bytes.
-- [x] Recorded Tier 3 per-session stats:
-  sample 0 -> writes `4`, retrieves `3`, retrieved latents `24`, new latents
-  `32`, slot count `4`;
-  sample 1 -> writes `2`, retrieves `1`, retrieved latents `8`, new latents
-  `16`, slot count `2`;
-  sample 2 -> writes `4`, retrieves `3`, retrieved latents `24`, new latents
-  `32`, slot count `4`;
-  sample 3 -> writes `2`, retrieves `1`, retrieved latents `8`, new latents
-  `16`, slot count `2`;
-  sample 4 -> writes `4`, retrieves `3`, retrieved latents `24`, new latents
-  `32`, slot count `4`;
-  total latency `21.562 s`, mean latency `4.312 s/sample`, peak CUDA memory
-  `9,395,434,496` bytes.
-- [x] Found no new blocking bug in Phase 7.
-- [x] Modified only the debug harness and research notes in this Phase.
-- [x] Added debug-only bank summary fields and debug-harness CLI overrides for
-  capacity-trigger validation; no disabled-path or training-path semantics were
-  changed.
-- [x] Did not modify `memgen/trainer/**`, `scripts/train/**`, Weaver training
-  logic, Trigger training logic, or implement Version B.
-- [x] Did not enter Phase 8.
-
-## End-of-Day Validation Outcome
-
-The 2026-06-11 end-of-day validation is complete.
-
-- [x] Confirmed branch `rlm-memory-bank` at
-  `506bd21ffd53531a0cac442093ccce403e8b3891`.
-- [x] Confirmed the working tree contains uncommitted Phase 4 module, config,
-  tests, and research-note updates.
-- [x] Confirmed no diff in protected training paths, `MemGenModel.generate()`,
-  runner, interaction managers, or the existing GSM8K configuration.
-- [x] Passed `py_compile` for the repaired model/runner, Phase 4 module, smoke
-  harness, and unit tests.
-- [x] Passed all 16 LatentMemoryBank unit tests.
-- [x] Re-read the accepted Phase 3 JSONL artifact: 20 predictions, one summary,
-  and `compute_reward=0.60`.
-- [x] Re-read the EXP-20260611-007 golden replay artifacts: three predictions,
-  one summary, and sample IDs 0, 1, and 2.
-- [x] Reconfirmed stored adapter evidence: Weaver 112/112, Trigger 112/112, with
-  zero missing, unexpected, shape, or value mismatches.
-- [x] Reconfirmed `BUG-0001` and `BUG-0002` remain fixed.
-- [x] Reconfirmed the Phase 4 module is standalone and disabled by default.
-- [x] Did not run inference, implement integration, or enter Phase 5.
-
-## Files Audited in Phase 1
-
-- `main.py`
-- `common/config.py`
-- `memgen/runner.py`
-- `interactions/base_interaction.py`
-- `interactions/singleturn_interaction.py`
-- `interactions/multiturn_interaction.py`
-- `memgen/model/modeling_memgen.py`
-- `memgen/model/modeling_utils.py`
-- `memgen/model/weaver.py`
-- `memgen/model/trigger.py`
-- `memgen/utils.py`
-- `data/__init__.py`
-- `data/base_builder.py`
-- `data/base_env.py`
-
-## Repository Snapshot at Phase 1 Closeout
-
-- Branch: `rlm-memory-bank`
-- Commit: `7b8b9a44eb30325a676a6c9576c35b3a10b52c32`
-- Working tree had uncommitted changes before Phase 2 note updates: `yes`
-- Phase 2 modified research notes only: `yes`
-
-## Key Phase 1 Conclusions
-
-- Inference evaluation enters through `main.py -> MemGenRunner.evaluate()`.
-- Static and dynamic evaluations use different interaction managers, but both
-  funnel generation through `MemGenModel.generate()`.
-- Trigger gating, Weaver latent generation, and latent-to-Reasoner injection all
-  happen inside `MemGenModel.generate()` on the inference path.
-- The safest future memory reset boundary is the interaction-manager session, not
-  a global model lifetime.
-- A future memory-bank design should use explicit inference-only state passing,
-  not persistent global memory on `MemGenModel`.
-- At Phase 1 closeout, baseline trust was blocked by `BUG-0001`; the later
-  Repair Phase resolved it before Phase 3.
-
-## Key Phase 2 Conclusions
-
-- Recommended runtime environment for this repository is
-  `/home/baishilong/miniconda3/envs/memgen` with Python `3.10.20`.
-- The current `base` environment is unsuitable for MemGen because it uses Python
-  `3.13.9`, the project's `conda` wrapper is broken by CRLF, and sandboxed runs
-  cannot expose CUDA to PyTorch.
-- Offline execution requires bypassing the inherited `HF_ENDPOINT=https://hf-mirror.com`
-  and local proxy variables, and using the local cached Qwen snapshot path.
-- The original MemGen evaluation stack reached real generation on GPU for a
-  1-sample GSM8K smoke run.
-- The official static-eval route did not complete because
-  `StaticEvalRecorder.record_batch()` crashed with `KeyError: 0`; the created
-  `evaluate/answer.json` file remained empty.
-- A script-only harness that kept the original model and interaction logic but
-  bypassed the broken recorder produced a completion and wrote
-  `manual_answer.json`.
-- At Phase 2 closeout, `BUG-0001` remained open and no Phase 2 output was valid
-  as a baseline; the later Repair Phase resolved it before Phase 3.
-
-## Environment Alignment Conclusions
-
-- Canonical Python executable:
-  `/home/baishilong/miniconda3/envs/memgen/bin/python`
-- Recommended activation:
-  `source /home/baishilong/miniconda3/bin/activate memgen`
-- Direct absolute Python invocation is preferred for automated runs because the
-  current PATH-level `/home/baishilong/bin/conda` wrapper has a CRLF shebang.
-- README recommends Python `3.10`; `memgen.yml` specifies Python `3.11.13`.
-  The existing environment uses Python `3.10.20` and has already reached real
-  GPU generation, so it is the lower-risk repair environment.
-- Installed key versions:
-  - PyTorch `2.12.0+cu126`
-  - Transformers `4.55.4`
-  - PEFT `0.17.1`
-  - Accelerate `1.10.1`
-  - Datasets `4.0.0`
-  - FlashAttention `2.8.3`
-- The installed PyTorch is newer than both checked-in manifests, but imports,
-  dependency validation, CUDA/BF16 checks, and Phase 2 generation succeeded.
-  Do not downgrade it before repairing the known code defects.
-- Current proxy variables point to `127.0.0.1:7898`. For reproducible offline
-  runs, unset proxy and custom HF endpoint variables, set Hugging Face offline
-  flags, and use the verified local snapshot/cache paths.
-- No project file needs modification for environment alignment.
-
-## Phase History
-
-| Date | Phase | Outcome | Evidence |
-|---|---|---|---|
-| 2026-06-11 | Phase 0 - Research Memory System and Repository Snapshot | Completed | `research_notes/` structure confirmed; repository and environment snapshot recorded |
-| 2026-06-11 | Phase 1 - Code Map and Inference Pipeline Audit | Completed | `research_notes/CODE_MAP.md` updated with verified inference path, boundaries, tensor notes, and integration risks |
-| 2026-06-11 | Phase 2 - Original Project Smoke Test | Completed with caveats | Original evaluation path reached generation but failed in static recorder; script-only harness produced one completion; baseline remains invalid due `BUG-0001` |
-| 2026-06-11 | Temporary Environment Alignment Phase | Completed | Existing `memgen` environment validated; CUDA/BF16 and local assets confirmed; no install or environment rebuild required |
-| 2026-06-11 | Temporary Repair Phase | Completed | `BUG-0001` and `BUG-0002` fixed; one-sample official static smoke wrote a non-empty `answer.json` with exact adapter tensor verification |
-| 2026-06-11 | Temporary Repair Review and Sanity Check | Completed | Core repair diff reviewed; training files unchanged; three-sample official static eval produced three predictions plus one summary |
-| 2026-06-11 | Phase 3 - Original MemGen Baseline | Completed | Fixed 20-sample baseline accepted at `compute_reward=0.60`; three golden cases replayed with exact token/mask hashes |
-| 2026-06-11 | Phase 4 - LatentMemoryBank Module Skeleton | Completed | Standalone disabled-by-default bank added; 16 unit tests passed after cleanup; production inference and training paths remain disconnected |
-| 2026-06-11 | Phase 4 cleanup | Completed | Clarified replace fallback and write-step semantics; retrieval-copy isolation covered; 16 unit tests passed |
-| 2026-06-11 | End-of-Day Validation | Completed | Compilation and 16 unit tests passed; Repair and baseline artifacts revalidated; Phase 4 remains isolated and ready to commit |
-
-## Historical Phase 4 Session Handoff
-
-This section preserves the Phase 4 closeout state and is not the current
-project status.
-
-- Phase 4 is complete.
-- The memory bank exists only as a standalone, unit-tested skeleton.
-- `latent_memory_bank.enabled` defaults to `false`.
-- No production inference or training path imports or calls the module.
-- Phase 3 baseline and golden artifacts remain the compatibility oracle.
-- Current Phase 4 work is ready to commit; the working tree is not yet clean.
-- Next suggested phase is Phase 5: Version A Integration — Reasoner Injection
-  Only, after explicit approval.
-- Do not enter Phase 5 without explicit approval.
+- [x] 只运行 enabled-path bounded debug 和 stability checks；没有做 performance claim。
+- [x] 保持 seed `42`、batch size `1`、greedy decoding 和 maximum response length `1024`。
+- [x] 确认运行前 `git status` 干净，protected training paths 没有 diff。
+- [x] 重新运行 `git diff --check`、`py_compile` 和完整 `unittest`，全部通过。
+- [x] 在一个 GSM8K test sample 上运行 Tier 1 smoke enabled mode。
+- [x] 在 GSM8K test samples `0..2` 上运行 Tier 2 small stability enabled mode。
+- [x] 在 GSM8K test samples `0..4` 上运行 Tier 3 bounded capacity enabled mode。
+- [x] 确认所有 enabled runs 都写入非空 `answer.json`，并包含预期数量的 prediction records 和 1 条 summary record。
+- [x] 所有 Tier 中都没有观察到 crash、NaN、OOM、CUDA error、shape mismatch、device mismatch 或 dtype mismatch。
+- [x] 确认每个 single-turn session 都从 `initial_slots=0` 开始。
+- [x] 确认 Tier 2 或 Tier 3 sessions 中没有 cross-sample leakage。
+- [x] 确认 retrieved memory 仍然是 Reasoner-only；Weaver input token counts 始终匹配 `reasoner_to_weaver` input token counts。
+- [x] 确认 stored latent memories 仍然是 hidden size `1536` 的 reasoner-space tensors。
+- [x] 确认 slot storage 显式记录：CPU storage、original device `cuda:0`、original dtype `torch.bfloat16`、stored dtype `torch.bfloat16`。
+- [x] 确认 `slot_count` 从未超过 `max_slots=8`。
+- [x] 在该 bounded run 中没有观察到 replacement-policy activation，因为最大 per-session slot count 是 `4`。
+- [x] 在 Phase 7 后运行 capacity-trigger supplement，设置 `max_slots=2`，在真实 enabled session 中确认 replacement activation。
+- [x] 确认 supplement 记录 `append_count=2`、`replace_count=2`、`rejected_write_count=0`，以及 `update_action_trace=["append", "append", "replace", "replace"]`。
+- [x] 确认 supplement 保持 `final slot_count=2 <= max_slots=2`，同时 `memory_write_count=4 > max_slots`。
+- [x] 解决唯一剩余的 Phase 7 warning：现在已经在真实 enabled debug path 中观察到 replacement policy。
+- [x] 记录 Tier 1 stats：writes `4`、retrieves `3`、retrieved latents `24`、new latents `32`、slot count `4`、latency `8.658 s`、peak CUDA memory `9,385,351,168` bytes。
+- [x] 记录 Tier 2 per-session stats：
+  sample 0 -> writes `4`、retrieves `3`、retrieved latents `24`、new latents `32`、slot count `4`；
+  sample 1 -> writes `2`、retrieves `1`、retrieved latents `8`、new latents `16`、slot count `2`；
+  sample 2 -> writes `4`、retrieves `3`、retrieved latents `24`、new latents `32`、slot count `4`；
+  total latency `14.066 s`、mean latency `4.689 s/sample`、peak CUDA memory `9,385,351,168` bytes。
+- [x] 记录 Tier 3 per-session stats：
+  sample 0 -> writes `4`、retrieves `3`、retrieved latents `24`、new latents `32`、slot count `4`；
+  sample 1 -> writes `2`、retrieves `1`、retrieved latents `8`、new latents `16`、slot count `2`；
+  sample 2 -> writes `4`、retrieves `3`、retrieved latents `24`、new latents `32`、slot count `4`；
+  sample 3 -> writes `2`、retrieves `1`、retrieved latents `8`、new latents `16`、slot count `2`；
+  sample 4 -> writes `4`、retrieves `3`、retrieved latents `24`、new latents `32`、slot count `4`；
+  total latency `21.562 s`、mean latency `4.312 s/sample`、peak CUDA memory `9,395,434,496` bytes。
+- [x] Phase 7 没有发现新的 blocking bug。
+- [x] 本 Phase 只修改 debug harness 和 research notes。
+- [x] 添加 debug-only bank summary fields 和 debug-harness CLI overrides，用于 capacity-trigger validation；没有改变 disabled-path 或 training-path 语义。
+- [x] 没有修改 `memgen/trainer/**`、`scripts/train/**`、Weaver training logic、Trigger training logic，也没有实现 Version B。
+- [x] 没有进入 Phase 8。
 
 ## 2026-06-12 - Phase 8A Core Ablation Pilot
 
-- Status: `completed`
-- Overall result: `PASS`
-- Scope:
-  - Pilot only
+- 状态：`completed`
+- 总体结果：`PASS`
+- 范围：
+  - 只做 pilot
   - GSM8K test sample IDs `0..19`
   - `sample_count=20`
   - `seed=42`
   - `batch_size=1`
   - greedy decoding
   - `max_response_length=1024`
-  - no latest-k retrieval
-  - no random retrieval
-  - no Version B
-- Compared groups:
-  - `G0` disabled anchor: reused `EXP-20260612-013` with frozen baseline
-    reference `EXP-20260611-006`
-  - `G1` Version A anchor: `EXP-20260612-019`
-  - `G4` cosine retrieval without recency decay: `EXP-20260612-020`
-  - `G6` append-only update: `EXP-20260612-021`
-  - `G7` replace update: `EXP-20260612-022`
-- Outcomes:
+  - 没有 latest-k retrieval
+  - 没有 random retrieval
+  - 没有 Version B
+- 比较组：
+  - `G0` disabled anchor：复用 `EXP-20260612-013`，frozen baseline reference 为 `EXP-20260611-006`
+  - `G1` Version A anchor：`EXP-20260612-019`
+  - `G4` cosine retrieval without recency decay：`EXP-20260612-020`
+  - `G6` append-only update：`EXP-20260612-021`
+  - `G7` replace update：`EXP-20260612-022`
+- 结果：
   - `G0`: `compute_reward=0.60` (`12/20`)
   - `G1`: `compute_reward=0.50` (`10/20`)
   - `G4`: `compute_reward=0.50` (`10/20`)
   - `G6`: `compute_reward=0.50` (`10/20`)
   - `G7`: `compute_reward=0.50` (`10/20`)
-- Stability/debug observations:
-  - all enabled groups produced non-empty `answer.json`
-  - all enabled groups wrote `20` predictions and `1` summary
-  - no crash, NaN, OOM, CUDA error, or shape/device/dtype mismatch
-  - all enabled groups kept `initial_slots=0` for every session
-  - no cross-sample leakage observed
-  - retrieved memory remained Reasoner-only in all enabled groups because
-    `weaver_input_token_counts` matched
-    `reasoner_to_weaver_input_token_counts`
-  - stored latent memories remained reasoner-space `[8, 1536]` tensors
-  - `slot_count` never exceeded `4`, so `max_slots=8` was not saturated in
-    this pilot
-- Interpretation:
-  - this pilot does not support any performance claim
-  - on this 20-sample slice, all enabled variants underperformed the disabled
-    anchor by the same observed margin
-  - within this pilot, removing current write-age decay or switching among the
-    currently implemented update-policy settings did not change
-    `compute_reward`
-  - update-policy behavior was not effectively separated because
-    `max_slots=8` was not saturated and `replace_count=0`
-  - current `threshold_topk` has no fallback top-1
-  - current decay is write-age decay, not last-retrieved-turn decay
-- Next-step recommendation:
-  - do not expand GSM8K directly as the primary main experiment
-  - plan a trusted TriviaQA disabled baseline before enabled-memory runs
-  - after target-task stability, evaluate method-aligned Version A variants
-    before considering Version B
-- Gate:
-  - do not treat Phase 8A as a paper-level result
-  - Phase 8B has not started
-  - Phase 9 has not started
+- 稳定性 / debug 观察：
+  - 所有 enabled groups 都产生非空 `answer.json`
+  - 所有 enabled groups 都写入 `20` 条 predictions 和 `1` 条 summary
+  - 没有 crash、NaN、OOM、CUDA error 或 shape/device/dtype mismatch
+  - 所有 enabled groups 中，每个 session 的 `initial_slots=0`
+  - 没有观察到 cross-sample leakage
+  - retrieved memory 在所有 enabled groups 中仍然是 Reasoner-only，因为 `weaver_input_token_counts` 匹配 `reasoner_to_weaver_input_token_counts`
+  - stored latent memories 仍然是 reasoner-space `[8, 1536]` tensors
+  - `slot_count` 从未超过 `4`，所以本 pilot 中 `max_slots=8` 没有饱和
+- 解释：
+  - 该 pilot 不支持任何 performance claim
+  - 在这个 20-sample slice 上，所有 enabled variants 都以相同 observed margin 低于 disabled anchor
+  - 在本 pilot 内，去掉当前 write-age decay 或在当前实现的 update-policy settings 间切换，并没有改变 `compute_reward`
+  - update-policy behavior 没有被有效区分，因为 `max_slots=8` 没有饱和，且 `replace_count=0`
+  - 当前 `threshold_topk` 没有 fallback top-1
+  - 当前 decay 是 write-age decay，而不是 last-retrieved-turn decay
+- 下一步建议：
+  - 不要直接把 GSM8K 扩展为 primary main experiment
+  - 在 enabled-memory runs 之前，先规划可信的 TriviaQA disabled baseline
+  - 在 target-task stability 之后，先评估 method-aligned Version A variants，再考虑 Version B
+- Gate：
+  - 不要把 Phase 8A 当成 paper-level result
+  - Phase 8B 尚未开始
+  - Phase 9 尚未开始
 
-## 2026-06-12 - Step 2 Structured Retrieval Context
+## 2026-06-12 - Step 2 结构化检索上下文
 
-- Status: `completed`
-- Added immutable `LatentMemoryRetrievalResult`.
-- Added `retrieve_with_context(...)` with:
-  - full-bank scores in original slot-index order
-  - pre-filter maximum score and argmax index
+- 状态：`completed`
+- 添加 immutable `LatentMemoryRetrievalResult`。
+- 添加 `retrieve_with_context(...)`，包含：
+  - 按原始 slot-index 顺序排列的 full-bank scores
+  - pre-filter maximum score 和 argmax index
   - threshold-pass status
   - filtered retrieved indices and scores
-  - current memory-write bank step
-- Kept `retrieve(...)` as the legacy slot-list API.
-- Preserved current write-age scoring, threshold-without-fallback behavior,
-  detached retrieval copies, and all existing write/update policies.
-- Did not modify `MemGenModel.generate()`.
-- Did not implement matched-thread write-back, fallback top-1, or
-  last-retrieved decay.
-- Step 3 remains gated on explicit approval.
+  - 当前 memory-write bank step
+- 保留 `retrieve(...)` 作为 legacy slot-list API。
+- 保留当前 write-age scoring、threshold-without-fallback 行为、detached retrieval copies 和所有已有 write/update policies。
+- 没有修改 `MemGenModel.generate()`。
+- 没有实现 matched-thread write-back、fallback top-1 或 last-retrieved decay。
+- Step 3 仍需要明确批准。
 
-## 2026-06-12 - Step 3 Thread-Aware Write-Back
+## 2026-06-12 - Step 3 线程感知写回
 
-- Status: `completed`
-- Added `update_policy=thread_update`.
-- Added `write_back(memory, retrieval_result, metadata=None)`.
-- Implemented:
+- 状态：`completed`
+- 添加 `update_policy=thread_update`。
+- 添加 `write_back(memory, retrieval_result, metadata=None)`。
+- 实现：
   - empty bank -> insert
   - high current-query score -> replace current argmax slot
   - low score with capacity -> insert new thread
   - low score at capacity -> evict oldest and insert new thread
-- Added stale retrieval-step and matched-index validation.
-- Added separate debug counts and event traces for thread insertion, matched
-  replacement, and capacity eviction.
-- Integrated only the `thread_update` policy with
-  `retrieve_with_context(...)` and `write_back(...)` in generation.
-- Preserved Reasoner-only retrieved-memory injection and unchanged Weaver
-  inputs.
-- Preserved legacy update policies, no-fallback threshold retrieval,
-  write-age decay, and the disabled path.
-- Validation:
-  - `py_compile` passed for the modified model and test files
-  - full unit discovery passed `47/47`
-  - `git diff --check` passed
-  - disabled golden replay
-    `EXP-20260612-023-step3-disabled-replay` matched
-    `EXP-20260611-007` on all three response-token hashes, all three
-    augmentation-mask hashes, Trigger calls (`193`), Weaver prompt calls (`3`),
-    and Weaver inference calls (`8`)
-  - disabled sessions created no memory bank and exposed no memory debug state
-- Did not enter Version B.
-- Step 4 smoke remains gated on explicit approval.
+- 添加 stale retrieval-step 和 matched-index validation。
+- 添加独立 debug counts 和 event traces，用于 thread insertion、matched replacement 和 capacity eviction。
+- 只把 `thread_update` policy 与 `retrieve_with_context(...)` 和 `write_back(...)` 集成进 generation。
+- 保留 Reasoner-only retrieved-memory injection 和不变的 Weaver inputs。
+- 保留 legacy update policies、no-fallback threshold retrieval、write-age decay 和 disabled path。
+- 验证：
+  - 修改后的 model 和 test files 通过 `py_compile`
+  - full unit discovery 通过 `47/47`
+  - `git diff --check` 通过
+  - disabled golden replay `EXP-20260612-023-step3-disabled-replay` 在所有三个 response-token hashes、所有三个 augmentation-mask hashes、Trigger calls (`193`)、Weaver prompt calls (`3`) 和 Weaver inference calls (`8`) 上与 `EXP-20260611-007` 匹配
+  - disabled sessions 没有创建 memory bank，也没有暴露 memory debug state
+- 没有进入 Version B。
+- Step 4 smoke 仍需要明确批准。
 
-## 2026-06-12 - Step 4 Thread-Update Mechanism Validation
+## 2026-06-12 - Step 4 Thread-Update 机制验证
 
-- Status: `completed`
-- Experiment: `EXP-20260612-024`
-- Output:
+- 状态：`completed`
+- 实验：`EXP-20260612-024`
+- 输出：
   `outputs/latent_bank_vA/EXP-20260612-024-thread-update-smoke/`
-- Real enabled inference:
-  - one GSM8K test sample completed
-  - non-empty answer file, one prediction, one summary
-  - no crash, NaN, OOM, CUDA, shape, device, or dtype error
+- 真实 enabled inference：
+  - 一个 GSM8K test sample 完成
+  - answer file 非空，包含一条 prediction 和一条 summary
+  - 没有 crash、NaN、OOM、CUDA、shape、device 或 dtype error
   - `memory_write_count=4`
   - `memory_retrieve_count=3`
   - `thread_insert_count=1`
   - `matched_replace_count=3`
   - `capacity_evict_count=0`
-  - observed update reasons: one `empty_bank`, three `matched_thread`
-- Boundaries:
-  - Weaver input counts matched reasoner-to-Weaver input counts exactly
-  - retrieved memory remained Reasoner-only
-  - stored latent shape remained `[8, 1536]`
-  - session began with `initial_slots=0`
-- Controlled branch evidence:
-  - four targeted tests passed for empty insert, low-score new-thread insert,
-    high-score matched replacement, and full-bank oldest eviction
-  - full test discovery passed `47/47`
-  - `git diff --check` passed
-- Scope:
-  - no Step 4 code modification was needed
-  - no disabled-path rerun was required because no core or generate logic
-    changed during Step 4
-  - this is mechanism validation, not a performance result
-  - no fallback top-1 or last-retrieved decay
-  - Version B has not started
-- Recommendation:
-  - return to TriviaQA baseline planning before adding further method variants
+  - 观察到的 update reasons：一个 `empty_bank`，三个 `matched_thread`
+- 边界：
+  - Weaver input counts 与 reasoner-to-Weaver input counts 完全匹配
+  - retrieved memory 仍然是 Reasoner-only
+  - stored latent shape 仍然是 `[8, 1536]`
+  - session 从 `initial_slots=0` 开始
+- 受控分支证据：
+  - 四个 targeted tests 通过，分别覆盖 empty insert、low-score new-thread insert、high-score matched replacement 和 full-bank oldest eviction
+  - full test discovery 通过 `47/47`
+  - `git diff --check` 通过
+- 范围：
+  - Step 4 不需要代码修改
+  - 因为 Step 4 中 core 或 generate logic 没有改变，所以不需要重新运行 disabled-path
+  - 这是机制验证，不是 performance result
+  - 没有 fallback top-1 或 last-retrieved decay
+  - Version B 尚未开始
+- 建议：
+  - 在添加更多 method variants 前，回到 TriviaQA baseline planning
 
-## 2026-06-12 - Phase 8C-alt Controlled Multi-Turn Mechanism Evaluation
+## 2026-06-12 - Phase 8C-alt 受控多轮机制评估
 
-- Status: `completed_with_negative_smoke`
-- Scope:
-  - added a harness-only deterministic three-turn evaluation
-  - Turn 3 reconstructs the visible prompt from system instruction plus the
-    current query, excluding Turn 1 and Turn 2 history
-  - this is a mechanism study and cannot replace TriviaQA
-- Implementation:
-  - added `scripts/eval/phase8c_controlled_memory.py`
-  - added `tests/test_controlled_multiturn_memory.py`
-  - did not modify core model, Weaver, Trigger, runner, interaction managers,
-    trainers, training scripts, or baseline configuration
-- Validation:
-  - `py_compile` passed
-  - full unit discovery passed `56/56`
-  - `git diff --check` passed
-- Smoke experiments:
-  - `EXP-20260612-025`: failed because the first harness revision did not move
-    the model to CUDA before FlashAttention; fixed in the harness only
-  - `EXP-20260612-026`: G0 disabled completed one three-turn episode, passed
-    all leakage checks, created no bank, and scored `0/1`
-  - `EXP-20260612-027`: G2 `thread_update` completed one three-turn episode,
-    passed all leakage checks, kept one bank across turns, and scored `0/1`
-- G2 mechanism evidence:
-  - slot counts after turns: `[1, 2, 3]`
+- 状态：`completed_with_negative_smoke`
+- 范围：
+  - 添加一个 harness-only deterministic three-turn evaluation
+  - Turn 3 从 system instruction 和当前 query 重建 visible prompt，不包含 Turn 1 和 Turn 2 history
+  - 这是机制研究，不能替代 TriviaQA
+- 实现：
+  - 添加 `scripts/eval/phase8c_controlled_memory.py`
+  - 添加 `tests/test_controlled_multiturn_memory.py`
+  - 没有修改 core model、Weaver、Trigger、runner、interaction managers、trainers、training scripts 或 baseline configuration
+- 验证：
+  - `py_compile` 通过
+  - full unit discovery 通过 `56/56`
+  - `git diff --check` 通过
+- Smoke experiments：
+  - `EXP-20260612-025`：失败，因为第一个 harness revision 在 FlashAttention 前没有把 model 移到 CUDA；仅在 harness 中修复
+  - `EXP-20260612-026`：G0 disabled 完成一个 three-turn episode，通过所有 leakage checks，没有创建 bank，得分 `0/1`
+  - `EXP-20260612-027`：G2 `thread_update` 完成一个 three-turn episode，通过所有 leakage checks，在 turns 之间保持一个 bank，得分 `0/1`
+- G2 机制证据：
+  - 各 turn 后 slot counts：`[1, 2, 3]`
   - `memory_write_count=12`
   - `memory_retrieve_count=11`
   - `retrieved_latent_count=72`
@@ -651,278 +365,291 @@ project status.
   - `thread_insert_count=3`
   - `matched_replace_count=9`
   - `capacity_evict_count=0`
-  - stored hidden sizes remained `1536`
-  - Weaver input counts matched reasoner-to-Weaver input counts
-- Interpretation:
-  - the controlled session lifecycle and Version A-aligned mechanism operate
-    across three independent prompt calls
-  - neither G0 nor G2 produced a tagged exact answer in this one-episode smoke
-  - the negative smoke does not establish method failure because the harness
-    uses a GSM8K-trained checkpoint on an out-of-distribution synthetic task
-  - no fallback top-1, last-retrieved decay, or Version B was introduced
+  - stored hidden sizes 仍然是 `1536`
+  - Weaver input counts 匹配 reasoner-to-Weaver input counts
+- 解释：
+  - 受控 session lifecycle 和 Version A-aligned mechanism 可以跨三次独立 prompt calls 运行
+  - G0 和 G2 都没有在这个 one-episode smoke 中产生 tagged exact answer
+  - negative smoke 不说明方法失败，因为 harness 使用的是 GSM8K-trained checkpoint，任务是 out-of-distribution synthetic task
+  - 没有引入 fallback top-1、last-retrieved decay 或 Version B
 
 ## 2026-06-13 - G3 Oracle-Visible One-Episode Smoke
 
-- Status: `completed_with_protocol_failure`
-- Experiment: `EXP-20260613-001`
-- Output:
+- 状态：`completed_with_protocol_failure`
+- 实验：`EXP-20260613-001`
+- 输出：
   `outputs/controlled_memory/EXP-20260613-001-controlled-g3-oracle-visible/`
-- Configuration:
+- 配置：
   - group `G3_oracle_visible`
-  - one deterministic exact-code episode
-  - `seed=42`, `batch_size=1`, greedy decoding
+  - 一个 deterministic exact-code episode
+  - `seed=42`、`batch_size=1`、greedy decoding
   - `max_response_length=64`
-  - memory disabled and `oracle_visible=true`
-- Oracle prompt checks:
-  - Turn 3 visibly included the early fact and gold value `770487`
-  - Turn 3 prompt length was `90` tokens
-  - oracle-visible content was expected and was not treated as leakage
-- Result:
-  - raw Turn 3 response was
+  - memory disabled 且 `oracle_visible=true`
+- Oracle prompt 检查：
+  - Turn 3 显式包含 early fact 和 gold value `770487`
+  - Turn 3 prompt length 为 `90` tokens
+  - oracle-visible content 符合预期，不视为 leakage
+- 结果：
+  - raw Turn 3 response 为
     `The access code for Project Lumen is 770487.`
-  - the response contained the correct gold value but omitted the required
-    `<answer>...</answer>` tags
-  - strict parser output was `null`, so exact match was `0/1`
-  - the episode remained structurally valid and completed without runtime error
-- Interpretation:
-  - the checkpoint can read the visible oracle fact and produce the correct
-    answer content
-  - the current tagged-output protocol is not reliably followed by this
-    checkpoint, so G0/G2 strict exact-match failures are confounded by the
-    prompt/parser contract
-  - G3 is an oracle visible-context control, not a memory-method result and not
-    a fair comparison with G0/G2
-  - this controlled study does not replace TriviaQA
-  - no harness, core model, Weaver, Trigger, trainer, or training-script code
-    was changed
-  - no fallback top-1, last-retrieved decay, or Version B was introduced
-- Recommendation:
-  - audit the prompt/parser scoring contract before running G1 or any larger
-    controlled pilot
+  - response 包含正确 gold value，但缺少必需的 `<answer>...</answer>` tags
+  - strict parser output 为 `null`，所以 exact match 是 `0/1`
+  - episode 在结构上有效，且无 runtime error
+- 解释：
+  - checkpoint 能读取 visible oracle fact 并产生正确答案内容
+  - 当前 tagged-output protocol 不能被该 checkpoint 可靠遵守，因此 G0/G2 strict exact-match failures 受到 prompt/parser contract 混淆
+  - G3 是 oracle visible-context control，不是 memory-method result，也不能与 G0/G2 公平比较
+  - 该 controlled study 不能替代 TriviaQA
+  - 没有修改 harness、core model、Weaver、Trigger、trainer 或 training-script code
+  - 没有引入 fallback top-1、last-retrieved decay 或 Version B
+- 建议：
+  - 在运行 G1 或任何更大 controlled pilot 前，先审计 prompt/parser scoring contract
 
 ## 2026-06-13 - Controlled Parser Calibration
 
-- Status: `implemented`
-- Scope:
-  - modified only the controlled harness, its tests, and research notes
-  - did not run G0, G1, G2, G3, or a small pilot
-  - did not modify core model, Weaver, Trigger, runner, interactions, trainers,
-    or training scripts
-- Prompt contract:
-  - all groups now receive the same final instruction:
-    `Return exactly one line: <answer>VALUE</answer>. Do not include any other
-    text.`
-  - G0/G1/G2 still exclude the early fact and gold value from Turn 3
-  - G3 still includes the early fact and gold value as an oracle-visible
-    positive control
-- Scoring contract:
-  - `strict_exact_match` uses only the last complete
-    `<answer>...</answer>` span
-  - `relaxed_exact_match` reuses the strict candidate when available
-  - exact-code fallback accepts exactly one standalone six-digit candidate
-  - zero candidates produce `none`; multiple candidates produce `ambiguous`
-  - semantic-relation fallback normalizes only the complete short response
-    after stripping outer quotes and one terminal punctuation mark
-  - no LLM judge, gold substring search, gold-guided candidate selection, or
-    fuzzy semantic matching is allowed
-  - legacy `exact_match` remains only as a deprecated alias for
-    `strict_exact_match`
-- Artifact contract:
-  - turn and episode records now include strict and relaxed parsed answers,
-    parser success flags, parser mode, and both exact-match metrics
-  - summary and verification records now include strict/relaxed counts and
-    rates plus parser-success counts
-- Evidence reclassification:
-  - `EXP-20260612-026`, `EXP-20260612-027`, and `EXP-20260613-001` are
-    pre-parser-calibration smoke runs
-  - they remain useful for runtime, leakage, bank-lifecycle, and boundary
-    evidence, but are not calibrated comparison results
-- Validation:
-  - targeted controlled-harness tests passed `22/22`
-  - `py_compile` passed for the harness and controlled test module
-  - full unit discovery passed `69/69`
-  - `git diff --check` passed
-- Scope boundaries:
-  - controlled evaluation remains a mechanism study and does not replace
-    TriviaQA
-  - no fallback top-1, last-retrieved decay, or Version B was introduced
+- 状态：`implemented`
+- 范围：
+  - 只修改 controlled harness、其 tests 和 research notes
+  - 没有运行 G0、G1、G2、G3 或 small pilot
+  - 没有修改 core model、Weaver、Trigger、runner、interactions、trainers 或 training scripts
+- Prompt contract：
+  - 所有 groups 现在接收相同 final instruction：
+    `Return exactly one line: <answer>VALUE</answer>. Do not include any other text.`
+  - G0/G1/G2 的 Turn 3 仍然排除 early fact 和 gold value
+  - G3 仍然包含 early fact 和 gold value，作为 oracle-visible positive control
+- Scoring contract：
+  - `strict_exact_match` 只使用最后一个完整的 `<answer>...</answer>` span
+  - `relaxed_exact_match` 在可用时复用 strict candidate
+  - exact-code fallback 只接受唯一一个 standalone six-digit candidate
+  - zero candidates 产生 `none`；multiple candidates 产生 `ambiguous`
+  - semantic-relation fallback 只在 strip outer quotes 和一个 terminal punctuation mark 后，normalize 完整短 response
+  - 不允许 LLM judge、gold substring search、gold-guided candidate selection 或 fuzzy semantic matching
+  - legacy `exact_match` 只作为 deprecated alias 保留，指向 `strict_exact_match`
+- Artifact contract：
+  - turn 和 episode records 现在包含 strict 和 relaxed parsed answers、parser success flags、parser mode，以及两种 exact-match metrics
+  - summary 和 verification records 现在包含 strict/relaxed counts and rates，以及 parser-success counts
+- Evidence reclassification：
+  - `EXP-20260612-026`、`EXP-20260612-027` 和 `EXP-20260613-001` 是 pre-parser-calibration smoke runs
+  - 它们仍然可用于 runtime、leakage、bank-lifecycle 和 boundary evidence，但不是 calibrated comparison results
+- 验证：
+  - targeted controlled-harness tests 通过 `22/22`
+  - harness 和 controlled test module 通过 `py_compile`
+  - full unit discovery 通过 `69/69`
+  - `git diff --check` 通过
+- 范围边界：
+  - controlled evaluation 仍是机制研究，不能替代 TriviaQA
+  - 没有引入 fallback top-1、last-retrieved decay 或 Version B
 
 ## 2026-06-13 - Calibrated G0/G2/G3 One-Episode Smokes
 
-- Status: `completed`
-- Pre-run validation:
-  - full unit discovery passed `69/69`
-  - `git diff --check` passed
-  - no protected core, Weaver, Trigger, runner, interaction, trainer, or
-    training-script diff was present
-- Shared protocol:
-  - frozen calibrated prompt and dual strict/relaxed scoring
-  - one deterministic exact-code episode
-  - `seed=42`, `batch_size=1`, greedy decoding
+- 状态：`completed`
+- 运行前验证：
+  - full unit discovery 通过 `69/69`
+  - `git diff --check` 通过
+  - protected core、Weaver、Trigger、runner、interaction、trainer 或 training-script 没有 diff
+- 共享协议：
+  - frozen calibrated prompt 和 dual strict/relaxed scoring
+  - 一个 deterministic exact-code episode
+  - `seed=42`、`batch_size=1`、greedy decoding
   - `max_response_length=64`
-- `EXP-20260613-002` calibrated G0:
-  - Turn 3 excluded the early fact and gold value
-  - no bank was created
-  - raw response contained the unique wrong code `123456`
-  - strict exact match `0/1`; relaxed exact match `0/1`
-- `EXP-20260613-003` calibrated G2:
-  - one bank persisted across all three turns
-  - slots after turns were `[1, 2, 3]`
-  - 12 writes, 11 retrievals, 3 thread inserts, and 9 matched replacements
-  - retrieved memory remained Reasoner-only
-  - stored latent hidden sizes remained `1536`
-  - raw response contained the unique wrong code `123456`
-  - strict exact match `0/1`; relaxed exact match `0/1`
-- `EXP-20260613-004` calibrated G3:
-  - Turn 3 included the oracle-visible early fact and gold value `770487`
-  - raw response was
+- `EXP-20260613-002` calibrated G0：
+  - Turn 3 排除 early fact 和 gold value
+  - 没有创建 bank
+  - raw response 包含唯一错误 code `123456`
+  - strict exact match `0/1`；relaxed exact match `0/1`
+- `EXP-20260613-003` calibrated G2：
+  - 一个 bank 在所有三个 turns 中持续存在
+  - turn 后 slot trace 为 `[1, 2, 3]`
+  - 12 writes、11 retrievals、3 thread inserts、9 matched replacements
+  - retrieved memory 仍然是 Reasoner-only
+  - stored latent hidden sizes 仍然是 `1536`
+  - raw response 包含唯一错误 code `123456`
+  - strict exact match `0/1`；relaxed exact match `0/1`
+- `EXP-20260613-004` calibrated G3：
+  - Turn 3 包含 oracle-visible early fact 和 gold value `770487`
+  - raw response 是
     `The access code for Project Lumen is 770487.`
-  - strict parser failed because tags were absent
-  - relaxed parser extracted the unique code `770487`
-  - strict exact match `0/1`; relaxed exact match `1/1`
-- Interpretation:
-  - the calibrated parser distinguishes format compliance from deterministic
-    answer correctness as intended
-  - G3 validates the oracle-visible prompt and relaxed exact-code extraction
-  - under relaxed exact match, neither G0 nor G2 recovered the hidden fact in
-    this one-episode smoke
-  - this is mechanism-level evidence only and is not a performance conclusion
-  - controlled evaluation does not replace TriviaQA
-  - no fallback top-1, last-retrieved decay, or Version B was introduced
+  - strict parser 因为没有 tags 而失败
+  - relaxed parser 提取唯一 code `770487`
+  - strict exact match `0/1`；relaxed exact match `1/1`
+- 解释：
+  - calibrated parser 能按预期区分 format compliance 和 deterministic answer correctness
+  - G3 验证 oracle-visible prompt 和 relaxed exact-code extraction
+  - 在 relaxed exact match 下，G0 和 G2 都没有在这个 one-episode smoke 中恢复 hidden fact
+  - 这只是机制级证据，不是 performance conclusion
+  - controlled evaluation 不能替代 TriviaQA
+  - 没有引入 fallback top-1、last-retrieved decay 或 Version B
 
 ## 2026-06-13 - Calibrated G1 Version A-Simple One-Episode Smoke
 
-- Status: `completed`
-- Experiment: `EXP-20260613-005`
-- Output:
+- 状态：`completed`
+- 实验：`EXP-20260613-005`
+- 输出：
   `outputs/controlled_memory/EXP-20260613-005-calibrated-g1-vA-simple/`
-- Configuration:
+- 配置：
   - group `G1_vA_simple`
   - memory mode `vA_simple`
-  - one deterministic exact-code episode
-  - `seed=42`, `batch_size=1`, greedy decoding
+  - 一个 deterministic exact-code episode
+  - `seed=42`、`batch_size=1`、greedy decoding
   - `max_response_length=64`
-  - frozen calibrated prompt and dual strict/relaxed scoring
-- Results:
+  - frozen calibrated prompt 和 dual strict/relaxed scoring
+- 结果：
   - valid episodes `1/1`
-  - Turn 3 excluded the early fact and gold value
-  - raw response contained the unique wrong code `123456`
-  - strict parser returned `null`
-  - relaxed parser extracted `123456`
-  - strict exact match `0/1`; relaxed exact match `0/1`
-- Memory behavior:
-  - one bank persisted across all three turns
-  - slot trace was `[4, 8, 8]`; final slot count was `8`
+  - Turn 3 排除 early fact 和 gold value
+  - raw response 包含唯一错误 code `123456`
+  - strict parser 返回 `null`
+  - relaxed parser 提取 `123456`
+  - strict exact match `0/1`；relaxed exact match `0/1`
+- Memory behavior：
+  - 一个 bank 在所有三个 turns 中持续存在
+  - slot trace 为 `[4, 8, 8]`；final slot count 为 `8`
   - `memory_write_count=12`
   - `memory_retrieve_count=11`
-  - legacy `replace_oldest` update path remained active
-  - `thread_update` was not used
-  - retrieved memory remained Reasoner-only
-  - Weaver input counts matched reasoner-to-Weaver input counts
-  - stored latent hidden sizes remained eight `1536`-dimensional tensors
-- Runtime:
+  - legacy `replace_oldest` update path 仍然活跃
+  - 未使用 `thread_update`
+  - retrieved memory 仍然是 Reasoner-only
+  - Weaver input counts 匹配 reasoner-to-Weaver input counts
+  - stored latent hidden sizes 仍然是 8 个 `1536` 维 tensors
+- Runtime：
   - Trigger calls `132`
   - Weaver prompt calls `3`
   - Weaver inference calls `9`
   - latency `6.162 s`
-  - no crash, non-finite metric, OOM, CUDA, shape, dtype, or device error
-- Interpretation:
-  - the calibrated harness can execute the legacy Version A-simple path
-  - this is a one-episode mechanism smoke only, not a performance conclusion
-  - controlled evaluation does not replace TriviaQA
-  - no fallback top-1, last-retrieved decay, or Version B was introduced
+  - 没有 crash、non-finite metric、OOM、CUDA、shape、dtype 或 device error
+- 解释：
+  - calibrated harness 可以执行 legacy Version A-simple path
+  - 这只是 one-episode mechanism smoke，不是 performance conclusion
+  - controlled evaluation 不能替代 TriviaQA
+  - 没有引入 fallback top-1、last-retrieved decay 或 Version B
 
-## Phase 8C-alt Closeout and TriviaQA Restart Plan
+## Phase 8C-alt 收尾与 TriviaQA 重启计划
 
-### Controlled Study Purpose
+### Controlled Study 目的
 
-- Phase 8C-alt was a mechanism study.
-- It provided a low-cost way to validate memory lifecycle, boundary behavior,
-  parser behavior, and artifact generation while TriviaQA infrastructure was
-  unavailable.
+- Phase 8C-alt 是机制研究。
+- 它在 TriviaQA infrastructure 不可用时，以低成本验证 memory lifecycle、boundary behavior、parser behavior 和 artifact generation。
 
-### Why This Study Was Needed
+### 为什么需要这个研究
 
-- TriviaQA checkpoint was unavailable.
-- TriviaQA / AgentBank data caches were unavailable or unverified.
-- Retrieval service and search index were unavailable.
-- Despite those blockers, Version A-simple and Version A-aligned
-  `thread_update` still needed a bounded cross-turn runtime check.
+- TriviaQA checkpoint 不可用。
+- TriviaQA / AgentBank data caches 不可用或未验证。
+- Retrieval service 和 search index 不可用。
+- 尽管存在这些 blocker，Version A-simple 和 Version A-aligned `thread_update` 仍需要一个有限的 cross-turn runtime check。
 
-### What It Validated
+### 它验证了什么
 
-- the controlled harness runs end to end
-- calibrated strict / relaxed parser behavior works
-- G1 legacy Version A-simple path runs
-- G2 Version A-aligned `thread_update` path runs
-- G2 preserves Reasoner-only injection
-- stored latent hidden size remains `1536`
-- G3 oracle-visible positive control reaches relaxed exact match `1/1`
+- controlled harness 可以端到端运行
+- calibrated strict / relaxed parser behavior 可以工作
+- G1 legacy Version A-simple path 可以运行
+- G2 Version A-aligned `thread_update` path 可以运行
+- G2 保持 Reasoner-only injection
+- stored latent hidden size 仍然是 `1536`
+- G3 oracle-visible positive control 达到 relaxed exact match `1/1`
 
-### What It Did Not Validate
+### 它没有验证什么
 
-- no target-task performance claim
-- no general memory benefit claim
-- no TriviaQA result
-- no Version B result
-- no fallback top-1
-- no last-retrieved decay
+- 没有 target-task performance claim
+- 没有 general memory benefit claim
+- 没有 TriviaQA result
+- 没有 Version B result
+- 没有 fallback top-1
+- 没有 last-retrieved decay
 
-### G0/G1/G2/G3 Closeout
+### G0/G1/G2/G3 收尾
 
-| Group | Meaning | Strict EM | Relaxed EM | Main outcome |
+| Group | 含义 | Strict EM | Relaxed EM | 主要结果 |
 |---|---|---:|---:|---|
-| G0 | disabled | 0/1 | 0/1 | wrong unique code; no bank |
-| G1 | Version A-simple | 0/1 | 0/1 | wrong unique code; legacy path runs |
-| G2 | Version A-aligned thread_update | 0/1 | 0/1 | wrong unique code; thread-aware path runs |
-| G3 | oracle-visible control | 0/1 | 1/1 | correct untagged code recovered by relaxed parser |
+| G0 | disabled | 0/1 | 0/1 | 错误唯一 code；无 bank |
+| G1 | Version A-simple | 0/1 | 0/1 | 错误唯一 code；legacy path 可运行 |
+| G2 | Version A-aligned thread_update | 0/1 | 0/1 | 错误唯一 code；thread-aware path 可运行 |
+| G3 | oracle-visible control | 0/1 | 1/1 | relaxed parser 恢复正确未加标签 code |
 
 ### G1 vs G2 Memory Behavior
 
-- G1 uses `update_policy=replace_oldest`.
-- G1 slot trace is `[4, 8, 8]`.
-- G1 fills to capacity and then uses legacy replacement.
-- G2 uses `update_policy=thread_update`.
-- G2 slot trace is `[1, 2, 3]`.
-- G2 thread inserts are `3`.
-- G2 matched replacements are `9`.
-- Both preserve Reasoner-only injection and `1536` hidden-size storage.
+- G1 使用 `update_policy=replace_oldest`。
+- G1 slot trace 是 `[4, 8, 8]`。
+- G1 填满 capacity 后使用 legacy replacement。
+- G2 使用 `update_policy=thread_update`。
+- G2 slot trace 是 `[1, 2, 3]`。
+- G2 thread inserts 是 `3`。
+- G2 matched replacements 是 `9`。
+- 两者都保持 Reasoner-only injection 和 `1536` hidden-size storage。
 
-### Current Interpretation
+### 当前解释
 
-- G0/G1/G2 scoring `0/1` does not show the method is invalid because this is a
-  single synthetic deterministic episode and the checkpoint is
-  out-of-distribution for the task.
-- G3 is not a memory result because Turn 3 explicitly contains the early fact
-  and gold value.
-- Controlled study results do not replace TriviaQA.
-- A small pilot is not recommended now unless later work explicitly needs more
-  synthetic mechanism evidence.
+- G0/G1/G2 得分 `0/1` 并不说明方法无效，因为这是单个 synthetic deterministic episode，而且 checkpoint 对该任务是 out-of-distribution。
+- G3 不是 memory result，因为 Turn 3 显式包含 early fact 和 gold value。
+- Controlled study results 不能替代 TriviaQA。
+- 除非之后明确需要更多 synthetic mechanism evidence，否则现在不建议做 small pilot。
 
-### Current Research State
+### 当前研究状态
 
-- Version A-simple: implemented and runnable; mechanism smoke complete; no
-  positive task evidence.
-- Version A-aligned thread_update: implemented and runnable; boundaries
-  validated; no positive task evidence.
-- Controlled mechanism study: complete.
-- TriviaQA: still blocked at infrastructure level.
-- Version B: not started.
+- Version A-simple：已实现且可运行；mechanism smoke 完成；没有 positive task evidence。
+- Version A-aligned thread_update：已实现且可运行；boundaries 已验证；没有 positive task evidence。
+- Controlled mechanism study：完成。
+- TriviaQA：仍被 infrastructure 层面阻塞。
+- Version B：未开始。
 
-### Phase 8D TriviaQA Restart Checklist
+### Phase 8D TriviaQA 重启 Checklist
 
-- verify official TriviaQA checkpoint
-- verify `mandarjoshi/trivia_qa` cache
-- verify `Solaris99/AgentBank/triviaqa` cache
-- verify `127.0.0.1:8001/retrieve`
-- verify Search-R1 / Wikipedia index
-- prevent silent `Cannot find corresponding pages` fallback
-- design dynamic single-sample harness with structured `answer.json`
-- only after the disabled baseline is stable, run Version A-aligned enabled
-  smoke
+- 验证官方 TriviaQA checkpoint
+- 验证 `mandarjoshi/trivia_qa` cache
+- 验证 `Solaris99/AgentBank/triviaqa` cache
+- 验证 `127.0.0.1:8001/retrieve`
+- 验证 Search-R1 / Wikipedia index
+- 防止 silent `Cannot find corresponding pages` fallback
+- 设计 dynamic single-sample harness，带 structured `answer.json`
+- 只有 disabled baseline 稳定后，才运行 Version A-aligned enabled smoke
 
-### Final Closeout Decision
+### 最终收尾决定
 
-- Phase 8C-alt is closed as a mechanism-study node.
-- The next main track is Phase 8D TriviaQA infrastructure.
-- Do not enter Version B yet.
+- Phase 8C-alt 作为 mechanism-study node 关闭。
+- 下一条主线是 Phase 8D TriviaQA infrastructure。
+- 不要进入 Version B。
+
+## 2026-06-13 - Phase 8D-0 TriviaQA Infrastructure Asset Discovery
+
+- 范围：
+  - 只做 read-only asset discovery
+  - 不下载、不启动 retrieval service、不运行正式实验
+  - 不改代码、不做 Version B、不做 fallback top-1、不做 last-retrieved decay
+- 仓库状态：
+  - branch `rlm-memory-bank`
+  - `git status` 干净
+  - Phase 8C-alt 在开始 asset discovery 前保持关闭
+- Config / script 审计：
+  - `configs/latent_memory/triviaqa.yaml` 设置 base model 为 `Qwen/Qwen2.5-1.5B-Instruct`，但 `model.load_model_path: null`
+  - `scripts/eval/qwen2_5_triviaqa.sh` 指向预期 TriviaQA checkpoint 路径：
+    `MemGen/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8`
+  - `data/triviaqa/builder.py` 同时需要 `mandarjoshi/trivia_qa` 和 `Solaris99/AgentBank`，并使用 `triviaqa` config path
+  - `data/utils/retrieval_utils.py` 仍指向 `http://127.0.0.1:8001/retrieve`
+  - `memgen/runner.py` dynamic evaluation 通过 `DynamicEvalRecorder` 写入 `conversations.txt`，不会生成 structured `answer.json`
+  - 官方 dynamic path 暴露 batch-size configuration，但没有识别到可信的 `sample_count=1` 路径
+- Checkpoint discovery：
+  - 在 repository、`.cache/`、`outputs/`、`checkpoints/` 或 HuggingFace hub cache 下都没有找到本地 TriviaQA checkpoint snapshot
+  - 唯一找到的完整本地 MemGen checkpoint 是 `.cache/baselines/memgen-gsm8k-sft/` 下的 GSM8K SFT checkpoint
+  - GSM8K assets 不能被当作 TriviaQA substitute
+  - TriviaQA checkpoint status 为 `missing`
+- Dataset discovery：
+  - 本地没有找到 cached `mandarjoshi/trivia_qa` dataset
+  - 本地没有找到 cached `Solaris99/AgentBank` dataset
+  - 两个 datasets 的 offline metadata / `[:1]` load attempts 都失败，因为没有 local cache
+  - TriviaQA 和 AgentBank 的 dataset status 都是 `missing`
+- Retrieval / index discovery：
+  - 在 read-only audit 期间，没有正面证据表明存在 live `127.0.0.1:8001` retrieval service
+  - 没有找到可信的本地 Search-R1 / Wikipedia retrieval index asset set
+  - `data/triviaqa/env.py` 仍允许 retrieval failure 表现为 `Cannot find corresponding pages.`，所以 silent degraded runs 仍然是风险
+  - retrieval / search asset status 在真正 staging 并验证 service 和 index 前，实际上是 `missing`
+- Dynamic harness status：
+  - 官方 dynamic TriviaQA path 存在，但对目标 smoke protocol 来说不完整
+  - 当前缺口包括：缺少 structured `answer.json`、没有可信的 `sample_count=1` 控制、没有显式 retrieval success / failure accounting
+- Phase 8D-0 结论：
+  - TriviaQA disabled `1`-sample smoke 仍然是 `NO-GO`
+  - 立即 blocker 是：
+    - 缺少官方 TriviaQA checkpoint
+    - 缺少 `mandarjoshi/trivia_qa` cache
+    - 缺少 `Solaris99/AgentBank` cache
+    - 缺少或未验证 retrieval service
+    - 缺少或未验证 Search-R1 / Wikipedia index assets
+    - dynamic harness 不完整，无法进行 single-sample structured recording
+  - 下一个工作项是 Phase 8D infrastructure acquisition / verification，而不是 Version B

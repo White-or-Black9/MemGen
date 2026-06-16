@@ -1,3 +1,54 @@
+"""
+Session-local 潜在记忆库（LatentMemoryBank）。
+
+===== 架构概览 =====
+
+本模块提供了推理时可选的 session 级检索增强循环潜在记忆机制。
+核心设计原则：
+- Session-local：每个 bank 实例绑定到一个 session（单轮或多轮），不跨 session 共享。
+- 显式传入推理：bank 由 interaction manager 持有，通过参数传入 MemGenModel.generate()，
+  不挂在 MemGenModel 上。
+- 默认禁用：enabled=false 时完全零开销，不影响原始推理路径。
+- 独立模块：Phase 4 中本模块不被任何 production 路径 import。
+
+===== 核心数据结构 =====
+
+LatentMemoryBankConfig : 所有超参数和策略选择。
+LatentMemorySlot      : 一个记忆槽位，包含 memory tensor、key tensor、metadata。
+LatentMemoryBank      : 按写入次数计步的槽位存储，支持多种检索/更新策略。
+
+===== 检索流程 =====
+
+1. build_query(hidden_states) —— 对最近 pool_last_n 个 token 的 hidden states 做 mean pooling
+2. retrieve_with_context(query) —— 对所有 slot 计算 cosine similarity × exponential recency decay
+3. 根据 retrieve_policy 过滤（threshold / topk / threshold_topk）
+4. 返回 detached clone，外部修改不影响 bank 内部状态
+
+===== 写入流程 =====
+
+write():
+  - 不支持 thread_update 策略（thread_update 必须用 write_back）
+  - 未满：append
+  - 已满 + append 策略：拒绝写入
+  - 已满 + replace_oldest 策略：替换 created_step 最小的 slot
+  - 已满 + replace 策略：替换 last_score 最低的 slot（全未评分时退化为 oldest）
+
+write_back():
+  - 仅用于 thread_update 策略
+  - 空 bank -> insert（新线程）
+  - max_score >= threshold -> 替换 argmax slot（匹配线程更新）
+  - max_score < threshold 且未满 -> insert（新线程）
+  - max_score < threshold 且已满 -> 淘汰 oldest，insert（新线程 + 容量管理）
+
+===== 与项目架构的关系 =====
+
+- Reasoner-only injection：检索到的记忆仅注入 Reasoner，不入 Weaver。
+- Reasoner-space storage：存储的是 weaver_to_reasoner(...) 之后的 latent_inputs_embeds。
+- 不对 Weaver/Trigger 训练路径做任何修改。
+- _step 按成功写入次数计数，而非 generation token 数。
+- 当前 decay 是 write-age decay，不是 last-retrieved-turn decay。
+"""
+
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 import math
@@ -7,26 +58,47 @@ import torch
 import torch.nn.functional as F
 
 
+# --- 类型别名：策略与存储选项 ---
+# 更新策略：写入时如何管理槽位
 UpdatePolicy = Literal["append", "replace", "replace_oldest", "thread_update"]
+# 检索策略：如何从 bank 中筛选相关记忆
 RetrievePolicy = Literal["threshold", "topk", "threshold_topk"]
+# 存储设备：cpu = 强制 CPU 存储, same = 保持原设备
 StorageDevice = Literal["cpu", "same"]
 
 
 @dataclass(frozen=True)
 class LatentMemoryBankConfig:
-    enabled: bool = False
-    batch_size: int = 1
-    max_slots: int = 8
-    top_k: int = 1
-    threshold: float = 0.7
-    decay_alpha: float = 0.05
-    pool_last_n: int = 64
-    update_policy: UpdatePolicy = "replace_oldest"
-    retrieve_policy: RetrievePolicy = "threshold_topk"
-    storage_device: StorageDevice = "cpu"
-    debug: bool = True
+    """记忆库配置（frozen，实例化后不可修改）。
+
+    所有字段都有默认值，默认 disabled，对原始推理路径零影响。
+    """
+
+    # ---------- 基本开关 ----------
+    enabled: bool = False          # 是否启用记忆库；禁用时 write/retrieve 均为 no-op
+    batch_size: int = 1            # 当前仅支持 batch_size=1（Phase 4 约束）
+
+    # ---------- 容量与检索 ----------
+    max_slots: int = 8             # 最大槽位数
+    top_k: int = 1                 # topk 检索时返回的槽位数
+    threshold: float = 0.7         # 余弦相似度阈值，范围 [-1, 1]
+    decay_alpha: float = 0.05      # 指数衰减系数：score *= exp(-alpha * age)；alpha=0 表示无衰减
+
+    # ---------- 查询构造 ----------
+    pool_last_n: int = 64          # query pooling：取最近 N 个 token 的 hidden states 做 mean
+
+    # ---------- 策略选择 ----------
+    update_policy: UpdatePolicy = "replace_oldest"    # 写入更新策略
+    retrieve_policy: RetrievePolicy = "threshold_topk" # 检索过滤策略
+
+    # ---------- 存储 ----------
+    storage_device: StorageDevice = "cpu"  # slot tensor 的存储设备
+
+    # ---------- 调试 ----------
+    debug: bool = True             # 是否启用 debug 统计（不影响计算正确性）
 
     def __post_init__(self) -> None:
+        """构造后校验：确保所有参数在合法范围内。"""
         if self.batch_size != 1:
             raise ValueError(
                 "LatentMemoryBank currently supports batch_size=1 only"
@@ -65,17 +137,30 @@ class LatentMemoryBankConfig:
 
 @dataclass
 class LatentMemorySlot:
-    memory: torch.Tensor
-    key: torch.Tensor
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    created_step: int = 0
-    last_access_step: int = 0
-    access_count: int = 0
-    last_score: Optional[float] = None
-    original_device: str = "cpu"
-    original_dtype: str = "torch.float32"
+    """一个记忆槽位。
+
+    存储单次 Trigger 写入的 latent memory tensor 及其 key、元数据。
+    """
+
+    # --- 核心 tensor ---
+    memory: torch.Tensor            # [token_count, hidden_size] 的 latent 表示
+    key: torch.Tensor               # memory 的 mean-pooled key，用于相似度计算
+
+    # --- 元数据 ---
+    metadata: Dict[str, Any] = field(default_factory=dict)  # 用户自定义元数据
+
+    # --- 生命周期追踪 ---
+    created_step: int = 0           # 创建时的 bank _step（写入次数）
+    last_access_step: int = 0       # 最后被访问时的 _step
+    access_count: int = 0           # 被检索的总次数
+    last_score: Optional[float] = None  # 最后一次检索的相似度得分
+
+    # --- 来源信息 ---
+    original_device: str = "cpu"           # 写入时 tensor 所在设备
+    original_dtype: str = "torch.float32"  # 写入时 tensor 的 dtype
 
     def debug_summary(self) -> Dict[str, Any]:
+        """返回 slot 状态的只读摘要（用于 debug 日志和实验记录）。"""
         return {
             "memory_shape": list(self.memory.shape),
             "key_shape": list(self.key.shape),
@@ -93,14 +178,20 @@ class LatentMemorySlot:
 
 @dataclass(frozen=True)
 class LatentMemoryRetrievalResult:
-    slots: List[LatentMemorySlot]
-    scores: Tuple[float, ...]
-    max_score: Optional[float]
-    argmax_index: Optional[int]
-    threshold_passed: bool
-    retrieved_indices: Tuple[int, ...]
-    retrieved_scores: Tuple[float, ...]
-    bank_step: int
+    """检索结果的不可变容器。
+
+    包含检索到的 slots 以及完整的 bank 级别 score 信息，
+    供 write_back 使用（用于 thread_update 策略的匹配判断）。
+    """
+
+    slots: List[LatentMemorySlot]           # 检索到的槽位（detached clone）
+    scores: Tuple[float, ...]               # 全部槽位的得分，按原始 slot index 排序
+    max_score: Optional[float]              # 最高得分（bank 为空时为 None）
+    argmax_index: Optional[int]             # 最高得分对应的 slot index（bank 为空时为 None）
+    threshold_passed: bool                  # max_score 是否 >= threshold
+    retrieved_indices: Tuple[int, ...]      # 通过过滤的 slot indices
+    retrieved_scores: Tuple[float, ...]     # 通过过滤的 slot scores
+    bank_step: int                          # 检索时的 bank step，用于 write_back 的防过期校验
 
 
 class LatentMemoryBank:
@@ -108,35 +199,72 @@ class LatentMemoryBank:
 
     This class has no global registry and is intentionally not connected to any
     MemGen production inference path in Phase 4.
+
+    ===== 生命周期 =====
+
+    1. 构造：每个 session 创建一个实例（由 interaction manager 持有）
+    2. 推理中：
+       - retrieve / retrieve_with_context：按相似度检索相关记忆
+       - write / write_back：写入新的 latent memory
+    3. 结束时：随着 session 对象销毁而释放；或调用 reset() 手动清空
+
+    ===== _step 语义 =====
+
+    _step 记录的是成功写入次数（memory-write count），不是 generation token 数。
+    这影响：
+    - created_step / last_access_step 的取值
+    - age 计算：age = max(0, _step - slot.created_step)
+    - decay 计算：score = similarity * exp(-decay_alpha * age)
+
+    ===== 隔离保证 =====
+
+    - write 时：detach + clone 后存储，断开与推理计算图的联系
+    - retrieve 时：返回 detached clone，外部修改不影响 bank 内部状态
+    - metadata：deepcopy，嵌套结构也完全隔离
     """
 
     def __init__(self, config: Optional[LatentMemoryBankConfig] = None) -> None:
         self.config = config or LatentMemoryBankConfig()
         self._slots: List[LatentMemorySlot] = []
-        # Counts successful memory writes, not generation tokens.
+
+        # ===== 核心计数器 =====
+        # 成功写入次数，不是 token 数
         self._step = 0
-        self._memory_write_count = 0
-        self._memory_retrieve_count = 0
-        self._retrieved_latent_count = 0
-        self._new_latent_count = 0
-        self._append_count = 0
-        self._replace_count = 0
-        self._rejected_write_count = 0
+
+        # ===== 写入/检索统计 =====
+        self._memory_write_count = 0        # 总写入次数
+        self._memory_retrieve_count = 0     # 总检索次数
+        self._retrieved_latent_count = 0    # 检索到的 latent token 总数
+        self._new_latent_count = 0          # 新写入的 latent token 总数
+
+        # ===== legacy 更新策略追踪 =====
+        self._append_count = 0              # append 次数
+        self._replace_count = 0             # replace 次数（所有策略的总替换数）
+        self._rejected_write_count = 0      # 写入被拒绝次数（仅 append-full 场景）
         self._last_update_action: Optional[str] = None
         self._update_action_trace: List[str] = []
-        self._thread_insert_count = 0
-        self._matched_replace_count = 0
-        self._capacity_evict_count = 0
+
+        # ===== thread_update 策略追踪 =====
+        self._thread_insert_count = 0       # 新线程插入次数
+        self._matched_replace_count = 0     # 匹配线程替换次数
+        self._capacity_evict_count = 0      # 因容量满而淘汰 oldest 的次数
         self._last_write_back: Optional[Dict[str, Any]] = None
         self._write_back_trace: List[Dict[str, Any]] = []
 
+    # ==================================================================
+    # 基本操作：容量、重置
+    # ==================================================================
+
     def __len__(self) -> int:
+        """返回当前槽位数。"""
         return len(self._slots)
 
     def reset(self) -> None:
+        """重置 bank：清空所有槽位和计数器（等价于 clear）。"""
         self.clear()
 
     def clear(self) -> None:
+        """清空所有槽位并将所有计数器归零。"""
         self._slots.clear()
         self._step = 0
         self._memory_write_count = 0
@@ -154,14 +282,32 @@ class LatentMemoryBank:
         self._last_write_back = None
         self._write_back_trace = []
 
+    # ==================================================================
+    # Query / Key 构造
+    # ==================================================================
+
     def build_query(self, hidden_states: torch.Tensor) -> torch.Tensor:
+        """根据 hidden states 序列构造检索用的 query。
+
+        取最近 pool_last_n 个 token 的 hidden states，做 mean pooling。
+        返回 1D tensor [hidden_size]，已 detach。
+        """
         states = self._normalize_memory_tensor(hidden_states, "hidden_states")
         pooled_states = states[-self.config.pool_last_n :]
         return pooled_states.mean(dim=0).detach()
 
     def build_key(self, memory: torch.Tensor) -> torch.Tensor:
+        """根据 memory tensor 构造存储用的 key。
+
+        对 memory 的所有 token 维度做 mean pooling。
+        返回 1D tensor [hidden_size]，已 detach。
+        """
         states = self._normalize_memory_tensor(memory, "memory")
         return states.mean(dim=0).detach()
+
+    # ==================================================================
+    # 检索接口
+    # ==================================================================
 
     def retrieve(
         self,
@@ -170,7 +316,11 @@ class LatentMemoryBank:
         device: Optional[Union[str, torch.device]] = None,
         dtype: Optional[torch.dtype] = None,
     ) -> List[LatentMemorySlot]:
-        """Return detached slot copies that cannot mutate bank-owned state."""
+        """检索相关记忆（legacy 兼容接口）。
+
+        内部调用 retrieve_with_context() 并只返回 .slots。
+        返回的是 detached clone，修改返回值不会影响 bank 内部状态。
+        """
         return self.retrieve_with_context(
             query_or_hidden_states,
             device=device,
@@ -184,7 +334,25 @@ class LatentMemoryBank:
         device: Optional[Union[str, torch.device]] = None,
         dtype: Optional[torch.dtype] = None,
     ) -> LatentMemoryRetrievalResult:
-        """Return detached slot copies plus full-bank retrieval scores."""
+        """检索相关记忆，返回完整的结构化检索结果（包含 all scores、max、argmax 等）。
+
+        检索步骤：
+        1. 如果 disabled 或 bank 为空 -> 返回空结果
+        2. 如果输入是 1D tensor，直接作为 query；如果是 2D/3D，通过 build_query() 构造
+        3. 对每个 slot 计算 cosine_similarity(query, slot.key)
+        4. 乘以 recency decay: score = similarity * exp(-decay_alpha * age)
+        5. 根据 retrieve_policy 过滤（threshold / topk / threshold_topk）
+        6. 为每个选中 slot 构造 detached clone，同时更新 slot 的访问统计
+
+        参数：
+            query_or_hidden_states: 1D query 或 2D/3D hidden states 序列
+            device: 输出 tensor 的目标设备（None = 跟随 query）
+            dtype: 输出 tensor 的目标 dtype（None = 跟随 query）
+
+        返回：
+            LatentMemoryRetrievalResult：包含 slots、全部 scores、max_score 等完整信息
+        """
+        # --- disabled 或空 bank：直接返回空 ---
         if not self.config.enabled or not self._slots:
             return LatentMemoryRetrievalResult(
                 slots=[],
@@ -197,6 +365,7 @@ class LatentMemoryBank:
                 bank_step=self._step,
             )
 
+        # --- 输入校验与 query 构造 ---
         if not isinstance(query_or_hidden_states, torch.Tensor):
             raise TypeError("query_or_hidden_states must be a torch.Tensor")
         if query_or_hidden_states.ndim == 1:
@@ -206,7 +375,10 @@ class LatentMemoryBank:
                 raise TypeError("query must use a floating-point dtype")
             query = query_or_hidden_states.detach()
         else:
+            # 2D 或 3D：通过 build_query 从 hidden states 构造 query
             query = self.build_query(query_or_hidden_states)
+
+        # --- 对每个 slot 计算相似度得分 ---
         scored_slots = []
         for index, slot in enumerate(self._slots):
             if slot.key.shape != query.shape:
@@ -217,40 +389,50 @@ class LatentMemoryBank:
                 )
             score_device = query.device
             score_dtype = query.dtype
+            # 将 slot key 搬到 query 所在的 device/dtype 上计算
             slot_key = slot.key.to(device=score_device, dtype=score_dtype)
             similarity = F.cosine_similarity(
                 query.unsqueeze(0),
                 slot_key.unsqueeze(0),
                 dim=-1,
             ).item()
+            # write-age decay：age = 当前写入次数 - slot 创建时的写入次数
             age = max(0, self._step - slot.created_step)
             score = similarity * math.exp(-self.config.decay_alpha * age)
             scored_slots.append((score, index, slot))
 
+        # --- 构建按原始 index 排序的 scores 元组 ---
         scores = [0.0] * len(self._slots)
         for score, index, _ in scored_slots:
             scores[index] = score
 
-        # Equal scores retain the lower original slot index.
+        # --- 排序：按 score 降序，同等 score 保留较小原始 index ---
         scored_slots.sort(key=lambda item: (-item[0], item[1]))
         max_score, argmax_index, _ = scored_slots[0]
         selected_slots = scored_slots
+
+        # --- threshold 过滤 ---
         if self.config.retrieve_policy in {"threshold", "threshold_topk"}:
             selected_slots = [
                 item
                 for item in selected_slots
                 if item[0] >= self.config.threshold
             ]
+
+        # --- top-k 截断 ---
         if self.config.retrieve_policy in {"topk", "threshold_topk"}:
             selected_slots = selected_slots[: self.config.top_k]
 
+        # --- 构造输出 slot（detached clone）并更新访问统计 ---
         output_device = torch.device(device) if device is not None else query.device
         output_dtype = dtype if dtype is not None else query.dtype
         retrieved = []
         for score, _, slot in selected_slots:
+            # 更新 bank 内 slot 的访问统计
             slot.last_access_step = self._step
             slot.access_count += 1
             slot.last_score = score
+            # 构造 detached clone 返回给 caller
             retrieved.append(
                 LatentMemorySlot(
                     memory=slot.memory.to(
@@ -270,8 +452,11 @@ class LatentMemoryBank:
                     original_dtype=slot.original_dtype,
                 )
             )
+
+        # --- 更新检索统计 ---
         self._memory_retrieve_count += 1
         self._retrieved_latent_count += sum(slot.memory.shape[0] for slot in retrieved)
+
         return LatentMemoryRetrievalResult(
             slots=retrieved,
             scores=tuple(scores),
@@ -283,11 +468,27 @@ class LatentMemoryBank:
             bank_step=self._step,
         )
 
+    # ==================================================================
+    # 写入接口
+    # ==================================================================
+
     def write(
         self,
         memory: torch.Tensor,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> bool:
+        """写入新记忆（legacy 更新策略：append / replace / replace_oldest）。
+
+        注意：不支持 thread_update 策略，thread_update 必须使用 write_back()。
+
+        写入逻辑：
+        - 未满容量：直接 append
+        - 已满 + append：拒绝写入，记录 rejected
+        - 已满 + replace_oldest：替换 created_step 最小的 slot
+        - 已满 + replace：替换 last_score 最低的 slot（全未评分时退化为 replace_oldest）
+
+        返回 True 表示成功写入，False 表示被拒绝（仅 append-full 场景）。
+        """
         if not self.config.enabled:
             return False
         if self.config.update_policy == "thread_update":
@@ -297,6 +498,8 @@ class LatentMemoryBank:
             )
 
         normalized = self._normalize_memory_tensor(memory, "memory")
+
+        # --- append 策略 + 已满：拒绝写入 ---
         if (
             len(self._slots) >= self.config.max_slots
             and self.config.update_policy == "append"
@@ -308,24 +511,30 @@ class LatentMemoryBank:
 
         new_slot = self._create_slot(normalized, metadata)
 
+        # --- 未满：直接追加 ---
         if len(self._slots) < self.config.max_slots:
             self._slots.append(new_slot)
             self._append_count += 1
             self._last_update_action = "append"
             self._update_action_trace.append(self._last_update_action)
             return True
+
+        # --- 已满：选择替换目标 ---
         if self.config.update_policy == "replace_oldest":
+            # 替换最旧的 slot（最小的 created_step）
             replace_index = min(
                 range(len(self._slots)),
                 key=lambda index: self._slots[index].created_step,
             )
         else:
+            # replace 策略：优先替换 last_score 最低的
             scored_indices = [
                 index
                 for index, slot in enumerate(self._slots)
                 if slot.last_score is not None
             ]
             if not scored_indices:
+                # 全未评分：退化为 oldest
                 replace_index = min(
                     range(len(self._slots)),
                     key=lambda index: self._slots[index].created_step,
@@ -351,6 +560,19 @@ class LatentMemoryBank:
         retrieval_result: LatentMemoryRetrievalResult,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> bool:
+        """thread_update 策略的写入入口。
+
+        与 write() 不同，write_back 需要当前 query 的完整检索结果，
+        以便判断是"匹配已有线程"还是"新线程"。
+
+        决策逻辑（按优先级）：
+        1. bank 为空 -> insert（新线程，reason="empty_bank"）
+        2. max_score >= threshold -> 替换 argmax slot（匹配线程更新，reason="matched_thread"）
+        3. max_score < threshold 且未满 -> insert（新线程，reason="new_thread"）
+        4. max_score < threshold 且已满 -> 淘汰 oldest 后 insert（新线程，reason="new_thread_bank_full"）
+
+        返回 True 表示写入成功。
+        """
         if not self.config.enabled:
             return False
         if self.config.update_policy != "thread_update":
@@ -361,16 +583,19 @@ class LatentMemoryBank:
             raise TypeError(
                 "retrieval_result must be a LatentMemoryRetrievalResult"
             )
+
+        # --- 防过期校验：确保 retrieval_result 来自当前 bank 状态 ---
         if retrieval_result.bank_step != self._step:
             raise ValueError(
                 "stale retrieval_result: "
                 f"bank_step={retrieval_result.bank_step}, current_step={self._step}"
             )
-        if len(retrieval_result.scores) != len(self._slots):
+        if retrieval_result.scores != () and len(retrieval_result.scores) != len(self._slots):
             raise ValueError(
                 "retrieval_result scores do not match current bank slot count"
             )
 
+        # --- 判断是否匹配已有线程 ---
         matched = (
             bool(self._slots)
             and retrieval_result.max_score is not None
@@ -389,12 +614,14 @@ class LatentMemoryBank:
         normalized = self._normalize_memory_tensor(memory, "memory")
         new_slot = self._create_slot(normalized, metadata)
 
+        # --- 状态变量，用于构造 debug event ---
         replaced_slot_index = None
         replaced_slot_score = None
         evicted_slot_index = None
         inserted_new_thread = False
 
         if not self._slots:
+            # 情况 1：空 bank -> 插入
             self._slots.append(new_slot)
             self._append_count += 1
             self._thread_insert_count += 1
@@ -402,6 +629,7 @@ class LatentMemoryBank:
             update_reason = "empty_bank"
             inserted_new_thread = True
         elif matched:
+            # 情况 2：匹配线程 -> 替换 argmax slot
             replaced_slot_index = matched_index
             replaced_slot_score = retrieval_result.max_score
             self._slots[matched_index] = new_slot
@@ -410,6 +638,7 @@ class LatentMemoryBank:
             write_action = "replace_matched"
             update_reason = "matched_thread"
         elif len(self._slots) < self.config.max_slots:
+            # 情况 3：未满 + 新线程 -> 插入
             self._slots.append(new_slot)
             self._append_count += 1
             self._thread_insert_count += 1
@@ -417,6 +646,7 @@ class LatentMemoryBank:
             update_reason = "new_thread"
             inserted_new_thread = True
         else:
+            # 情况 4：已满 + 新线程 -> 淘汰 oldest，插入
             evicted_slot_index = min(
                 range(len(self._slots)),
                 key=lambda index: self._slots[index].created_step,
@@ -429,6 +659,7 @@ class LatentMemoryBank:
             update_reason = "new_thread_bank_full"
             inserted_new_thread = True
 
+        # --- 记录 debug event ---
         event = {
             "matched_slot_index": matched_index,
             "max_score": retrieval_result.max_score,
@@ -449,7 +680,15 @@ class LatentMemoryBank:
         self._write_back_trace.append(deepcopy(event))
         return True
 
+    # ==================================================================
+    # 调试与状态导出
+    # ==================================================================
+
     def debug_summary(self) -> Dict[str, Any]:
+        """返回完整的 debug 摘要，包含配置、计数器、所有 slot 摘要。
+
+        用于实验记录中的 memory bank 状态 snapshot。
+        """
         return {
             "config": asdict(self.config),
             "enabled": self.config.enabled,
@@ -473,7 +712,11 @@ class LatentMemoryBank:
         }
 
     def state_dict(self) -> Dict[str, Any]:
-        """Return a detached debug snapshot; this is not a training checkpoint."""
+        """返回 detached 的 bank 状态快照（不是训练 checkpoint）。
+
+        所有 tensor 都已 detach + clone，保证与原 bank 完全隔离。
+        用于 debug 对比和验证，不用于训练恢复。
+        """
         return {
             "config": asdict(self.config),
             "step": self._step,
@@ -493,24 +736,45 @@ class LatentMemoryBank:
             ],
         }
 
+    # ==================================================================
+    # 内部方法
+    # ==================================================================
+
     def _create_slot(
         self,
         normalized: torch.Tensor,
         metadata: Optional[Dict[str, Any]],
     ) -> LatentMemorySlot:
+        """根据归一化后的 memory tensor 创建新 slot。
+
+        执行步骤：
+        1. 记录原始 device 和 dtype
+        2. 根据 storage_device 配置决定存储位置（cpu / same）
+        3. detach + clone 建立隔离副本
+        4. 构造 key（mean pooling + clone）
+        5. 递增 _step 和统计计数器
+
+        此方法会修改 bank 状态（递增 _step 和计数器）。
+        """
         original_device = str(normalized.device)
         original_dtype = str(normalized.dtype)
+
+        # detach + clone：断开计算图并创建独立副本
         stored_memory = normalized.detach().clone()
         if self.config.storage_device == "cpu":
             stored_memory = stored_memory.to("cpu")
+
+        # key 也做 clone，与 memory 同设备/dtype
         stored_key = self.build_key(stored_memory).to(
             device=stored_memory.device,
             dtype=stored_memory.dtype,
         ).clone()
 
+        # 递增写入计数器
         self._step += 1
         self._memory_write_count += 1
         self._new_latent_count += stored_memory.shape[0]
+
         return LatentMemorySlot(
             memory=stored_memory,
             key=stored_key,
@@ -526,6 +790,12 @@ class LatentMemoryBank:
         tensor: torch.Tensor,
         name: str,
     ) -> torch.Tensor:
+        """输入校验与归一化。
+
+        - 3D [1, tokens, hidden] -> 压缩为 2D [tokens, hidden]
+        - 2D [tokens, hidden] -> 直接通过
+        - 拒绝非浮点、空维度等非法输入
+        """
         if not isinstance(tensor, torch.Tensor):
             raise TypeError(f"{name} must be a torch.Tensor")
         if tensor.ndim == 3:

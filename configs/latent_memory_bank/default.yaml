@@ -1,12 +1,27 @@
+# LatentMemoryBank 默认配置
+# 默认 disabled，确保对原始推理路径零影响。
+# 使用时通过 CLI 或代码覆盖 enabled=true 即可激活。
+
 latent_memory_bank:
-  enabled: false
-  batch_size: 1
-  max_slots: 8
-  top_k: 1
-  threshold: 0.7
-  decay_alpha: 0.05
-  pool_last_n: 64
-  retrieve_policy: threshold_topk
-  update_policy: replace_oldest
-  storage_device: cpu
-  debug: true
+  # ---------- 基本开关 ----------
+  enabled: false          # 是否启用；false 时 write/retrieve 均为 no-op
+
+  # ---------- 容量与检索 ----------
+  batch_size: 1           # 当前仅支持 1（Phase 4 约束）
+  max_slots: 8            # 最大槽位容量
+  top_k: 1                # topk 检索返回的槽位数
+  threshold: 0.7          # 余弦相似度阈值 [-1, 1]
+  decay_alpha: 0.05       # 指数衰减系数；0 = 无衰减
+
+  # ---------- 查询构造 ----------
+  pool_last_n: 64         # query: 取最近 N 个 token hidden states 做 mean pooling
+
+  # ---------- 策略选择 ----------
+  retrieve_policy: threshold_topk   # 检索策略: threshold | topk | threshold_topk
+  update_policy: replace_oldest     # 写入策略: append | replace | replace_oldest | thread_update
+
+  # ---------- 存储 ----------
+  storage_device: cpu     # slot tensor 存储位置: cpu | same
+
+  # ---------- 调试 ----------
+  debug: true             # 是否开启 debug 统计（不影响计算正确性）

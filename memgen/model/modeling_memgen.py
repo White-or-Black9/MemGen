@@ -449,6 +449,7 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
         inputs_embeds = reasoner.get_input_embeddings()(input_ids)
         B, _, hidden_size = inputs_embeds.shape
         device = inputs_embeds.device
+        # Phase 5: memory bank 启用时限制 batch_size=1（当前不支持批处理）
         if latent_memory_bank is not None and B != 1:
             raise ValueError(
                 "latent_memory_bank-enabled generate currently supports batch_size=1 only"
@@ -490,6 +491,8 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                 candidate_attention_mask = current_attention_mask[augment_indices]
                 candidate_position_ids = current_position_ids[augment_indices]
 
+                # Phase 5: thread_update 策略需要提前做检索（获取 retrieval_result
+                # 供后续 write_back 使用），非 thread_update 策略在 Weaver 生成后再检索
                 retrieval_result = None
                 use_thread_update = (
                     latent_memory_bank is not None
@@ -517,9 +520,12 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                     weaver_hidden_states, attn_mask, _ = weaver.augment_inference(
                         weaver_inputs_embeds, candidate_attention_mask, candidate_position_ids
                     )
+                # 将 Weaver 输出映射回 reasoner 空间
                 latent_inputs_embeds = self.weaver_to_reasoner(weaver_hidden_states)
+                # ═══ Phase 5: 根据 bank 是否启用，分支处理 latent 注入 ═══
                 if latent_memory_bank is None:
-                    # Preserve the original disabled path exactly.
+                    # ----- 原始禁用路径（完全不变）-----
+                    # 直接将新生成的 latent 拼到 candidate 序列末尾
                     candidate_inputs_embeds = torch.cat(
                         [candidate_inputs_embeds, latent_inputs_embeds], dim=1
                     )
@@ -532,15 +538,21 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                         else weaver.inference_latents_num
                     )
                 else:
+                    # ----- Memory bank 启用路径 -----
+                    # 步骤：检索旧记忆 → [旧记忆] + [新 latent] 拼接注入 → 写入新 latent
                     if use_thread_update:
+                        # thread_update 策略：复用 Weaver 生成前已完成的检索结果
                         retrieved_slots = retrieval_result.slots
                     else:
+                        # 其他策略：用当前的 candidate_inputs_embeds（reasoner-space）做检索
                         retrieved_slots = latent_memory_bank.retrieve(
                             candidate_inputs_embeds.detach(),
                             device=device,
                             dtype=current_inputs_embeds.dtype,
                         )
                     if retrieved_slots:
+                        # 有检索到记忆：按 [当前序列 → 旧记忆 → 新latent] 顺序拼接
+                        # 旧记忆注入在 latent 之前，reasoner 可以看到历史上下文
                         retrieved_memory = torch.cat(
                             [slot.memory for slot in retrieved_slots], dim=0
                         ).unsqueeze(0)
@@ -566,12 +578,15 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                             dim=1,
                         )
                     else:
+                        # bank 为空或无匹配：行为和原始路径相同，只拼新 latent
                         candidate_inputs_embeds = torch.cat(
                             [candidate_inputs_embeds, latent_inputs_embeds], dim=1
                         )
                         candidate_attention_mask = torch.cat(
                             [candidate_attention_mask, attn_mask], dim=1
                         )
+                    # 将新生成的 reasoner-space latent 写入 bank
+                    # 写入的是 weaver_to_reasoner 之后的 latent_inputs_embeds（reasoner-space）
                     if use_thread_update:
                         latent_memory_bank.write_back(
                             latent_inputs_embeds.detach(),
@@ -579,6 +594,7 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                         )
                     else:
                         latent_memory_bank.write(latent_inputs_embeds.detach())
+                    # pad_len：增强后比原始序列多出的长度，用于后续未增强样本的左填充对齐
                     pad_len = candidate_inputs_embeds.size(1) - current_inputs_embeds.size(1)
 
                 # 合并增强和未增强的序列

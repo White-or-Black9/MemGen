@@ -4,6 +4,7 @@ LatentMemoryBank 单元测试（Phase 4：16 个核心测试 → 后续扩展到
 各检索策略、recency decay、detach/clone 隔离、thread_update 完整分支。
 """
 
+import math
 import unittest
 
 import torch
@@ -355,12 +356,46 @@ class LatentMemoryBankTest(unittest.TestCase):
 
         self.assertEqual(result, [])
 
-    def test_recency_decay_affects_score(self):
-        """recency decay：更新 slot 得分更高，排序正确。"""
+    def test_retrieval_step_increments_once_per_retrieval_entrypoint(self):
+        """retrieve_with_context() 和 retrieve() 每次入口都只递增一个 retrieval turn。
+        Phase R2 保护：retrieve() 委托给 retrieve_with_context() 不自增第二遍；
+        disabled 路径不递增 retrieval_step。防止未来重构引入 double increment。"""
         bank = LatentMemoryBank(
             LatentMemoryBankConfig(
                 enabled=True,
-                top_k=2,
+                top_k=1,
+                retrieve_policy="topk",
+                decay_alpha=0.0,
+            )
+        )
+        bank.write(torch.tensor([[1.0, 0.0]]))
+
+        start_step = bank.debug_summary()["retrieval_step"]
+        context_result = bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+        self.assertEqual(context_result.retrieval_step, start_step + 1)
+        self.assertEqual(bank.debug_summary()["retrieval_step"], start_step + 1)
+
+        before_retrieve = bank.debug_summary()["retrieval_step"]
+        slots = bank.retrieve(torch.tensor([1.0, 0.0]))
+        self.assertEqual(len(slots), 1)
+        self.assertEqual(bank.debug_summary()["retrieval_step"], before_retrieve + 1)
+
+        disabled = LatentMemoryBank(LatentMemoryBankConfig(enabled=False))
+        disabled_start = disabled.debug_summary()["retrieval_step"]
+        self.assertEqual(disabled.retrieve(torch.tensor([1.0, 0.0])), [])
+        self.assertEqual(disabled.debug_summary()["retrieval_step"], disabled_start)
+        disabled.retrieve_with_context(torch.tensor([1.0, 0.0]))
+        self.assertEqual(disabled.debug_summary()["retrieval_step"], disabled_start)
+
+    def test_last_retrieved_decay_affects_score_not_created_step_age(self):
+        """last-retrieved decay：score 使用最后被选中检索的 retrieval turn，而非 created_step。
+        Phase R2 核心保护：decay 依据 last_retrieved_step。较早创建的 slot 如果最近被检索过
+        （通过 retrieve() 刷新），其 age 小于未检索的新 slot。如果误用 created_step 做 decay，
+        此测试会失败（"new" 将因 created_step 更大而得高分）。"""
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                top_k=1,
                 retrieve_policy="topk",
                 decay_alpha=1.0,  # 强衰减
             )
@@ -368,11 +403,97 @@ class LatentMemoryBankTest(unittest.TestCase):
         memory = torch.tensor([[1.0, 0.0]])
         bank.write(memory, {"id": "old"})
         bank.write(memory, {"id": "new"})
+        # Refresh the older slot. If decay used created_step, "new" would score higher.
+        bank.retrieve(memory)
 
-        result = bank.retrieve(memory)
+        result = bank.retrieve_with_context(memory)
 
-        self.assertEqual([slot.metadata["id"] for slot in result], ["new", "old"])
-        self.assertGreater(result[0].last_score, result[1].last_score)
+        self.assertEqual([slot.metadata["id"] for slot in result.slots], ["old"])
+        self.assertGreater(result.scores[0], result.scores[1])
+
+    def test_selected_slots_only_update_last_retrieved_step(self):
+        """只有最终 selected / returned slots 更新 last_retrieved_step。
+        Phase R2 保护：below-threshold 和 top-k 过滤掉的 slot 不刷新 last_retrieved_step，
+        它们的 age 继续增长。确保阈值过滤和 top-k 截断后未选中 slot 不被意外刷新。"""
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                top_k=1,
+                threshold=0.5,
+                retrieve_policy="threshold_topk",
+                decay_alpha=0.0,
+            )
+        )
+        bank.write(torch.tensor([[1.0, 0.0]]), {"id": "selected"})
+        bank.write(torch.tensor([[0.0, 1.0]]), {"id": "below_threshold"})
+        bank.write(torch.tensor([[1.0, 0.0]]), {"id": "topk_filtered"})
+        before = [
+            slot["last_retrieved_step"]
+            for slot in bank.state_dict()["slots"]
+        ]
+
+        result = bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+        after = [
+            slot["last_retrieved_step"]
+            for slot in bank.state_dict()["slots"]
+        ]
+
+        self.assertEqual(result.retrieved_indices, (0,))
+        self.assertGreater(after[0], before[0])
+        self.assertEqual(after[1], before[1])
+        self.assertEqual(after[2], before[2])
+
+    def test_never_retrieved_slot_age_grows_from_creation(self):
+        """从未被选中检索的 slot 使用创建时初始化的 last_retrieved_step，随后 age 增长。
+        Phase R2 保护：验证新 slot 的 last_retrieved_step 被正确初始化为创建时的 retrieval_step，
+        且在未命中检索时 age 随 retrieval_step 推进而增长。初始 age 必须非负且确定。"""
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                top_k=1,
+                retrieve_policy="topk",
+                decay_alpha=1.0,
+            )
+        )
+        bank.write(torch.tensor([[1.0, 0.0]]), {"id": "old"})
+        bank.write(torch.tensor([[0.0, 1.0]]), {"id": "fresh"})
+        bank.retrieve(torch.tensor([0.0, 1.0]))
+
+        result = bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+
+        self.assertAlmostEqual(result.scores[0], math.exp(-2.0))
+        self.assertEqual(result.retrieved_indices, (0,))
+        slot = bank.debug_summary()["slots"][0]
+        self.assertEqual(slot["last_retrieved_step"], result.retrieval_step)
+        self.assertEqual(slot["last_retrieved_age"], 0)
+
+    def test_threshold_miss_preserves_argmax_without_updating_last_retrieved_step(self):
+        """无 slot 达到 threshold 时仍保留 argmax，但不 fallback top-1，也不更新 last_retrieved_step。
+        Phase R2 双重边界保护：
+        (1) threshold miss 时返回空 slots（不 fallback top-1），
+           这是 Version A-aligned 行为——低相似度记忆不应注入 Reasoner；
+        (2) argmax slot 的 last_retrieved_step 不被更新，下次检索时 age 继续增长。
+        """
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                threshold=0.9,
+                retrieve_policy="threshold_topk",
+                decay_alpha=0.0,
+            )
+        )
+        bank.write(torch.tensor([[0.0, 1.0]]), {"id": "only"})
+        before = bank.state_dict()["slots"][0]["last_retrieved_step"]
+
+        result = bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+
+        self.assertEqual(result.slots, [])
+        self.assertEqual(result.argmax_index, 0)
+        self.assertEqual(result.retrieved_indices, ())
+        self.assertEqual(
+            bank.state_dict()["slots"][0]["last_retrieved_step"],
+            before,
+        )
 
     # ==================================================================
     # 检索隔离（caller 修改不影响 bank）
@@ -488,7 +609,7 @@ class LatentMemoryBankTest(unittest.TestCase):
 
     def test_thread_update_low_score_not_full_inserts_new_thread(self):
         """thread_update: 低分 + 未满 -> insert 新线程（reason="new_thread"）。"""
-        bank = self._thread_bank(max_slots=3, threshold=0.7)
+        bank = self._thread_bank(max_slots=3, threshold=0.95)
         self._thread_write(
             bank,
             torch.tensor([[1.0, 0.0]]),
@@ -512,26 +633,36 @@ class LatentMemoryBankTest(unittest.TestCase):
         self.assertEqual(event["update_reason"], "new_thread")
         self.assertTrue(event["inserted_new_thread"])
 
-    def test_thread_update_low_score_full_evicts_oldest_then_inserts(self):
-        """thread_update: 低分 + 已满 -> 淘汰 oldest 后 insert（reason="new_thread_bank_full"）。"""
-        bank = self._thread_bank(max_slots=2, threshold=0.7)
+    def test_thread_update_low_score_full_evicts_largest_last_retrieved_age(self):
+        """thread_update: 低分 + 已满 -> 淘汰 last_retrieved_age 最大的 slot。
+        Phase R2 核心保护：满容量时淘汰最久未被检索的 slot（largest last_retrieved_age），
+        而非旧的 oldest created_step。较早创建但最近刷新过的 slot（"oldest_recently_retrieved"）
+        应被保留，而"stale" slot（last_retrieved_age 最大）应被淘汰。
+        验证 eviction_basis 字段为 "last_retrieved_age"。"""
+        bank = self._thread_bank(max_slots=3, threshold=0.95)
         self._thread_write(
             bank,
             torch.tensor([[1.0, 0.0]]),
-            {"id": "oldest"},
+            {"id": "oldest_recently_retrieved"},
         )
         self._thread_write(
             bank,
             torch.tensor([[0.0, 1.0]]),
+            {"id": "stale"},
+        )
+        self._thread_write(
+            bank,
+            torch.tensor([[0.5, 0.5]]),
             {"id": "newer"},
         )
-        # 查询与两个已存 slot 都正交 -> 低分 + 满 -> 淘汰 oldest
+        # Refresh the oldest-created slot so it should not be evicted.
+        bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
         retrieval_result = bank.retrieve_with_context(
-            torch.tensor([[-1.0, 0.0]])
+            torch.tensor([[-1.0, -1.0]])
         )
 
         bank.write_back(
-            torch.tensor([[-1.0, 0.0]]),
+            torch.tensor([[-1.0, -1.0]]),
             retrieval_result,
             {"id": "new-thread"},
         )
@@ -539,11 +670,43 @@ class LatentMemoryBankTest(unittest.TestCase):
         ids = [slot["metadata"]["id"] for slot in bank.state_dict()["slots"]]
         summary = bank.debug_summary()
         event = summary["last_write_back"]
-        self.assertEqual(ids, ["new-thread", "newer"])  # oldest(id="oldest") 被淘汰
+        self.assertEqual(
+            ids,
+            ["oldest_recently_retrieved", "new-thread", "newer"],
+        )
         self.assertEqual(event["write_action"], "evict_oldest_insert")
-        self.assertEqual(event["evicted_slot_index"], 0)
+        self.assertEqual(event["evicted_slot_index"], 1)
+        self.assertEqual(event["eviction_basis"], "last_retrieved_age")
         self.assertIsNone(event["replaced_slot_index"])
         self.assertEqual(summary["capacity_evict_count"], 1)
+
+    def test_thread_update_eviction_tiebreaks_by_created_step_then_index(self):
+        """eviction tie-break：age 相同淘汰 created_step 更早者，再按较小 index deterministic。
+        Phase R2 保护：验证 eviction tie-break 确定性行为——
+        largest age → earliest created_step → smallest index。
+        所有 slot 的 last_retrieved_step 被设为 0 使 age 相等，然后依次用 created_step 和
+        index 决出被淘汰者。确定性保证同一状态多次 eviction 结果一致。"""
+        bank = self._thread_bank(max_slots=3, threshold=0.95)
+        self._thread_write(bank, torch.tensor([[1.0, 0.0]]), {"id": "first"})
+        self._thread_write(bank, torch.tensor([[0.0, 1.0]]), {"id": "second"})
+        self._thread_write(bank, torch.tensor([[0.5, 0.5]]), {"id": "third"})
+        for slot in bank._slots:
+            slot.last_retrieved_step = 0
+            slot.last_access_step = 0
+        retrieval_result = bank.retrieve_with_context(torch.tensor([[0.0, -1.0]]))
+
+        bank.write_back(
+            torch.tensor([[-1.0, -1.0]]),
+            retrieval_result,
+            {"id": "new-thread"},
+        )
+
+        ids = [slot["metadata"]["id"] for slot in bank.state_dict()["slots"]]
+        event = bank.debug_summary()["last_write_back"]
+        self.assertEqual(ids, ["new-thread", "second", "third"])
+        self.assertEqual(event["evicted_slot_index"], 0)
+        self.assertEqual(event["eviction_basis"], "last_retrieved_age")
+        self.assertEqual(event["evicted_slot_last_retrieved_age"], 4)
 
     def test_thread_update_high_score_replaces_argmax_even_when_not_full(self):
         """thread_update: 高分 + 未满 -> 仍然替换 argmax slot（不增加槽位数）。"""
@@ -569,6 +732,47 @@ class LatentMemoryBankTest(unittest.TestCase):
         self.assertEqual(event["write_action"], "replace_matched")
         self.assertEqual(event["replaced_slot_index"], 0)
         self.assertIsNone(event["evicted_slot_index"])
+        self.assertEqual(
+            bank.state_dict()["slots"][0]["last_retrieved_step"],
+            retrieval_result.retrieval_step,
+        )
+
+    def test_thread_update_replacement_uses_retrieval_result_step_after_later_retrieval(self):
+        """write_back 创建 replacement slot 时使用触发它的 retrieval_result step。
+        Phase R2-fix 保护：验证即使 retrieve_with_context() 和 write_back() 之间
+        发生了另一次检索（_retrieval_step 已增大），write_back 创建的新 slot 仍绑定到
+        触发它的 retrieval_result.retrieval_step，而非当前 self._retrieval_step。
+        防止 last_retrieved_step 语义漂移。"""
+        bank = self._thread_bank(max_slots=3)
+        self._thread_write(
+            bank,
+            torch.tensor([[1.0, 0.0]]),
+            {"id": "old"},
+        )
+        retrieval_result = bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+        bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+
+        self.assertGreater(
+            bank.debug_summary()["retrieval_step"],
+            retrieval_result.retrieval_step,
+        )
+        bank.write_back(
+            torch.tensor([[2.0, 0.0]]),
+            retrieval_result,
+            {"id": "new"},
+        )
+
+        slot = bank.state_dict()["slots"][0]
+        self.assertEqual(slot["metadata"]["id"], "new")
+        self.assertEqual(slot["created_step"], 2)
+        self.assertEqual(
+            slot["last_access_step"],
+            retrieval_result.retrieval_step,
+        )
+        self.assertEqual(
+            slot["last_retrieved_step"],
+            retrieval_result.retrieval_step,
+        )
 
     def test_thread_update_high_score_replaces_argmax_when_full(self):
         """thread_update: 高分 + 已满 -> 替换 argmax slot。"""
@@ -675,9 +879,12 @@ class LatentMemoryBankTest(unittest.TestCase):
                 "replaced_slot_index",
                 "replaced_slot_score",
                 "evicted_slot_index",
+                "evicted_slot_last_retrieved_age",
+                "eviction_basis",
                 "update_reason",
                 "inserted_new_thread",
                 "retrieval_bank_step",
+                "retrieval_step",
             },
         )
 
@@ -722,6 +929,7 @@ class LatentMemoryBankTest(unittest.TestCase):
         self.assertEqual(bank.debug_summary()["step"], 0)
         self.assertEqual(bank.debug_summary()["memory_write_count"], 0)
         self.assertEqual(bank.debug_summary()["memory_retrieve_count"], 0)
+        self.assertEqual(bank.debug_summary()["retrieval_step"], 0)
 
     def test_debug_summary_records_append_replace_and_reject_actions(self):
         """debug_summary 正确记录 legacy update action trace。"""

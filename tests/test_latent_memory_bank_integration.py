@@ -372,7 +372,10 @@ class LatentMemoryBankIntegrationTest(unittest.TestCase):
             manager.run_agent_loop(gen_batch)
 
     def test_single_turn_bank_is_session_local(self):
-        """single-turn：每次 run_agent_loop() 创建新 bank，bank_id 不同且 initial_slots=0。"""
+        """single-turn：每次 run_agent_loop() 创建新 bank，且 initial_slots=0。
+        Phase R2 变更：移除了 Python id() 断言，改用 debug-state 检查（slot_count、memory_write_count）。
+        因为 id() 可能被内存分配器复用，debug-state 断言更可靠。
+        """
         tokenizer = FakeTokenizer()
         actor = RecordingSingleTurnActor()
         config = InteractionConfig(
@@ -392,12 +395,14 @@ class LatentMemoryBankIntegrationTest(unittest.TestCase):
 
         self.assertEqual(actor.calls[0]["initial_slots"], 0)
         self.assertEqual(actor.calls[1]["initial_slots"], 0)
-        self.assertNotEqual(actor.calls[0]["bank_id"], actor.calls[1]["bank_id"])
         self.assertEqual(first_debug["memory_write_count"], 1)
         self.assertEqual(first_debug["slot_count"], 1)
 
     def test_multi_turn_shares_bank_within_episode_and_resets_next_episode(self):
-        """multi-turn：同一 episode 内 bank_id 相同，下一 episode 创建新 bank。"""
+        """multi-turn：同一 episode 内 bank_id 相同，下一 episode 创建新 bank。
+        Phase R2 变更：移除了 Python id() 断言，改用 initial_slots 验证 session-local 语义。
+        同一 episode 的第二 turn 应有 initial_slots >= 1，下一 episode 的第一 turn 为 0。
+        """
         tokenizer = FakeTokenizer()
         actor = RecordingMultiTurnActor()
         config = InteractionConfig(
@@ -420,7 +425,6 @@ class LatentMemoryBankIntegrationTest(unittest.TestCase):
         self.assertEqual(first_episode_calls[0]["bank_id"], first_episode_calls[1]["bank_id"])
         self.assertEqual(first_episode_calls[0]["initial_slots"], 0)
         self.assertGreaterEqual(first_episode_calls[1]["initial_slots"], 1)
-        self.assertNotEqual(first_episode_calls[0]["bank_id"], actor.calls[2]["bank_id"])
         self.assertEqual(actor.calls[2]["initial_slots"], 0)
 
     def test_generate_disabled_path_stays_on_original_reasoner_injection(self):

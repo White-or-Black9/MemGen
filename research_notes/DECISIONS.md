@@ -41,6 +41,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0032 | 2026-06-12 | accepted | Complete Version A-aligned thread_update and gate Version B behind a TriviaQA target-task baseline |
 | DEC-0033 | 2026-06-12 | accepted | Use a controlled three-turn fallback only as mechanism evidence while TriviaQA infrastructure is blocked |
 | DEC-0034 | 2026-06-13 | accepted | Freeze strict and deterministic relaxed scoring before controlled group comparison |
+| DEC-0035 | 2026-06-16 | accepted | Revise Version A-aligned decay and full-bank eviction to last-retrieved semantics without entering Version B |
 
 ## Decision Template
 
@@ -820,3 +821,30 @@ IDs and append superseding decisions rather than silently rewriting history.
   - `EXP-20260612-026`
   - `EXP-20260612-027`
   - `EXP-20260613-001`
+
+### DEC-0035: Version A-Aligned Last-Retrieved Decay Revision
+
+- Date: 2026-06-16
+- Status: accepted
+- Context: Phase R2 changes only the Version A-aligned `thread_update` mechanism.
+  Historical Version A-simple and earlier Phase 8A / Phase 8C-alt results remain
+  write-age-decay evidence.
+- Decision:
+  - add an enabled retrieval-turn counter for the bank
+  - compute Version A-aligned retrieval score with
+    `current_retrieval_step - slot.last_retrieved_step`
+  - update `last_retrieved_step` only for final selected / returned slots
+  - initialize newly inserted or matched-replacement slots at the current
+    retrieval step
+  - when `thread_update` inserts a new thread into a full bank, evict the slot
+    with largest `last_retrieved_age`
+  - break eviction ties by earlier `created_step`, then lower slot index
+  - keep `retrieval_result.bank_step` stale-context protection
+- Rationale: This aligns Version A-aligned decay and full-bank capacity behavior
+  with actual retrieval reuse recency rather than slot creation age.
+- Consequences:
+  - Version A-aligned no longer uses write-age decay
+  - Version A-simple remains a historical / legacy baseline variant
+  - no fallback top-1 is introduced
+  - retrieved memory remains Reasoner-only and does not enter Weaver
+  - Version B remains not started

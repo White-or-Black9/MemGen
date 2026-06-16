@@ -20,7 +20,7 @@ LatentMemoryBank      : 按写入次数计步的槽位存储，支持多种检�
 ===== 检索流程 =====
 
 1. build_query(hidden_states) —— 对最近 pool_last_n 个 token 的 hidden states 做 mean pooling
-2. retrieve_with_context(query) —— 对所有 slot 计算 cosine similarity × exponential recency decay
+2. retrieve_with_context(query) —— 对所有 slot 计算 cosine similarity × last-retrieved decay
 3. 根据 retrieve_policy 过滤（threshold / topk / threshold_topk）
 4. 返回 detached clone，外部修改不影响 bank 内部状态
 
@@ -38,7 +38,8 @@ write_back():
   - 空 bank -> insert（新线程）
   - max_score >= threshold -> 替换 argmax slot（匹配线程更新）
   - max_score < threshold 且未满 -> insert（新线程）
-  - max_score < threshold 且已满 -> 淘汰 oldest，insert（新线程 + 容量管理）
+  - max_score < threshold 且已满 -> 淘汰 last-retrieved age 最大的 slot，
+    insert（新线程 + 容量管理）
 
 ===== 与项目架构的关系 =====
 
@@ -46,7 +47,8 @@ write_back():
 - Reasoner-space storage：存储的是 weaver_to_reasoner(...) 之后的 latent_inputs_embeds。
 - 不对 Weaver/Trigger 训练路径做任何修改。
 - _step 按成功写入次数计数，而非 generation token 数。
-- 当前 decay 是 write-age decay，不是 last-retrieved-turn decay。
+- _retrieval_step 按 enabled retrieval turn 计数。
+- 当前 Version A-aligned decay 是 last-retrieved decay，不是 Version B。
 """
 
 from copy import deepcopy
@@ -150,8 +152,11 @@ class LatentMemorySlot:
     metadata: Dict[str, Any] = field(default_factory=dict)  # 用户自定义元数据
 
     # --- 生命周期追踪 ---
+    # created_step：写入顺序标记，仅用于 legacy replace_oldest 和 eviction tie-break，
+    # 不再参与 decay 计算。decay 依据 last_retrieved_step。
     created_step: int = 0           # 创建时的 bank _step（写入次数）
-    last_access_step: int = 0       # 最后被访问时的 _step
+    last_access_step: int = 0       # 兼容旧字段：当前与 last_retrieved_step 同步，不单独参与 decay
+    last_retrieved_step: int = 0    # 最后一次被真正选中检索的 retrieval turn；未被选中过的 slot 初始化为创建时的 retrieval_step
     access_count: int = 0           # 被检索的总次数
     last_score: Optional[float] = None  # 最后一次检索的相似度得分
 
@@ -159,8 +164,14 @@ class LatentMemorySlot:
     original_device: str = "cpu"           # 写入时 tensor 所在设备
     original_dtype: str = "torch.float32"  # 写入时 tensor 的 dtype
 
-    def debug_summary(self) -> Dict[str, Any]:
+    def debug_summary(self, current_retrieval_step: Optional[int] = None) -> Dict[str, Any]:
         """返回 slot 状态的只读摘要（用于 debug 日志和实验记录）。"""
+        last_retrieved_age = None
+        if current_retrieval_step is not None:
+            last_retrieved_age = max(
+                0,
+                current_retrieval_step - self.last_retrieved_step,
+            )
         return {
             "memory_shape": list(self.memory.shape),
             "key_shape": list(self.key.shape),
@@ -170,6 +181,8 @@ class LatentMemorySlot:
             "original_dtype": self.original_dtype,
             "created_step": self.created_step,
             "last_access_step": self.last_access_step,
+            "last_retrieved_step": self.last_retrieved_step,
+            "last_retrieved_age": last_retrieved_age,
             "access_count": self.access_count,
             "last_score": self.last_score,
             "metadata": dict(self.metadata),
@@ -192,6 +205,7 @@ class LatentMemoryRetrievalResult:
     retrieved_indices: Tuple[int, ...]      # 通过过滤的 slot indices
     retrieved_scores: Tuple[float, ...]     # 通过过滤的 slot scores
     bank_step: int                          # 检索时的 bank step，用于 write_back 的防过期校验
+    retrieval_step: int = 0                 # 当前 retrieval turn
 
 
 class LatentMemoryBank:
@@ -212,9 +226,14 @@ class LatentMemoryBank:
 
     _step 记录的是成功写入次数（memory-write count），不是 generation token 数。
     这影响：
-    - created_step / last_access_step 的取值
-    - age 计算：age = max(0, _step - slot.created_step)
+    - created_step 的取值
+    - last_retrieved_step / last_access_step 的初始值
+
+    _retrieval_step 记录 enabled retrieval turn。
+    - age 计算：age = max(0, _retrieval_step - slot.last_retrieved_step)
     - decay 计算：score = similarity * exp(-decay_alpha * age)
+    - 只有最终 selected / returned slots 更新 last_retrieved_step
+    - created_step 不再参与 decay，仅保留为写入顺序标记和 eviction tie-break
 
     ===== 隔离保证 =====
 
@@ -230,6 +249,9 @@ class LatentMemoryBank:
         # ===== 核心计数器 =====
         # 成功写入次数，不是 token 数
         self._step = 0
+        # retrieval turn 计数器，与 _step（写入次数）独立；
+        # 每次 enabled 检索入口递增一；age 计算：current - slot.last_retrieved_step
+        self._retrieval_step = 0
 
         # ===== 写入/检索统计 =====
         self._memory_write_count = 0        # 总写入次数
@@ -247,7 +269,7 @@ class LatentMemoryBank:
         # ===== thread_update 策略追踪 =====
         self._thread_insert_count = 0       # 新线程插入次数
         self._matched_replace_count = 0     # 匹配线程替换次数
-        self._capacity_evict_count = 0      # 因容量满而淘汰 oldest 的次数
+        self._capacity_evict_count = 0      # 因容量满而淘汰 slot 的次数
         self._last_write_back: Optional[Dict[str, Any]] = None
         self._write_back_trace: List[Dict[str, Any]] = []
 
@@ -267,6 +289,7 @@ class LatentMemoryBank:
         """清空所有槽位并将所有计数器归零。"""
         self._slots.clear()
         self._step = 0
+        self._retrieval_step = 0
         self._memory_write_count = 0
         self._memory_retrieve_count = 0
         self._retrieved_latent_count = 0
@@ -340,7 +363,7 @@ class LatentMemoryBank:
         1. 如果 disabled 或 bank 为空 -> 返回空结果
         2. 如果输入是 1D tensor，直接作为 query；如果是 2D/3D，通过 build_query() 构造
         3. 对每个 slot 计算 cosine_similarity(query, slot.key)
-        4. 乘以 recency decay: score = similarity * exp(-decay_alpha * age)
+        4. 乘以 last-retrieved decay: score = similarity * exp(-decay_alpha * age)
         5. 根据 retrieve_policy 过滤（threshold / topk / threshold_topk）
         6. 为每个选中 slot 构造 detached clone，同时更新 slot 的访问统计
 
@@ -353,7 +376,13 @@ class LatentMemoryBank:
             LatentMemoryRetrievalResult：包含 slots、全部 scores、max_score 等完整信息
         """
         # --- disabled 或空 bank：直接返回空 ---
+        # disabled 路径不递增 retrieval_step（零开销），但 enabled 空 bank 仍然递增，
+        # 以保证后续写入的 slot 获得一致的时间基准（age 不会负值）。
         if not self.config.enabled or not self._slots:
+            retrieval_step = self._retrieval_step
+            if self.config.enabled:
+                self._retrieval_step += 1
+                retrieval_step = self._retrieval_step
             return LatentMemoryRetrievalResult(
                 slots=[],
                 scores=(),
@@ -363,7 +392,11 @@ class LatentMemoryBank:
                 retrieved_indices=(),
                 retrieved_scores=(),
                 bank_step=self._step,
+                retrieval_step=retrieval_step,
             )
+        # 每次 enabled 检索入口恰推进一个 retrieval turn。retrieve() 委托进来不自增第二遍。
+        self._retrieval_step += 1
+        retrieval_step = self._retrieval_step
 
         # --- 输入校验与 query 构造 ---
         if not isinstance(query_or_hidden_states, torch.Tensor):
@@ -396,8 +429,12 @@ class LatentMemoryBank:
                 slot_key.unsqueeze(0),
                 dim=-1,
             ).item()
-            # write-age decay：age = 当前写入次数 - slot 创建时的写入次数
-            age = max(0, self._step - slot.created_step)
+            # last-retrieved decay：age 使用 retrieval_step - slot.last_retrieved_step，
+            # 而非 created_step。原因是 write-age decay 不能反映实际使用频率：
+            # 一个很早写入但频繁被检索的 slot 应该比一个刚写入但从未被检索的 slot 得分更高。
+            # last_retrieved_step 记录的是真正被选中返回给 Reasoner 的上一次 retrieval turn，
+            # 并非所有参与评分计算的访问。
+            age = max(0, retrieval_step - slot.last_retrieved_step)
             score = similarity * math.exp(-self.config.decay_alpha * age)
             scored_slots.append((score, index, slot))
 
@@ -412,6 +449,9 @@ class LatentMemoryBank:
         selected_slots = scored_slots
 
         # --- threshold 过滤 ---
+        # threshold 全不过时 selected_slots 为空，后续返回空 slots 给 Reasoner。
+        # 这里不做 fallback top-1：低于 threshold 时即使有 argmax，也不返回任何 slot，
+        # 因为低相似度记忆对生成有害。argmax_index 仅保留用于 matched_thread 判断。
         if self.config.retrieve_policy in {"threshold", "threshold_topk"}:
             selected_slots = [
                 item
@@ -424,12 +464,17 @@ class LatentMemoryBank:
             selected_slots = selected_slots[: self.config.top_k]
 
         # --- 构造输出 slot（detached clone）并更新访问统计 ---
+        # 只有最终进入 selected_slots 的 slot 会更新 last_retrieved_step。
+        # 参与 scoring 但被 threshold/top-k 过滤掉的 slot 不刷新，
+        # 从而它们的 last_retrieved_age 继续增长，下次检索时衰减更大。
+        # 这是 Version A-aligned 的行为：仅真正返回给 Reasoner 的 slot 算"被检索到"。
         output_device = torch.device(device) if device is not None else query.device
         output_dtype = dtype if dtype is not None else query.dtype
         retrieved = []
         for score, _, slot in selected_slots:
             # 更新 bank 内 slot 的访问统计
-            slot.last_access_step = self._step
+            slot.last_retrieved_step = retrieval_step
+            slot.last_access_step = retrieval_step
             slot.access_count += 1
             slot.last_score = score
             # 构造 detached clone 返回给 caller
@@ -446,6 +491,7 @@ class LatentMemoryBank:
                     metadata=deepcopy(slot.metadata),
                     created_step=slot.created_step,
                     last_access_step=slot.last_access_step,
+                    last_retrieved_step=slot.last_retrieved_step,
                     access_count=slot.access_count,
                     last_score=score,
                     original_device=slot.original_device,
@@ -466,6 +512,7 @@ class LatentMemoryBank:
             retrieved_indices=tuple(index for _, index, _ in selected_slots),
             retrieved_scores=tuple(score for score, _, _ in selected_slots),
             bank_step=self._step,
+            retrieval_step=retrieval_step,
         )
 
     # ==================================================================
@@ -510,6 +557,8 @@ class LatentMemoryBank:
             return False
 
         new_slot = self._create_slot(normalized, metadata)
+        # 不传 retrieval_step，_create_slot 回退到 self._retrieval_step。
+        # 这对 write() 路径是可接受的，因为 write() 不与特定 retrieval 绑定。
 
         # --- 未满：直接追加 ---
         if len(self._slots) < self.config.max_slots:
@@ -569,7 +618,8 @@ class LatentMemoryBank:
         1. bank 为空 -> insert（新线程，reason="empty_bank"）
         2. max_score >= threshold -> 替换 argmax slot（匹配线程更新，reason="matched_thread"）
         3. max_score < threshold 且未满 -> insert（新线程，reason="new_thread"）
-        4. max_score < threshold 且已满 -> 淘汰 oldest 后 insert（新线程，reason="new_thread_bank_full"）
+        4. max_score < threshold 且已满 -> 淘汰 last-retrieved age 最大的 slot 后 insert
+           （新线程，reason="new_thread_bank_full"）
 
         返回 True 表示写入成功。
         """
@@ -612,12 +662,22 @@ class LatentMemoryBank:
             )
 
         normalized = self._normalize_memory_tensor(memory, "memory")
-        new_slot = self._create_slot(normalized, metadata)
+        # 使用 retrieval_result.retrieval_step 而非 self._retrieval_step：
+        # 如果在 retrieve_with_context() 和 write_back() 之间发生了另一次检索，
+        # self._retrieval_step 会大于触发此次 write_back 的 retrieval step。
+        # 绑定到 retrieval_result 的 step 保证新 slot 的时间基准与得分计算一致。
+        new_slot = self._create_slot(
+            normalized,
+            metadata,
+            retrieval_step=retrieval_result.retrieval_step,
+        )
 
         # --- 状态变量，用于构造 debug event ---
         replaced_slot_index = None
         replaced_slot_score = None
         evicted_slot_index = None
+        evicted_slot_last_retrieved_age = None
+        eviction_basis = None
         inserted_new_thread = False
 
         if not self._slots:
@@ -646,11 +706,29 @@ class LatentMemoryBank:
             update_reason = "new_thread"
             inserted_new_thread = True
         else:
-            # 情况 4：已满 + 新线程 -> 淘汰 oldest，插入
-            evicted_slot_index = min(
+            # 情况 4：已满 + 新线程 -> 淘汰 last-retrieved age 最大者，插入
+            # 使用 largest last_retrieved_age 而非 oldest created_step：
+            # 一个创建早但频繁被检索的 slot 比一个创建晚但从未被检索的 slot
+            # 更值得保留。last_retrieved_age 衡量的是"多久未被实际使用"，
+            # 比 write-age 更能反映 slot 的当前价值。
+            # Tie-break（确定性的）：
+            #   largest age -> earliest created_step -> smallest index
+            # 确定性保证同一状态下多次 eviction 结果一致，便于实验复现。
+            evicted_slot_index = max(
                 range(len(self._slots)),
-                key=lambda index: self._slots[index].created_step,
+                key=lambda index: (
+                    retrieval_result.retrieval_step
+                    - self._slots[index].last_retrieved_step,
+                    -self._slots[index].created_step,
+                    -index,
+                ),
             )
+            evicted_slot_last_retrieved_age = max(
+                0,
+                retrieval_result.retrieval_step
+                - self._slots[evicted_slot_index].last_retrieved_step,
+            )
+            eviction_basis = "last_retrieved_age"
             self._slots[evicted_slot_index] = new_slot
             self._replace_count += 1
             self._thread_insert_count += 1
@@ -670,9 +748,12 @@ class LatentMemoryBank:
             "replaced_slot_index": replaced_slot_index,
             "replaced_slot_score": replaced_slot_score,
             "evicted_slot_index": evicted_slot_index,
+            "evicted_slot_last_retrieved_age": evicted_slot_last_retrieved_age,
+            "eviction_basis": eviction_basis,
             "update_reason": update_reason,
             "inserted_new_thread": inserted_new_thread,
-            "retrieval_bank_step": retrieval_result.bank_step,
+            "retrieval_bank_step": retrieval_result.bank_step,  # 用于检测 stale write_back
+            "retrieval_step": retrieval_result.retrieval_step,  # 触发本次 write_back 的 retrieval turn
         }
         self._last_update_action = write_action
         self._update_action_trace.append(write_action)
@@ -693,6 +774,7 @@ class LatentMemoryBank:
             "config": asdict(self.config),
             "enabled": self.config.enabled,
             "step": self._step,
+            "retrieval_step": self._retrieval_step,  # 当前 retrieval turn，用于验证 last-retrieved decay
             "slot_count": len(self._slots),
             "memory_write_count": self._memory_write_count,
             "memory_retrieve_count": self._memory_retrieve_count,
@@ -708,7 +790,10 @@ class LatentMemoryBank:
             "capacity_evict_count": self._capacity_evict_count,
             "last_write_back": deepcopy(self._last_write_back),
             "write_back_trace": deepcopy(self._write_back_trace),
-            "slots": [slot.debug_summary() for slot in self._slots],
+            "slots": [
+                slot.debug_summary(self._retrieval_step)
+                for slot in self._slots
+            ],
         }
 
     def state_dict(self) -> Dict[str, Any]:
@@ -720,6 +805,7 @@ class LatentMemoryBank:
         return {
             "config": asdict(self.config),
             "step": self._step,
+            "retrieval_step": self._retrieval_step,
             "slots": [
                 {
                     "memory": slot.memory.detach().clone(),
@@ -727,6 +813,7 @@ class LatentMemoryBank:
                     "metadata": deepcopy(slot.metadata),
                     "created_step": slot.created_step,
                     "last_access_step": slot.last_access_step,
+                    "last_retrieved_step": slot.last_retrieved_step,
                     "access_count": slot.access_count,
                     "last_score": slot.last_score,
                     "original_device": slot.original_device,
@@ -744,8 +831,18 @@ class LatentMemoryBank:
         self,
         normalized: torch.Tensor,
         metadata: Optional[Dict[str, Any]],
+        retrieval_step: Optional[int] = None,
     ) -> LatentMemorySlot:
         """根据归一化后的 memory tensor 创建新 slot。
+
+        retrieval_step 参数（Phase R2 新增）：
+        - write() 路径不传 retrieval_step，回退到 self._retrieval_step。
+          这对 write() 是可接受的，因为它不与特定 retrieval 绑定。
+        - write_back() 路径显式传入 retrieval_result.retrieval_step。
+          这样即使 retrieve_with_context() 和 write_back() 之间发生了
+          其他检索，新 slot 的 last_retrieved_step 仍然绑定到触发
+          本次 write_back 的 retrieval turn，与得分计算使用的 step 一致。
+        - last_access_step 和 last_retrieved_step 总是同步到此值。
 
         执行步骤：
         1. 记录原始 device 和 dtype
@@ -774,13 +871,22 @@ class LatentMemoryBank:
         self._step += 1
         self._memory_write_count += 1
         self._new_latent_count += stored_memory.shape[0]
+        # 确定新 slot 的 last_retrieved_step：
+        # - 如果 caller 显式传入了 retrieval_step（write_back 路径），使用该值
+        # - 否则（write 路径）使用当前 bank 的 self._retrieval_step
+        slot_retrieval_step = (
+            self._retrieval_step
+            if retrieval_step is None
+            else retrieval_step
+        )
 
         return LatentMemorySlot(
             memory=stored_memory,
             key=stored_key,
             metadata=deepcopy(metadata or {}),
             created_step=self._step,
-            last_access_step=self._step,
+            last_access_step=slot_retrieval_step,
+            last_retrieved_step=slot_retrieval_step,
             original_device=original_device,
             original_dtype=original_dtype,
         )

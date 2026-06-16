@@ -2,7 +2,8 @@
 
 ## 当前状态
 
-- 当前状态：Version A 对齐的 `thread_update` 已完成；下一步是目标任务 baseline 规划。
+- 当前状态：Phase R2 已将 Version A-aligned `thread_update` 修订为
+  last-retrieved decay；下一步仍是目标任务 baseline / infrastructure 规划。
 - 状态：`completed`
 - 最后更新：2026-06-12
 - 衰减 / fallback 实现审计：`completed`
@@ -11,8 +12,10 @@
 - Step 3 线程感知写回：`completed`
 - Step 4 thread-update 机制 smoke：`completed`
   (`EXP-20260612-024`)
+- Phase R2 last-retrieved decay revision：`completed`
 - 停止条件：已达到；没有明确批准，不要进入新的实现或实验阶段。
-- 下一步建议：完成 notes review 和 commit 准备，然后规划并建立 Original MemGen / disabled-memory TriviaQA baseline。Version B 仍未开始。
+- 下一步建议：规划并建立 Original MemGen / disabled-memory TriviaQA baseline。
+  Version B 仍未开始。
 
 ## 研究目标
 
@@ -653,3 +656,41 @@ Phase 7 已完成。
     - 缺少或未验证 Search-R1 / Wikipedia index assets
     - dynamic harness 不完整，无法进行 single-sample structured recording
   - 下一个工作项是 Phase 8D infrastructure acquisition / verification，而不是 Version B
+
+## 2026-06-16 - Phase R2 Version A-aligned Last-Retrieved Decay Revision
+
+- 状态：`completed`
+- 范围：
+  - 修改 `memgen/model/latent_memory_bank.py`
+  - 更新 `tests/test_latent_memory_bank.py`
+  - 更新 method / decision / progress notes
+  - 没有运行正式实验
+  - 没有进入 Version B
+- 机制修订：
+  - 新增 enabled retrieval-turn counter
+  - Version A-aligned score 从 write-age decay 改为 last-retrieved decay
+  - `last_retrieved_age = current_retrieval_step - slot.last_retrieved_step`
+  - 只有最终 selected / returned slots 更新 `last_retrieved_step`
+  - below-threshold 和 top-k 未选中的 slots 不更新 `last_retrieved_step`
+  - 新插入 slot 和 matched replacement slot 初始化为当前 retrieval step
+  - full-bank `new_thread` eviction 从 oldest-created 改为最大
+    `last_retrieved_age`
+  - eviction tie-break 为 earlier `created_step`，再 lower slot index
+- Debug / trace：
+  - `debug_summary()` 增加 `retrieval_step`
+  - slot debug 增加 `last_retrieved_step` 和 `last_retrieved_age`
+  - `write_back_trace` 增加 `retrieval_step`、`eviction_basis` 和
+    `evicted_slot_last_retrieved_age`
+  - 保留 `last_access_step` 作为兼容字段，语义等同
+    `last_retrieved_step`
+- 边界：
+  - retrieved memory 仍然只进入 Reasoner
+  - retrieved memory 仍然不进入 Weaver
+  - 没有 fallback top-1
+  - disabled path 语义不变
+  - enabled memory 仍限制 batch size 1
+  - 没有修改 Weaver、Trigger、trainer 或 training scripts
+  - Version B 未开始
+- 解释：
+  - Phase 8A 和 Phase 8C-alt 的既有结果仍属于历史 write-age decay 版本
+  - 本阶段没有产生 target-task performance claim

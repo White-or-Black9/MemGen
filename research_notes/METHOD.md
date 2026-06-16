@@ -155,11 +155,25 @@ last-retrieved decay remain unimplemented.
   the oldest slot by `created_step`.
 - `replace_oldest`: replace the earliest-created slot.
 
-### Version A-Aligned Thread-Aware Write-Back
+### Version A-Aligned Last-Retrieved Thread-Aware Write-Back
 
-Step 3 adds `update_policy=thread_update` and
-`write_back(memory, retrieval_result, metadata=None)`. This policy consumes the
-structured result from the current query and applies:
+Step 3 added `update_policy=thread_update` and
+`write_back(memory, retrieval_result, metadata=None)`. Phase R2 revises this
+Version A-aligned path from historical write-age decay to last-retrieved decay.
+The bank now maintains a retrieval turn counter:
+
+```text
+current_retrieval_step = number of enabled retrieval turns so far
+last_retrieved_age_i = current_retrieval_step - slot_i.last_retrieved_step
+score_i = cosine(query, key_i) * exp(-decay_alpha * last_retrieved_age_i)
+```
+
+Only final selected / returned slots update `last_retrieved_step`. Slots that
+participate in scoring but fail threshold filtering or top-k selection do not
+update `last_retrieved_step`.
+
+The thread-update policy consumes the structured result from the current query
+and applies:
 
 ```text
 if M is empty:
@@ -169,21 +183,24 @@ elif max_score >= threshold:
 elif len(M) < max_slots:
     insert m_t as a new thread
 else:
-    evict the oldest slot and insert m_t as a new thread
+    evict the slot with largest last_retrieved_age and insert m_t as a new thread
 ```
 
 Matched replacement occurs even when unused capacity remains. New-thread
 insertion and capacity eviction are distinct from matched replacement, and the
 decision never uses slot `last_score`. `retrieval_result.bank_step` must match
 the current bank step so that a write-back cannot consume stale slot indices.
+When full-bank new-thread insertion requires eviction, ties on
+`last_retrieved_age` are broken by earlier `created_step` and then lower slot
+index.
 
 In `MemGenModel.generate()`, only the `thread_update` policy uses
 `retrieve_with_context(...)` followed by `write_back(...)`. Retrieved slots
 remain Reasoner-only supports; Weaver still receives only the original current
 context and produces a reasoner-space latent for write-back.
 
-This is a Version A-aligned write-back variant, not Version B. It does not add
-fallback top-1, last-retrieved decay, or retrieved-memory input to Weaver.
+This is a Version A-aligned write-back/retrieval-decay variant, not Version B.
+It does not add fallback top-1 or retrieved-memory input to Weaver.
 Legacy `append`, `replace`, and `replace_oldest` behavior remains on
 `retrieve(...)` plus `write(...)`.
 
@@ -268,7 +285,9 @@ Retrieved memory is never passed into Weaver and never participates in
 The implementation and experiments from Phase 5 through Phase 8A belong to
 this conservative Version A-simple definition. Steps 2 through 4 subsequently
 added the Version A-aligned `thread_update` write-back variant while retaining
-Reasoner-only injection, write-age decay, and no fallback top-1.
+Reasoner-only injection, historical write-age decay, and no fallback top-1.
+Phase R2 later changed only the Version A-aligned decay / full-bank eviction
+mechanism to last-retrieved decay and last-retrieved-age eviction.
 
 ## Version B: Full Retrieval-Augmented Recurrent Latent Update
 
@@ -418,7 +437,8 @@ is not merged into current runtime configuration in Phase 4.
 - Current Version A-simple uses write-age decay, not last-retrieved-turn decay.
 - Current Version A-simple has no fallback top-1.
 - The original Version A-simple policies have no matched-slot thread update;
-  the optional Version A-aligned `thread_update` variant now provides it.
+  the Version A-aligned `thread_update` variant now provides matched write-back
+  and last-retrieved decay.
 - Current Version A-simple is not the full proposed Version B.
 - No multi-sample batch support.
 - No persistence contract for experiment checkpoints.
@@ -439,7 +459,8 @@ Validated on 2026-06-12:
   config subtree is absent.
 - All Weaver/Trigger training paths remain unchanged.
 - Version A-simple and Version A-aligned `thread_update` are present.
-- Current retrieval still uses write-age decay and no fallback top-1.
+- Current Version A-aligned retrieval uses last-retrieved decay and no fallback
+  top-1; Version A-simple historical runs used write-age decay.
 - Version B has not started.
 
 ## Open Questions
@@ -465,8 +486,10 @@ latents remained `[8, 1536]` reasoner-space tensors.
 The real smoke did not observe low-score new-thread insertion or capacity
 eviction. Those branches remain covered by deterministic unit tests. This
 mixed evidence is sufficient for mechanism validation but not for any
-performance claim. Retrieval still uses write-age decay, has no fallback
-top-1, and does not send retrieved memory into Weaver.
+performance claim. At that historical closeout, retrieval still used write-age
+decay, had no fallback top-1, and did not send retrieved memory into Weaver.
+Phase R2 later revised the Version A-aligned path to last-retrieved decay while
+keeping no fallback top-1 and keeping retrieved memory outside Weaver.
 
 ## Phase 8C-alt Controlled Multi-Turn Mechanism Study
 

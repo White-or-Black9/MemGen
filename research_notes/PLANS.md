@@ -304,6 +304,241 @@ Version A-simple 保留作为对照组。
 - no current detailed investigation or adoption design
 - user will investigate them later
 
+### R4-1B：Dataset and Checkpoint Acquisition / Cache
+
+状态：planned。
+
+目标：
+
+- 在任何 TriviaQA evaluation 之前，准备好或获取所需的资源。
+
+输入条件：
+
+- base model `Qwen/Qwen2.5-1.5B-Instruct` 已存在于本地 HF cache 中
+- 所需的 TriviaQA checkpoint（检查点）缺失
+- 所需的 TriviaQA dataset cache（数据集缓存）缺失
+- 所需的 AgentBank triviaqa dataset cache 缺失
+
+范围：
+
+- dataset cache 验证 / 获取规划
+- checkpoint cache 验证 / 部署规划
+- 资产就绪后的离线加载验证
+- 不运行 evaluation
+
+任务：
+
+1. 确认 TriviaQA checkpoint 是公开可下载的，还是需要手动部署 / 权限。
+2. 决定数据集和 checkpoint 的缓存目录策略。
+3. 缓存或部署 `mandarjoshi/trivia_qa`，config
+   `rc.wikipedia.nocontext`，split `validation`。
+4. 缓存或部署 `Solaris99/AgentBank`，config `triviaqa`，split `train`。
+5. 缓存或部署 TriviaQA MemGen checkpoint：
+   `MemGen/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8`。
+6. 验证离线数据集加载。
+7. 验证 checkpoint 路径可读性。
+8. 本阶段不运行 evaluation。
+
+成功标准：
+
+- base model 已验证
+- TriviaQA dataset 可离线加载
+- AgentBank triviaqa 可离线加载
+- checkpoint 路径存在且可读
+- 未运行任何 evaluation
+
+退出条件：
+
+- 资产就绪，或已记录明确的 blocker
+
+### R4-1C：Retrieval Service / Index Configuration
+
+状态：planned。
+
+目标：
+
+- 使 TriviaQA dynamic retrieval endpoint（动态检索端点）可靠可用。
+
+范围：
+
+- Search-R1-compatible retrieval service（检索服务）和 index（索引）的搭建 / 验证
+- endpoint schema 兼容性检查
+- 不运行完整 evaluation
+
+任务：
+
+1. 检查 Search-R1 仓库和 `search_r1/search/retrieval_server.py` 是否存在。
+2. 检查 retriever 运行环境，或创建搭建计划。
+3. 定位或部署 `wiki-18.jsonl`。
+4. 定位或部署 `e5_Flat.index`。
+5. 定位或部署 `intfloat/e5-base-v2`。
+6. 启动或规划 Search-R1 `retrieval_server.py` 的启动流程。
+7. 用 curl 验证 `http://127.0.0.1:8001/retrieve` 可达。
+8. 确认响应 schema 与 `data/utils/retrieval_utils.py` 兼容。
+9. 添加或规划 retrieval failure 的 fail-fast（快速失败）检查。
+10. 本阶段不运行完整 evaluation。
+
+成功标准：
+
+- endpoint 可达
+- curl 返回有效的检索结果
+- 目标运行不会出现静默 retrieval degradation（静默检索降级）
+- index/corpus 路径已文档化
+
+退出条件：
+
+- Search-R1-compatible retrieval service 就绪，或已记录 blocker
+
+### R4-1D：Dynamic Single-Sample Structured Harness
+
+状态：planned。
+
+目标：
+
+- 在运行 baseline 之前，构建一个可信的最小化 dynamic evaluation harness
+  （动态评估脚手架）。
+
+范围：
+
+- 仅限 dynamic TriviaQA sample selection（样本选择）和 structured output
+  （结构化输出）
+- 不改变 memory-bank 方法
+- 不进入 Version B
+- 不启用 fallback top-1（不启用 top-1 兜底）
+- 不让 retrieved memory 进入 Weaver
+
+任务：
+
+1. 为 dynamic TriviaQA 添加 `sample_count=1` 或固定样本选择。
+2. 为 dynamic evaluation 生成结构化 `answer.json`。
+3. 保留 `conversations.txt`。
+4. 记录 sample id。
+5. 记录 question。
+6. 记录 gold answer（标准答案）。
+7. 记录 parsed answer（解析后的答案）。
+8. 如适用，记录 exact match / relaxed match（精确匹配 / 宽松匹配）。
+9. 记录 retrieval calls（检索调用次数）。
+10. 记录 retrieval failures（检索失败）。
+11. 记录是否出现了 `Cannot find corresponding pages.`。
+12. 记录 memory enabled flag。
+13. 记录 batch size。
+14. 记录 checkpoint path。
+15. 记录 config overrides（配置覆盖项）。
+16. 对于启用 memory 的运行，如有 memory trace 则保留之。
+17. 保持 memory-bank 方法不变。
+18. 如合适，为 harness 行为添加测试或 smoke checks（冒烟检查）。
+
+成功标准：
+
+- 单样本 dynamic 运行可确定性执行
+- 结构化输出存在
+- retrieval failure 可见
+- disabled 和 enabled 配置可以复用同一个 harness
+
+退出条件：
+
+- harness 已准备好供 disabled baseline smoke 使用
+
+### R4-1E：Disabled Baseline Smoke
+
+状态：planned。
+
+目标：
+
+- 在测试 memory-bank 启用行为之前，建立一个可信的 disabled baseline
+  （禁用 memory 的基线）。
+
+前置要求：
+
+- R4-1B 资产就绪
+- R4-1C retrieval service 就绪
+- R4-1D harness 就绪
+
+任务：
+
+1. 对 1 个固定的 TriviaQA 样本，以 memory disabled 状态运行。
+2. 使用 `batch_size=1`，以便与后续 enabled memory 路径直接对比。
+3. 记录结构化 `answer.json`。
+4. 记录 `conversations.txt`。
+5. 记录 retrieval 成功 / 失败。
+6. 确认没有 memory bank 被构造或使用。
+7. 确认没有静默 retrieval failure。
+8. 不声称任何性能结果。
+
+成功标准：
+
+- 运行完成
+- retrieval 正常工作
+- 结构化输出存在
+- disabled 路径干净
+- 没有意外的 memory-bank 工件出现
+
+退出条件：
+
+- disabled baseline smoke 通过验收
+
+### R4-1F：Version A-Aligned Enabled Smoke
+
+状态：planned。
+
+目标：
+
+- 对同一个固定的 TriviaQA 样本，以当前 Version A-aligned
+  （当前对齐版 Version A）memory bank 启用状态运行。
+
+前置要求：
+
+- R4-1E disabled baseline 通过验收
+- `batch_size=1`
+- 尽可能使用与 disabled baseline 相同的样本
+- 使用相同的 checkpoint / retrieval service / harness
+
+任务：
+
+1. 启用当前 Version A-aligned memory bank。
+2. 保持 retrieved memory 仅进入 Reasoner（Reasoner-only）。
+3. 确保 retrieved memory 不进入 Weaver。
+4. 确保不启用 fallback top-1（不启用 top-1 兜底）。
+5. 确保 memory bank 为 session-local（会话本地）。
+6. 运行 1 个固定样本。
+7. 记录结构化 `answer.json`。
+8. 记录 `conversations.txt`。
+9. 记录 memory trace 中的 retrieve count。
+10. 记录 memory trace 中的 write count。
+11. 记录 memory trace 中的 `last_retrieved_step`。
+12. 记录 memory trace 中的 `last_retrieved_age`。
+13. 记录 selected slots（被选中的 slot）。
+14. 记录 eviction reason（淘汰原因），如有。
+15. 与 disabled smoke 做定性对比。
+16. 不声称任何性能提升。
+
+成功标准：
+
+- enabled 运行完成
+- memory path 激活且无边界违规
+- `batch_size=1`
+- 结构化输出存在
+- memory trace 确认 Version A-aligned 行为
+
+退出条件：
+
+- enabled smoke 通过验收，或已记录 blocker
+
+### R4 Boundary and Claim Control（共享边界与声明控制）
+
+- R4-1B 至 R4-1F 阶段属于 environment / harness / smoke phases
+  （环境搭建 / 评测脚手架 / 冒烟测试阶段），不是最终 main result phases
+  （主结果阶段）。
+- 目前尚无任何 TriviaQA result。
+- 目前尚无任何 target-task performance gain claim（目标任务性能声明）。
+- Controlled diagnostic subset（受控诊断子集）与 TriviaQA infrastructure
+  计划相互独立。
+- Version B remains deferred（继续推迟）。
+- R4 不包含 fallback top-1（不启用 top-1 兜底）。
+- Retrieved memory 不进入 Weaver。
+- Toy retrieval server（玩具检索服务）的输出，即使被使用，也仅限 smoke-only
+  （仅用于冒烟测试），不能支撑正式的 TriviaQA result 或 performance claim。
+
 ---
 
 ## Phase 8F：TriviaQA Targeted Ablations（TriviaQA 消融实验）

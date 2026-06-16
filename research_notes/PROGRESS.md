@@ -744,3 +744,89 @@ Phase 7 已完成。
   - 没有引入 fallback top-1
   - 没有让 retrieved memory 进入 Weaver
   - 没有进入 Version B
+
+## 2026-06-16 - Phase R4-1A TriviaQA Environment Configuration Preflight
+
+- 状态：`completed`
+- 性质：
+  - environment preflight only
+  - 不是实验
+  - 没有运行 TriviaQA disabled baseline
+  - 没有运行 Version A-aligned enabled smoke
+  - 没有产生 TriviaQA result
+  - 没有 target-task performance claim
+- 仓库状态：
+  - branch `rlm-memory-bank`
+  - preflight HEAD `622d385`
+  - `git status` clean
+  - R4-0A plan 已提交：
+    `622d385 docs: record TriviaQA-first evaluation plan`
+- Config / script 结论：
+  - `configs/latent_memory/triviaqa.yaml` 使用 base model
+    `Qwen/Qwen2.5-1.5B-Instruct`
+  - YAML 中 `model.load_model_path: null`
+  - `scripts/eval/qwen2_5_triviaqa.sh` 预期 checkpoint：
+    `MemGen/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8`
+  - 官方 dynamic path 写 `evaluate/conversations.txt`
+  - 官方 dynamic path 没有可信 structured `answer.json`
+  - 官方 dynamic path 没有可信 `sample_count=1` dynamic harness
+- Local assets:
+  - base model `Qwen/Qwen2.5-1.5B-Instruct` exists in local HF cache
+  - TriviaQA checkpoint missing
+  - `mandarjoshi/trivia_qa` cache missing
+  - `Solaris99/AgentBank` triviaqa cache missing
+  - Search-R1 / Wikipedia index assets not found / uncertain
+- Retrieval preflight:
+  - MemGen TriviaQA dynamic env does not implement a full retriever internally
+  - MemGen calls local endpoint `http://127.0.0.1:8001/retrieve`
+  - no listener was observed on port `8001`
+  - curl to `/retrieve` failed to connect
+  - retrieval endpoint is unavailable
+  - retrieval failure can silently degrade into
+    `Cannot find corresponding pages.`
+- Retrieval-service route understanding:
+  - original project points users to Search-R1 for retriever environment setup
+  - intended formal route is:
+    MemGen dynamic env -> local `/retrieve` endpoint -> Search-R1
+    `retrieval_server.py` -> FAISS index + Wikipedia corpus
+  - Search-R1 launch is expected to use `e5_Flat.index`, `wiki-18.jsonl`,
+    `retriever_name=e5`, `retriever_model=intfloat/e5-base-v2`, and optionally
+    `--faiss_gpu`
+  - a toy retrieval server may be useful only for engineering smoke / harness
+    debugging and cannot support formal TriviaQA results
+- Current go/no-go:
+  - No-Go for TriviaQA disabled baseline
+  - No-Go for Version A-aligned enabled smoke
+  - blockers are infrastructure / environment blockers, not Version A-aligned
+    mechanism failures
+  - no performance claim is supported
+
+## 2026-06-16 - Phase R4-1Plan TriviaQA Infra Preflight and Detailed Execution Plan
+
+- 状态：`completed`
+- 范围：
+  - record R4-1A preflight results in notes
+  - record current TriviaQA infrastructure blockers
+  - record Search-R1-compatible retrieval-service decision
+  - plan R4-1B through R4-1F
+  - no model code changes
+  - no tests changes
+  - no dataset or checkpoint download
+  - no retrieval service startup
+  - no dynamic harness implementation
+  - no toy retrieval server implementation
+- Next planned phases:
+  - R4-1B: Dataset and Checkpoint Acquisition / Cache
+  - R4-1C: Retrieval Service / Index Configuration
+  - R4-1D: Dynamic Single-Sample Structured Harness
+  - R4-1E: Disabled Baseline Smoke
+  - R4-1F: Version A-aligned Enabled Smoke
+- Boundary:
+  - R4-1B through R4-1F are environment / harness / smoke phases, not main
+    result phases
+  - no TriviaQA result exists yet
+  - no target-task performance gain claim exists yet
+  - controlled diagnostic subset remains separate from this TriviaQA infra plan
+  - Version B remains deferred
+  - no fallback top-1
+  - retrieved memory does not enter Weaver

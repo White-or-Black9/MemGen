@@ -43,6 +43,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0034 | 2026-06-13 | accepted | Freeze strict and deterministic relaxed scoring before controlled group comparison |
 | DEC-0035 | 2026-06-16 | accepted | Revise Version A-aligned decay and full-bank eviction to last-retrieved semantics without entering Version B |
 | DEC-0036 | 2026-06-16 | accepted | Use TriviaQA-first evaluation with a controlled diagnostic subset |
+| DEC-0037 | 2026-06-16 | accepted | Use Search-R1-compatible retrieval service for formal TriviaQA evaluation |
 
 ## Decision Template
 
@@ -913,3 +914,38 @@ IDs and append superseding decisions rather than silently rewriting history.
   - the controlled diagnostic subset is mechanism evidence only
   - MemoryAgentBench and LongMemEval are not current implementation tasks
   - no Version B work belongs to this stage
+
+### DEC-0037: Use Search-R1-Compatible Retrieval Service for Formal TriviaQA Evaluation
+
+- Date: 2026-06-16
+- Status: accepted
+- Context: R4-1A confirmed that MemGen TriviaQA dynamic evaluation expects a
+  local HTTP retrieval endpoint but does not implement a full retriever inside
+  the MemGen repository. The endpoint was unavailable during preflight.
+- Decision:
+  - formal TriviaQA evaluation should use the original intended
+    Search-R1-compatible local retrieval service when possible
+  - the expected endpoint is `http://127.0.0.1:8001/retrieve`
+  - the service should be backed by a Wikipedia corpus and index, such as
+    Search-R1 `search_r1/search/retrieval_server.py` with `e5_Flat.index`,
+    `wiki-18.jsonl`, `retriever_name=e5`, and
+    `retriever_model=intfloat/e5-base-v2`
+  - optional `--faiss_gpu` remains a retrieval-service deployment detail, not a
+    MemGen method change
+  - a toy retrieval server is allowed only for engineering smoke or harness
+    debugging
+  - toy retrieval output must not be used for a formal TriviaQA result or
+    performance claim
+- Rationale:
+  - the MemGen README points users to Search-R1 for retriever environment setup
+  - the current MemGen TriviaQA environment expects a local retrieval endpoint
+  - formal comparability requires avoiding arbitrary custom retrieval behavior
+  - silent retrieval failure can produce misleading degraded runs through
+    `Cannot find corresponding pages.`
+- Consequences:
+  - R4-1C should first check Search-R1 compatibility and assets
+  - if Search-R1 assets are unavailable, record a blocker rather than inventing
+    a formal retriever
+  - any toy server must be clearly labeled as smoke-only
+  - no Version B work, fallback top-1, or retrieved-memory-to-Weaver behavior is
+    introduced by this retrieval-service decision

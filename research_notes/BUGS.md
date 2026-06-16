@@ -29,12 +29,46 @@ blockers for the next TriviaQA stage:
 - official TriviaQA checkpoint is missing or not staged
 - TriviaQA dataset cache is missing or not staged
 - AgentBank TriviaQA cache is missing or not staged
-- retrieval service at `127.0.0.1:8001` is not verified
-- Search-R1 / Wikipedia index assets are not verified
+- retrieval service at `127.0.0.1:8001` is unavailable / not verified
+- Search-R1 / Wikipedia index assets are missing or not verified
 - the dynamic single-sample structured harness is missing or incomplete
 - the official dynamic path does not yet provide a trusted structured
   `answer.json` workflow for the intended smoke protocol
 - silent `Cannot find corresponding pages` fallback remains a run-quality risk
+
+### R4 TriviaQA Infrastructure Blockers
+
+- Date recorded: 2026-06-16
+- Status: `open`
+- Classification: infrastructure / environment blockers, not memory-bank code
+  bugs
+- Evidence source: Phase R4-1A TriviaQA environment preflight
+- Blockers:
+  - TriviaQA checkpoint
+    `MemGen/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8`
+    is missing
+  - `mandarjoshi/trivia_qa`, config `rc.wikipedia.nocontext`, split
+    `validation` is not cached
+  - `Solaris99/AgentBank`, config `triviaqa`, split `train` is not cached
+  - retrieval endpoint `http://127.0.0.1:8001/retrieve` is unavailable; no
+    listener was observed on port `8001` and curl could not connect
+  - Search-R1 / Wikipedia index assets, including `e5_Flat.index` and
+    `wiki-18.jsonl`, are missing or unverified
+  - dynamic single-sample structured harness is missing
+  - dynamic structured `answer.json` is missing; the official dynamic path
+    writes `conversations.txt`
+  - retrieval failure can silently degrade into
+    `Cannot find corresponding pages.`
+- Impact:
+  - these blockers prevent TriviaQA disabled baseline smoke
+  - these blockers also prevent Version A-aligned enabled smoke
+  - these blockers do not constitute Version A-aligned mechanism failure
+  - these blockers do not support any target-task performance claim
+- Required resolution:
+  - acquire or stage the datasets and checkpoint
+  - configure and verify a Search-R1-compatible retrieval service and index
+  - build a dynamic single-sample structured harness with visible retrieval
+    failure accounting before smoke runs
 
 ## Recorded Bugs
 

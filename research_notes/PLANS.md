@@ -419,7 +419,7 @@ Decision after R4-1C:
 
 ### R4-1D：Dynamic Single-Sample Structured Harness
 
-状态：design in progress.
+状态：implemented.
 
 目标：
 
@@ -468,6 +468,27 @@ Decision after R4-1C:
 退出条件：
 
 - harness 已准备好供 disabled baseline smoke 使用
+
+R4-1D implementation result:
+
+- added `scripts/eval/r4_triviaqa_dynamic_harness.py`
+- added `tests/test_r4_triviaqa_dynamic_harness.py`
+- CLI supports `--cfg-path`, `--checkpoint-path`, `--output-dir`,
+  `--sample-index`, `--sample-count`, `--batch-size`, `--memory-mode`,
+  `--require-retrieval-ok`, `--retrieval-endpoint`, `--retrieval-topk`,
+  `--max-response-length`, `--temperature`, `--seed`, `--dry-run`, and
+  `--preflight-only`
+- `batch_size != 1` and `sample_count != 1` fail fast
+- `memory_mode=disabled` keeps memory disabled
+- `memory_mode=version_a_aligned` enables the current Version A-aligned
+  `thread_update` memory-bank configuration without changing memory-bank logic
+- structured `answer.json` records sample identity, question, gold answers,
+  conversation, final response, strict parsed answer, retrieval accounting,
+  run metadata, `memory_bank_debug`, `valid_run`, and `invalid_reason`
+- `summary.json` records sample count, valid / invalid run counts, and
+  retrieval-blocked count
+- no formal experiment, disabled baseline, or enabled smoke was run during
+  implementation
 
 ### R4-1E：Disabled Baseline Smoke
 

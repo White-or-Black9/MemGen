@@ -28,14 +28,13 @@ base model, TriviaQA dataset cache, AgentBank TriviaQA cache, and TriviaQA
 checkpoint are now ready. See the R4-1C update below for the current
 unresolved retrieval-side blockers.
 
-Remaining target-task and infrastructure blockers for the next TriviaQA stage:
+Remaining target-task and infrastructure blockers for the next TriviaQA smoke
+stage:
 
 - retrieval service at `127.0.0.1:8001` is unavailable / not verified
 - Search-R1 / Wikipedia index assets are missing or not verified
-- the dynamic single-sample structured harness is missing or incomplete
-- the official dynamic path does not yet provide a trusted structured
-  `answer.json` workflow for the intended smoke protocol
 - silent `Cannot find corresponding pages` fallback remains a run-quality risk
+  that the R4-1D harness now records explicitly
 
 ### R4 TriviaQA Infrastructure Blockers
 
@@ -49,11 +48,8 @@ Remaining target-task and infrastructure blockers for the next TriviaQA stage:
     listener was observed on port `8001` and curl could not connect
   - Search-R1 / Wikipedia index assets, including `e5_Flat.index` and
     `wiki-18.jsonl`, are missing or unverified
-  - dynamic single-sample structured harness is missing
-  - dynamic structured `answer.json` is missing; the official dynamic path
-    writes `conversations.txt`
   - retrieval failure can silently degrade into
-    `Cannot find corresponding pages.`
+    `Cannot find corresponding pages.` on the official dynamic path
 - Impact:
   - these blockers prevent TriviaQA disabled baseline smoke
   - these blockers also prevent Version A-aligned enabled smoke
@@ -61,8 +57,8 @@ Remaining target-task and infrastructure blockers for the next TriviaQA stage:
   - these blockers do not support any target-task performance claim
 - Required resolution:
   - configure and verify a Search-R1-compatible retrieval service and index
-  - build a dynamic single-sample structured harness with visible retrieval
-    failure accounting before smoke runs
+  - use the R4-1D dynamic single-sample structured harness with visible
+    retrieval failure accounting before smoke runs
 
 ### R4-1C Retrieval Service / Index Check Update
 
@@ -102,6 +98,34 @@ Remaining target-task and infrastructure blockers for the next TriviaQA stage:
   - add or use harness-level retrieval failure accounting before any smoke run
   - keep toy retrieval server outputs smoke-only and out of formal TriviaQA
     results
+
+### R4-1D Dynamic Single-Sample Harness Update
+
+- Date recorded: 2026-06-17
+- Status: `resolved for harness availability`
+- Classification: infrastructure / harness update, not memory-bank code bug
+- Evidence source: Phase R4-1D implementation
+- Resolved:
+  - dynamic single-sample structured harness now exists at
+    `scripts/eval/r4_triviaqa_dynamic_harness.py`
+  - structured `answer.json` support now exists for the intended single-sample
+    dynamic smoke protocol
+  - retrieval failure accounting now records call count, success count,
+    failure count, exception details, and
+    `Cannot find corresponding pages.` detection
+  - top-level `valid_run` and `invalid_reason` are now part of the structured
+    record
+- Still blocked:
+  - formal retrieval remains blocked until Search-R1-compatible service,
+    Wikipedia corpus, FAISS index, and retriever model are available
+  - disabled baseline smoke remains blocked until retrieval service / index is
+    ready
+  - Version A-aligned enabled smoke remains blocked until disabled baseline
+    path is stable
+- Boundary:
+  - no formal TriviaQA result exists
+  - no target-task performance claim exists
+  - no toy retrieval server result is valid for formal reporting
 
 ## Recorded Bugs
 

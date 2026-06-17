@@ -892,3 +892,49 @@ Phase 7 已完成。
   - retrieved memory does not enter Weaver
   - memory-bank mechanism unchanged
   - no commit or push performed
+
+## 2026-06-17 - Phase R4-1D Dynamic Single-Sample Structured Harness
+
+- 状态：`implemented`
+- 性质：
+  - harness implementation only
+  - no formal TriviaQA experiment was run
+  - no TriviaQA disabled baseline was run
+  - no Version A-aligned enabled smoke was run
+  - no retrieval service was started
+  - no dataset, checkpoint, Search-R1 repo, index, or corpus was downloaded
+  - no target-task performance claim was made
+- Implemented:
+  - added `scripts/eval/r4_triviaqa_dynamic_harness.py`
+  - added `tests/test_r4_triviaqa_dynamic_harness.py`
+  - harness enforces `sample_count=1` and `batch_size=1`
+  - harness supports `memory_mode=disabled` and
+    `memory_mode=version_a_aligned`
+  - harness writes structured `evaluate/answer.json`
+  - harness preserves `evaluate/conversations.txt`
+  - harness writes `summary.json`, `run_config.json`, and
+    `memory_trace.json`
+  - harness records retrieval endpoint, top-k, call count, success count,
+    failure count, exception details, and
+    `Cannot find corresponding pages.` detection
+  - harness records top-level `valid_run` and `invalid_reason`
+  - strict parser extracts `<answer>...</answer>` and does not use gold-guided
+    fuzzy matching or an LLM judge
+  - enabled runs preserve `memory_bank_debug` when available; missing memory
+    trace is recorded as `null`
+- Validation:
+  - target unit tests passed with standard-library `unittest`
+  - preflight-only CLI artifact write completed under `/tmp` without loading a
+    model, dataset, checkpoint, or retrieval service
+  - `py_compile` passed for the new harness and tests
+- Current blocker:
+  - formal TriviaQA retrieval remains blocked until Search-R1-compatible
+    retrieval service, Wikipedia corpus, FAISS index, and retriever model are
+    available and verified
+- Boundary:
+  - no Version B
+  - no fallback top-1
+  - retrieved memory does not enter Weaver
+  - memory-bank mechanism unchanged
+  - no training code changed
+  - no commit or push performed

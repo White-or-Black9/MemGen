@@ -23,12 +23,13 @@ Do not delete resolved entries.
 
 ## Current Research / Infrastructure Blockers
 
-These are not R2 code bugs. They are current target-task and infrastructure
-blockers for the next TriviaQA stage:
+These are not R2 code bugs. This section is partially resolved:
+base model, TriviaQA dataset cache, AgentBank TriviaQA cache, and TriviaQA
+checkpoint are now ready. See the R4-1C update below for the current
+unresolved retrieval-side blockers.
 
-- official TriviaQA checkpoint is missing or not staged
-- TriviaQA dataset cache is missing or not staged
-- AgentBank TriviaQA cache is missing or not staged
+Remaining target-task and infrastructure blockers for the next TriviaQA stage:
+
 - retrieval service at `127.0.0.1:8001` is unavailable / not verified
 - Search-R1 / Wikipedia index assets are missing or not verified
 - the dynamic single-sample structured harness is missing or incomplete
@@ -44,12 +45,6 @@ blockers for the next TriviaQA stage:
   bugs
 - Evidence source: Phase R4-1A TriviaQA environment preflight
 - Blockers:
-  - TriviaQA checkpoint
-    `MemGen/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8`
-    is missing
-  - `mandarjoshi/trivia_qa`, config `rc.wikipedia.nocontext`, split
-    `validation` is not cached
-  - `Solaris99/AgentBank`, config `triviaqa`, split `train` is not cached
   - retrieval endpoint `http://127.0.0.1:8001/retrieve` is unavailable; no
     listener was observed on port `8001` and curl could not connect
   - Search-R1 / Wikipedia index assets, including `e5_Flat.index` and
@@ -65,10 +60,48 @@ blockers for the next TriviaQA stage:
   - these blockers do not constitute Version A-aligned mechanism failure
   - these blockers do not support any target-task performance claim
 - Required resolution:
-  - acquire or stage the datasets and checkpoint
   - configure and verify a Search-R1-compatible retrieval service and index
   - build a dynamic single-sample structured harness with visible retrieval
     failure accounting before smoke runs
+
+### R4-1C Retrieval Service / Index Check Update
+
+- Date recorded: 2026-06-17
+- Status: `open`
+- Classification: infrastructure / environment blocker, not memory-bank code
+  bug
+- Evidence source: Phase R4-1C retrieval service / index configuration check
+- Resolved from earlier R4 blockers:
+  - base model is ready
+  - TriviaQA dataset cache is ready and offline verified
+  - AgentBank triviaqa dataset cache is ready and offline verified
+  - TriviaQA checkpoint is ready from `Kana-s/MemGen`
+- Remaining formal retrieval blockers:
+  - Search-R1 repo / server is not present locally
+  - `search_r1/search/retrieval_server.py` is not present locally
+  - `retrieval_launch.sh` is not present locally
+  - no `searchr1` / retriever conda env was found
+  - `faiss` is missing from the validated `memgen` environment
+  - `pyserini` is missing from the validated `memgen` environment
+  - `e5_Flat.index` is missing
+  - `wiki-18.jsonl` is missing
+  - local `intfloat/e5-base-v2` cache is missing
+  - `http://127.0.0.1:8001/retrieve` is not running
+- Endpoint contract that still needs a real service:
+  - request:
+    `{"queries": [...], "topk": 3, "return_scores": true}`
+  - response:
+    `{"result": [[{"document": {"contents": "Title\nBody"}, "score": ...}]]}`
+- Risk:
+  - silent retrieval degradation remains possible because
+    `data/triviaqa/env.py` catches retrieval exceptions and returns
+    `Cannot find corresponding pages.`
+- Required resolution:
+  - set up a Search-R1-compatible retrieval server and verified Wikipedia
+    corpus / index
+  - add or use harness-level retrieval failure accounting before any smoke run
+  - keep toy retrieval server outputs smoke-only and out of formal TriviaQA
+    results
 
 ## Recorded Bugs
 

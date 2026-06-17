@@ -353,7 +353,7 @@ Version A-simple 保留作为对照组。
 
 ### R4-1C：Retrieval Service / Index Configuration
 
-状态：planned。
+状态：completed as configuration check; formal retrieval setup remains blocked.
 
 目标：
 
@@ -389,9 +389,37 @@ Version A-simple 保留作为对照组。
 
 - Search-R1-compatible retrieval service 就绪，或已记录 blocker
 
+R4-1C check result:
+
+- MemGen expects `http://127.0.0.1:8001/retrieve`
+- request payload is
+  `{"queries": [...], "topk": 3, "return_scores": true}`
+- expected response is
+  `{"result": [[{"document": {"contents": "Title\nBody"}, "score": ...}]]}`
+- `data/triviaqa/env.py` still silently converts retrieval exceptions into
+  `Cannot find corresponding pages.`
+- endpoint and top-k are hard-coded in `data/utils/retrieval_utils.py`
+- Search-R1 repo / server, `retrieval_server.py`, and `retrieval_launch.sh`
+  were not found locally
+- no `searchr1` / retriever conda env was found
+- `faiss`, `pyserini`, `e5_Flat.index`, `wiki-18.jsonl`,
+  `intfloat/e5-base-v2`, and the `8001` endpoint are missing / unavailable
+- upstream Search-R1 schema appears compatible, except the default upstream
+  port is `8000` while MemGen expects `8001`
+- formal TriviaQA retrieval remains blocked until Search-R1-compatible service,
+  corpus, index, and retriever model are available
+- toy retrieval server remains smoke-only and cannot support formal TriviaQA
+  results
+
+Decision after R4-1C:
+
+- continue formal Search-R1 setup later
+- proceed to R4-1D harness design because structured output and retrieval
+  failure accounting are required regardless of retrieval-service readiness
+
 ### R4-1D：Dynamic Single-Sample Structured Harness
 
-状态：planned。
+状态：design in progress.
 
 目标：
 
@@ -420,13 +448,15 @@ Version A-simple 保留作为对照组。
 9. 记录 retrieval calls（检索调用次数）。
 10. 记录 retrieval failures（检索失败）。
 11. 记录是否出现了 `Cannot find corresponding pages.`。
-12. 记录 memory enabled flag。
-13. 记录 batch size。
-14. 记录 checkpoint path。
-15. 记录 config overrides（配置覆盖项）。
-16. 对于启用 memory 的运行，如有 memory trace 则保留之。
-17. 保持 memory-bank 方法不变。
-18. 如合适，为 harness 行为添加测试或 smoke checks（冒烟检查）。
+12. 记录 `valid_run: bool`。
+13. 记录 `invalid_reason: str | null`。
+14. 记录 memory enabled flag。
+15. 记录 batch size。
+16. 记录 checkpoint path。
+17. 记录 config overrides（配置覆盖项）。
+18. 对于启用 memory 的运行，如有 memory trace 则保留之。
+19. 保持 memory-bank 方法不变。
+20. 如合适，为 harness 行为添加测试或 smoke checks（冒烟检查）。
 
 成功标准：
 

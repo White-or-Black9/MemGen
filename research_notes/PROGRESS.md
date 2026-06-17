@@ -830,3 +830,65 @@ Phase 7 已完成。
   - Version B remains deferred
   - no fallback top-1
   - retrieved memory does not enter Weaver
+
+## 2026-06-17 - Phase R4-1C Retrieval Service / Index Configuration Check
+
+- 状态：`completed`
+- 性质：
+  - retrieval environment / configuration check only
+  - no retrieval service was started
+  - no large index or corpus was downloaded
+  - no formal experiment was run
+  - no TriviaQA disabled baseline was run
+  - no Version A-aligned enabled smoke was run
+  - no target-task performance claim was made
+- R4-1B carry-forward:
+  - base model `Qwen/Qwen2.5-1.5B-Instruct` ready
+  - `mandarjoshi/trivia_qa`, config `rc.wikipedia.nocontext`, split
+    `validation` ready and offline verified
+  - `Solaris99/AgentBank`, config `triviaqa`, split `train` ready and offline
+    verified
+  - TriviaQA checkpoint ready at:
+    `/home/baishilong/.cache/huggingface/hub/models--Kana-s--MemGen/snapshots/269d9b1741130b94fffa410cdaa3d4bc74081a7f/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8/model`
+- MemGen retrieval client contract:
+  - endpoint: `http://127.0.0.1:8001/retrieve`
+  - request payload:
+    `{"queries": [...], "topk": 3, "return_scores": true}`
+  - expected response shape:
+    `{"result": [[{"document": {"contents": "Title\nBody"}, "score": ...}]]}`
+  - `data/triviaqa/env.py` catches retrieval exceptions and returns
+    `Cannot find corresponding pages.`
+  - endpoint and top-k are currently hard-coded in
+    `data/utils/retrieval_utils.py`
+- R4-1C findings:
+  - Search-R1 repo / server not found locally
+  - `search_r1/search/retrieval_server.py` not found locally
+  - `retrieval_launch.sh` not found locally
+  - no `searchr1` / retriever conda env found
+  - `faiss` missing from the validated `memgen` environment
+  - `pyserini` missing from the validated `memgen` environment
+  - `e5_Flat.index` not found
+  - `wiki-18.jsonl` not found
+  - local `intfloat/e5-base-v2` cache not found
+  - `127.0.0.1:8001` endpoint not running
+  - upstream Search-R1 `/retrieve` schema appears compatible with MemGen's
+    payload / response expectations, but upstream default port is `8000` while
+    MemGen expects `8001`
+- Current blocker:
+  - formal TriviaQA retrieval remains blocked until a Search-R1-compatible
+    retrieval service, Wikipedia corpus, FAISS index, and retriever model are
+    available and verified
+  - silent fallback risk remains because retrieval failures can become
+    `Cannot find corresponding pages.`
+- Decision / transition:
+  - continue formal Search-R1 setup later
+  - proceed to R4-1D dynamic single-sample structured harness design because
+    the harness is needed regardless of retrieval-service readiness
+  - any toy retrieval server remains smoke-only and must not be used for a
+    formal TriviaQA result or performance claim
+- Boundary:
+  - no Version B
+  - no fallback top-1
+  - retrieved memory does not enter Weaver
+  - memory-bank mechanism unchanged
+  - no commit or push performed

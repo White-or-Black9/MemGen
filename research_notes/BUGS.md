@@ -45,13 +45,24 @@ Remaining caveats / watchlist:
 - silent `Cannot find corresponding pages` fallback remains a run-quality risk
   outside the structured R4 harness accounting
 - duplicate system prompt appears in disabled, Version A, and diagnostic
-  conversation artifacts
+  conversation artifacts (all R4 runs)
 - `answer.json` is JSONL-style and must be read line by line
 - Reasoner-only injection is not directly asserted in R4 artifacts
-- default threshold `0.7` did not trigger non-empty retrieved latent memory on
-  sample `0`
-- diagnostic threshold `0.01` must not be treated as a formal setting or
-  performance evidence
+  (artifacts show memory retrieval/write-back but not a separate "injected" flag)
+- default threshold `0.7` does not trigger non-empty retrieved latent memory on
+  TriviaQA; mean decayed-score 0.036, max 0.054
+- diagnostic threshold `0.01` and calibrated `0.04` must not be treated as
+  formal settings or performance evidence
+- threshold comment in config says "cosine similarity threshold" but
+  implementation compares against decayed retrieval score (DEC-0050)
+- memory timing caveat: first write occurs before Search-R1 evidence in
+  context; retrieved latent may amplify query entity salience rather than
+  evidence-grounded answers (DEC-0047)
+- threshold-only fix appears incomplete given pre-evidence write timing
+  (DEC-0047)
+- all R4 reward means (disabled 0.60/0.575, Version A 0.55/0.600) are
+  exploratory only, not benchmark evidence
+- no formal TriviaQA result exists
 
 ### R4 TriviaQA Infrastructure Blockers
 

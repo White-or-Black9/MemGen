@@ -5,8 +5,9 @@
 - Accepted formal results: Phase 0-7.
 - Historical / exploratory records: Phase 8A GSM8K pilot, Phase 8C-alt
   controlled mechanism study, Phase 8D-0 / R4-1A infrastructure discovery, R4
-  Search-R1 / TriviaQA infrastructure validation smokes, and Phase R2 / R2-fix
-  mechanism revisions.
+  Search-R1 / TriviaQA full pipeline (infrastructure validation + threshold
+  calibration + held-out exploratory comparison + case studies), and Phase R2 /
+  R2-fix mechanism revisions.
 - Current mechanism definition:
   - Reasoner-only retrieved-memory injection.
   - Retrieved memory does not enter Weaver.
@@ -15,29 +16,51 @@
   - Enabled memory requires `batch_size=1`.
   - Retrieval uses last-retrieved decay.
   - No fallback top-1.
-- Current R4 state: Search-R1 / TriviaQA infrastructure validation is complete
-  with caveats. Disabled-memory and Version A-aligned one-sample dynamic smokes
-  passed with live retrieval, and a diagnostic low-threshold run exercised
-  non-empty retrieved latent memory.
+- Current R4 state:
+  - Infrastructure validation: complete with caveats.
+  - Threshold calibration: complete.
+    - default `threshold=0.7` is inappropriate for TriviaQA scale
+      (mean decayed-score 0.036, max 0.054)
+    - `threshold=0.04` is a first calibrated candidate (score-based, not
+      reward)
+  - Held-out exploratory comparison (samples 20..79, threshold fixed at 0.04):
+    - disabled 35/60, Version A t=0.04 35/60 — net gain 0
+    - 1 rescue (sample 53), 1 regression (sample 21)
+    - effect fragile and sample-dependent
+  - Key mechanism caveat: pre-evidence memory write timing
+    - first insert occurs before Search-R1 evidence in context
+    - retrieved latent may amplify query entity salience rather than
+      evidence-grounded answer
+  - Threshold comment caveat: config comment says "cosine similarity
+    threshold" but implementation uses decayed retrieval score
 - Remaining caveats:
-  - these are infrastructure / path-coverage smokes, not performance results
+  - all R4 reward means are exploratory only, not benchmark evidence
   - duplicate system prompt appears in conversation artifacts
-  - default `threshold=0.7` did not trigger non-empty retrieved latent memory on
-    sample `0`
-  - diagnostic `threshold=0.01` is not a formal setting
+  - `answer.json` uses JSONL format
+  - no direct artifact-level Reasoner-only injection assertion
+  - threshold=0.04 overrides were in-memory diagnostics only
+  - default threshold 0.7 incompatible with TriviaQA decayed-score scale
+  - memory timing issue (pre-evidence write) may confound threshold-only fixes
 - Version B status: not started and blocked until target-task evidence and a
   separate approval justify it.
 
 ## Current Next Step（当前下一步）
 
-1. Make the next experimental decision before any larger TriviaQA run:
-   keep default `threshold=0.7` and search for naturally matching samples, or
-   design a threshold calibration / ablation plan.
-2. If scaling is approved later, preserve the existing R4 harness constraints:
-   explicit Search-R1 endpoint override, structured retrieval accounting,
-   `batch_size=1` for enabled memory, and no performance claim from smoke-only
-   runs.
-3. Keep Version B blocked until a separate explicit decision.
+1. R4 infrastructure validation and threshold calibration are complete with
+   caveats.
+2. Do NOT immediately run larger benchmarks, tune thresholds, or implement
+   pipeline timing constraints.
+3. Primary next step: read-only case study comparing rescue sample 53
+   (Seymour Hersh / My Lai massacre) against harmful sample 21 (Gangsta's
+   Paradise / Dangerous Minds).
+   - Goal: understand when memory helps vs hurts.
+   - Determine whether memory is acting as: useful latent prior,
+     evidence-grounded clue, query-salience amplifier, or noisy perturbation.
+4. After mechanism analysis, possible variants include:
+   evidence-grounded memory only, suppress pre-evidence memory write,
+   retrieve only evidence-grounded slots, answer-stage verification/gating,
+   or threshold ablation informed by timing/content understanding.
+5. Version B remains deferred until a separate explicit decision.
 
 ---
 

@@ -1148,3 +1148,123 @@ IDs and append superseding decisions rather than silently rewriting history.
   - `EXP-20260618-002`
   - `EXP-20260618-003`
   - `EXP-20260618-004`
+
+### DEC-0044: LatentMemoryBank Scoring / Recency Semantics Audit PASS
+
+- Date: 2026-06-18
+- Status: accepted
+- Context: Read-only audit of `memgen/model/latent_memory_bank.py`
+- Audit result:
+  - active retrieval path matches intended last-retrieved-age design
+  - score formula: `similarity * exp(-decay_alpha * age)` where
+    `age = max(0, retrieval_step - last_retrieved_step)`
+  - `_retrieval_step` is enabled retrieval-turn counter
+  - `_step` is successful write count, used for legacy/stale checks only
+  - `access_count` not used in scoring
+  - thread update eviction: largest last-retrieved age
+  - existing tests cover key behaviors
+- Caveat: config comment calls threshold "cosine similarity threshold"
+  but actual comparison is against decayed retrieval score
+  (terminology/comment mismatch, not functional)
+- Consequences: foundation semantics confirmed for all R4 experiments
+
+### DEC-0045: Default Threshold 0.7 Not Appropriate for TriviaQA Decayed-Score Scale
+
+- Date: 2026-06-18
+- Status: accepted
+- Context: 20-sample threshold calibration score scan (EXP-20260618-007)
+- Score distribution: mean 0.036, max 0.054, median 0.037
+- Default threshold 0.7 is ~13× higher than mean score
+- 0/20 samples naturally triggered at default threshold
+- Decision:
+  - confirm default `threshold=0.7` is inappropriate for TriviaQA scale
+  - adopt `threshold=0.04` as first calibrated candidate (score-based, not reward)
+  - no optimal threshold claim
+- Caveats:
+  - no reward inspection was used to select this threshold
+  - threshold 0.04 gives moderate ~40% trigger rate
+  - future threshold changes require explicit decisions
+
+### DEC-0046: Threshold Overrides Are In-Memory Diagnostics Only
+
+- Date: 2026-06-18
+- Status: accepted
+- Context: All threshold=0.04 experiments (EXP-20260618-008 through 013)
+- Override mechanism: in-memory harness override only
+- No source files or config files modified
+- Original `configs/latent_memory/triviaqa.yaml` untouched
+- Decision: mark threshold overrides as diagnostic instrumentation, not
+  production configuration changes
+- Rationale: preserves audit trail, distinguishes permanent config from
+  calibration diagnostics
+
+### DEC-0047: Memory Timing Is the Most Important Mechanism Caveat
+
+- Date: 2026-06-18
+- Status: accepted
+- Context: Sample 21 regression case study (EXP-20260618-010) and triggered
+  audit (EXP-20260618-011)
+- Finding:
+  - first memory write occurs during initial generation turn, before
+    Search-R1 evidence is appended to context
+  - retrieved latent from first write is seeded from pre-evidence
+    question/query context only
+  - this pre-evidence latent is later retrieved during evidence-grounded
+    answer generation
+- Hypothesis: retrieved latent can amplify query entity salience rather
+  than evidence-grounded answer content
+- Decision:
+  - record memory timing as most important mechanism caveat
+  - threshold-only fix appears incomplete
+  - mechanism analysis (sample 21 vs 53) should precede pipeline changes
+- Consequences: understanding timing/content is prerequisite for any
+  further threshold, architecture, or pipeline modification
+
+### DEC-0048: Exploratory Results Mixed; Claim Neither Improvement Nor Failure
+
+- Date: 2026-06-18
+- Status: accepted
+- Context: Combined held-out analysis (EXP-20260618-013)
+- Result: disabled 35/60, Version A t=0.04 35/60; net gain 0
+  - rescue: 1 (sample 53), regression: 1 (sample 21)
+- Decision:
+  - explicitly claim neither improvement nor failure for Version A t=0.04
+  - current evidence shows mixed, fragile, sample-dependent behavior
+  - all reward means are exploratory only
+- Not benchmark evidence for or against latent memory
+
+### DEC-0049: Next Step Is Mechanism Analysis, Not Scaling
+
+- Date: 2026-06-18
+- Status: accepted
+- Context: R4 has produced calibration, behavior validation, comparison,
+  and case studies; net effect neutral
+- Decision:
+  - primary next step: read-only case study comparing rescue sample 53
+    against harmful sample 21
+  - goal: understand when memory helps vs hurts
+  - defer: larger benchmarks, threshold tuning, pipeline modifications
+  - possible later variants after mechanism understanding:
+    evidence-grounded memory, suppress pre-evidence writes,
+    answer-stage verification/gating
+  - Version B remains deferred
+
+### DEC-0050: Threshold Comment Terminology Needs Correction
+
+- Date: 2026-06-18
+- Status: accepted (note only; no code change yet)
+- Context: LatentMemoryBank audit (DEC-0044)
+- Issue: config comment says "Cosine similarity threshold for retrieval"
+- Reality: threshold applied to decayed retrieval score
+- Correct: "Decayed retrieval score threshold"
+- Decision: document as known terminology mismatch; fix in future code-only PR
+- No functional impact; purely documentation accuracy
+
+### DEC-0051: Version B Remains Deferred
+
+- Date: 2026-06-18
+- Status: reaffirmed from DEC-0043/DEC-0049
+- Context: All R4 evidence shows mixed Version A behavior; no net gain
+- Reaffirm: Version B (text-visible memory injection) remains deferred
+- No new evidence justifies starting Version B implementation
+- Requires separate explicit approval

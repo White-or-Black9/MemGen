@@ -103,6 +103,15 @@ Current next experiment gate:
 | EXP-20260618-002 | 2026-06-18 | R4 disabled TriviaQA smoke | Can the R4 dynamic harness complete one disabled-memory TriviaQA sample with live retrieval? | `completed` | One sample valid; retrieval calls `1`, failures `0`, `valid_run=True` |
 | EXP-20260618-003 | 2026-06-18 | R4 Version A TriviaQA smoke | Can Version A-aligned memory run on one dynamic TriviaQA sample with live retrieval? | `completed` | Enabled memory wrote 2 slots and performed 1 retrieval turn, but default threshold `0.7` returned `retrieved_latent_count=0` |
 | EXP-20260618-004 | 2026-06-18 | R4 retrieval-positive diagnostic | Can non-empty retrieved latent memory be exercised under a controlled low threshold? | `completed_diagnostic_only` | Diagnostic `threshold=0.01` produced `retrieved_latent_count=8` and `replace_matched`; not default behavior or performance evidence |
+| EXP-20260618-005 | 2026-06-18 | R4 audit | Does the LatentMemoryBank active retrieval path match the intended last-retrieved-age design? | `completed` | Read-only audit confirmed score formula, exact age semantics, thread eviction, and debug exports all correct; threshold comment has terminology mismatch |
+| EXP-20260618-006 | 2026-06-18 | R4 default-threshold natural trigger scan | Does default `threshold=0.7` trigger non-empty retrieval on TriviaQA samples 1..5? | `completed` | 0/5 triggers; max_score 0.02–0.045 |
+| EXP-20260618-007 | 2026-06-18 | R4 threshold calibration score scan | What is the decayed retrieval score scale under default threshold on samples 0..19? | `completed` | Mean 0.036, median 0.037, range 0.010–0.054; threshold 0.04 estimated 40% trigger rate |
+| EXP-20260618-008 | 2026-06-18 | R4 threshold=0.04 behavior scan | Does threshold=0.04 activate retrieved latent memory on samples 0..19? | `completed` | 8/20 triggered, exactly matched offline estimate; behavior validation only |
+| EXP-20260618-009 | 2026-06-18 | R4 held-out comparison s20_39 | Does Version A t=0.04 affect TriviaQA reward on held-out samples 20..39? | `completed` | Disabled 0.60 vs Version A 0.55; one regression (sample 21), no rescue |
+| EXP-20260618-010 | 2026-06-18 | R4 sample 21 regression case study | Why did sample 21 regress from 1.0 to 0.0 under Version A t=0.04? | `completed` | Memory-induced regression: query-entity salience amplification of "Gangsta's Paradise" |
+| EXP-20260618-011 | 2026-06-18 | R4 triggered held-out audit s20_39 | What effect did memory triggering have on samples 20..39? | `completed` | 0 helpful, 1 harmful, 5 neutral (among 6 triggered) |
+| EXP-20260618-012 | 2026-06-18 | R4 rescue/regression scan s40_79 | Does Version A t=0.04 rescue any disabled-wrong answers on fresh held-out samples 40..79? | `completed` | 1 rescue (sample 53 Seymour Hersh), 0 regression, mean diff +0.025 |
+| EXP-20260618-013 | 2026-06-18 | R4 combined held-out analysis s20_79 | What is the net effect across 60 held-out TriviaQA samples? | `completed` | Net gain 0 (both 35/60); effect fragile and sample-dependent |
 
 ## Recorded Experiments
 
@@ -2126,3 +2135,157 @@ full GSM8K test performance.
   - duplicate system prompt appears in the conversation artifact
   - artifacts show retrieval and memory-bank behavior; they do not separately
     assert Reasoner-only injection
+
+### EXP-20260618-005: LatentMemoryBank Scoring / Recency Semantics Audit
+
+- Phase: R4 mechanism audit
+- Status: `completed`
+- Research question: Does the active LatentMemoryBank retrieval path match the
+  intended last-retrieved-age design?
+- Nature: read-only audit; no model runs
+- Scope: `memgen/model/latent_memory_bank.py`
+- Key findings:
+  - score formula: `score = similarity * exp(-decay_alpha * age)`
+  - exact age: `age = max(0, retrieval_step - slot.last_retrieved_step)`
+  - Δt_i = last-retrieved age (NOT retrieval count, NOT insertion age)
+  - `_retrieval_step` is enabled retrieval-turn counter
+  - `_step` is write count, used for created_step/stale checks only
+  - `access_count` is incremented for returned slots but not used in scoring
+  - successful retrieval updates `last_retrieved_step`
+  - thread update eviction: largest last-retrieved age, tie-break by
+    earliest created_step then smallest index
+  - debug exports consistent with semantics
+  - tests exist for all key behaviors
+- Caveat: config comment calls threshold "cosine similarity threshold" but
+  implementation compares against decayed retrieval score (terminology mismatch)
+
+### EXP-20260618-006: Default-Threshold Natural Trigger Scan (samples 1..5)
+
+- Phase: R4 default-threshold diagnostic
+- Status: `completed`
+- Research question: Does default `threshold=0.7` trigger non-empty retrieval
+  on TriviaQA samples 1..5?
+- Output: `outputs/r4_triviaqa_default_threshold_scan_version_a_s1_5/`
+- Configuration: memory-mode `version_a_aligned`, threshold `0.7`, samples 1..5
+- Result: 5/5 valid, retrieval 5/5, natural triggers 0/5
+  - max_score values roughly 0.02–0.045 range
+- Interpretation: default threshold 0.7 consistently blocks retrieval on
+  TriviaQA despite memory writes occurring
+
+### EXP-20260618-007: Threshold Calibration Score Scan (samples 0..19)
+
+- Phase: R4 threshold calibration
+- Status: `completed`
+- Research question: What is the decayed retrieval score scale for TriviaQA
+  samples 0..19 under default threshold?
+- Output: `outputs/r4_triviaqa_threshold_calibration_score_scan_s0_20/`
+- Summary: `threshold_calibration_summary.json`
+- Score distribution:
+  - min: 0.0102, max: 0.0539, mean: 0.0356, median: 0.0368
+  - p25: 0.0300, p75: 0.0441
+- Hypothetical trigger rates:
+  - t=0.01: 100%, t=0.02: 90%, t=0.03: 75%, t=0.04: 40%
+  - t=0.05: 5%, t=0.10: 0%, t=0.70: 0%
+- Interpretation:
+  - default 0.7 far above observed range
+  - threshold 0.04 selected as first calibrated candidate (moderate 40%
+    trigger rate, no reward inspection)
+
+### EXP-20260618-008: Threshold=0.04 Calibrated Behavior Scan (samples 0..19)
+
+- Phase: R4 behavior validation
+- Status: `completed`
+- Research question: Does threshold=0.04 actually activate Version A
+  retrieved-memory injection on samples 0..19?
+- Output: `outputs/r4_triviaqa_threshold_calibrated_behavior_t004_s0_20/`
+- Summary: `threshold_behavior_summary.json`
+- Configuration: in-memory threshold override 0.04, no source/config changed
+- Result: 20/20 valid, 8/20 triggered (exactly matched offline estimate)
+  - total retrieved_latent: 64
+  - replace_matched: 8, insert-only: 12
+  - slot_count: {1: 8, 2: 12}
+- Interpretation: behavior validation only, not performance evidence
+
+### EXP-20260618-009: Held-Out Exploratory Comparison (samples 20..39)
+
+- Phase: R4 held-out exploratory
+- Status: `completed`
+- Research question: Does Version A t=0.04 differ from disabled on held-out
+  TriviaQA samples 20..39?
+- Output: `outputs/r4_triviaqa_heldout_s20_39_*`
+- Summary: `outputs/r4_triviaqa_heldout_s20_39_comparison_summary.json`
+- Calibration: samples 0..19; held-out: 20..39; threshold fixed at 0.04
+- Result: 20/20 valid both runs
+  - disabled `compute_reward`: 0.60 (12/20)
+  - Version A t=0.04: 0.55 (11/20)
+  - only change: sample 21 (1.0→0.0)
+  - 6/20 memory-triggered, total retrieved: 88
+- Interpretation: one regression, no rescue; exploratory only
+
+### EXP-20260618-010: Sample 21 Regression Case Study
+
+- Phase: R4 case study
+- Status: `completed`
+- Research question: Why did sample 21 regress under Version A t=0.04?
+- Question: "What Michelle Pfeiffer movie got a boost from the Coolio song
+  Gangsta's Paradise?"
+- Disabled: "Dangerous Minds" (reward 1.0)
+- Version A t=0.04: "Gangsta's Paradise" (reward 0.0)
+- External retrieval identical; docs clearly contained correct answer
+- Version A memory: writes=2, retrieved=8, max_score=0.0534, replace_matched
+- Likely cause: memory-induced regression
+  - retrieved latent amplified salient query/song entity instead of
+    evidence-grounded movie answer
+- Memory timing hypothesis:
+  - first insert: before Search-R1 evidence
+  - later replace_matched: after external evidence
+  - retrieved latent from pre-evidence query context injected into
+    post-evidence answer generation
+
+### EXP-20260618-011: Triggered Held-Out Audit (samples 20..39)
+
+- Phase: R4 triggered audit
+- Status: `completed`
+- Research question: What effect did memory triggering have on reward outcomes
+  for samples 20..39?
+- Triggered samples: 20, 21, 34, 36, 37, 39
+- Summary: helpful=0, harmful=1 (21), neutral=3, neutral/unclear=2
+- Mechanism finding: pre-evidence latent seeded from query context,
+  retrieved during post-evidence answer generation, amplifying query entities
+
+### EXP-20260618-012: Fresh Held-Out Rescue/Regression Scan (samples 40..79)
+
+- Phase: R4 rescue/regression scan
+- Status: `completed`
+- Research question: Does Version A t=0.04 rescue any disabled-wrong answers
+  on fresh held-out samples 40..79?
+- Output: `outputs/r4_triviaqa_rescue_scan_s40_79_*`
+- Summary: `outputs/r4_triviaqa_rescue_scan_s40_79_summary.json`
+- Fresh samples 40..79; threshold fixed at 0.04; no threshold tuning
+- Result: 40/40 valid both runs
+  - disabled: 0.575 (23/40)
+  - Version A: 0.600 (24/40), diff +0.025
+  - rescue: 1 (sample 53 "Seymour Hersh"), regression: 0
+  - memory-triggered: 12/40, retrieved: 120
+- Notable rescue sample 53:
+  - journalist who told of My Lai massacre
+  - disabled: "Normand Poirier" → Version A: "Seymour Hersh"
+  - max_score: 0.0441, replace_matched
+- Interpretation: Version A can rescue; not only harmful
+
+### EXP-20260618-013: Combined Held-Out Interpretation (samples 20..79)
+
+- Phase: R4 combined analysis
+- Status: `completed`
+- Research question: What is the net effect across all 60 held-out samples?
+- Samples 20..39: disabled 12/20, Version A 11/20, rescue=0, regression=1
+- Samples 40..79: disabled 23/40, Version A 24/40, rescue=1, regression=0
+- Combined 20..79: disabled 35/60, Version A 35/60
+  - net gain: 0
+  - rescue: 1, regression: 1
+- Interpretation:
+  - Version A t=0.04 can both rescue and regress; mixed behavior
+  - no net improvement across 60 held-out samples
+  - effect fragile and sample-dependent
+  - do NOT claim improvement or failure; evidence shows neutral with isolated
+    effects in both directions

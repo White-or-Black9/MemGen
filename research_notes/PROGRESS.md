@@ -34,11 +34,16 @@
   - Controlled mechanism study 已 closeout
   - TriviaQA 仍无正式 baseline 或正式 performance 结果
   - R4 Search-R1 / TriviaQA infrastructure validation 已完成，带 caveats
-  - concrete next-step plan 现为 TriviaQA-first evaluation 加上
-    controlled diagnostic subset design
-  - TriviaQA 仍是当前 immediate repository-aligned evaluation path
-  - controlled diagnostic subset 用于暴露 TriviaQA 可能不明显体现的
-    Version A-aligned last-retrieved mechanisms
+  - R4 TriviaQA threshold calibration 已完成：默认 threshold=0.7 在
+    calibration samples 0..19 上产生 0/20 个自然触发
+  - 衰减评分量表：min 0.010, max 0.054, mean 0.036, median 0.037
+  - 已校准 threshold=0.04 作为第一个候选值（仅基于评分分布，非 rewards）
+  - held-out samples 20..79（校准后）：
+    disabled 35/60 vs Version A t=0.04 35/60，净增益 0
+  - 观察到 1 个 rescue（样本 53）和 1 个 regression（样本 21）；无净改进也无净退步
+  - 关键机制 caveat：检索到的潜在记忆（retrieved latent memory）是在证据前（pre-evidence）生成的，可能放大查询实体显著性（query-entity salience），而非证据锚定答案
+  - 当前推荐下一步：暂时不要扩大规模；对救援案例与回归案例进行基于工件的案例研究，以理解记忆究竟何时帮助 vs 伤害
+  - Threshold comment caveat：配置注释称 threshold 为"cosine similarity threshold"，但实际应用于 decayed retrieval score 而非 raw cosine
   - MemoryAgentBench / LongMemEval 只记录为 future candidates
   - Version B 继续 deferred
 - 历史解释边界：
@@ -58,20 +63,41 @@
     `valid_run=True`
   - R4 threshold-positive diagnostic exercised non-empty retrieved latent memory
     under diagnostic-only `threshold=0.01`
+  - R4 LatentMemoryBank scoring/recency semantics audit completed — confirmed
+    activation path uses last-retrieved-age decay with exact age =
+    `retrieval_step - last_retrieved_step`
+  - R4 default-threshold natural trigger scan (samples 1..5) 完成：0/5 触发
+  - R4 20-sample threshold calibration score scan (samples 0..19) 完成
+  - R4 threshold=0.04 calibrated behavior scan (samples 0..19) 完成：
+    8/20 触发，exactly matched offline estimate
+  - R4 held-out exploratory comparison (samples 20..39) 完成：
+    disabled mean 0.60, Version A t=0.04 mean 0.55, 1 regression
+  - R4 sample 21 regression case study 完成：记忆诱导的回归（memory-induced regression）
+  - R4 triggered held-out audit (samples 20..39 memory-triggered) 完成：
+    0 helpful, 1 harmful, 5 neutral
+  - R4 fresh held-out rescue/regression scan (samples 40..79) 完成：
+    1 rescue (sample 53), 0 regression, mean diff +0.025
+  - R4 combined held-out interpretation (samples 20..79) 完成：net gain 0
 - 停止条件：已达到；没有明确批准，不要进入新的实现或实验阶段。
 
 ## Current Next Step
 
-1. Treat R4 Search-R1 / TriviaQA infrastructure validation as complete with
-   caveats, not as a formal performance result.
-2. Decide the next experimental route: keep default `threshold=0.7` and search
-   for naturally matching TriviaQA samples, or design a threshold calibration /
-   ablation plan.
-3. Only after a separate decision should the project run any larger TriviaQA
-   evaluation. Version B remains deferred.
-
-Do not enter Version B until the TriviaQA disabled baseline / smoke path is
-stable and explicitly approved.
+1. R4 infrastructure validation is complete with caveats.
+2. Threshold calibration is complete with caveats:
+   - default threshold 0.7 is inappropriate for observed TriviaQA decayed-score
+     scale
+   - threshold 0.04 is a first calibrated candidate, not an optimal threshold
+3. Do NOT immediately run larger benchmarks, tune thresholds, or implement
+   timing constraints.
+4. Primary next step: read-only case study of rescue sample 53 vs harmful
+   sample 21.
+   - Goal: understand when memory helps versus hurts before scaling
+   - Questions: is memory acting as useful latent prior, evidence-grounded clue,
+     query-salience amplifier, or noisy perturbation?
+5. Later, after mechanism analysis: consider evidence-grounded-memory-only,
+   suppress pre-evidence memory write, retrieve only evidence-grounded slots,
+   answer-stage verification/gating, or threshold ablation.
+6. Version B remains deferred until a separate explicit decision.
 
 ## 研究目标
 
@@ -1086,8 +1112,250 @@ Phase 7 已完成。
     sample `0`
   - threshold `0.01` is diagnostic-only and must not be used as a formal
     performance setting without a separate decision
-- Current transition:
-  - R4 infrastructure validation is complete with caveats
-  - next decision needed: keep default threshold `0.7` and search for
-    naturally matching samples, or design threshold calibration / ablation
-    before any larger run
+- Scoring audit caveat:
+  - config comment says threshold is a "cosine similarity threshold", but
+    implementation compares the threshold against decayed retrieval score,
+    not raw cosine similarity → terminology / comment caveat only
+
+### R4: LatentMemoryBank Scoring / Recency Semantics Audit
+
+- Read-only audit confirmed the active LatentMemoryBank retrieval path
+  matches the intended last-retrieved-age design
+- Core implementation: `memgen/model/latent_memory_bank.py`
+- Score formula: `score = similarity * exp(-decay_alpha * age)`
+- Exact age: `age = max(0, retrieval_step - slot.last_retrieved_step)`
+- Therefore Δt_i = last-retrieved age (NOT retrieval count, NOT insertion age,
+  NOT successful write count age)
+- `_retrieval_step` is an enabled retrieval-turn counter
+- `_step` is successful memory write count, used for created_step / stale checks
+  / legacy ordering, not scoring
+- `access_count` is incremented for returned slots but is not used in scoring
+- Successful retrieval updates `last_retrieved_step`, effectively resetting
+  last-retrieved age for returned slots
+- Insertion/replacement initializes or resets recency
+- Thread update eviction uses largest last-retrieved age, with tie-breaks by
+  earliest created_step and smallest index
+- Debug exports are consistent with this semantics
+- tests exist for key behaviors:
+  retrieval step increment, score uses last-retrieved age, only returned slots
+  refresh, never-retrieved slot age from creation baseline, threshold miss does
+  not refresh argmax, full-bank thread update eviction, replacement uses
+  triggering retrieval step
+- Caveat noted: threshold comment terminology mismatch (cosine vs decayed score)
+
+### R4: Default-Threshold Natural Trigger Scan (Samples 1..5)
+
+- Output: `outputs/r4_triviaqa_default_threshold_scan_version_a_s1_5/`
+- memory-mode: `version_a_aligned`, threshold: default `0.7`, samples 1..5
+- Result: valid 5/5, retrieval 5/5, natural triggers 0/5
+- max_score values roughly 0.02–0.045 range
+- Interpretation: default threshold 0.7 did not naturally trigger on this
+  small scan; consistent with earlier 1-sample findings
+
+### R4: 20-Sample Threshold Calibration Score Scan (Samples 0..19)
+
+- Output:
+  `outputs/r4_triviaqa_threshold_calibration_score_scan_s0_20/`
+- Summary:
+  `outputs/r4_triviaqa_threshold_calibration_score_scan_s0_20/threshold_calibration_summary.json`
+- memory-mode: `version_a_aligned`, threshold: default `0.7`, samples 0..19
+- Result: valid 20/20, retrieval 20/20, natural triggers at 0.7: 0/20
+- Score distribution (decayed retrieval scores):
+  - min: 0.0102, max: 0.0539, mean: 0.0356, median: 0.0368
+  - p25: 0.0300, p75: 0.0441
+- Offline hypothetical trigger counts:
+  - threshold 0.01: 20/20 (100%)
+  - threshold 0.02: 18/20 (90%)
+  - threshold 0.03: 15/20 (75%)
+  - threshold 0.04: 8/20 (40%)
+  - threshold 0.05: 1/20 (5%)
+  - threshold 0.10: 0/20, threshold 0.70: 0/20
+- Interpretation:
+  - default threshold 0.7 is far above observed decayed-score range for
+    TriviaQA
+  - threshold 0.04 selected as first calibrated candidate: moderate expected
+    trigger rate (40%), no reward inspection
+
+### R4: Threshold=0.04 Calibrated Behavior Scan (Samples 0..19)
+
+- Output:
+  `outputs/r4_triviaqa_threshold_calibrated_behavior_t004_s0_20/`
+- Summary:
+  `outputs/r4_triviaqa_threshold_calibrated_behavior_t004_s0_20/threshold_behavior_summary.json`
+- memory-mode: `version_a_aligned`, in-memory threshold override: 0.04,
+  samples 0..19
+- Result: valid 20/20, retrieval 20/20
+  - samples with `retrieved_latent_count > 0`: 8/20
+  - total `retrieved_latent_count`: 64
+  - `replace_matched` samples: 8, only-insert samples: 12
+  - slot_count distribution: {1: 8, 2: 12}
+  - observed trigger count exactly matched offline estimate: 8/20
+- Interpretation:
+  - threshold=0.04 successfully activates retrieved-memory injection path
+  - behavior validation only, not performance evidence
+
+### R4: Held-Out Exploratory Comparison (Samples 20..39)
+
+- Outputs:
+  - `outputs/r4_triviaqa_heldout_s20_39_disabled/`
+  - `outputs/r4_triviaqa_heldout_s20_39_version_a_t004/`
+  - `outputs/r4_triviaqa_heldout_s20_39_comparison_summary.json`
+- Calibration samples 0..19; held-out samples 20..39
+- Threshold 0.04 fixed before reward evaluation; no post-hoc tuning
+- Result: valid 20/20 both runs, retrieval 24/0 both runs
+  - disabled `compute_reward`: 0.60 (12/20)
+  - Version A t=0.04 `compute_reward`: 0.55 (11/20)
+  - only reward change: sample 21 1.0→0.0
+  - Version A memory-triggered: 6/20, total retrieved_latent: 88
+  - update trace: insert=34, replace_matched=11
+- Interpretation:
+  - one regression, no rescue in this subset
+  - Version A t=0.04 can perturb final answers; not final benchmark evidence
+
+### R4: Sample 21 Regression Case Study
+
+- Question: "What Michelle Pfeiffer movie got a boost from the Coolio song
+  Gangsta's Paradise?"
+- Gold: "dangerous minds" / variants
+- Disabled: "Dangerous Minds" (reward 1.0)
+- Version A t=0.04: "Gangsta's Paradise" (reward 0.0)
+- External retrieval was identical between runs; docs clearly contained
+  the correct answer ("song was on the soundtrack for the 1995 film
+  Dangerous Minds")
+- Conversation messages identical up to final assistant answer
+- Version A memory: writes=2, retrieves=1, retrieved_latent=8, slot_count=1,
+  max_score=0.0534, threshold_passed=true, replace_matched
+- Likely cause: memory-induced regression
+  - retrieved latent memory may have amplified salient query/song entity
+    "Gangsta's Paradise" instead of evidence-grounded movie answer
+    "Dangerous Minds"
+  - threshold 0.05 would NOT block this because score 0.0534 > 0.05
+- Memory timing hypothesis:
+  - first insert occurs during first generation turn, before Search-R1
+    evidence is appended to context
+  - later replace_matched occurs after external evidence is present
+  - retrieved latent may be seeded from pre-evidence question/query context
+    and injected into final evidence-grounded answer generation
+  - this can amplify query-entity salience instead of evidence-grounded
+    answers
+
+### R4: Triggered Held-Out Audit (Samples 20..39 Memory-Triggered)
+
+- Triggered samples: 20, 21, 34, 36, 37, 39
+- Summary: helpful=0, harmful=1 (sample 21), neutral=3 (34, 36, 39),
+  neutral/unclear=2 (20, 37)
+- Details:
+  - sample 20: disabled 0.0, Version A 0.0, answer changed, max_score=0.055,
+    retrieved=24, neutral/unclear
+  - sample 21: disabled 1.0, Version A 0.0, answer changed, max_score=0.053,
+    retrieved=8, harmful
+  - sample 34: disabled 0.0, Version A 0.0, answer changed, max_score=0.049,
+    retrieved=8, neutral
+  - sample 36: disabled 1.0, Version A 1.0, answer unchanged, max_score=0.048,
+    retrieved=8, neutral
+  - sample 37: disabled 0.0, Version A 0.0, answer unchanged, max_score=0.054,
+    retrieved=32, neutral/unclear
+  - sample 39: disabled 1.0, Version A 1.0, answer unchanged,
+    max_score=0.045, retrieved=8, neutral
+- Mechanism finding confirmed: pre-evidence latent may be seeded from
+  query/context before Search-R1 evidence is present, then retrieved during
+  post-evidence answer generation
+- Threshold-only fix appears incomplete; issue related to memory
+  timing/content
+
+### R4: Fresh Held-Out Rescue/Regression Scan (Samples 40..79)
+
+- Outputs:
+  - `outputs/r4_triviaqa_rescue_scan_s40_79_disabled/`
+  - `outputs/r4_triviaqa_rescue_scan_s40_79_version_a_t004/`
+  - `outputs/r4_triviaqa_rescue_scan_s40_79_summary.json`
+- Fresh samples 40..79, threshold 0.04 fixed before evaluation
+- Result: valid 40/40 both runs
+  - disabled retrieval 44/0, Version A retrieval 47/0
+  - disabled `compute_reward`: 0.575 (23/40)
+  - Version A t=0.04 `compute_reward`: 0.600 (24/40)
+  - difference: +0.025
+  - rescue count: 1 (sample 53), regression count: 0
+  - Version A memory-triggered: 12/40, total retrieved_latent: 120
+  - answer changed count: 4, answer changed but reward same: 3
+- Notable rescue (sample 53):
+  - question: "Which journalist first told the world about the My Lai
+    massacre?"
+  - disabled: "Normand Poirier" (wrong)
+  - Version A: "Seymour Hersh" (correct, matches gold aliases)
+  - max_score: 0.0441, retrieved_latent: 8, replace_matched
+- Interpretation:
+  - Version A can produce at least one rescue case — it is not only
+    harmful/noisy
+  - still exploratory only
+
+### R4: Combined Held-Out Interpretation (Samples 20..79)
+
+- Calibration samples: 0..19
+- Held-out exploratory samples: 20..79 (60 total)
+- Breakdown:
+  - samples 20..39: disabled 12/20, Version A t=0.04 11/20,
+    rescue=0, regression=1
+  - samples 40..79: disabled 23/40, Version A t=0.04 24/40,
+    rescue=1, regression=0
+- Combined 20..79:
+  - disabled: 35/60
+  - Version A t=0.04: 35/60
+  - net gain: 0
+  - observed rescue: 1
+  - observed regression: 1
+- Interpretation:
+  - Version A t=0.04 can both rescue and regress individual samples
+  - current exploratory held-out evidence shows no net improvement across
+    60 held-out samples
+  - effect is fragile and sample-dependent
+  - do not claim improvement; do not claim failure — evidence shows mixed
+    behavior
+
+### R4: Current Scientific Interpretation
+
+- Default threshold 0.7 is not appropriate for the observed TriviaQA
+  decayed-score scale; no natural retrieval in calibration
+- Threshold 0.04 is a reasonable first calibrated candidate, not optimal
+- Version A t=0.04 activates retrieved latent memory
+- Retrieved latent memory can perturb final answers:
+  - it can cause regressions (sample 21)
+  - it can rescue wrong answers (sample 53)
+- Across held-out 20..79, net effect is currently neutral
+- Most important mechanism caveat: memory timing
+  - pre-evidence latent memory may be written before Search-R1 evidence,
+    then retrieved during post-evidence answer generation
+  - this can amplify query/entity salience
+- Future work should understand when memory helps vs hurts before scaling
+
+### R4: Recommended Next Work
+
+- Primary next step: read-only case study of rescue sample 53 vs harmful
+  sample 21
+- Goal: understand why sample 53 was rescued while sample 21 regressed
+- Determine whether memory is acting as:
+  - useful latent prior
+  - evidence-grounded clue
+  - query-salience amplifier
+  - noisy perturbation
+- Do NOT immediately run larger benchmarks, tune thresholds, or implement
+  timing constraints
+- Possible later variants after mechanism analysis:
+  - evidence-grounded memory only
+  - suppress pre-evidence memory write
+  - retrieve only evidence-grounded slots
+  - answer-stage verification/gating
+  - threshold ablation after timing/content issue is understood
+
+### R4: Current Caveats / Watchlist
+
+- duplicate system prompt still appears across all R4 runs
+  - was not differentiating in sample 21 because both runs shared it
+- threshold comment misleading: threshold applies to decayed retrieval
+  score, not raw cosine similarity
+- threshold=0.04 overrides were in-memory diagnostics, not source/config
+  changes
+- reward means are exploratory only
+- output artifacts are under `outputs/` and should not be staged
+- source files remain unchanged
+- Search-R1 was alive and retrieval succeeded in all reported runs

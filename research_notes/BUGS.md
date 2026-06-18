@@ -429,6 +429,12 @@ examples = dict
 
 ## Research-Specific Watchlist
 
+- Current status note after 2026-06-18 consolidation:
+  - Phase R2 superseded the current Version A-aligned decay / full-bank
+    eviction behavior with last-retrieved semantics.
+  - Phase 8A and Phase 8C-alt records remain historical exploratory evidence.
+  - No formal target-task TriviaQA result exists yet.
+  - Version B remains not started.
 - Disabled mode differs from original outputs.
 - Memory persists across samples or sessions.
 - Retrieval mutates training behavior or training configuration.

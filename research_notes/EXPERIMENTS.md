@@ -19,6 +19,45 @@ Interpretation boundary:
   experiments.
 - There is still no TriviaQA result and no target-task performance claim.
 
+## Current Evidence Classification
+
+Accepted formal result set:
+
+- Phase 0-7 records are the accepted formal project results.
+- `EXP-20260611-006` is the accepted fixed 20-sample GSM8K Original MemGen
+  comparator.
+- `EXP-20260612-013` is the accepted disabled-memory equivalence result against
+  the frozen comparator.
+- Phase 7 enabled-memory records are bounded stability / debug evidence only;
+  they are not performance claims.
+
+Historical / exploratory records:
+
+- Phase 8A GSM8K pilot records are historical and exploratory. They used the
+  pre-R2 write-age mechanism and must not be interpreted as current
+  last-retrieved-decay evidence.
+- Phase 8C-alt controlled records are mechanism / harness evidence only. They
+  do not replace TriviaQA and do not establish target-task performance.
+- Phase 8D-0 / R4-1A records are infrastructure discovery / preflight only.
+  They are not evaluation results.
+- Phase R2 / R2-fix define the current mechanism but did not run formal
+  target-task experiments.
+
+Current mechanism to use for future experiments:
+
+- Reasoner-only retrieved-memory injection.
+- Retrieved memory does not enter Weaver.
+- Stored memory is reasoner-space `latent_inputs_embeds`.
+- Memory is session-local.
+- Enabled memory requires `batch_size=1`.
+- Retrieval uses last-retrieved decay with no fallback top-1.
+
+Current next experiment gate:
+
+- Do not run enabled-memory TriviaQA or Version B until TriviaQA infrastructure
+  is ready and a disabled-memory one-sample structured smoke has passed using
+  `scripts.eval.r4_triviaqa_dynamic_harness`.
+
 ## Experiment Index
 
 | ID | Date | Phase | Question | Status | Key Result |

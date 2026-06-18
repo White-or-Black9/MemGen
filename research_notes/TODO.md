@@ -11,7 +11,54 @@
 
 # 待办任务（Backlog）
 
-## Phase 0：审计与基线（Audit and Baseline）
+## Current Next Step（当前下一步）
+
+- [ ] Resolve TriviaQA infrastructure readiness before formal TriviaQA eval.
+- [ ] Verify / acquire local TriviaQA MemGen checkpoint.
+- [ ] Verify / acquire `mandarjoshi/trivia_qa` cache.
+- [ ] Verify / acquire `Solaris99/AgentBank` `triviaqa` cache.
+- [ ] Verify retrieval endpoint / index readiness for
+  `http://127.0.0.1:8001/retrieve`.
+- [ ] Confirm the structured answer output path through
+  `scripts.eval.r4_triviaqa_dynamic_harness`.
+- [ ] After all above are ready, run disabled-memory one-sample TriviaQA
+  structured smoke.
+- [ ] Only after disabled-memory TriviaQA smoke is stable, consider
+  enabled-memory TriviaQA.
+- [ ] Keep Version B blocked until the target-task disabled baseline path is
+  stable and explicitly approved.
+
+---
+
+## Accepted Formal Results（已接受的正式结果）
+
+- [x] Phase 0-7 records are the accepted formal result set.
+- [x] Original MemGen fixed 20-sample GSM8K comparator accepted:
+  `EXP-20260611-006`.
+- [x] Disabled-path equivalence accepted:
+  `EXP-20260612-013`.
+- [x] Version A enabled stability/debug evidence accepted through Phase 7,
+  without performance claims.
+
+---
+
+## Historical / Exploratory Records（历史或探索性记录）
+
+- [x] Phase 8A GSM8K pilot exists, but is historical / exploratory only.
+- [x] Phase 8C-alt controlled mechanism study exists, but is mechanism evidence
+  only and does not replace TriviaQA.
+- [x] Phase 8D-0 / R4-1A TriviaQA discovery / preflight exists, but is not a
+  formal evaluation.
+- [x] Phase R2 / R2-fix defines the current Version A-aligned mechanism, but no
+  formal target-task experiment has been run after R2.
+
+---
+
+## Superseded / Resolved Historical Items（已由后续记录取代）
+
+The items below are retained for provenance. They are no longer active blockers.
+
+### Phase 0：审计与基线（Audit and Baseline）
 
 - [x] 确认推理（inference）入口及调用图（call graph）。
 - [x] 确认 Weaver 与 Trigger 的训练边界，保证后续工作不会修改它们。
@@ -23,20 +70,21 @@
 - [x] 记录标准 baseline 命令及其评测指标（metric contract）。
 - [x] 定义精确的 disabled-feature 兼容性测试。
 - [x] 更新 CODE_MAP.md 与 BASELINE.md。
-- [ ] 在一个单独批准的 Phase 中修复 BUG-0001。
-- [ ] 在修复 loader 后，重新运行并正式接受完整 baseline。
+- [x] 修复 BUG-0001：已由 Temporary Repair Phase 的 checkpoint adapter
+  restore 逻辑修复，并通过 112/112 Weaver / Trigger adapter tensor 验证。
+- [x] 修复 loader 后重新运行并正式接受 baseline：已由 Phase 3
+  `EXP-20260611-006` 完成。
 
----
+### Phase 1：Session-Local Prototype（会话级原型）
 
-## Phase 1：Session-Local Prototype（会话级原型）
-
-- [ ] 定义 Memory Bank 的接口（interface）和生命周期（lifecycle）。
-- [ ] 定义 retrieval（检索）、recurrent update（循环更新）、capacity（容量）和 eviction（淘汰）机制的默认策略。
-- [ ] 添加可选（opt-in）配置，并默认保持关闭（disabled）。
-- [ ] 实现仅限 inference 的集成（inference-only integration）。
-- [ ] 强制保证每个 session 独立（per-session isolation），默认使用 batch_size=1。
-- [ ] 测试 disabled-path 等价性（确保关闭 Memory Bank 时行为完全一致）。
-- [ ] 测试 reset 逻辑以及不存在跨 sample 的 memory 泄漏。
+- [x] 定义 Memory Bank 的接口（interface）和生命周期（lifecycle）。
+- [x] 定义 retrieval、capacity、update 和 eviction 的当前策略。
+- [x] 添加可选（opt-in）配置，并默认保持关闭（disabled）。
+- [x] 实现仅限 inference 的集成（inference-only integration）。
+- [x] 强制保证每个 session 独立（per-session isolation），enabled mode
+  默认 / 当前要求 `batch_size=1`。
+- [x] 测试 disabled-path 等价性（确保关闭 Memory Bank 时行为完全一致）。
+- [x] 测试 reset 逻辑以及不存在跨 sample 的 memory 泄漏。
 
 ---
 
@@ -46,20 +94,27 @@
 - [ ] 测量模型质量（quality）、延迟（latency）和内存开销（memory overhead）。
 - [ ] 开展鲁棒性分析（robustness）和失败案例分析（failure analysis）。
 - [ ] 整理形成可直接用于论文的实验证据（paper-ready evidence）。
+- [ ] 这些后续任务必须等待 TriviaQA disabled-memory structured smoke 稳定；
+  当前不能直接推进为 formal experiment。
 
 ---
 
 # 当前进行中（Active）
 
-- 无（None）。
-
-当前 Phase 0 已在 baseline gate（基线验证关口）暂停。
+- TriviaQA infrastructure readiness only.
+- No active model-code implementation.
+- No active Version B work.
 
 ---
 
 # 阻塞项（Blocked）
 
-- 可信（trusted）的 baseline 运行目前被 BUG-0001 所阻塞。
+- Formal TriviaQA evaluation is blocked by missing or uncertain assets:
+  local TriviaQA MemGen checkpoint, `mandarjoshi/trivia_qa` cache,
+  `Solaris99/AgentBank` cache, retrieval endpoint / index readiness, and
+  structured answer output path readiness.
+- Version B is blocked until the disabled-memory target-task path is stable and
+  explicitly approved.
 
 ---
 

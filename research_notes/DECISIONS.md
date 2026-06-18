@@ -44,6 +44,8 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0035 | 2026-06-16 | accepted | Revise Version A-aligned decay and full-bank eviction to last-retrieved semantics without entering Version B |
 | DEC-0036 | 2026-06-16 | accepted | Use TriviaQA-first evaluation with a controlled diagnostic subset |
 | DEC-0037 | 2026-06-16 | accepted | Use Search-R1-compatible retrieval service for formal TriviaQA evaluation |
+| DEC-0038 | 2026-06-18 | accepted | Treat Phase 0-7 as formal results, later runs as historical/exploratory unless explicitly promoted |
+| DEC-0039 | 2026-06-18 | accepted | Block formal TriviaQA evaluation until infrastructure readiness and a disabled structured smoke are established |
 
 ## Decision Template
 
@@ -62,6 +64,31 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Superseded by:
 
 ## Standing Decisions
+
+### Current Board
+
+- Date: 2026-06-18
+- Current formal result set: accepted Phase 0-7 records.
+- Current exploratory / historical set:
+  - Phase 8A GSM8K pilot
+  - Phase 8C-alt controlled mechanism study
+  - Phase 8D-0 / R4-1A TriviaQA infrastructure discovery / preflight
+  - Phase R2 / R2-fix mechanism revisions
+- Current mechanism:
+  - retrieved memory is injected only into the Reasoner path
+  - retrieved memory does not enter Weaver
+  - stored memory is reasoner-space `latent_inputs_embeds`
+  - memory is session-local
+  - enabled memory requires `batch_size=1`
+  - retrieval uses last-retrieved decay
+  - no fallback top-1
+- Current blocker: formal TriviaQA evaluation is not ready until the local
+  TriviaQA MemGen checkpoint, required dataset caches, retrieval endpoint /
+  index, and structured answer output path are verified.
+- Current next step: resolve TriviaQA infrastructure, then run disabled-memory
+  one-sample structured smoke with `scripts.eval.r4_triviaqa_dynamic_harness`.
+- Version B remains deferred and must not start before the disabled target-task
+  path is stable and explicitly approved.
 
 ### DEC-0001: Inference-Only Research Scope
 
@@ -949,3 +976,69 @@ IDs and append superseding decisions rather than silently rewriting history.
   - any toy server must be clearly labeled as smoke-only
   - no Version B work, fallback top-1, or retrieved-memory-to-Weaver behavior is
     introduced by this retrieval-service decision
+
+### DEC-0038: Current Evidence Classification
+
+- Date: 2026-06-18
+- Status: accepted
+- Context: A read-only full-project audit found that the repository contains
+  accepted Phase 0-7 records plus later Phase 8A, Phase 8C-alt, Phase 8D-0 /
+  R4-1A, and Phase R2 / R2-fix records. Without an explicit classification,
+  readers could confuse exploratory or historical records with current formal
+  target-task evidence.
+- Decision:
+  - treat Phase 0-7 as the accepted formal result set
+  - treat Phase 8A GSM8K as historical / exploratory pilot evidence
+  - treat Phase 8C-alt controlled runs as historical / exploratory mechanism
+    evidence only
+  - treat Phase 8D-0 / R4-1A as infrastructure discovery / preflight only
+  - treat Phase R2 / R2-fix as current mechanism-definition revisions, not
+    formal target-task experiments
+  - do not reinterpret Phase 8A write-age results as current
+    last-retrieved-decay evidence
+- Rationale:
+  - Phase 8A preceded the R2 last-retrieved decay revision
+  - controlled runs do not replace target-task TriviaQA evaluation
+  - R2 changed mechanism semantics without running a new formal target-task
+    evaluation
+- Consequences:
+  - current claims must separate accepted formal results, historical
+    exploratory records, and current mechanism definition
+  - no paper-facing target-task performance claim is available for the current
+    Version A-aligned mechanism
+  - future experiments must cite this boundary when comparing against older
+    records
+
+### DEC-0039: TriviaQA Infrastructure Gate Before Formal Evaluation
+
+- Date: 2026-06-18
+- Status: accepted
+- Context: The audit found that TriviaQA remains the immediate
+  repository-aligned target task, but formal evaluation is blocked by missing
+  or uncertain infrastructure assets.
+- Decision:
+  - resolve TriviaQA infrastructure readiness before formal TriviaQA eval
+  - required readiness items are:
+    - local TriviaQA MemGen checkpoint
+    - `mandarjoshi/trivia_qa` cache
+    - `Solaris99/AgentBank` `triviaqa` cache
+    - retrieval endpoint / index readiness
+    - structured answer output path readiness
+  - after readiness is established, run disabled-memory one-sample TriviaQA
+    structured smoke with `scripts.eval.r4_triviaqa_dynamic_harness`
+  - consider enabled-memory TriviaQA only after the disabled structured smoke is
+    stable
+  - keep Version B deferred until the target-task disabled path is stable and
+    explicitly approved
+- Rationale:
+  - the official dynamic path alone does not currently provide the desired
+    structured one-sample artifact contract
+  - retrieval failures can silently degrade TriviaQA through
+    `Cannot find corresponding pages.`
+  - enabled-memory or Version B work before a stable disabled target-task path
+    would make failures uninterpretable
+- Consequences:
+  - immediate work is infrastructure readiness, not method expansion
+  - any TriviaQA command before readiness should be marked candidate-only or
+    preflight-only
+  - Version B remains not started

@@ -1,5 +1,35 @@
 # Research Plan（研究计划）
 
+## Current Planning State（当前计划状态）
+
+- Accepted formal results: Phase 0-7.
+- Historical / exploratory records: Phase 8A GSM8K pilot, Phase 8C-alt
+  controlled mechanism study, Phase 8D-0 / R4-1A infrastructure discovery, and
+  Phase R2 / R2-fix mechanism revisions.
+- Current mechanism definition:
+  - Reasoner-only retrieved-memory injection.
+  - Retrieved memory does not enter Weaver.
+  - Stored memory is reasoner-space `latent_inputs_embeds`.
+  - Memory is session-local.
+  - Enabled memory requires `batch_size=1`.
+  - Retrieval uses last-retrieved decay.
+  - No fallback top-1.
+- Current blocker: TriviaQA infrastructure is not ready for formal evaluation.
+- Version B status: not started and blocked until target-task disabled-memory
+  path is stable and explicitly approved.
+
+## Current Next Step（当前下一步）
+
+1. Resolve TriviaQA infrastructure readiness:
+   local TriviaQA MemGen checkpoint, `mandarjoshi/trivia_qa` cache,
+   `Solaris99/AgentBank` cache, retrieval endpoint / index readiness, and
+   structured answer output path readiness.
+2. Run disabled-memory one-sample TriviaQA structured smoke with
+   `scripts.eval.r4_triviaqa_dynamic_harness`.
+3. Only after that consider enabled-memory TriviaQA or Version B planning.
+
+---
+
 ## Objective（研究目标）
 
 将 MemGen 作为一个长期研究项目持续推进，并研究一种仅在推理阶段（inference-only）启用的、可选的（optional）、会话级（session-level）的 Retrieval-Augmented Recurrent Latent Memory Bank（检索增强循环潜在记忆库）。

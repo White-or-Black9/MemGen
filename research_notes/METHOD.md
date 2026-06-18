@@ -19,6 +19,26 @@ Trigger?
 - No cross-sample sharing until explicitly approved.
 - Memory-bank experiments default to `batch_size=1`.
 
+## Current Mechanism Definition
+
+This is the current Version A-aligned mechanism after Phase R2 / R2-fix:
+
+- Retrieved memory is injected only into the Reasoner path.
+- Retrieved memory does not enter Weaver.
+- Stored memory is reasoner-space `latent_inputs_embeds`, after
+  `weaver_to_reasoner(...)`.
+- Memory is session-local and owned by the interaction session / episode.
+- Enabled memory requires `batch_size=1`.
+- Retrieval uses last-retrieved decay:
+  `score = cosine_similarity * exp(-decay_alpha * last_retrieved_age)`.
+- Only slots selected / returned to the Reasoner refresh `last_retrieved_step`.
+- `threshold_topk` has no fallback top-1.
+- Version B retrieval-to-Weaver behavior is not implemented.
+
+Historical note: Phase 8A and Phase 8C-alt records predate this current
+last-retrieved mechanism and must not be reinterpreted as current
+last-retrieved-decay evidence.
+
 ## Non-Goals
 
 - Modifying Weaver or Trigger training.

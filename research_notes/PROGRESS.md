@@ -2,10 +2,10 @@
 
 ## 当前状态
 
-- 当前状态：Version A-aligned 已实现、已提交，并已在 Phase R2 修订为
-  last-retrieved decay；当前没有 target-task main result。
+- 当前状态：Version A-aligned 已实现、已提交，并已在 Phase R2 / R2-fix
+  修订为 last-retrieved decay；当前没有 formal target-task main result。
 - 状态：`completed`
-- 最后更新：2026-06-16
+- 最后更新：2026-06-18 notes consolidation
 - Canonical revision：`c95e2bd feat: revise Version A-aligned decay to last-retrieved age`
 - 衰减 / fallback 实现审计：`completed`
 - 方法 / 计划对齐更新：`completed`
@@ -16,10 +16,20 @@
 - Phase R2 last-retrieved decay revision：`completed`
 - Phase R2-fix retrieval-step / write_back clarification：`completed`
 - 当前标准状态：
+  - Phase 0-7 是当前 accepted formal result set
+  - Phase 8A GSM8K pilot 是 historical / exploratory evidence only
+  - Phase 8C-alt controlled study 是 historical / exploratory mechanism
+    evidence only
+  - Phase 8D-0 / R4-1A 是 infrastructure discovery / preflight only
+  - Phase R2 / R2-fix 定义当前 mechanism，但没有产生 formal
+    target-task result
   - Version A-aligned current retrieval 使用 last-retrieved decay
   - full-bank `new_thread` eviction 使用 largest `last_retrieved_age`
   - no fallback top-1
   - retrieved memory 保持 Reasoner-only，不进入 Weaver
+  - stored memory 是 reasoner-space `latent_inputs_embeds`
+  - memory 是 session-local
+  - enabled memory 仍要求 `batch_size=1`
   - Version B 未开始
   - Controlled mechanism study 已 closeout
   - TriviaQA 仍无正式 baseline 或正式结果
@@ -31,21 +41,31 @@
     Version A-aligned last-retrieved mechanisms
   - MemoryAgentBench / LongMemEval 只记录为 future candidates
   - Version B 继续 deferred
+- 历史解释边界：
+  - Phase 8A 记录的是 R2 前 historical write-age mechanism，不得重解释为
+    current last-retrieved-decay evidence。
+  - Phase 8C-alt controlled runs 可作为 runtime / lifecycle / boundary
+    evidence，但不是 target-task performance evidence。
+  - Controlled diagnostic subset 只能作为 future mechanism diagnostic；不能替代
+    TriviaQA。
 - 最新验证：
   - `tests 76/76 passed`
   - Phase R2 / R2-fix 只修改代码、tests 和 notes；没有运行正式实验
 - 停止条件：已达到；没有明确批准，不要进入新的实现或实验阶段。
-- 下一步建议：
-  - 继续做 testing environment preparation，而不是进入 Version B
-  - acquire / verify TriviaQA dataset cache
-  - acquire / verify checkpoint
-  - acquire / verify retrieval service / Search-R1 / Wikipedia index
-  - build dynamic single-sample structured harness
-  - run disabled baseline first
-  - run Version A-aligned enabled smoke only after disabled path is stable
-  - parallel planning track：design a small controlled diagnostic subset for
-    mechanism verification only
-  - keep MemoryAgentBench / LongMemEval as future benchmark candidates only
+
+## Current Next Step
+
+1. Resolve TriviaQA infrastructure readiness before any formal TriviaQA eval:
+   local TriviaQA MemGen checkpoint, `mandarjoshi/trivia_qa` cache,
+   `Solaris99/AgentBank` cache, retrieval endpoint / index readiness, and a
+   structured answer output path.
+2. Then run a disabled-memory one-sample TriviaQA structured smoke using
+   `scripts.eval.r4_triviaqa_dynamic_harness`.
+3. Only after the disabled-memory TriviaQA smoke is stable should the project
+   consider enabled-memory TriviaQA runs or any Version B planning.
+
+Do not enter Version B until the TriviaQA disabled baseline / smoke path is
+stable and explicitly approved.
 
 ## 研究目标
 

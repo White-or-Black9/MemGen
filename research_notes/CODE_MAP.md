@@ -1,5 +1,33 @@
 # Code Map
 
+## Current Audit Consolidation
+
+Last consolidated after the 2026-06-18 read-only full-project audit.
+
+Current code-level conclusions:
+
+- Inference entry remains `main.py -> MemGenRunner.evaluate()`.
+- Static GSM8K evaluation uses `SingleTurnInteractionManager.run_agent_loop()`.
+- Dynamic TriviaQA evaluation uses `MultiTurnInteractionManager.run_agent_loop()`.
+- Memory-bank state is created by interaction managers, not stored globally on
+  `MemGenModel`.
+- `MemGenModel.generate(..., latent_memory_bank=...)` is the only model-level
+  memory-bank inference hook.
+- Retrieved memory is injected only into the Reasoner-side candidate path.
+- Retrieved memory does not enter `reasoner_to_weaver(...)`,
+  `augment_prompt(...)`, or `augment_inference(...)`.
+- Stored memory is post-projection reasoner-space `latent_inputs_embeds`.
+- Enabled memory is restricted to `batch_size=1`.
+- Current retrieval uses last-retrieved decay and no fallback top-1.
+- Version B retrieval-to-Weaver behavior is not present.
+
+Current evaluation readiness:
+
+- GSM8K disabled-memory small eval is repository-ready through the existing
+  verified GSM8K SFT checkpoint and debug harness.
+- TriviaQA formal evaluation is not ready until checkpoint, dataset caches,
+  retrieval endpoint / index, and structured answer output path are verified.
+
 Phase 1 audit completed on revision
 `7a13d0abb8bdfcb851421d164a9a8223af22a55f`.
 

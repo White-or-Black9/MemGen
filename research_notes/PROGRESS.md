@@ -32,8 +32,8 @@
   - enabled memory 仍要求 `batch_size=1`
   - Version B 未开始
   - Controlled mechanism study 已 closeout
-  - TriviaQA 仍无正式 baseline 或正式结果
-  - TriviaQA infrastructure 仍 blocked
+  - TriviaQA 仍无正式 baseline 或正式 performance 结果
+  - R4 Search-R1 / TriviaQA infrastructure validation 已完成，带 caveats
   - concrete next-step plan 现为 TriviaQA-first evaluation 加上
     controlled diagnostic subset design
   - TriviaQA 仍是当前 immediate repository-aligned evaluation path
@@ -51,18 +51,24 @@
 - 最新验证：
   - `tests 76/76 passed`
   - Phase R2 / R2-fix 只修改代码、tests 和 notes；没有运行正式实验
+  - R4 Search-R1 `/retrieve` schema validation passed on port `8000`
+  - R4 disabled-memory TriviaQA 1-sample dynamic smoke completed with
+    `valid_run=True`
+  - R4 Version A-aligned TriviaQA 1-sample dynamic smoke completed with
+    `valid_run=True`
+  - R4 threshold-positive diagnostic exercised non-empty retrieved latent memory
+    under diagnostic-only `threshold=0.01`
 - 停止条件：已达到；没有明确批准，不要进入新的实现或实验阶段。
 
 ## Current Next Step
 
-1. Resolve TriviaQA infrastructure readiness before any formal TriviaQA eval:
-   local TriviaQA MemGen checkpoint, `mandarjoshi/trivia_qa` cache,
-   `Solaris99/AgentBank` cache, retrieval endpoint / index readiness, and a
-   structured answer output path.
-2. Then run a disabled-memory one-sample TriviaQA structured smoke using
-   `scripts.eval.r4_triviaqa_dynamic_harness`.
-3. Only after the disabled-memory TriviaQA smoke is stable should the project
-   consider enabled-memory TriviaQA runs or any Version B planning.
+1. Treat R4 Search-R1 / TriviaQA infrastructure validation as complete with
+   caveats, not as a formal performance result.
+2. Decide the next experimental route: keep default `threshold=0.7` and search
+   for naturally matching TriviaQA samples, or design a threshold calibration /
+   ablation plan.
+3. Only after a separate decision should the project run any larger TriviaQA
+   evaluation. Version B remains deferred.
 
 Do not enter Version B until the TriviaQA disabled baseline / smoke path is
 stable and explicitly approved.
@@ -958,3 +964,130 @@ Phase 7 已完成。
   - memory-bank mechanism unchanged
   - no training code changed
   - no commit or push performed
+
+## 2026-06-18 - Phase R4 Search-R1 / TriviaQA Infrastructure Validation
+
+- 状态：`completed_with_caveats`
+- 性质：
+  - retrieval service / harness / smoke validation only
+  - not a full benchmark
+  - not a formal TriviaQA performance result
+  - no Version B work
+  - no source code, training code, or main project config was modified
+- Search-R1 service:
+  - repo: `/mnt/18T/baishilong/Search-R1`
+  - endpoint: `http://127.0.0.1:8000/retrieve`
+  - Search-R1 hard-codes Uvicorn port `8000`
+  - MemGen harness used `--retrieval-endpoint
+    http://127.0.0.1:8000/retrieve` rather than patching Search-R1 or using
+    the MemGen default `8001`
+  - `/retrieve` schema test passed
+  - compatible response shape:
+    `{"result":[[{"document":{"contents":"Title\nBody"},"score":...}]]}`
+- Retrieval assets:
+  - E5 model:
+    `/mnt/18T/baishilong/retrieval_assets/e5-base-v2`
+  - E5 was verified separately with `AutoTokenizer` and `AutoModel`;
+    hidden size `768`
+  - corpus:
+    `/mnt/18T/baishilong/retrieval_assets/wiki-18/wiki-18.jsonl`
+    valid JSONL, about `14G`
+  - compressed corpus:
+    `/mnt/18T/baishilong/retrieval_assets/wiki-18/wiki-18.jsonl.gz`
+  - FAISS index:
+    `/mnt/18T/baishilong/retrieval_assets/wiki-18/e5_Flat.index`
+    about `61G`
+  - index split files:
+    `/mnt/18T/baishilong/retrieval_assets/wiki-18-index/part_aa`
+    and
+    `/mnt/18T/baishilong/retrieval_assets/wiki-18-index/part_ab`
+  - caveat: the corpus `.gz` was actually a gzip-compressed tar payload; the
+    correct extraction route was `tar -xOzf`, not plain `gzip -dc`
+- Search-R1 GPU / port bring-up:
+  - port `8000` was initially occupied by a user-owned temporary
+    `python3 -m http.server 8000 --bind 0.0.0.0`; it was killed after
+    verification
+  - all-visible-GPU FAISS loading failed initially because GPU `6` was nearly
+    full
+  - `CUDA_VISIBLE_DEVICES=7` failed because one 49GB A6000 could not hold the
+    about-61G index
+  - successful service launch used:
+    `CUDA_VISIBLE_DEVICES=0,2,3,4,7`
+- Disabled-memory dynamic smoke:
+  - output:
+    `outputs/r4_triviaqa_dynamic_smoke_disabled_1sample/`
+  - exit code `0`
+  - `evaluate/answer.json` written as JSONL-style records
+  - `retrieval_call_count=1`
+  - `retrieval_success_count=1`
+  - `retrieval_failure_count=0`
+  - `saw_cannot_find_pages=False`
+  - `valid_run=True`
+  - `invalid_reason=None`
+  - `memory_mode=disabled`
+  - `memory_enabled=False`
+  - Claude read-only review: `PASS`
+  - interpretation: infrastructure smoke only, not a performance result
+- Version A-aligned dynamic smoke:
+  - output:
+    `outputs/r4_triviaqa_dynamic_smoke_version_a_1sample/`
+  - exit code `0`
+  - `memory_mode=version_a_aligned`
+  - `memory_enabled=True`
+  - `memory_write_count=2`
+  - `memory_retrieve_count=1`
+  - `retrieved_latent_count=0`
+  - `new_latent_count=16`
+  - `slot_count=2`
+  - default `threshold=0.7`
+  - `max_score` about `0.044`
+  - `threshold_passed=False`
+  - `retrieval_call_count=1`
+  - `retrieval_success_count=1`
+  - `valid_run=True`
+  - Claude read-only review: `PASS`
+  - interpretation: Version A enabled path and memory write path validated,
+    but non-empty retrieved-memory path was not triggered at the default
+    threshold on sample `0`
+- Retrieval-positive diagnostic:
+  - output:
+    `outputs/r4_triviaqa_dynamic_diagnostic_version_a_threshold001_1sample/`
+  - diagnostic-only threshold override:
+    `threshold 0.7 -> 0.01`
+  - original source and original config were not modified
+  - copied YAML under `outputs/` was provenance only; the effective threshold
+    override was an in-memory harness override
+  - exit code `0`
+  - `memory_enabled=True`
+  - `memory_write_count=2`
+  - `memory_retrieve_count=1`
+  - `retrieved_latent_count=8`
+  - `new_latent_count=16`
+  - `slot_count=1`
+  - `threshold=0.01`
+  - `max_score=0.04365994428860699`
+  - `threshold_passed=True`
+  - `update_action_trace=["insert", "replace_matched"]`
+  - `retrieved_indices=[0]`
+  - Claude read-only review: `PASS`
+  - interpretation: confirms the non-empty retrieved-memory path can be
+    exercised under a controlled diagnostic threshold; it is not a performance
+    result and not default Version A behavior
+- Caveats:
+  - duplicate system prompt appears in disabled, Version A, and diagnostic
+    records; this appears to be a conversation construction artifact and did
+    not block smoke validation
+  - `answer.json` is JSONL-style and must be read line by line, not with
+    `json.load`
+  - artifacts do not directly assert Reasoner-only injection; they record
+    memory retrieval / memory-bank behavior, while the latent injection remains
+    consistent with the Version A Reasoner-only design
+  - default threshold `0.7` did not trigger `retrieved_latent_count > 0` on
+    sample `0`
+  - threshold `0.01` is diagnostic-only and must not be used as a formal
+    performance setting without a separate decision
+- Current transition:
+  - R4 infrastructure validation is complete with caveats
+  - next decision needed: keep default threshold `0.7` and search for
+    naturally matching samples, or design threshold calibration / ablation
+    before any larger run

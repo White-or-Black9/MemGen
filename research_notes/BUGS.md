@@ -23,23 +23,40 @@ Do not delete resolved entries.
 
 ## Current Research / Infrastructure Blockers
 
-These are not R2 code bugs. This section is partially resolved:
-base model, TriviaQA dataset cache, AgentBank TriviaQA cache, and TriviaQA
-checkpoint are now ready. See the R4-1C update below for the current
-unresolved retrieval-side blockers.
+These are not R2 code bugs. R4 Search-R1 / TriviaQA infrastructure validation
+is now complete with caveats as of 2026-06-18.
 
-Remaining target-task and infrastructure blockers for the next TriviaQA smoke
-stage:
+Resolved from earlier R4 blockers:
 
-- retrieval service at `127.0.0.1:8001` is unavailable / not verified
-- Search-R1 / Wikipedia index assets are missing or not verified
+- local TriviaQA MemGen checkpoint is ready
+- `mandarjoshi/trivia_qa` cache is ready
+- `Solaris99/AgentBank` `triviaqa` cache is ready
+- Search-R1 repo and server are present at `/mnt/18T/baishilong/Search-R1`
+- E5 model, Wikipedia JSONL corpus, and FAISS index are present and verified
+  enough for smoke use
+- Search-R1 `/retrieve` runs on `http://127.0.0.1:8000/retrieve`
+- R4 disabled-memory, Version A-aligned, and retrieval-positive diagnostic
+  single-sample smoke records completed without retrieval failure
+
+Remaining caveats / watchlist:
+
+- MemGen's default retriever path still expects `127.0.0.1:8001`; R4 harness
+  commands used endpoint override to Search-R1 port `8000`
 - silent `Cannot find corresponding pages` fallback remains a run-quality risk
-  that the R4-1D harness now records explicitly
+  outside the structured R4 harness accounting
+- duplicate system prompt appears in disabled, Version A, and diagnostic
+  conversation artifacts
+- `answer.json` is JSONL-style and must be read line by line
+- Reasoner-only injection is not directly asserted in R4 artifacts
+- default threshold `0.7` did not trigger non-empty retrieved latent memory on
+  sample `0`
+- diagnostic threshold `0.01` must not be treated as a formal setting or
+  performance evidence
 
 ### R4 TriviaQA Infrastructure Blockers
 
 - Date recorded: 2026-06-16
-- Status: `open`
+- Status: `resolved_by_R4_20260618_with_caveats`
 - Classification: infrastructure / environment blockers, not memory-bank code
   bugs
 - Evidence source: Phase R4-1A TriviaQA environment preflight
@@ -63,7 +80,7 @@ stage:
 ### R4-1C Retrieval Service / Index Check Update
 
 - Date recorded: 2026-06-17
-- Status: `open`
+- Status: `superseded_by_R4_20260618_validation`
 - Classification: infrastructure / environment blocker, not memory-bank code
   bug
 - Evidence source: Phase R4-1C retrieval service / index configuration check
@@ -115,13 +132,15 @@ stage:
     `Cannot find corresponding pages.` detection
   - top-level `valid_run` and `invalid_reason` are now part of the structured
     record
-- Still blocked:
-  - formal retrieval remains blocked until Search-R1-compatible service,
-    Wikipedia corpus, FAISS index, and retriever model are available
-  - disabled baseline smoke remains blocked until retrieval service / index is
-    ready
-  - Version A-aligned enabled smoke remains blocked until disabled baseline
-    path is stable
+- 2026-06-18 update:
+  - Search-R1-compatible service, Wikipedia corpus, FAISS index, and E5 model
+    are now available for R4 smoke validation
+  - disabled-memory one-sample structured smoke completed with
+    `valid_run=True`
+  - Version A-aligned one-sample structured smoke completed with
+    `valid_run=True`
+  - retrieval-positive diagnostic completed under diagnostic-only
+    `threshold=0.01`
 - Boundary:
   - no formal TriviaQA result exists
   - no target-task performance claim exists

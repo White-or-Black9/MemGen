@@ -46,6 +46,10 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0037 | 2026-06-16 | accepted | Use Search-R1-compatible retrieval service for formal TriviaQA evaluation |
 | DEC-0038 | 2026-06-18 | accepted | Treat Phase 0-7 as formal results, later runs as historical/exploratory unless explicitly promoted |
 | DEC-0039 | 2026-06-18 | accepted | Block formal TriviaQA evaluation until infrastructure readiness and a disabled structured smoke are established |
+| DEC-0040 | 2026-06-18 | accepted | Use harness endpoint override for Search-R1 port 8000 rather than patching Search-R1 |
+| DEC-0041 | 2026-06-18 | accepted | Treat the threshold-positive run as diagnostic only |
+| DEC-0042 | 2026-06-18 | accepted | Do not treat one-sample TriviaQA reward as performance evidence |
+| DEC-0043 | 2026-06-18 | accepted | Mark R4 infrastructure validation complete with caveats and gate next scaling decision |
 
 ## Decision Template
 
@@ -1042,3 +1046,105 @@ IDs and append superseding decisions rather than silently rewriting history.
   - any TriviaQA command before readiness should be marked candidate-only or
     preflight-only
   - Version B remains not started
+
+### DEC-0040: Use Endpoint Override for Search-R1 Port 8000
+
+- Date: 2026-06-18
+- Status: accepted
+- Context: Search-R1 `retrieval_server.py` hard-codes Uvicorn port `8000`,
+  while MemGen's default retrieval client points at
+  `http://127.0.0.1:8001/retrieve`.
+- Decision:
+  - run Search-R1 on its native port `8000`
+  - use the R4 harness `--retrieval-endpoint
+    http://127.0.0.1:8000/retrieve` override
+  - do not patch Search-R1 for port `8001` during R4 infrastructure smoke
+- Rationale:
+  - endpoint override is the least invasive route
+  - it preserves Search-R1 upstream code and MemGen source code
+  - `/retrieve` schema compatibility was verified on port `8000`
+- Consequences:
+  - R4 harness commands must record the explicit endpoint override
+  - future non-harness paths that still use `data/utils/retrieval_utils.py`
+    may still expect port `8001` unless separately configured or changed
+- Related experiments:
+  - `EXP-20260618-001`
+  - `EXP-20260618-002`
+  - `EXP-20260618-003`
+  - `EXP-20260618-004`
+
+### DEC-0041: Threshold-Positive Run Is Diagnostic Only
+
+- Date: 2026-06-18
+- Status: accepted
+- Context: The default Version A-aligned TriviaQA smoke on sample `0` produced
+  `max_score` about `0.044`, below the default threshold `0.7`, so
+  `retrieved_latent_count=0`.
+- Decision:
+  - allow a one-sample diagnostic-only threshold override
+    `0.7 -> 0.01` to exercise the non-empty retrieved-memory path
+  - do not treat `threshold=0.01` as a default Version A setting
+  - do not use the diagnostic run as performance evidence
+- Rationale:
+  - the diagnostic isolates path coverage for non-empty retrieved latent memory
+  - threshold calibration is a separate methodological decision
+- Consequences:
+  - `EXP-20260618-004` can support the claim that non-empty retrieval path can
+    be exercised, but not a quality or performance claim
+  - any future threshold sweep or calibration requires a separate plan
+- Related experiment:
+  - `EXP-20260618-004`
+
+### DEC-0042: One-Sample TriviaQA Reward Is Not Performance Evidence
+
+- Date: 2026-06-18
+- Status: accepted
+- Context: Disabled, Version A, and diagnostic R4 runs each used one TriviaQA
+  validation sample for infrastructure smoke.
+- Decision:
+  - do not interpret `reward=1.0` or any one-sample outcome as a performance
+    result
+  - report these runs only as infrastructure, harness, retrieval, and
+    memory-path validation
+- Rationale:
+  - one sample is insufficient for performance estimation
+  - the diagnostic threshold differs from default Version A behavior
+  - smoke tests were intentionally scoped to readiness and path coverage
+- Consequences:
+  - no paper-facing target-task performance claim exists from R4 smoke
+  - future performance evaluation requires an explicitly approved sample set and
+    metric contract
+- Related experiments:
+  - `EXP-20260618-002`
+  - `EXP-20260618-003`
+  - `EXP-20260618-004`
+
+### DEC-0043: R4 Infrastructure Validation Complete with Caveats
+
+- Date: 2026-06-18
+- Status: accepted
+- Context: Search-R1 retrieval, disabled-memory smoke, Version A smoke, and a
+  retrieval-positive diagnostic all completed after the R4 harness became
+  available.
+- Decision:
+  - mark R4 Search-R1 / TriviaQA infrastructure validation complete with
+    caveats
+  - next experimental decision is required before any larger run:
+    keep default threshold `0.7` and search for naturally matching samples, or
+    design a threshold calibration / ablation plan
+  - keep Version B deferred
+- Caveats:
+  - duplicate system prompt appears in conversation artifacts
+  - `answer.json` is JSONL-style and must be read line by line
+  - artifacts do not directly assert Reasoner-only injection
+  - default threshold `0.7` did not trigger non-empty retrieval on sample `0`
+  - threshold `0.01` was diagnostic-only
+- Consequences:
+  - R4 infrastructure blockers are resolved enough for the next planned
+    experimental decision
+  - no full benchmark or performance claim has been made
+- Related experiments:
+  - `EXP-20260618-001`
+  - `EXP-20260618-002`
+  - `EXP-20260618-003`
+  - `EXP-20260618-004`

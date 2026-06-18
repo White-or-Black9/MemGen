@@ -7,8 +7,9 @@ overwrite prior records; append a new entry.
 
 Phase R2 changed the current Version A-aligned mechanism from historical
 write-age decay to last-retrieved decay. This was a code / test / documentation
-revision, not a formal target-task experiment, and no formal experiment has
-been run after R2 yet.
+revision, not a formal target-task experiment. R4 later ran TriviaQA
+infrastructure smokes and a retrieval-positive diagnostic, but still no formal
+target-task performance experiment has been run after R2.
 
 Interpretation boundary:
 
@@ -17,7 +18,8 @@ Interpretation boundary:
   evidence under the older write-age mechanism.
 - These pre-R2 runs must not be reinterpreted as last-retrieved-decay
   experiments.
-- There is still no TriviaQA result and no target-task performance claim.
+- There is still no formal TriviaQA performance result and no target-task
+  performance claim.
 
 ## Current Evidence Classification
 
@@ -40,6 +42,9 @@ Historical / exploratory records:
   do not replace TriviaQA and do not establish target-task performance.
 - Phase 8D-0 / R4-1A records are infrastructure discovery / preflight only.
   They are not evaluation results.
+- R4 Search-R1 / TriviaQA records `EXP-20260618-001` through
+  `EXP-20260618-004` are infrastructure smoke / path-coverage / diagnostic
+  evidence only. They are not formal target-task performance results.
 - Phase R2 / R2-fix define the current mechanism but did not run formal
   target-task experiments.
 
@@ -54,9 +59,10 @@ Current mechanism to use for future experiments:
 
 Current next experiment gate:
 
-- Do not run enabled-memory TriviaQA or Version B until TriviaQA infrastructure
-  is ready and a disabled-memory one-sample structured smoke has passed using
-  `scripts.eval.r4_triviaqa_dynamic_harness`.
+- R4 infrastructure validation is complete with caveats. Before any larger
+  TriviaQA run, decide whether to keep default `threshold=0.7` and search for
+  naturally matching samples, or design a threshold calibration / ablation plan.
+- Version B remains deferred.
 
 ## Experiment Index
 
@@ -93,6 +99,10 @@ Current next experiment gate:
 | EXP-20260613-003 | 2026-06-13 | Phase 8C-alt calibrated G2 | Does calibrated G2 preserve lifecycle and recover the hidden fact? | `completed` | Slots `[1,2,3]`, 12 writes, 11 retrievals; unique wrong code `123456`; strict `0/1`, relaxed `0/1` |
 | EXP-20260613-004 | 2026-06-13 | Phase 8C-alt calibrated G3 | Does the calibrated oracle-visible control validate deterministic relaxed scoring? | `completed` | Correct untagged code `770487`; strict `0/1`, relaxed `1/1` |
 | EXP-20260613-005 | 2026-06-13 | Phase 8C-alt calibrated G1 | Does the calibrated Version A-simple legacy path run correctly as a one-episode mechanism smoke? | `completed` | Legacy `replace_oldest` path ran with slot trace `[4,8,8]`; unique wrong code `123456`; strict `0/1`, relaxed `0/1` |
+| EXP-20260618-001 | 2026-06-18 | R4 Search-R1 preflight | Can the local Search-R1 retrieval service serve a MemGen-compatible `/retrieve` schema? | `completed_with_caveats` | Search-R1 served port `8000` with compatible schema after multi-GPU FAISS load using `CUDA_VISIBLE_DEVICES=0,2,3,4,7` |
+| EXP-20260618-002 | 2026-06-18 | R4 disabled TriviaQA smoke | Can the R4 dynamic harness complete one disabled-memory TriviaQA sample with live retrieval? | `completed` | One sample valid; retrieval calls `1`, failures `0`, `valid_run=True` |
+| EXP-20260618-003 | 2026-06-18 | R4 Version A TriviaQA smoke | Can Version A-aligned memory run on one dynamic TriviaQA sample with live retrieval? | `completed` | Enabled memory wrote 2 slots and performed 1 retrieval turn, but default threshold `0.7` returned `retrieved_latent_count=0` |
+| EXP-20260618-004 | 2026-06-18 | R4 retrieval-positive diagnostic | Can non-empty retrieved latent memory be exercised under a controlled low threshold? | `completed_diagnostic_only` | Diagnostic `threshold=0.01` produced `retrieved_latent_count=8` and `replace_matched`; not default behavior or performance evidence |
 
 ## Recorded Experiments
 
@@ -1924,3 +1934,195 @@ full GSM8K test performance.
   - controlled evaluation remains a mechanism study and does not replace
     TriviaQA
   - no fallback top-1, last-retrieved decay, or Version B was introduced
+
+### EXP-20260618-001: Search-R1 Retrieval Service Preflight
+
+- Phase: R4 Search-R1 / TriviaQA infrastructure validation
+- Status: `completed_with_caveats`
+- Research question: Can the local Search-R1 retrieval service serve the
+  MemGen-compatible `/retrieve` schema for TriviaQA dynamic smoke tests?
+- Nature: infrastructure preflight only; not a MemGen evaluation and not a
+  performance result
+- Search-R1 repo:
+  `/mnt/18T/baishilong/Search-R1`
+- Endpoint:
+  `http://127.0.0.1:8000/retrieve`
+- MemGen harness route:
+  - Search-R1 hard-codes Uvicorn port `8000`
+  - MemGen harness used the `--retrieval-endpoint` override
+  - Search-R1 was not patched to port `8001`
+- Assets:
+  - E5 model:
+    `/mnt/18T/baishilong/retrieval_assets/e5-base-v2`
+  - E5 verification: `AutoTokenizer` and `AutoModel` load succeeded; hidden
+    size `768`
+  - corpus:
+    `/mnt/18T/baishilong/retrieval_assets/wiki-18/wiki-18.jsonl`, valid JSONL,
+    about `14G`
+  - compressed corpus:
+    `/mnt/18T/baishilong/retrieval_assets/wiki-18/wiki-18.jsonl.gz`
+  - FAISS index:
+    `/mnt/18T/baishilong/retrieval_assets/wiki-18/e5_Flat.index`, about `61G`
+  - split index files:
+    `/mnt/18T/baishilong/retrieval_assets/wiki-18-index/part_aa` and
+    `/mnt/18T/baishilong/retrieval_assets/wiki-18-index/part_ab`
+  - extraction caveat: the corpus `.gz` was actually a gzip-compressed tar
+    payload; correct extraction used `tar -xOzf`, not plain `gzip -dc`
+- Bring-up observations:
+  - port `8000` was initially occupied by a user-owned temporary
+    `python3 -m http.server 8000 --bind 0.0.0.0`; it was killed after
+    verification
+  - all-visible-GPU FAISS loading failed because GPU `6` was nearly full
+  - `CUDA_VISIBLE_DEVICES=7` failed because one A6000 could not hold the
+    about-61G index
+  - successful launch used `CUDA_VISIBLE_DEVICES=0,2,3,4,7`
+- Schema verification:
+  - request:
+    `{"queries":["Who was Evan Morris?"],"topk":3,"return_scores":true}`
+  - HTTP status `200`
+  - response top-level keys: `["result"]`
+  - `result[0][0].document.contents` existed
+  - `score` existed
+  - response shape compatible with MemGen:
+    `{"result":[[{"document":{"contents":"Title\nBody"},"score":...}]]}`
+- Conclusion:
+  - Search-R1 / Wikipedia retrieval is usable for R4 smoke tests on port `8000`
+  - endpoint override is the least invasive route
+  - this does not establish any model performance claim
+
+### EXP-20260618-002: Disabled-Memory TriviaQA Dynamic Smoke
+
+- Phase: R4 disabled-memory dynamic smoke
+- Status: `completed`
+- Research question: Can the R4 dynamic harness complete one disabled-memory
+  TriviaQA sample with live Search-R1 retrieval and structured artifacts?
+- Nature: infrastructure smoke only; not a formal TriviaQA result and not a
+  performance experiment
+- Output:
+  `outputs/r4_triviaqa_dynamic_smoke_disabled_1sample/`
+- Configuration:
+  - config: `configs/latent_memory/triviaqa.yaml`
+  - checkpoint:
+    `/home/baishilong/.cache/huggingface/hub/models--Kana-s--MemGen/snapshots/269d9b1741130b94fffa410cdaa3d4bc74081a7f/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8/model`
+  - sample index `0`, sample count `1`, batch size `1`
+  - memory mode `disabled`
+  - retrieval endpoint `http://127.0.0.1:8000/retrieve`
+  - retrieval top-k `3`
+  - seed `42`, temperature `0.0`, max response length `1024`
+  - `--require-retrieval-ok` enabled
+- Result:
+  - exit code `0`
+  - `evaluate/answer.json` written as JSONL-style records
+  - retrieval calls `1`
+  - retrieval successes `1`
+  - retrieval failures `0`
+  - `saw_cannot_find_pages=False`
+  - `valid_run=True`
+  - `invalid_reason=None`
+  - `memory_enabled=False`
+  - Claude read-only review: `PASS`
+- Caveats:
+  - duplicate system prompt appears in the conversation artifact
+  - `answer.json` must be read line by line rather than with `json.load`
+  - do not treat `reward=1.0` from this one-sample smoke as a performance
+    result
+
+### EXP-20260618-003: Version A-Aligned TriviaQA Dynamic Smoke
+
+- Phase: R4 Version A-aligned dynamic smoke
+- Status: `completed`
+- Research question: Can the Version A-aligned memory path run on one dynamic
+  TriviaQA sample with live retrieval?
+- Nature: enabled-path infrastructure smoke only; not a formal TriviaQA result
+  and not a performance experiment
+- Output:
+  `outputs/r4_triviaqa_dynamic_smoke_version_a_1sample/`
+- Configuration:
+  - config: `configs/latent_memory/triviaqa.yaml`
+  - checkpoint:
+    `/home/baishilong/.cache/huggingface/hub/models--Kana-s--MemGen/snapshots/269d9b1741130b94fffa410cdaa3d4bc74081a7f/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8/model`
+  - sample index `0`, sample count `1`, batch size `1`
+  - memory mode `version_a_aligned`
+  - retrieval endpoint `http://127.0.0.1:8000/retrieve`
+  - retrieval top-k `3`
+  - seed `42`, temperature `0.0`, max response length `1024`
+  - `--require-retrieval-ok` enabled
+- Retrieval result:
+  - retrieval calls `1`
+  - retrieval successes `1`
+  - retrieval failures `0`
+  - `valid_run=True`
+  - Claude read-only review: `PASS`
+- Memory result:
+  - `memory_enabled=True`
+  - `memory_write_count=2`
+  - `memory_retrieve_count=1`
+  - `retrieved_latent_count=0`
+  - `new_latent_count=16`
+  - `slot_count=2`
+  - default `threshold=0.7`
+  - `max_score` about `0.044`
+  - `threshold_passed=False`
+- Interpretation:
+  - Version A enabled path and memory write path were validated on this smoke
+  - non-empty retrieved-memory path was not triggered at default threshold on
+    sample `0`
+  - artifacts did not directly assert Reasoner-only injection; they recorded
+    memory-bank behavior consistent with the Version A path
+  - do not treat `reward=1.0` from this one-sample smoke as a performance
+    result
+- Caveat:
+  - duplicate system prompt appears in the conversation artifact
+
+### EXP-20260618-004: Retrieval-Positive Version A Diagnostic
+
+- Phase: R4 retrieval-positive diagnostic
+- Status: `completed_diagnostic_only`
+- Research question: Can non-empty retrieved latent memory be exercised under a
+  controlled threshold override?
+- Nature:
+  - controlled diagnostic only
+  - not a formal TriviaQA result
+  - not a default Version A setting
+  - not a performance experiment
+- Output:
+  `outputs/r4_triviaqa_dynamic_diagnostic_version_a_threshold001_1sample/`
+- Configuration:
+  - base config copied to:
+    `outputs/r4_triviaqa_dynamic_diagnostic_version_a_threshold001_1sample/triviaqa_threshold001.yaml`
+  - original source and original config were not modified
+  - copied YAML was provenance only because the R4 harness hard-codes the
+    Version A-aligned memory config
+  - effective diagnostic override was in-memory:
+    `latent_memory_bank.threshold: 0.7 -> 0.01`
+  - sample index `0`, sample count `1`, batch size `1`
+  - memory mode `version_a_aligned`
+  - retrieval endpoint `http://127.0.0.1:8000/retrieve`
+  - retrieval top-k `3`
+  - seed `42`, temperature `0.0`, max response length `1024`
+  - `--require-retrieval-ok` enabled
+- Result:
+  - exit code `0`
+  - `memory_enabled=True`
+  - `memory_write_count=2`
+  - `memory_retrieve_count=1`
+  - `retrieved_latent_count=8`
+  - `new_latent_count=16`
+  - `slot_count=1`
+  - `threshold=0.01`
+  - `max_score=0.04365994428860699`
+  - `threshold_passed=True`
+  - `update_action_trace=["insert", "replace_matched"]`
+  - `retrieved_indices=[0]`
+  - Claude read-only review: `PASS`
+- Interpretation:
+  - non-empty retrieved latent memory can be exercised under a controlled
+    diagnostic threshold
+  - this does not justify changing the default threshold or making performance
+    claims
+  - threshold `0.01` must not be used as a formal performance setting without a
+    separate decision
+- Caveats:
+  - duplicate system prompt appears in the conversation artifact
+  - artifacts show retrieval and memory-bank behavior; they do not separately
+    assert Reasoner-only injection

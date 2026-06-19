@@ -2317,3 +2317,32 @@ full GSM8K test performance.
   - exploratory R4 evidence only; not formal target-task benchmark
   - Version A shows sparse steering but no net gain on the larger held-out slice
   - result strengthens the case for a suppress-pre-evidence-write ablation
+
+### EXP-20260619-015: Disabled TriviaQA Full Validation Aggregate
+
+- Phase: R4 disabled full baseline
+- Status: `completed`
+- Research question: Can the disabled-memory TriviaQA harness complete the
+  full validation split end-to-end with the corrected retry chunks?
+- Output: `outputs/r4_triviaqa_full_chunks/disabled_s*`
+- Configuration:
+  - checkpoint: `Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8/model`
+  - dataset: TriviaQA validation / `rc.wikipedia.nocontext`
+  - retrieval: local Search-R1 endpoint
+  - batch_size: 1
+  - temperature: 0.0
+  - seed: 42
+- Result: 7993/7993 samples covered with no missing or duplicate sample IDs
+  - disabled correct: 5148/7993
+  - disabled accuracy: 0.6440635556
+  - the original stuck `disabled_s7000_7992` chunk was preserved in place and
+    excluded from the final aggregate; the tail was re-run via smaller retry
+    chunks
+  - retry chunks:
+    - 7000..7499: 500/500 valid, 0 retrieval-blocked
+    - 7500..7799: 295/300 valid, 5 retrieval-blocked
+    - 7800..7992: 193/193 valid, 0 retrieval-blocked
+- Interpretation:
+  - this is an operational/full-coverage disabled baseline, not a Version A
+    comparison and not a formal claim about the enabled mechanism
+  - the full disabled path now has complete artifacts for the validation split

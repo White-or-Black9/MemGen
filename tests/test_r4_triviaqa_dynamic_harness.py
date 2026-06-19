@@ -1,5 +1,9 @@
 import argparse
+import contextlib
+import io
+import tempfile
 import unittest
+from pathlib import Path
 
 from scripts.eval import r4_triviaqa_dynamic_harness as harness
 
@@ -94,6 +98,8 @@ class R4TriviaQADynamicHarnessTest(unittest.TestCase):
                 memory_enabled=False,
                 checkpoint_path="/tmp/checkpoint",
                 config_overrides=["run.mode", "evaluate"],
+                memory_threshold=None,
+                memory_top_k=None,
                 temperature=0.0,
                 max_response_length=1024,
                 seed=42,
@@ -165,6 +171,60 @@ class R4TriviaQADynamicHarnessTest(unittest.TestCase):
                     "version_b",
                 ]
             )
+
+    def test_load_sample_uses_preloaded_dataset(self):
+        dataset = [
+            {
+                "question": "What is the capital of France?",
+                "answer": {"normalized_aliases": ["Paris"]},
+            }
+        ]
+
+        sample = harness._load_sample(dataset, 0)
+
+        self.assertEqual(sample["prompt"], "What is the capital of France?")
+        self.assertEqual(sample["answer"], ["Paris"])
+
+    def test_log_sample_progress_prints_chunk_context_and_reward(self):
+        buffer = io.StringIO()
+
+        with contextlib.redirect_stdout(buffer):
+            harness.log_sample_progress(
+                chunk_start=7000,
+                chunk_end=7992,
+                sample_index=7005,
+                local_index=6,
+                sample_count=993,
+                stage="finish",
+                reward=1.0,
+                valid_run=True,
+                invalid_reason=None,
+            )
+
+        output = buffer.getvalue()
+        self.assertIn("chunk 7000..7992", output)
+        self.assertIn("sample 7005", output)
+        self.assertIn("6/993", output)
+        self.assertIn("reward=1.0", output)
+
+    def test_write_artifacts_logs_written_files(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_dir = Path(tmpdir)
+            buffer = io.StringIO()
+
+            with contextlib.redirect_stdout(buffer):
+                harness.write_artifacts(
+                    output_dir=output_dir,
+                    records=[],
+                    summary={"summary": {"sample_count": 0}},
+                    run_config={"phase": harness.PHASE},
+                )
+
+        output = buffer.getvalue()
+        self.assertIn("run_config.json", output)
+        self.assertIn("evaluate/answer.json", output)
+        self.assertIn("summary.json", output)
+        self.assertIn("memory_trace.json", output)
 
 
 if __name__ == "__main__":

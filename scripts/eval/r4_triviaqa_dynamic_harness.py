@@ -286,6 +286,39 @@ def conversation_to_text(record: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def log_sample_progress(
+    *,
+    chunk_start: int,
+    chunk_end: int,
+    sample_index: int,
+    local_index: int,
+    sample_count: int,
+    stage: str,
+    reward: Optional[float] = None,
+    valid_run: Optional[bool] = None,
+    invalid_reason: Optional[str] = None,
+) -> None:
+    suffix_parts = []
+    if reward is not None:
+        suffix_parts.append(f"reward={reward}")
+    if valid_run is not None:
+        suffix_parts.append(f"valid_run={valid_run}")
+    if invalid_reason is not None:
+        suffix_parts.append(f"invalid_reason={invalid_reason}")
+    suffix = f" {' '.join(suffix_parts)}" if suffix_parts else ""
+    print(
+        (
+            f"[{PHASE}] chunk {chunk_start}..{chunk_end} "
+            f"sample {sample_index} ({local_index}/{sample_count}) stage={stage}{suffix}"
+        ),
+        flush=True,
+    )
+
+
+def log_artifact_write(path: Path) -> None:
+    print(f"[{PHASE}] writing {path}", flush=True)
+
+
 def write_artifacts(
     output_dir: Path,
     records: List[Dict[str, Any]],
@@ -294,23 +327,33 @@ def write_artifacts(
 ) -> None:
     evaluate_dir = output_dir / "evaluate"
     evaluate_dir.mkdir(parents=True, exist_ok=True)
-    with (evaluate_dir / "answer.json").open("w", encoding="utf-8") as handle:
+    answer_path = evaluate_dir / "answer.json"
+    log_artifact_write(answer_path)
+    with answer_path.open("w", encoding="utf-8") as handle:
         for record in records:
             handle.write(json.dumps(record, ensure_ascii=False) + "\n")
         handle.write(json.dumps(summary, ensure_ascii=False) + "\n")
-    (evaluate_dir / "conversations.txt").write_text(
+    conversations_path = evaluate_dir / "conversations.txt"
+    log_artifact_write(conversations_path)
+    conversations_path.write_text(
         "\n\n".join(conversation_to_text(record) for record in records) + "\n",
         encoding="utf-8",
     )
-    (output_dir / "summary.json").write_text(
+    summary_path = output_dir / "summary.json"
+    log_artifact_write(summary_path)
+    summary_path.write_text(
         json.dumps(summary, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
-    (output_dir / "run_config.json").write_text(
+    run_config_path = output_dir / "run_config.json"
+    log_artifact_write(run_config_path)
+    run_config_path.write_text(
         json.dumps(run_config, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
-    (output_dir / "memory_trace.json").write_text(
+    memory_trace_path = output_dir / "memory_trace.json"
+    log_artifact_write(memory_trace_path)
+    memory_trace_path.write_text(
         json.dumps(
             [
                 {
@@ -338,14 +381,17 @@ def _sample_from_raw(raw_sample: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def _load_sample(sample_index: int) -> Dict[str, Any]:
+def _load_validation_dataset():
     from datasets import load_dataset
 
-    dataset = load_dataset(
+    return load_dataset(
         "mandarjoshi/trivia_qa",
         "rc.wikipedia.nocontext",
         split="validation",
     )
+
+
+def _load_sample(dataset: Any, sample_index: int) -> Dict[str, Any]:
     if sample_index >= len(dataset):
         raise ValueError(
             f"sample_index {sample_index} out of range for validation split"
@@ -424,14 +470,25 @@ def _invalid_reason(
 def run_single_sample(
     args: argparse.Namespace,
     *,
+    dataset: Any,
     config_dict: Dict[str, Any],
     model: Any,
     interaction_manager: Any,
+    local_index: int,
+    chunk_end: int,
 ) -> Dict[str, Any]:
     from data.triviaqa.env import TriviaQAEnv
     import torch
 
-    sample = _load_sample(args.sample_index)
+    log_sample_progress(
+        chunk_start=args.sample_index - local_index + 1,
+        chunk_end=chunk_end,
+        sample_index=args.sample_index,
+        local_index=local_index,
+        sample_count=args.sample_count,
+        stage="start",
+    )
+    sample = _load_sample(dataset, args.sample_index)
     env = TriviaQAEnv(config_dict["dataset"])
     system_prompt, user_prompt = env.set_env(sample)
     retrieval = RetrievalAccounting(
@@ -440,6 +497,14 @@ def run_single_sample(
     )
     env.explorer = AccountingRetriever(env.explorer, retrieval)
     data_proto = _build_data_proto(system_prompt, user_prompt, env)
+    log_sample_progress(
+        chunk_start=args.sample_index - local_index + 1,
+        chunk_end=chunk_end,
+        sample_index=args.sample_index,
+        local_index=local_index,
+        sample_count=args.sample_count,
+        stage="run_agent_loop_start",
+    )
 
     errors: List[str] = []
     start = time.perf_counter()
@@ -483,6 +548,17 @@ def run_single_sample(
     )
     record["latency"] = latency
     record["errors"] = errors
+    log_sample_progress(
+        chunk_start=args.sample_index - local_index + 1,
+        chunk_end=chunk_end,
+        sample_index=args.sample_index,
+        local_index=local_index,
+        sample_count=args.sample_count,
+        stage="finish",
+        reward=record["reward"],
+        valid_run=record["valid_run"],
+        invalid_reason=record["invalid_reason"],
+    )
     return record
 
 
@@ -542,15 +618,20 @@ def main() -> int:
         records = [build_preflight_record(args)]
     else:
         records = []
+        dataset = _load_validation_dataset()
+        chunk_end = args.sample_index + args.sample_count - 1
         for sample_index in range(args.sample_index, args.sample_index + args.sample_count):
             sample_args = argparse.Namespace(**vars(args))
             sample_args.sample_index = sample_index
             records.append(
                 run_single_sample(
                     sample_args,
+                    dataset=dataset,
                     config_dict=config_dict,
                     model=model,
                     interaction_manager=interaction_manager,
+                    local_index=(sample_index - args.sample_index + 1),
+                    chunk_end=chunk_end,
                 )
             )
 

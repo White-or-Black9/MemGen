@@ -81,6 +81,20 @@
   - R4 expanded held-out paired eval (samples 80..179) 完成：
     disabled 47/100 vs Version A t=0.04 47/100，rescue 1，regression 1，
     threshold-passed 37/100，net gain 0
+  - R4 disabled full TriviaQA baseline completed after retrying the final
+    range in smaller chunks:
+    disabled 5148/7993 = 0.6441
+    - missing 0, duplicates 0
+    - original disabled_s7000_7992 chunk was preserved in its stuck/no-artifact
+      state and not used for the final aggregate
+    - original completed chunks: 0000..6999
+    - retry chunks: 7000..7499, 7500..7799, 7800..7992
+    - retry artifact summary:
+      - 7000..7499: 500/500 valid, 0 retrieval-blocked
+      - 7500..7799: 295/300 valid, 5 retrieval-blocked
+      - 7800..7992: 193/193 valid, 0 retrieval-blocked
+    - final aggregate confirms the disabled path is operational end-to-end on
+      the full TriviaQA validation set
   - 当前结论：Version A shows sparse steering but no net gain on the
     larger held-out slice；这仍然是 exploratory R4 evidence，不是 formal
     target-task benchmark

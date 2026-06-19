@@ -69,6 +69,8 @@ class RunMetadata:
     memory_enabled: bool
     checkpoint_path: str
     config_overrides: List[str]
+    memory_threshold: Optional[float]
+    memory_top_k: Optional[int]
     temperature: float
     max_response_length: int
     seed: int
@@ -129,6 +131,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default=DEFAULT_RETRIEVAL_ENDPOINT,
     )
     parser.add_argument("--retrieval-topk", type=int, default=DEFAULT_RETRIEVAL_TOPK)
+    parser.add_argument("--memory-threshold", type=float, default=0.7)
+    parser.add_argument("--memory-top-k", type=int, default=1)
     parser.add_argument("--max-response-length", type=int, default=1024)
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--seed", type=int, default=42)
@@ -140,14 +144,18 @@ def build_arg_parser() -> argparse.ArgumentParser:
 def validate_args(args: argparse.Namespace) -> None:
     if args.batch_size != 1:
         raise ValueError("R4-1D harness requires batch_size=1")
-    if args.sample_count != 1:
-        raise ValueError("R4-1D harness currently requires sample_count=1")
+    if args.sample_count <= 0:
+        raise ValueError("sample_count must be positive")
     if args.sample_index < 0:
         raise ValueError("sample_index must be non-negative")
     if args.max_response_length <= 0:
         raise ValueError("max_response_length must be positive")
     if args.retrieval_topk <= 0:
         raise ValueError("retrieval_topk must be positive")
+    if args.memory_top_k <= 0:
+        raise ValueError("memory_top_k must be positive")
+    if args.memory_threshold < 0:
+        raise ValueError("memory_threshold must be non-negative")
     if args.memory_mode not in {"disabled", "version_a_aligned"}:
         raise ValueError(f"Unsupported memory_mode: {args.memory_mode}")
 
@@ -173,19 +181,19 @@ def build_config_overrides(args: argparse.Namespace) -> List[str]:
     ]
 
 
-def build_memory_bank_config(memory_mode: str) -> Dict[str, Any]:
-    if memory_mode == "disabled":
+def build_memory_bank_config(args: argparse.Namespace) -> Dict[str, Any]:
+    if args.memory_mode == "disabled":
         return {
             "enabled": False,
             "batch_size": 1,
         }
-    if memory_mode == "version_a_aligned":
+    if args.memory_mode == "version_a_aligned":
         return {
             "enabled": True,
             "batch_size": 1,
             "max_slots": 8,
-            "top_k": 1,
-            "threshold": 0.7,
+            "top_k": int(args.memory_top_k),
+            "threshold": float(args.memory_threshold),
             "decay_alpha": 0.05,
             "pool_last_n": 64,
             "retrieve_policy": "threshold_topk",
@@ -193,7 +201,7 @@ def build_memory_bank_config(memory_mode: str) -> Dict[str, Any]:
             "storage_device": "cpu",
             "debug": True,
         }
-    raise ValueError(f"Unsupported memory_mode: {memory_mode}")
+    raise ValueError(f"Unsupported memory_mode: {args.memory_mode}")
 
 
 def build_run_metadata(args: argparse.Namespace) -> RunMetadata:
@@ -204,6 +212,8 @@ def build_run_metadata(args: argparse.Namespace) -> RunMetadata:
         memory_enabled=memory_enabled,
         checkpoint_path=str(args.checkpoint_path),
         config_overrides=build_config_overrides(args),
+        memory_threshold=(float(args.memory_threshold) if memory_enabled else None),
+        memory_top_k=(int(args.memory_top_k) if memory_enabled else None),
         temperature=args.temperature,
         max_response_length=args.max_response_length,
         seed=args.seed,
@@ -352,7 +362,7 @@ def _build_config(args: argparse.Namespace) -> Dict[str, Any]:
     )
     config = Config(config_args)
     config_dict = config.to_dict()
-    config_dict["latent_memory_bank"] = build_memory_bank_config(args.memory_mode)
+    config_dict["latent_memory_bank"] = build_memory_bank_config(args)
     return config_dict
 
 
@@ -411,16 +421,15 @@ def _invalid_reason(
     return None
 
 
-def run_single_sample(args: argparse.Namespace) -> Dict[str, Any]:
+def run_single_sample(
+    args: argparse.Namespace,
+    *,
+    config_dict: Dict[str, Any],
+    model: Any,
+    interaction_manager: Any,
+) -> Dict[str, Any]:
     from data.triviaqa.env import TriviaQAEnv
-    from interactions.multiturn_interaction import MultiTurnInteractionManager
-    from main import set_seed
-    from memgen.model import MemGenModel
-
     import torch
-
-    config_dict = _build_config(args)
-    set_seed(args.seed, use_gpu=torch.cuda.is_available())
 
     sample = _load_sample(args.sample_index)
     env = TriviaQAEnv(config_dict["dataset"])
@@ -430,20 +439,6 @@ def run_single_sample(args: argparse.Namespace) -> Dict[str, Any]:
         topk=args.retrieval_topk,
     )
     env.explorer = AccountingRetriever(env.explorer, retrieval)
-
-    model = MemGenModel.from_config(config_dict["model"])
-    if torch.cuda.is_available():
-        model = model.to(device=torch.device("cuda"), dtype=torch.bfloat16)
-    else:
-        model = model.to(torch.bfloat16)
-    model.eval()
-
-    interaction_manager = MultiTurnInteractionManager(
-        model.tokenizer,
-        model,
-        _build_interaction_config(config_dict),
-    )
-    interaction_manager.actor_rollout_wg = model
     data_proto = _build_data_proto(system_prompt, user_prompt, env)
 
     errors: List[str] = []
@@ -523,10 +518,41 @@ def main() -> int:
     output_dir = Path(args.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    from interactions.multiturn_interaction import MultiTurnInteractionManager
+    from main import set_seed
+    from memgen.model import MemGenModel
+    import torch
+
+    config_dict = _build_config(args)
+    set_seed(args.seed, use_gpu=torch.cuda.is_available())
+    model = MemGenModel.from_config(config_dict["model"])
+    if torch.cuda.is_available():
+        model = model.to(device=torch.device("cuda"), dtype=torch.bfloat16)
+    else:
+        model = model.to(torch.bfloat16)
+    model.eval()
+    interaction_manager = MultiTurnInteractionManager(
+        model.tokenizer,
+        model,
+        _build_interaction_config(config_dict),
+    )
+    interaction_manager.actor_rollout_wg = model
+
     if args.preflight_only or args.dry_run:
         records = [build_preflight_record(args)]
     else:
-        records = [run_single_sample(args)]
+        records = []
+        for sample_index in range(args.sample_index, args.sample_index + args.sample_count):
+            sample_args = argparse.Namespace(**vars(args))
+            sample_args.sample_index = sample_index
+            records.append(
+                run_single_sample(
+                    sample_args,
+                    config_dict=config_dict,
+                    model=model,
+                    interaction_manager=interaction_manager,
+                )
+            )
 
     summary = build_summary(records)
     run_config = {
@@ -536,6 +562,8 @@ def main() -> int:
         "sample_index": args.sample_index,
         "sample_count": args.sample_count,
         "memory_mode": args.memory_mode,
+        "memory_threshold": args.memory_threshold,
+        "memory_top_k": args.memory_top_k,
         "require_retrieval_ok": args.require_retrieval_ok,
         "retrieval_endpoint": args.retrieval_endpoint,
         "retrieval_topk": args.retrieval_topk,

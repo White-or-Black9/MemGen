@@ -1268,3 +1268,24 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Reaffirm: Version B (text-visible memory injection) remains deferred
 - No new evidence justifies starting Version B implementation
 - Requires separate explicit approval
+
+### DEC-0052: Expanded R4 TriviaQA Sweep Remains Exploratory
+
+- Date: 2026-06-19
+- Status: accepted
+- Context: Expanded paired eval on TriviaQA samples 80..179
+- Result:
+  - disabled 47/100
+  - Version A t=0.04 47/100
+  - rescue 1
+  - regression 1
+  - net gain 0
+- Decision:
+  - do not treat samples 80..179 as formal target-task benchmark evidence
+  - characterize the current Version A mechanism as sparse, unstable latent
+    steering rather than reliable evidence-grounded memory
+  - next mechanism experiment should prioritize suppress pre-evidence memory
+    write / evidence-gated write
+- Rationale: the larger held-out slice confirms the earlier 20..79 boundary:
+  Version A can help or hurt individual samples, but it has no net gain on the
+  current exploratory TriviaQA slices

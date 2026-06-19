@@ -78,6 +78,12 @@
   - R4 fresh held-out rescue/regression scan (samples 40..79) 完成：
     1 rescue (sample 53), 0 regression, mean diff +0.025
   - R4 combined held-out interpretation (samples 20..79) 完成：net gain 0
+  - R4 expanded held-out paired eval (samples 80..179) 完成：
+    disabled 47/100 vs Version A t=0.04 47/100，rescue 1，regression 1，
+    threshold-passed 37/100，net gain 0
+  - 当前结论：Version A shows sparse steering but no net gain on the
+    larger held-out slice；这仍然是 exploratory R4 evidence，不是 formal
+    target-task benchmark
 - 停止条件：已达到；没有明确批准，不要进入新的实现或实验阶段。
 
 ## Current Next Step
@@ -94,9 +100,9 @@
    - Goal: understand when memory helps versus hurts before scaling
    - Questions: is memory acting as useful latent prior, evidence-grounded clue,
      query-salience amplifier, or noisy perturbation?
-5. Later, after mechanism analysis: consider evidence-grounded-memory-only,
-   suppress pre-evidence memory write, retrieve only evidence-grounded slots,
-   answer-stage verification/gating, or threshold ablation.
+5. Later, after mechanism analysis: prioritize suppress pre-evidence memory
+   write / evidence-gated write before any further threshold or retrieval
+   ablation.
 6. Version B remains deferred until a separate explicit decision.
 
 ## 研究目标

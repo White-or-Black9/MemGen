@@ -2289,3 +2289,31 @@ full GSM8K test performance.
   - effect fragile and sample-dependent
   - do NOT claim improvement or failure; evidence shows neutral with isolated
     effects in both directions
+
+### EXP-20260619-014: Expanded R4 TriviaQA Paired Evaluation (samples 80..179)
+
+- Phase: R4 exploratory paired evaluation
+- Status: `completed`
+- Research question: Does Version A t=0.04 improve over disabled on a
+  larger held-out TriviaQA slice 80..179?
+- Output: `outputs/r4_triviaqa_paired_s80_179_*`
+- Configuration:
+  - checkpoint: `Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8/model`
+  - dataset: TriviaQA validation / `rc.wikipedia.nocontext`
+  - retrieval: local Search-R1 endpoint
+  - threshold: 0.04
+  - top_k: 1
+  - batch_size: 1
+- Result: 100/100 valid both runs
+  - disabled: 47/100
+  - Version A t=0.04: 47/100
+  - rescue: 1 (sample 83)
+  - regression: 1 (sample 82)
+  - stable correct: 46
+  - stable wrong: 52
+  - threshold-passed: 37/100
+  - net gain: 0
+- Interpretation:
+  - exploratory R4 evidence only; not formal target-task benchmark
+  - Version A shows sparse steering but no net gain on the larger held-out slice
+  - result strengthens the case for a suppress-pre-evidence-write ablation

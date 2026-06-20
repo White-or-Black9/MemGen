@@ -1289,3 +1289,43 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Rationale: the larger held-out slice confirms the earlier 20..79 boundary:
   Version A can help or hurt individual samples, but it has no net gain on the
   current exploratory TriviaQA slices
+
+### DEC-0053: Pause TriviaQA Ablations After Negative Full Version A Result
+
+- Date: 2026-06-20
+- Status: accepted user decision
+- Canonical action: `stop` the current TriviaQA ablation sequence and preserve
+  the completed evidence for later continuation
+- Context:
+  - disabled full: `5148/7993 = 0.6440635556`
+  - Version A full: `5092/7993 = 0.6370574252`
+  - delta: `-56` correct, `-0.7006` percentage points
+  - transitions: rescue `53`, regression `109`, stable correct `5039`,
+    stable wrong `2792`
+- Decision:
+  - pause all further TriviaQA ablation analysis for now
+  - preserve the result as negative but informative
+  - describe it as: **Version A full TriviaQA negative result,
+    mechanism-active but policy-unstable**
+  - do not run a threshold-only sweep: score buckets do not support a simple
+    increase to `0.05`, `0.055`, or `0.06`
+  - do not start Version B
+- Decisive evidence:
+  - `outputs/r4_triviaqa_full_version_a_t004_analysis/version_a_full_summary.json`
+  - `outputs/r4_triviaqa_full_version_a_t004_analysis/failure_analysis.json`
+  - `outputs/r4_triviaqa_full_version_a_t004_analysis/failure_analysis.md`
+  - repeated injection dominates the loss:
+    - `retrieved_latent_count=32+`: rescue `0`, regression `38`, net `-38`
+    - `retrieve_count=4+`: rescue `2`, regression `44`, net `-42`
+- Rejected immediate route:
+  - broad threshold sweep, because higher score buckets are more
+    regression-heavy rather than safer
+- Future continuation priority, only after explicit approval:
+  1. max one latent injection per sample
+  2. cumulative `retrieved_latent_count <= 8`
+  3. suppress repeated `replace_matched`
+  4. answer-preserving confidence gate
+  5. delayed/evidence-aware write
+  6. score calibration before any threshold-only rerun
+- Authoritative resume point:
+  `research_notes/R4_TRIVIAQA_VERSION_A_FULL_SUMMARY.md`

@@ -1379,3 +1379,39 @@ Phase 7 已完成。
 - output artifacts are under `outputs/` and should not be staged
 - source files remain unchanged
 - Search-R1 was alive and retrieval succeeded in all reported runs
+
+## 2026-06-20 - Version A Full TriviaQA Result Preserved; Ablations Paused
+
+- Completed the Version A full TriviaQA rerun across all `7993` validation
+  samples using 32 durable chunks under:
+  `outputs/r4_triviaqa_full_version_a_t004_chunks_250_fullrerun/`
+- Completed the sample-aligned paired comparison against the disabled full
+  baseline under `outputs/r4_triviaqa_full_chunks/`.
+- Completed artifact-only failure analysis under:
+  `outputs/r4_triviaqa_full_version_a_t004_analysis/`
+- Headline full result:
+  - disabled: `5148/7993 = 0.6440635556`
+  - Version A: `5092/7993 = 0.6370574252`
+  - delta: `-56` correct, `-0.7006` percentage points
+  - transitions: rescue `53`, regression `109`, stable correct `5039`,
+    stable wrong `2792`
+- Coverage is complete for both modes: missing `0`, duplicates `0`, valid
+  `7970`, invalid/retrieval-blocked `23`; denominator remains all `7993`.
+- Main failure-analysis result:
+  - repeated injection is the strongest failure signal
+  - `retrieved_latent_count=32+`: rescue `0`, regression `38`, net `-38`
+  - `retrieve_count=4+`: rescue `2`, regression `44`, net `-42`
+  - higher `max_score` is not a reliable correctness/confidence signal
+- Scientific status:
+  - **Version A full TriviaQA negative result, mechanism-active but
+    policy-unstable.**
+  - current behavior is brittle latent steering rather than reliable
+    evidence-grounded memory
+- User decision: pause further TriviaQA ablations. No threshold sweep or new
+  mechanism ablation has been started.
+- Authoritative resume summary:
+  `research_notes/R4_TRIVIAQA_VERSION_A_FULL_SUMMARY.md`
+- If work resumes, the first recommended experiment is a default-off
+  max-one-injection ablation, followed by a cumulative
+  `retrieved_latent_count <= 8` ablation. Do not start either without explicit
+  confirmation.

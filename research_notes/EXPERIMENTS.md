@@ -2346,3 +2346,133 @@ full GSM8K test performance.
   - this is an operational/full-coverage disabled baseline, not a Version A
     comparison and not a formal claim about the enabled mechanism
   - the full disabled path now has complete artifacts for the validation split
+  - aggregate denominator is all `7993` samples
+  - full validity accounting: valid `7970`, invalid/retrieval-blocked `23`
+
+### EXP-20260620-016: Version A Full TriviaQA Validation Rerun
+
+- Phase: R4 full target-task evaluation
+- Status: `completed_negative_result`
+- Research question: Does the current Version A session-local latent memory
+  bank improve over disabled MemGen on the complete TriviaQA validation split?
+- Output:
+  `outputs/r4_triviaqa_full_version_a_t004_chunks_250_fullrerun/`
+- Execution:
+  - 32 chunks, 250 samples each except final chunk `7750..7992` with 243
+  - all chunks completed with `run_config.json`, `evaluate/answer.json`,
+    `summary.json`, and `memory_trace.json`
+- Configuration:
+  - memory mode: `version_a_aligned`
+  - threshold: `0.04`
+  - top_k: `1`
+  - batch_size: `1`
+  - seed: `42`
+  - temperature: `0.0`
+  - max_response_length: `1024`
+  - retrieval_topk: `3`
+  - dataset: TriviaQA validation / `rc.wikipedia.nocontext`
+  - checkpoint: TriviaQA Weaver-SFT
+- Denominator rule: all `7993` samples, including invalid/retrieval-blocked
+  samples
+- Result:
+  - correct: `5092/7993`
+  - accuracy: `0.6370574252`
+  - valid: `7970`
+  - invalid/retrieval-blocked: `23`
+  - missing: `0`
+  - duplicates: `0`
+- Interpretation: complete enabled-path result; the paired comparison is
+  recorded separately in EXP-20260620-017.
+
+### EXP-20260620-017: Disabled vs Version A Full Paired Comparison
+
+- Phase: R4 full paired comparison
+- Status: `completed_negative_result`
+- Inputs:
+  - disabled: `outputs/r4_triviaqa_full_chunks/`
+  - Version A:
+    `outputs/r4_triviaqa_full_version_a_t004_chunks_250_fullrerun/`
+- Analysis output:
+  `outputs/r4_triviaqa_full_version_a_t004_analysis/`
+- Alignment:
+  - `7993` paired sample IDs, range `0..7992`
+  - missing `0`, duplicates `0`
+  - question mismatches `0`, gold-answer mismatches `0`
+- Result:
+
+| Mode | Correct | Total | Accuracy |
+|---|---:|---:|---:|
+| Disabled | 5148 | 7993 | 0.6440635556 |
+| Version A | 5092 | 7993 | 0.6370574252 |
+
+- Accuracy delta: `-0.0070061304` (`-0.7006` percentage points)
+- Net correct change: `-56`
+- Paired transitions:
+
+| Transition | Count |
+|---|---:|
+| Rescue | 53 |
+| Regression | 109 |
+| Stable correct | 5039 |
+| Stable wrong | 2792 |
+
+- Memory summary:
+  - mean writes: `2.102965`
+  - mean retrieve attempts: `1.102965`
+  - mean retrieved latent count: `2.973602`
+  - median retrieved latent count: `0`
+  - samples with retrieve attempts: `7971`
+  - samples receiving latent injection / threshold passed: `2417`
+  - mean per-sample max score: `0.034162`
+  - maximum score: `0.082211`
+  - action occurrences: insert `13838`, replace_matched `2971`
+- Interpretation:
+  - Version A is worse by 56 correct answers
+  - the mechanism is active and produces real rescues, but regressions are
+    approximately `2.06x` as frequent
+  - classify as a negative full TriviaQA result, not an inert mechanism
+
+### EXP-20260620-018: Version A Full Post-Hoc Failure Analysis
+
+- Phase: R4 artifact-only failure analysis
+- Status: `completed`
+- Inputs:
+  - `outputs/r4_triviaqa_full_version_a_t004_analysis/paired_per_sample.jsonl`
+  - Version A full `memory_trace.json` and saved conversations
+- Outputs:
+  - `outputs/r4_triviaqa_full_version_a_t004_analysis/failure_analysis.json`
+  - `outputs/r4_triviaqa_full_version_a_t004_analysis/failure_analysis.md`
+- Score-bucket net gains:
+  - no score: `0`
+  - `<0.04`: `0`
+  - `0.04..0.045`: `+2`
+  - `0.045..0.05`: `-12`
+  - `0.05..0.055`: `-27`
+  - `0.055..0.06`: `-14`
+  - `>=0.06`: `-5`
+- Repeated-injection result:
+  - retrieved latents `8`: rescue `45`, regression `59`, net `-14`
+  - retrieved latents `16`: rescue `7`, regression `9`, net `-2`
+  - retrieved latents `24`: rescue `1`, regression `3`, net `-2`
+  - retrieved latents `32+`: rescue `0`, regression `38`, net `-38`
+  - retrieve count `4+`: rescue `2`, regression `44`, net `-42`
+- Regression taxonomy:
+  - verbose_malformed `42`
+  - retrieval_confusion `26`
+  - answer_to_question_term `20`
+  - over_specific_or_under_specific `11`
+  - entity_substitution `9`
+  - unknown_other `1`
+- Rescue taxonomy:
+  - evidence_entity_fix `30`
+  - answer_specificity_fix `11`
+  - incomplete_to_answer `7`
+  - unknown_other `4`
+  - normalization_fix `1`
+- Interpretation:
+  - repeated latent injection is the strongest observed failure signal
+  - `max_score` is not calibrated as answer correctness/confidence
+  - simple threshold increases to `0.05`, `0.055`, or `0.06` are not
+    supported by the score-bucket results
+  - current Version A is mechanism-active but policy-unstable
+- Follow-up status: paused by user; no ablation started.

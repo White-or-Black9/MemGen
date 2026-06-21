@@ -2476,3 +2476,37 @@ full GSM8K test performance.
     supported by the score-bucket results
   - current Version A is mechanism-active but policy-unstable
 - Follow-up status: paused by user; no ablation started.
+
+### EXP-20260621-001: MAB-5A DetectiveQA Compressed-Memory n10
+
+- Phase: MAB-5A compressed-memory benchmark preservation
+- Status: `completed`
+- Research question: Does LatentBank help on `detective_qa` when the original full-history prompt is over capacity?
+- Output: `outputs/mab/compressed_memory_detectiveqa_n10/20260621T013454Z-detectiveqa-compressed-n10/`
+- Configuration:
+  - split: `Long_Range_Understanding`
+  - subtask: `detective_qa`
+  - query mode: `first-query-only`
+  - threshold: `0.03`
+  - top_k: `1`
+  - max_slots: `8`
+  - batch_size: `1`
+- Result:
+  - valid contexts: `10/10`
+  - Bank-off accuracy: `0.0`
+  - Bank-on accuracy: `0.0`
+  - delta: `0.0`
+  - output changed: `10/10`
+  - retrieval active in all contexts
+  - no cross-context leakage
+  - query writes: `0`
+- Mechanism note:
+  - retrieved scores were roughly `0.030-0.064`
+  - final slot counts stayed low, consistent with over-merge / over-compression
+  - current `thread_update` compares `candidate_inputs_embeds` with existing `slot.key`
+    before Weaver emits the new latent, so one threshold currently couples
+    retrieval visibility and write/update behavior
+- Interpretation:
+  - mechanism is active but not yet useful
+  - next mechanism experiment should decouple retrieve/update thresholds after
+    this preservation commit

@@ -46,6 +46,14 @@
   - Threshold comment caveat：配置注释称 threshold 为"cosine similarity threshold"，但实际应用于 decayed retrieval score 而非 raw cosine
   - MemoryAgentBench / LongMemEval 只记录为 future candidates
   - Version B 继续 deferred
+  - MAB-5A detective_qa compressed-memory n10 已完成：
+    10/10 valid, Bank-off `0.0`, Bank-on `0.0`, output_changed `10`, no leakage
+    detected, retrieval active in all contexts
+  - MAB-5A mechanism finding：retrieved scores roughly `0.030-0.064`, final
+    slot counts stayed low (`[1, 2, 2, 5, 6, 5, 6, 7, 4, 7]`), suggesting
+    over-merge / over-compression under the current low threshold
+  - current MAB follow-up recommendation: preserve the evidence first, then
+    test decoupled retrieve/update thresholds in a later mechanism experiment
 - 历史解释边界：
   - Phase 8A 记录的是 R2 前 historical write-age mechanism，不得重解释为
     current last-retrieved-decay evidence。

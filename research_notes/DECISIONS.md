@@ -1329,3 +1329,26 @@ IDs and append superseding decisions rather than silently rewriting history.
   6. score calibration before any threshold-only rerun
 - Authoritative resume point:
   `research_notes/R4_TRIVIAQA_VERSION_A_FULL_SUMMARY.md`
+
+### DEC-0054: Decouple Retrieval and Update Thresholds for Future MAB Experiments
+
+- Date: 2026-06-21
+- Status: proposed
+- Context: MAB-5A detective_qa compressed-memory n10 completed with active
+  retrieval but no accuracy gain; the low threshold kept retrieval non-empty
+  while also driving repeated slot replacement / over-compression.
+- Decision:
+  - preserve the current MAB-5A evidence without modifying model mechanisms
+  - do not implement the mechanism yet
+  - next mechanism experiment should separate `retrieve_threshold` from
+    `update_threshold`
+- Suggested future design:
+  - `retrieve_threshold = 0.03`
+  - `update_threshold = 0.05` or `0.07`
+  - `max_slots = 16`
+- Rationale: the current single threshold couples read visibility and
+  write/update behavior, which can suppress slot growth even when retrieval is
+  active
+- Consequences:
+  - future mechanism work should be treated as a code change, not a hyperparameter sweep
+  - no threshold-only ablation should be interpreted as sufficient for this issue

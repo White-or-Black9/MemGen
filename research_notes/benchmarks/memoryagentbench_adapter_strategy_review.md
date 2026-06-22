@@ -1,5 +1,9 @@
 # MemoryAgentBench Adapter Strategy Review
 
+> Historical design context. Phase ordering and next-action recommendations in
+> this note are superseded by `memoryagentbench_next_steps.md` and
+> `memoryagentbench_mechanism_plan.md`.
+
 Date: 2026-06-20  
 MemGen branch: `rlm-memory-bank`  
 Scope: source inspection and evaluation strategy only  

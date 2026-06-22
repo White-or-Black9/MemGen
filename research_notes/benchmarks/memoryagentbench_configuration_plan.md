@@ -1,5 +1,9 @@
 # MemoryAgentBench Configuration Plan for MemGen
 
+> Historical setup plan. Environment and task-selection provenance remains
+> useful, but current operations and mechanism routing are defined by
+> `memoryagentbench_runbook.md` and `memoryagentbench_next_steps.md`.
+
 Date: 2026-06-19  
 Branch context: `rlm-memory-bank`  
 Scope: configuration and execution planning only; no adapter implementation or experiment execution

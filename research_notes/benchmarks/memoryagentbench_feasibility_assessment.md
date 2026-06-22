@@ -1,5 +1,8 @@
 # MemoryAgentBench Feasibility Assessment for MemGen
 
+> Historical feasibility assessment. It predates completed MAB runs; use
+> `memoryagentbench_results.md` for current evidence and conclusions.
+
 Date: 2026-06-18
 Branch context: `rlm-memory-bank`
 Assessment mode: read-only feasibility and compatibility assessment

@@ -1,5 +1,9 @@
 # MemoryAgentBench Local Task Availability Audit
 
+> Historical task-selection audit. Its dataset counts remain evidence, but its
+> proposed next command is superseded by the completed MAB-5A run and
+> `memoryagentbench_next_steps.md`.
+
 ## 1. Objective
 Audit the local MemoryAgentBench parquet files and identify the next subtask for a multi-sample paired Bank-off vs low-threshold Bank-on evaluation without running inference.
 

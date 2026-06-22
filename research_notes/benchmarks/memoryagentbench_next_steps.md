@@ -1,101 +1,97 @@
 # MemoryAgentBench Next Steps
 
-## 1. Decision
+## Current Decision
 
-Proceed next to:
+Implement and validate Phase 1 only:
 
-`MAB-5A: detective_qa Compressed-memory Bank-off vs Bank-on n10`
+**MAB-5C: Decoupled Retrieval-Update Thresholds**
 
-## 2. Why This Is the Next Step
+Do not run another shared-threshold-only ablation. Do not implement retrieval
+fallback or retrieved-memory-to-Weaver conditioning during MAB-5C.
 
-The original MemGen over-context diagnostic showed that full-history multi-turn prompts are only valid when the rebuilt prompt fits within the model context capacity.
+## Why MAB-5C Is Next
 
-For `detective_qa`, the real-data preflight showed:
+MAB-5A showed active retrieval and output changes but no exact-match gain. With
+`threshold=0.03`, final slot counts remained `[1, 2, 2, 5, 6, 5, 6, 7, 4, 7]`
+after 25-50 chunks per context.
 
-- estimated full-history query tokens: `102477`
-- context capacity: `32768`
-- status: over-capacity
-- generation called: `false`
+The current single threshold controls two distinct decisions:
 
-Therefore:
+1. whether retrieved memory is visible to Reasoner;
+2. whether `write_back()` replaces the matched slot or inserts a new thread.
 
-- `Original MemGen Full-history Bank-off` is invalid for this task,
-- raw over-capacity full-history behavior should not be used as a baseline,
-- compressed-memory is the correct next diagnostic because it tests whether LatentBank can answer when full history cannot fit.
+Separating those gates directly tests the over-merge diagnosis while retaining
+the low read threshold that kept retrieval active.
 
-## 3. Valid Baseline Taxonomy
+## Phase 1 Contract
 
-- `Original MemGen Full-history Bank-off`: valid only under capacity
-- `Original MemGen Full-history over-capacity`: invalid marker, not run
-- `Original MemGen Truncated-history Bank-off`: optional future diagnostic, not the same as full-history
-- `Compressed Bank-off`: valid compressed lower bound
-- `Compressed Bank-on`: valid LatentBank memory condition
+Planned settings:
 
-## 4. Recommended Experiment
+- `retrieve_threshold=0.03`
+- `update_threshold=0.05`
+- `max_slots=16`
+- `top_k=1`
+- `retrieve_policy=threshold_topk`
+- `update_policy=thread_update`
+- same checkpoint, 10 detective_qa contexts, and first-query-only protocol as
+  MAB-5A
 
-Use `detective_qa` for the next MAB step, but switch to compressed-memory and keep the paired comparison controlled:
+Compatibility requirements:
 
-- one deterministic 10-context selection if feasible from the split
-- `Bank-off` vs `Bank-on`
-- no compressed-memory threshold sweep
-- no Trigger/Weaver changes
-- no benchmark-core changes
-- no commit or push
+- when new thresholds are unset, both fall back to legacy `threshold`;
+- old shared-threshold behavior remains reproducible by default;
+- query writes remain disabled;
+- bank state remains session-local and resets after every context;
+- retrieved memory remains Reasoner-only;
+- full-history detective_qa remains `over_capacity_invalid` and is not run.
 
-## 5. Guardrail Recommendation
+The detailed test, interface, diagnostics, and artifact contract is in
+`memoryagentbench_mechanism_plan.md`.
 
-Before any future full-history run, add a harness-level preflight check that marks the sample invalid when:
+## Required Comparison
 
-- rendered full-history prompt tokens exceed loaded reasoner capacity,
-- or latent augmentation would push the effective sequence beyond capacity.
-
-The guard should live in the runner, not in the benchmark core and not as a runtime OOM fallback.
-
-## 6. Git Status
-
-### Before
+Compare MAB-5C against the fixed MAB-5A run:
 
 ```text
-## rlm-memory-bank...origin/rlm-memory-bank [ahead 8]
- M memgen/model/modeling_memgen.py
-?? research_notes/benchmarks/
-?? scripts/eval/diagnose_memgen_over_context.py
-?? scripts/eval/mab2_bank_off.py
-?? scripts/eval/mab2_mab_bridge.py
-?? scripts/eval/mab3_bank_on_full_history.py
-?? scripts/eval/mab3a_threshold_ablation.py
-?? scripts/eval/mab4a_compressed_memory.py
-?? scripts/eval/mab_paired_bank_off_vs_low_threshold_bank_on.py
-?? tests/test_mab2_bank_off.py
-?? tests/test_mab3_bank_on_full_history.py
-?? tests/test_mab3a_threshold_ablation.py
-?? tests/test_mab4a_compressed_memory.py
-?? tests/test_mab_paired_bank_off_vs_low_threshold_bank_on.py
+20260621T013454Z-detectiveqa-compressed-n10
 ```
 
-## 7. MAB-5A Follow-up
+At minimum report:
 
-The completed `MAB-5A` compressed-memory run was mechanism-active but not accuracy-improving: Bank-off and Bank-on were both `0.0`, while outputs changed in all 10 contexts and retrieval stayed active.
+- official exact match and output changes;
+- retrieval-active count and delta;
+- per-context and average slot-count deltas;
+- matched-replace delta;
+- thread-insert delta;
+- query writes and cross-context leakage;
+- Reasoner-only versus Weaver routing checks.
 
-The next mechanism experiment should be a decoupled retrieve/update threshold design. Do not run another threshold-only ablation yet.
+An increase in slots or inserts is mechanism evidence, not an accuracy claim.
+`output_changed` remains an activation diagnostic, not improvement.
 
-### After
+## Later Phases
 
-```text
-## rlm-memory-bank...origin/rlm-memory-bank [ahead 8]
- M memgen/model/modeling_memgen.py
-?? research_notes/benchmarks/
-?? scripts/eval/diagnose_memgen_over_context.py
-?? scripts/eval/mab2_bank_off.py
-?? scripts/eval/mab2_mab_bridge.py
-?? scripts/eval/mab3_bank_on_full_history.py
-?? scripts/eval/mab3a_threshold_ablation.py
-?? scripts/eval/mab4a_compressed_memory.py
-?? scripts/eval/mab_paired_bank_off_vs_low_threshold_bank_on.py
-?? tests/test_mab2_bank_off.py
-?? tests/test_mab3_bank_on_full_history.py
-?? tests/test_mab3a_threshold_ablation.py
-?? tests/test_mab4a_compressed_memory.py
-?? tests/test_mab_paired_bank_off_vs_low_threshold_bank_on.py
-?? research_notes/benchmarks/memoryagentbench_next_steps.md
-```
+Proceed only after MAB-5C is implemented, tested, run, and interpreted:
+
+1. **MAB-5D:** MAB-5C plus optional `top1_if_empty` retrieval fallback.
+   Fallback remains off by default and must not alter update-threshold passage.
+2. **MAB-6A / Version B:** exploratory retrieved-memory-to-Weaver conditioning.
+   This must remain isolated from Version A and disabled by default.
+
+## Stop Conditions
+
+- Stop if old shared-threshold tests change behavior.
+- Stop if retrieved memory enters Weaver during MAB-5C.
+- Stop if query writes occur.
+- Stop if bank reset or context isolation fails.
+- Stop if compressed prompts contain chunk text or acknowledgement history.
+- Stop rather than run or truncate over-capacity full-history detective_qa.
+
+## Immediate Handoff
+
+1. Review `memoryagentbench_mechanism_plan.md`.
+2. Implement only its Phase 1 test cases and bank configuration changes.
+3. Do not edit `memgen/model/modeling_memgen.py` unless a focused failing test
+   proves Phase 1 requires it.
+4. Run unit and integration validation before any model inference.
+5. Run MAB-5C only after compatibility and routing checks pass.

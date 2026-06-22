@@ -1,5 +1,9 @@
 # MemoryAgentBench Fork Hygiene and MAB-1 Smoke Plan
 
+> Historical pre-smoke plan. MAB-1A later completed; use
+> `memoryagentbench_no_api_smoke.md` for evidence and
+> `memoryagentbench_runbook.md` for current operations.
+
 Date: 2026-06-19  
 MemGen branch context: `rlm-memory-bank`  
 MemoryAgentBench checkout: `/mnt/18T/baishilong/benchmarks/MemoryAgentBench`  

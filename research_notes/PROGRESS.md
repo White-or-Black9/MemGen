@@ -1,6 +1,37 @@
 # 项目进展
 
-## 当前状态
+## Current Project State (2026-06-22)
+
+- MAB-5A detective_qa compressed-memory n10 is complete and preserved as the
+  current MAB reference baseline.
+- Result: 10/10 valid contexts; compressed Bank-off exact match `0.0`;
+  compressed Bank-on exact match `0.0`; `output_changed=10`; retrieval active
+  in all contexts; `query_write_count=0`; no cross-context leakage.
+- Current Version A boundary: retrieved memory enters Reasoner only and does not
+  enter Weaver. Written memory is Weaver-generated reasoner-space
+  `latent_inputs_embeds`.
+- Original full-history detective_qa exceeds the 32,768-token capacity. It is
+  `over_capacity_invalid`, was not run in MAB-5A, and must not be silently
+  truncated.
+- Mechanism diagnosis: with shared `threshold=0.03`, retrieval stayed active
+  while `write_back()` repeatedly replaced matched slots. Final slot counts
+  were `[1, 2, 2, 5, 6, 5, 6, 7, 4, 7]` across contexts with 25-50 chunks.
+- The match score compares a query built from `candidate_inputs_embeds` with
+  `slot.key`; it does not compare the new Weaver latent with an old slot.
+- Canonical MAB index, results, next steps, runbook, and mechanism plan are under
+  `research_notes/benchmarks/`.
+- Current next action: implement Phase 1 only, MAB-5C Decoupled
+  Retrieval-Update Thresholds. Do not implement fallback or
+  retrieved-memory-to-Weaver conditioning yet.
+- Old shared-threshold behavior must remain reproducible by default.
+- `output_changed` is activation evidence, not improvement. Official exact
+  match and relaxed diagnostics remain separately labeled.
+
+## Historical Project State Snapshot (through 2026-06-20)
+
+This section preserves the pre-MAB handoff. Its next-step language is
+superseded by the current state above and by
+`benchmarks/memoryagentbench_next_steps.md`.
 
 - 当前状态：Version A-aligned 已实现、已提交，并已在 Phase R2 / R2-fix
   修订为 last-retrieved decay；当前没有 formal target-task main result。
@@ -108,7 +139,10 @@
     target-task benchmark
 - 停止条件：已达到；没有明确批准，不要进入新的实现或实验阶段。
 
-## Current Next Step
+## Historical Next Step (superseded by MAB-5C)
+
+The following was the R4 handoff before MAB-5A completed. It is retained for
+provenance and is not the current project action.
 
 1. R4 infrastructure validation is complete with caveats.
 2. Threshold calibration is complete with caveats:

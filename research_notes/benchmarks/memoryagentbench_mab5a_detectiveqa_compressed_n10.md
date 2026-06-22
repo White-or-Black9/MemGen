@@ -1,5 +1,8 @@
 # MAB-5A: detective_qa Compressed-memory Bank-off vs Bank-on n10
 
+Status: canonical detailed evidence for the fixed MAB-5A reference run. Current
+cross-experiment interpretation is maintained in `memoryagentbench_results.md`.
+
 ## Objective
 Test whether LatentBank helps on detective_qa when the full dialogue history is over capacity.
 
@@ -87,10 +90,16 @@ That means the low threshold can keep retrieval non-empty while also causing rep
 No context-level leakage or Weaver-injection failure was observed in the completed run.
 
 ## Interpretation
-Mechanism is active but not yet useful; inspect retrieval quality, memory content, and injection effects.
+The mechanism is active but produced no official exact-match gain. Retrieval
+was active in every context and all 10 outputs changed, so exact match of zero
+does not imply an inactive mechanism. `output_changed=10` shows generation was
+affected; it is not evidence of improvement. Official exact match must remain
+separate from relaxed or gold-substring diagnostics.
 
 ## Recommendation For Next Step
-Do not run another threshold-only ablation yet. The next mechanism experiment should be a decoupled retrieve/update threshold design, after this preservation commit.
+Do not run another threshold-only ablation. The next mechanism experiment is
+MAB-5C Decoupled Retrieval-Update Thresholds. Do not implement fallback or
+retrieved-memory-to-Weaver conditioning during MAB-5C.
 
 ## Git Status
 ### Before

@@ -1,160 +1,124 @@
-# MemoryAgentBench Results Summary
+# MemoryAgentBench Results
 
-## 1. Scope
+## Status
 
-This note summarizes the current MemoryAgentBench work on MemGen and preserves the over-context finding for the original MemGen full-history path.
+This is the canonical summary of MemoryAgentBench results for MemGen. Detailed
+run provenance remains in the linked evidence notes and output artifacts.
 
-## 2. Current Baseline Status
+The current reference run is MAB-5A:
 
-- `Original MemGen Full-history Bank-off` is valid only when the rebuilt prompt fits within the model context capacity.
-- `Original MemGen Full-history over-capacity` is invalid and should not be used as a baseline.
-- `Original MemGen Truncated-history Bank-off` is not the same experiment as full-history and, if studied later, must be labeled separately.
-- `Compressed Bank-off` is the valid compressed lower-bound condition.
-- `Compressed Bank-on` is the valid LatentBank memory condition.
+- run ID: `20260621T013454Z-detectiveqa-compressed-n10`
+- artifact:
+  `outputs/mab/compressed_memory_detectiveqa_n10/20260621T013454Z-detectiveqa-compressed-n10/`
+- split/subtask: `Long_Range_Understanding / detective_qa`
+- protocol: compressed-memory, 10 contexts, first query only
 
-## 3. Original MemGen Over-Context Behavior
+## Experiment Summary
 
-The original MemGen multi-turn/full-history path has no explicit over-context guard.
+| Experiment | Scope | Status | Main result |
+| --- | --- | --- | --- |
+| MAB-1A no-API smoke | `factconsolidation_sh_6k`, one local row | Infrastructure evidence | Local loading, official chunking/templates, and metric path validated |
+| MAB-2 | Full-history Bank-off, one context | Valid historical run | Original MemGen harness and official scoring completed |
+| MAB-3 | Full-history Bank-on, one context | Valid historical run | Bank lifecycle and Reasoner-only boundary validated; default threshold retrieved nothing |
+| MAB-3A | Shared-threshold ablation, one context | Valid historical diagnostic | Low thresholds activated retrieval; not performance evidence |
+| MAB-4A | Compressed-memory Bank-on, one context | Exploratory | Removed chunk/ack history from query and exercised latent retrieval |
+| Paired low-threshold attempt | Requested n10 on `factconsolidation_sh_6k` | Dataset-limited | Only one matching local context existed; not n10 evidence |
+| Local task audit | All local parquet splits | Completed audit | `detective_qa` has 10 rows but full history is over capacity |
+| Over-context diagnostic | Synthetic boundary plus real preflight | Completed diagnostic | Original full-history path has no explicit guard; real over-capacity samples must be rejected before generation |
+| MAB-5A | Compressed Bank-off vs Bank-on, detective_qa n10 | Completed reference baseline | Both exact-match accuracies were 0.0; mechanism active in every context |
 
-Source inspection showed:
+## Full-History Capacity Boundary
 
-- full multi-turn history is rendered and tokenized in [multiturn_interaction.py](/mnt/18T/baishilong/MemGen/interactions/multiturn_interaction.py#L169) through [multiturn_interaction.py](/mnt/18T/baishilong/MemGen/interactions/multiturn_interaction.py#L176),
-- `apply_chat_template()` is called without `truncation=True`,
-- the multi-turn path does not compare rendered prompt length against `max_prompt_length` before `MemGenModel.generate()`,
-- `MemGenModel.generate()` has no explicit `max_position_embeddings` or `input_len + max_new_tokens` guard,
-- Trigger/Weaver augmentation can expand effective sequence length further.
+The checkpoint context capacity is 32,768 tokens. Original MemGen's multi-turn
+full-history path has no explicit over-context guard and does not silently
+truncate the rebuilt conversation.
 
-The current MAB harnesses add explicit preflight guards, for example in [mab2_bank_off.py](/mnt/18T/baishilong/MemGen/scripts/eval/mab2_bank_off.py#L278) and [mab_paired_bank_off_vs_low_threshold_bank_on.py](/mnt/18T/baishilong/MemGen/scripts/eval/mab_paired_bank_off_vs_low_threshold_bank_on.py#L255).
+The synthetic diagnostic observed:
 
-## 4. Synthetic Diagnostic
+| Estimated input tokens | Result |
+| ---: | --- |
+| 32,000 | Generation succeeded |
+| 32,760 | Generation succeeded |
+| 32,800 | Generation succeeded |
+| 35,000 | `OutOfMemoryError` |
 
-Controlled Bank-off diagnostic artifact:
-[over_context_diagnostic.json](/mnt/18T/baishilong/MemGen/outputs/mab/memgen_over_context_behavior/20260620T133105Z-over-context/over_context_diagnostic.json)
+The first selected detective_qa context preflight estimated 102,477 full-history
+query tokens. All 10 MAB-5A contexts exceeded capacity. Therefore:
 
-Test setup:
+- original full-history detective_qa is `over_capacity_invalid`;
+- no full-history generation was called for MAB-5A;
+- over-capacity output is not a scored baseline;
+- silent truncation is prohibited;
+- any future truncated-history condition must be named and evaluated separately.
 
-- original MemGen Bank-off
-- `batch_size=1`
-- `max_new_tokens=1`
-- synthetic prompts near the observed `32768` context capacity
+Detailed evidence:
 
-Observed result:
+- `memgen_over_context_behavior.md`
+- `outputs/mab/memgen_over_context_behavior/20260620T133105Z-over-context/over_context_diagnostic.json`
 
-| Requested tokens | Actual input tokens | Result |
-|---:|---:|---|
-| 32000 | 32000 | succeeded |
-| 32760 | 32760 | succeeded |
-| 32800 | 32800 | succeeded |
-| 35000 | 35000 | `OutOfMemoryError` |
+## MAB-5A Result
 
-Interpretation:
+| Metric | Value |
+| --- | ---: |
+| Requested / valid contexts | 10 / 10 |
+| Compressed Bank-off exact match | 0.0 |
+| Compressed Bank-on exact match | 0.0 |
+| Accuracy delta | 0.0 |
+| Output changed | 10 |
+| Improved / regressed by exact match | 0 / 0 |
+| Retrieval-active contexts | 10 |
+| Query write count | 0 |
+| Cross-context leakage detected | 0 |
+| Retrieved memory entered Reasoner | Yes |
+| Retrieved memory entered Weaver | No |
+| Final slot counts | `[1, 2, 2, 5, 6, 5, 6, 7, 4, 7]` |
+| Successful retrieved-score range | approximately `0.030-0.064` |
 
-- `32800 > 32768` still generated successfully.
-- No silent truncation was observed in the synthetic diagnostic.
-- No explicit over-capacity warning was emitted.
-- Failure appeared later as CUDA OOM at `35000`.
+`output_changed=10` establishes that Bank-on affected generation. It is not an
+improvement metric. Likewise, official exact match of zero does not mean the
+mechanism was inactive: retrieval occurred in every context and all outputs
+changed.
 
-## 5. DetectiveQA Preflight
+Official exact match remains the benchmark result. Gold-substring, normalized,
+or other relaxed checks may be reported only as separately labeled diagnostics.
 
-The real-data preflight for `Long_Range_Understanding / detective_qa` showed:
+## Mechanism Interpretation
 
-- selected context id: `lru-cd66eabd2f070a38`
-- estimated full-history query tokens: `102477`
-- capacity: `32768`
-- status: over-capacity
-- generation called: `false`
+MAB-5A used:
 
-This means the task is not a valid full-history original-MemGen baseline under the current protocol.
+- `threshold=0.03`
+- `top_k=1`
+- `max_slots=8`
+- `retrieve_policy=threshold_topk`
+- `update_policy=thread_update`
 
-## 6. Baseline Taxonomy
+The low threshold kept retrieval non-empty, but the same threshold also governed
+matched-thread replacement in `write_back()`. The final slot counts remained low
+relative to 25-50 chunks per context, consistent with over-merge or
+over-compression.
 
-- `Original MemGen Full-history Bank-off`: valid only under capacity
-- `Original MemGen Full-history over-capacity`: invalid marker, not run
-- `Original MemGen Truncated-history Bank-off`: optional future diagnostic, not the same as full-history
-- `Compressed Bank-off`: valid compressed lower bound
-- `Compressed Bank-on`: valid LatentBank memory condition
+Current source behavior is precise:
 
-## 7. Recommendation
+1. Before Weaver generates a new latent, `retrieve_with_context()` builds a query
+   from `candidate_inputs_embeds`.
+2. The score compares that current-context query with each existing `slot.key`.
+3. It does not compare the new Weaver latent with an old slot.
+4. Weaver then generates `latent_inputs_embeds`.
+5. `write_back()` writes or replaces memory with that Weaver-generated
+   reasoner-space latent.
+6. Retrieved memory enters Reasoner only and does not enter Weaver in Version A.
 
-Do not use raw over-capacity full-history behavior as a valid baseline.
+## Current Conclusion
 
-For `detective_qa`, the next valid experiment is compressed-memory `n=10`, not full-history.
+MAB-5A is preliminary negative performance evidence but positive mechanism
+activation evidence. The bank changed behavior without improving official exact
+match. The next experiment is not another shared-threshold sweep; it is MAB-5C,
+which separates retrieval visibility from update matching while preserving old
+behavior by default.
 
-Proposed next step:
+See:
 
-`MAB-5A: detective_qa Compressed-memory Bank-off vs Bank-on n10`
-
-Reason:
-
-Full-history original MemGen is over-capacity and invalid for this task. Compressed-memory directly tests whether LatentBank can support answer generation when full dialogue history cannot fit.
-
-## 8. MAB-5A Preservation
-
-Completed experiment:
-
-- `MAB-5A: detective_qa Compressed-memory Bank-off vs Bank-on n10`
-- artifact root: `outputs/mab/compressed_memory_detectiveqa_n10/20260621T013454Z-detectiveqa-compressed-n10/`
-- valid contexts: `10/10`
-- compressed Bank-off accuracy: `0.0`
-- compressed Bank-on accuracy: `0.0`
-- delta: `0.0`
-- output changed: `10/10`
-- retrieval active in every context
-- no cross-context leakage observed
-- query write stayed disabled / read-only
-
-Mechanism note:
-
-- retrieved scores were roughly `0.030-0.064`
-- final slot counts stayed low (`[1, 2, 2, 5, 6, 5, 6, 7, 4, 7]`), which is consistent with over-merge / over-compression under the current low threshold
-- the current `thread_update` path compares `candidate_inputs_embeds` against existing `slot.key` before Weaver produces the new latent
-- the stored memory itself is Weaver-generated `latent_inputs_embeds`
-- one threshold currently couples retrieval visibility and write/update behavior
-
-Preservation note:
-
-- do not implement decoupled thresholds yet
-- next mechanism experiment should separate retrieve/update thresholds after this preservation commit
-
-## 8. Git Status
-
-### Before
-
-```text
-## rlm-memory-bank...origin/rlm-memory-bank [ahead 8]
- M memgen/model/modeling_memgen.py
-?? research_notes/benchmarks/
-?? scripts/eval/diagnose_memgen_over_context.py
-?? scripts/eval/mab2_bank_off.py
-?? scripts/eval/mab2_mab_bridge.py
-?? scripts/eval/mab3_bank_on_full_history.py
-?? scripts/eval/mab3a_threshold_ablation.py
-?? scripts/eval/mab4a_compressed_memory.py
-?? scripts/eval/mab_paired_bank_off_vs_low_threshold_bank_on.py
-?? tests/test_mab2_bank_off.py
-?? tests/test_mab3_bank_on_full_history.py
-?? tests/test_mab3a_threshold_ablation.py
-?? tests/test_mab4a_compressed_memory.py
-?? tests/test_mab_paired_bank_off_vs_low_threshold_bank_on.py
-```
-
-### After
-
-```text
-## rlm-memory-bank...origin/rlm-memory-bank [ahead 8]
- M memgen/model/modeling_memgen.py
-?? research_notes/benchmarks/
-?? scripts/eval/diagnose_memgen_over_context.py
-?? scripts/eval/mab2_bank_off.py
-?? scripts/eval/mab2_mab_bridge.py
-?? scripts/eval/mab3_bank_on_full_history.py
-?? scripts/eval/mab3a_threshold_ablation.py
-?? scripts/eval/mab4a_compressed_memory.py
-?? scripts/eval/mab_paired_bank_off_vs_low_threshold_bank_on.py
-?? tests/test_mab2_bank_off.py
-?? tests/test_mab3_bank_on_full_history.py
-?? tests/test_mab3a_threshold_ablation.py
-?? tests/test_mab4a_compressed_memory.py
-?? tests/test_mab_paired_bank_off_vs_low_threshold_bank_on.py
-?? research_notes/benchmarks/memoryagentbench_results.md
-```
+- `memoryagentbench_mab5a_detectiveqa_compressed_n10.md` for per-context evidence;
+- `memoryagentbench_next_steps.md` for the current action;
+- `memoryagentbench_mechanism_plan.md` for implementation and experiment details;
+- `memoryagentbench_runbook.md` for operational commands.

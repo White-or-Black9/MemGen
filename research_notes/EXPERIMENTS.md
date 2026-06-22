@@ -3,7 +3,24 @@
 Record every experiment, including failed, aborted, and exploratory runs. Never
 overwrite prior records; append a new entry.
 
-## Post-R2 Mechanism Boundary Note
+## Current MAB Evidence Boundary (2026-06-22)
+
+- MAB-5A is the current compressed-memory reference baseline.
+- Original full-history detective_qa is `over_capacity_invalid` and was not run.
+- MAB-5A official exact match was `0.0` for both modes, while retrieval was
+  active and all 10 outputs changed. Zero exact match does not imply an inactive
+  mechanism.
+- `output_changed` is not an improvement metric.
+- Current Version A injects retrieved memory into Reasoner only, not Weaver.
+- The next experiment is MAB-5C decoupled retrieve/update thresholds, not a
+  shared-threshold-only sweep.
+- Earlier dated recommendations remain historical records.
+
+## Historical Post-R2 Mechanism Boundary Note
+
+This snapshot predates the completed R4 full runs and MAB-5A. It is retained to
+preserve the interpretation boundary at that time; the current MAB boundary is
+the section above.
 
 Phase R2 changed the current Version A-aligned mechanism from historical
 write-age decay to last-retrieved decay. This was a code / test / documentation
@@ -21,7 +38,7 @@ Interpretation boundary:
 - There is still no formal TriviaQA performance result and no target-task
   performance claim.
 
-## Current Evidence Classification
+## Historical Evidence Classification (through early R4)
 
 Accepted formal result set:
 
@@ -112,6 +129,15 @@ Current next experiment gate:
 | EXP-20260618-011 | 2026-06-18 | R4 triggered held-out audit s20_39 | What effect did memory triggering have on samples 20..39? | `completed` | 0 helpful, 1 harmful, 5 neutral (among 6 triggered) |
 | EXP-20260618-012 | 2026-06-18 | R4 rescue/regression scan s40_79 | Does Version A t=0.04 rescue any disabled-wrong answers on fresh held-out samples 40..79? | `completed` | 1 rescue (sample 53 Seymour Hersh), 0 regression, mean diff +0.025 |
 | EXP-20260618-013 | 2026-06-18 | R4 combined held-out analysis s20_79 | What is the net effect across 60 held-out TriviaQA samples? | `completed` | Net gain 0 (both 35/60); effect fragile and sample-dependent |
+| EXP-20260620-019 | 2026-06-20 | MAB-1A | Can local MAB loading, chunking, templates, and metrics run without an API or model? | `completed_infrastructure_smoke` | Real local `factconsolidation_sh_6k` data path validated; not a benchmark score |
+| EXP-20260620-020 | 2026-06-20 | MAB-2 | Does original MemGen complete a one-context full-history Bank-off run? | `completed_valid_one_context` | Harness, scoring, and absence of LatentMemoryBank validated |
+| EXP-20260620-021 | 2026-06-20 | MAB-3 | Does Version A complete the paired full-history Bank-on run? | `completed_valid_one_context` | Session lifecycle and Reasoner-only boundary validated |
+| EXP-20260620-022 | 2026-06-20 | MAB-3A | Do low shared thresholds activate retrieval? | `completed_valid_diagnostic` | Retrieval activated on one context; not performance evidence |
+| EXP-20260620-023 | 2026-06-20 | MAB-4A | Can Bank-on answer from a compressed query prompt? | `completed_exploratory_one_context` | Chunk and acknowledgement history excluded; latent retrieval exercised |
+| EXP-20260620-024 | 2026-06-20 | Paired MAB attempt | Can `factconsolidation_sh_6k` support a paired n10 run? | `completed_with_dataset_limitation` | Only one matching local context; not n10 evidence |
+| EXP-20260620-025 | 2026-06-20 | MAB data audit | Which local task supports a 10-context compressed pilot? | `completed_read_only_audit` | detective_qa has 10 rows but full history is over capacity |
+| EXP-20260620-026 | 2026-06-20 | Over-context diagnostic | Is original full-history behavior valid beyond 32,768 tokens? | `completed_diagnostic` | No explicit guard; real over-capacity prompts must be rejected before generation |
+| EXP-20260621-001 | 2026-06-21 | MAB-5A | Does compressed Bank-on improve over compressed Bank-off on detective_qa n10? | `completed` | Both exact match 0.0; retrieval active and all outputs changed |
 
 ## Recorded Experiments
 
@@ -2477,6 +2503,72 @@ full GSM8K test performance.
   - current Version A is mechanism-active but policy-unstable
 - Follow-up status: paused by user; no ablation started.
 
+### EXP-20260620-019: MAB-1A No-API Real-Data Smoke
+
+- Status: `completed_infrastructure_smoke`
+- Scope: local `factconsolidation_sh_6k`, one context, first query, no model or
+  external API.
+- Artifact: `outputs/mab/no_api_smoke/20260620T015554Z-455306d-fact-sh-6k-real-local/`
+- Result: local parquet loading, official chunking, templates, and metric path
+  validated. This is infrastructure evidence, not a benchmark score.
+- Evidence note: `benchmarks/memoryagentbench_no_api_smoke.md`.
+
+### EXP-20260620-020: MAB-2 Full-History Bank-off
+
+- Status: `completed_valid_one_context`
+- Run ID: `20260620T034034Z-factconsolidation-sh-6k-onectx`
+- Result: original MemGen full-history rebuild, official scoring, and absence of
+  the added LatentMemoryBank validated on one context.
+- Evidence note: `benchmarks/memoryagentbench_mab2_bank_off_run.md`.
+
+### EXP-20260620-021: MAB-3 Full-History Bank-on
+
+- Status: `completed_valid_one_context`
+- Run ID: `20260620T085407Z-factconsolidation-sh-6k-onectx`
+- Result: session-local bank lifecycle and Reasoner-only injection boundary
+  validated; default threshold produced no retrieved latent injection.
+- Evidence note: `benchmarks/memoryagentbench_mab3_bank_on_full_history_run.md`.
+
+### EXP-20260620-022: MAB-3A Shared-Threshold Ablation
+
+- Status: `completed_valid_diagnostic`
+- Artifact: `outputs/mab/memgen_bank_on_threshold_ablation/20260620T103852Z-factconsolidation-sh-6k-onectx/`
+- Result: low shared thresholds activated retrieval on the one-context
+  full-history case. This is mechanism evidence, not performance evidence.
+- Evidence note: `benchmarks/memoryagentbench_mab3a_threshold_ablation.md`.
+
+### EXP-20260620-023: MAB-4A Compressed-Memory Exploratory Run
+
+- Status: `completed_exploratory_one_context`
+- Artifact: `outputs/mab/memgen_bank_on_compressed_memory/20260620T111903Z-factconsolidation-sh-6k-onectx/`
+- Result: query chunk and acknowledgement history were excluded while latent
+  retrieval remained available.
+- Evidence note: `benchmarks/memoryagentbench_mab4a_compressed_memory.md`.
+
+### EXP-20260620-024: Paired Low-Threshold n10 Attempt
+
+- Status: `completed_with_dataset_limitation`
+- Artifact: `outputs/mab/paired_bank_off_vs_low_threshold_bank_on/20260620T114425Z-factconsolidation-sh-6k-n10/`
+- Result: the local source contained only one matching context, so this is a
+  one-context paired case and not n10 evidence.
+- Evidence note:
+  `benchmarks/memoryagentbench_paired_bank_off_vs_low_threshold_bank_on_n10.md`.
+
+### EXP-20260620-025: Local MAB Task Availability Audit
+
+- Status: `completed_read_only_audit`
+- Result: detective_qa provided 10 local rows suitable for a compressed-memory
+  pilot, but full-history prompts were over the 32,768-token capacity.
+- Evidence note: `benchmarks/memoryagentbench_local_task_availability.md`.
+
+### EXP-20260620-026: MemGen Over-Context Diagnostic
+
+- Status: `completed_diagnostic`
+- Artifact: `outputs/mab/memgen_over_context_behavior/20260620T133105Z-over-context/over_context_diagnostic.json`
+- Result: original full-history inference has no explicit over-context guard;
+  detective_qa preflight exceeded capacity and generation was not called.
+- Evidence note: `benchmarks/memgen_over_context_behavior.md`.
+
 ### EXP-20260621-001: MAB-5A DetectiveQA Compressed-Memory n10
 
 - Phase: MAB-5A compressed-memory benchmark preservation
@@ -2507,6 +2599,9 @@ full GSM8K test performance.
     before Weaver emits the new latent, so one threshold currently couples
     retrieval visibility and write/update behavior
 - Interpretation:
-  - mechanism is active but not yet useful
-  - next mechanism experiment should decouple retrieve/update thresholds after
-    this preservation commit
+  - mechanism is active but produced no official exact-match gain
+  - `output_changed=10` is activation evidence, not improvement
+  - next experiment is MAB-5C decoupled retrieve/update thresholds, not another
+    shared-threshold-only ablation
+- Detailed evidence:
+  `benchmarks/memoryagentbench_mab5a_detectiveqa_compressed_n10.md`.

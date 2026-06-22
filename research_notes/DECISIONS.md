@@ -50,6 +50,22 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0041 | 2026-06-18 | accepted | Treat the threshold-positive run as diagnostic only |
 | DEC-0042 | 2026-06-18 | accepted | Do not treat one-sample TriviaQA reward as performance evidence |
 | DEC-0043 | 2026-06-18 | accepted | Mark R4 infrastructure validation complete with caveats and gate next scaling decision |
+| DEC-0044 | 2026-06-18 | accepted | Confirm active LatentMemoryBank scoring and recency semantics |
+| DEC-0045 | 2026-06-18 | accepted | Treat threshold 0.7 as inappropriate for the observed TriviaQA score scale |
+| DEC-0046 | 2026-06-18 | accepted | Keep threshold overrides diagnostic and in-memory only |
+| DEC-0047 | 2026-06-18 | accepted | Treat memory timing as the main mechanism caveat |
+| DEC-0048 | 2026-06-18 | accepted | Interpret exploratory TriviaQA effects as mixed, not improvement or failure |
+| DEC-0049 | 2026-06-18 | accepted | Prefer mechanism analysis over immediate scaling |
+| DEC-0050 | 2026-06-18 | accepted | Correct threshold terminology to decayed retrieval score |
+| DEC-0051 | 2026-06-18 | accepted | Keep Version B deferred |
+| DEC-0052 | 2026-06-19 | accepted | Keep the expanded TriviaQA sweep exploratory |
+| DEC-0053 | 2026-06-20 | accepted | Pause TriviaQA ablations after the negative full Version A result |
+| DEC-0054 | 2026-06-21 | accepted | Decouple retrieval and update thresholds for the next MAB mechanism experiment |
+| DEC-0055 | 2026-06-22 | accepted | Mark detective_qa original full-history as over-capacity invalid |
+| DEC-0056 | 2026-06-22 | accepted | Use MAB-5A as the compressed-memory reference baseline |
+| DEC-0057 | 2026-06-22 | accepted | Stage mechanism work as MAB-5C, MAB-5D, then exploratory MAB-6A |
+| DEC-0058 | 2026-06-22 | accepted | Preserve shared-threshold behavior by default |
+| DEC-0059 | 2026-06-22 | accepted | Keep Version B Weaver conditioning exploratory and isolated |
 
 ## Decision Template
 
@@ -69,7 +85,24 @@ IDs and append superseding decisions rather than silently rewriting history.
 
 ## Standing Decisions
 
-### Current Board
+### Current Board (2026-06-22)
+
+- Current MAB reference: MAB-5A run
+  `20260621T013454Z-detectiveqa-compressed-n10`.
+- Full-history detective_qa: `over_capacity_invalid`; do not run or silently
+  truncate.
+- Current Version A: session-local, Reasoner-only retrieval injection,
+  Weaver-generated reasoner-space memory, no fallback.
+- MAB-5A: both official exact-match accuracies `0.0`; retrieval active in all
+  contexts; all outputs changed; no leakage; query writes `0`.
+- Current next action: implement MAB-5C Phase 1 only with decoupled retrieval and
+  update thresholds while preserving shared-threshold behavior by default.
+- Deferred: MAB-5D fallback and exploratory MAB-6A Weaver conditioning.
+
+### Historical Board (2026-06-18)
+
+This board is retained for provenance. Its blocker and next-step statements were
+resolved or superseded by later R4 and MAB work.
 
 - Date: 2026-06-18
 - Current formal result set: accepted Phase 0-7 records.
@@ -1333,7 +1366,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 ### DEC-0054: Decouple Retrieval and Update Thresholds for Future MAB Experiments
 
 - Date: 2026-06-21
-- Status: proposed
+- Status: accepted
 - Context: MAB-5A detective_qa compressed-memory n10 completed with active
   retrieval but no accuracy gain; the low threshold kept retrieval non-empty
   while also driving repeated slot replacement / over-compression.
@@ -1352,3 +1385,64 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Consequences:
   - future mechanism work should be treated as a code change, not a hyperparameter sweep
   - no threshold-only ablation should be interpreted as sufficient for this issue
+
+### DEC-0055: DetectiveQA Full-History Is Over-Capacity Invalid
+
+- Date: 2026-06-22
+- Status: accepted
+- Context: all 10 selected detective_qa contexts exceed the checkpoint's
+  32,768-token capacity under original full-history reconstruction.
+- Decision:
+  - record original full-history as `over_capacity_invalid`
+  - do not call model generation for these prompts
+  - do not silently truncate them
+  - label any future truncated-history condition as a separate baseline
+- Rationale: unsupported or runtime-failed over-capacity generation is not a
+  scientifically valid comparator.
+
+### DEC-0056: MAB-5A Is the Compressed-Memory Reference Baseline
+
+- Date: 2026-06-22
+- Status: accepted
+- Decision: fix run
+  `20260621T013454Z-detectiveqa-compressed-n10` as the comparison baseline for
+  the next MAB mechanism experiments.
+- Interpretation boundary:
+  - Bank-off and Bank-on official exact match are both `0.0`
+  - retrieval active in all contexts and `output_changed=10` establish mechanism
+    activity, not improvement
+  - official exact match must not be mixed with relaxed diagnostics
+
+### DEC-0057: Stage MAB Mechanism Work as MAB-5C, MAB-5D, Then MAB-6A
+
+- Date: 2026-06-22
+- Status: accepted
+- Decision:
+  1. MAB-5C decouples retrieval and update thresholds.
+  2. MAB-5D may add opt-in `top1_if_empty` fallback only after MAB-5C.
+  3. MAB-6A may explore retrieved-memory-to-Weaver conditioning only after the
+     earlier phases are separately understood.
+- Consequence: implement Phase 1 only next; do not combine mechanisms in the
+  first follow-up.
+
+### DEC-0058: Preserve Shared-Threshold Behavior by Default
+
+- Date: 2026-06-22
+- Status: accepted
+- Decision: new retrieval and update threshold fields must fall back to the
+  existing shared `threshold` when unset.
+- Rationale: previous Version A runs and tests must remain reproducible, and new
+  mechanism results must not silently redefine old configurations.
+
+### DEC-0059: Version B Weaver Conditioning Is Exploratory and Isolated
+
+- Date: 2026-06-22
+- Status: accepted
+- Decision:
+  - current Version A remains Reasoner-only by default
+  - retrieved memory must not enter Weaver unless an explicit Version B flag is
+    enabled
+  - initial MAB-6A results must be labeled exploratory
+  - Version B must use separate tests, runner identity, artifacts, and notes
+- Rationale: Weaver was not trained for retrieved-memory-conditioned inputs, so
+  this mechanism cannot be conflated with Version A or threshold decoupling.

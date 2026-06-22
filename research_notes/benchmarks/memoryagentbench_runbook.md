@@ -65,6 +65,7 @@ Useful evidence file:
 | `scripts/eval/mab_paired_bank_off_vs_low_threshold_bank_on.py` | Paired Bank-off vs low-threshold Bank-on n10 attempt | Safe to rerun only if you understand it will create a new timestamped output directory and use whatever local source rows exist; the earlier target was limited by local data availability | A few minutes for the single available row; longer if data availability changes | `outputs/mab/paired_bank_off_vs_low_threshold_bank_on/<timestamp>-factconsolidation-sh-6k-n10/` | `--requested-contexts`, `--threshold`, base paths | `manifest.json`, `paired_results.json`, `diagnostics.jsonl`, `run_config.json` |
 | `scripts/eval/diagnose_memgen_over_context.py` | Over-context diagnostic | Yes; each rerun creates a new timestamped output directory | Short, usually minutes or less | `outputs/mab/memgen_over_context_behavior/<timestamp>-over-context/` | `--test-lengths`, `--max-new-tokens`, checkpoint and model paths | `over_context_diagnostic.json` plus manifest-style output |
 | `scripts/eval/mab5a_detectiveqa_compressed_n10.py` | Main detective_qa compressed-memory n10 run | Yes; each rerun creates a new timestamped output directory | About 9 minutes in the latest run on one GPU | `outputs/mab/compressed_memory_detectiveqa_n10/<timestamp>-detectiveqa-compressed-n10/` | Defaults already encode the dataset root, checkpoint, `threshold=0.03`, `top_k=1`, `max_slots=8`, `requested-contexts=10`, `query_mode=first-query-only` | `manifest.json`, `paired_results.json`, `diagnostics.jsonl`, `run_config.json` |
+| `scripts/eval/mab5b_raised_shared_threshold_detectiveqa_n10.py` | Raised shared-threshold detective_qa n10 diagnostic | Yes; each rerun creates a new timestamped output directory | Similar to MAB-5A | `outputs/mab/raised_shared_threshold_detectiveqa_n10/<timestamp>-detectiveqa-raised-shared-threshold-n10/` | Defaults encode `threshold=0.05`, `top_k=1`, `max_slots=8`, `requested-contexts=10`, `query_mode=first-query-only` | `manifest.json`, `paired_results.json`, `diagnostics.jsonl`, `run_config.json` |
 
 ## 6. Main Recommended Run: MAB-5A detective_qa Compressed n10
 
@@ -113,6 +114,24 @@ Known latest result from `20260621T013454Z-detectiveqa-compressed-n10`:
 - full-history status: `over_capacity_invalid`
 
 The runbook should treat this as the current evidence baseline, not as a reason to rerun full-history detective_qa.
+
+## 6.1. Main Diagnostic Run: MAB-5B Raised Shared Threshold n10
+
+Recommended command:
+
+```bash
+cd /mnt/18T/baishilong/MemGen
+CUDA_VISIBLE_DEVICES=<GPU_ID> /home/baishilong/miniconda3/envs/memgen/bin/python scripts/eval/mab5b_raised_shared_threshold_detectiveqa_n10.py
+```
+
+This runner now inserts the repository root into `sys.path`, so it should work
+directly from the repo root without a manual `PYTHONPATH` override.
+
+Operational caveat:
+
+- The Codex default sandbox may not expose `/dev/nvidia*` even when `nvidia-smi`
+  works elsewhere. Verify the exact Python process can see CUDA before starting
+  a long run; `nvidia-smi` alone is not enough.
 
 ## 7. How to Run Tests
 

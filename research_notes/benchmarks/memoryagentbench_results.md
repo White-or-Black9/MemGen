@@ -26,6 +26,7 @@ The current reference run is MAB-5A:
 | Local task audit | All local parquet splits | Completed audit | `detective_qa` has 10 rows but full history is over capacity |
 | Over-context diagnostic | Synthetic boundary plus real preflight | Completed diagnostic | Original full-history path has no explicit guard; real over-capacity samples must be rejected before generation |
 | MAB-5A | Compressed Bank-off vs Bank-on, detective_qa n10 | Completed reference baseline | Both exact-match accuracies were 0.0; mechanism active in every context |
+| MAB-5B | Raised shared-threshold diagnostic, detective_qa n10 | Completed diagnostic | Both exact-match accuracies were 0.0; slot counts rose to the max in every context; retrieval remained active in every context |
 
 ## Full-History Capacity Boundary
 
@@ -122,3 +123,34 @@ See:
 - `memoryagentbench_next_steps.md` for the current action;
 - `memoryagentbench_mechanism_plan.md` for implementation and experiment details;
 - `memoryagentbench_runbook.md` for operational commands.
+
+## MAB-5B Result
+
+| Metric | Value |
+| --- | ---: |
+| Requested / valid contexts | 10 / 10 |
+| Compressed Bank-off exact match | 0.0 |
+| Compressed Bank-on exact match | 0.0 |
+| Accuracy delta | 0.0 |
+| Output changed | 5 |
+| Improved / regressed by exact match | 0 / 0 |
+| Retrieval-active contexts | 10 |
+| Query write count | 0 |
+| Cross-context leakage detected | 0 |
+| Retrieved memory entered Reasoner | Yes |
+| Retrieved memory entered Weaver | No |
+| Final slot counts | `[8, 8, 8, 8, 8, 8, 8, 8, 8, 8]` |
+| Mean final slot count | `8.0` |
+| Retrieved latent count | `200` |
+| Write count | `326` |
+| Retrieval count | `316` |
+| Successful retrieved-score range | approximately `0.050-0.064` |
+
+MAB-5B is diagnostic evidence for the raised shared-threshold setting, not a
+new reference baseline. Compared with MAB-5A, it increased slot counts to the
+maximum on every context while keeping retrieval active and Reasoner-only. It
+did not improve official exact match.
+The resulting tradeoff strengthens the case for MAB-5C: keep retrieval density
+closer to MAB-5A while recovering the slot growth seen in MAB-5B. A clean first
+MAB-5C should start with `retrieve_threshold=0.03`,
+`update_threshold=0.05`, `max_slots=8`, and `top_k=1`.

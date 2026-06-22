@@ -66,6 +66,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0057 | 2026-06-22 | accepted | Stage mechanism work as MAB-5C, MAB-5D, then exploratory MAB-6A |
 | DEC-0058 | 2026-06-22 | accepted | Preserve shared-threshold behavior by default |
 | DEC-0059 | 2026-06-22 | accepted | Keep Version B Weaver conditioning exploratory and isolated |
+| DEC-0060 | 2026-06-22 | accepted | Treat MAB-5B as completed diagnostic evidence that strengthens the simple raised-threshold baseline |
 
 ## Decision Template
 
@@ -95,8 +96,11 @@ IDs and append superseding decisions rather than silently rewriting history.
   Weaver-generated reasoner-space memory, no fallback.
 - MAB-5A: both official exact-match accuracies `0.0`; retrieval active in all
   contexts; all outputs changed; no leakage; query writes `0`.
-- Current next action: implement MAB-5C Phase 1 only with decoupled retrieval and
-  update thresholds while preserving shared-threshold behavior by default.
+- MAB-5B: both official exact-match accuracies `0.0`; retrieval active in all
+  contexts; slot counts rose to the maximum in every context; output changes
+  dropped to `5`; no leakage; query writes `0`.
+- Current next action: keep MAB-5C pending as the next refinement experiment if
+  later evidence still warrants separating retrieval and update thresholds.
 - Deferred: MAB-5D fallback and exploratory MAB-6A Weaver conditioning.
 
 ### Historical Board (2026-06-18)

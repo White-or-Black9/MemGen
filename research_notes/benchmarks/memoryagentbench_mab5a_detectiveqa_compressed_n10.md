@@ -1,13 +1,10 @@
 # MAB-5A: detective_qa Compressed-memory Bank-off vs Bank-on n10
 
-Status: canonical detailed evidence for the fixed MAB-5A reference run. Current
-cross-experiment interpretation is maintained in `memoryagentbench_results.md`.
-
 ## Objective
 Test whether LatentBank helps on detective_qa when the full dialogue history is over capacity.
 
 ## Why Original Full-history Is Invalid
-The over-context diagnostic showed the original full-history path exceeds the 32,768-token capacity for detective_qa, so the full-history baseline is marked over_capacity_invalid and was not executed.
+The over-context diagnostic showed the original full-history path exceeds the 32,768-token capacity for detective_qa, so the full-history baseline is marked `over_capacity_invalid` and was not executed.
 
 ## Over-context Reference
 See `scripts/eval/diagnose_memgen_over_context.py` and `outputs/mab/memgen_over_context_behavior/20260620T133105Z-over-context/over_context_diagnostic.json`.
@@ -24,44 +21,25 @@ See `scripts/eval/diagnose_memgen_over_context.py` and `outputs/mab/memgen_over_
 - Do not run full-history generation for detective_qa.
 
 ## Baseline Taxonomy
-- Original MemGen full-history: over_capacity_invalid.
+- Original MemGen full-history: `over_capacity_invalid`.
 - Compressed Bank-off: no LatentBank, compressed query only.
 - Compressed Bank-on: LatentBank enabled, sequential chunk writes, read-only query proxy.
 
 ## Settings
 - Threshold: `0.03`
-- top_k: `1`
-- max_slots: `8`
-- retrieve_policy: `threshold_topk`
-- query_mode: `first-query-only`
+- `top_k`: `1`
+- `max_slots`: `8`
+- `retrieve_policy`: `threshold_topk`
+- `query_mode`: `first-query-only`
 
 ## Query Read-only Status
-The query turn used a no-op proxy for bank writes, so query_write_count remained 0 while retrieval stayed active.
+The query turn used a no-op proxy for bank writes, so `query_write_count` remained `0` while retrieval stayed active.
 
 ## Prompt Leakage Checks
 The compressed query prompt was checked for chunk-text and acknowledgement-history leakage per context.
 
 ## Reasoner-only Injection Checks
 Retrieved latents were checked to enter Reasoner and not Weaver.
-
-## Mechanism Finding
-The completed run suggests over-merge / over-compression under the current low threshold:
-
-- `threshold=0.03`, `top_k=1`, `max_slots=8`, `update_policy=thread_update`
-- retrieved scores were roughly in the `0.030-0.064` range
-- final slot counts stayed low: `[1, 2, 2, 5, 6, 5, 6, 7, 4, 7]`
-- example evidence:
-  - context 0: 25 chunks, 26 writes, final slots = 1
-  - context 8: 50 chunks, 51 writes, final slots = 4
-
-Source-level clarification:
-
-- retrieval compares `candidate_inputs_embeds` against existing `slot.key`
-- the comparison happens before Weaver produces the new latent
-- the written / updated memory is Weaver-generated `latent_inputs_embeds`
-- the single threshold currently couples retrieval visibility and write/update behavior
-
-That means the low threshold can keep retrieval non-empty while also causing repeated replace/update behavior instead of appending new slots.
 
 ## Per-context Result Table
 | context_index | exact_match_off | exact_match_on | output_changed | improved | regressed | retrieval_count | est_full_history_tokens |
@@ -90,16 +68,10 @@ That means the low threshold can keep retrieval non-empty while also causing rep
 No context-level leakage or Weaver-injection failure was observed in the completed run.
 
 ## Interpretation
-The mechanism is active but produced no official exact-match gain. Retrieval
-was active in every context and all 10 outputs changed, so exact match of zero
-does not imply an inactive mechanism. `output_changed=10` shows generation was
-affected; it is not evidence of improvement. Official exact match must remain
-separate from relaxed or gold-substring diagnostics.
+The mechanism is active but produced no official exact-match gain. Retrieval was active in every context and all 10 outputs changed, so exact match of zero does not imply an inactive mechanism. `output_changed=10` shows generation was affected; it is not evidence of improvement. Official exact match must remain separate from relaxed or gold-substring diagnostics.
 
 ## Recommendation For Next Step
-Do not run another threshold-only ablation. The next mechanism experiment is
-MAB-5C Decoupled Retrieval-Update Thresholds. Do not implement fallback or
-retrieved-memory-to-Weaver conditioning during MAB-5C.
+Do not run another threshold-only ablation. The next mechanism experiment is MAB-5C Decoupled Retrieval-Update Thresholds. Do not implement fallback or retrieved-memory-to-Weaver conditioning during MAB-5C.
 
 ## Git Status
 ### Before
@@ -122,21 +94,11 @@ retrieved-memory-to-Weaver conditioning during MAB-5C.
 ```
 ### After
 ```
-## rlm-memory-bank...origin/rlm-memory-bank [ahead 8]
+## rlm-memory-bank...origin/rlm-memory-bank [ahead 1]
  M memgen/model/modeling_memgen.py
-?? research_notes/benchmarks/
-?? scripts/eval/diagnose_memgen_over_context.py
-?? scripts/eval/mab2_bank_off.py
-?? scripts/eval/mab2_mab_bridge.py
-?? scripts/eval/mab3_bank_on_full_history.py
-?? scripts/eval/mab3a_threshold_ablation.py
-?? scripts/eval/mab4a_compressed_memory.py
-?? scripts/eval/mab5a_detectiveqa_compressed_n10.py
-?? scripts/eval/mab_paired_bank_off_vs_low_threshold_bank_on.py
-?? tests/test_mab2_bank_off.py
-?? tests/test_mab3_bank_on_full_history.py
-?? tests/test_mab3a_threshold_ablation.py
-?? tests/test_mab4a_compressed_memory.py
-?? tests/test_mab5a_detectiveqa_compressed_n10.py
-?? tests/test_mab_paired_bank_off_vs_low_threshold_bank_on.py
+ M research_notes/PROGRESS.md
+ M research_notes/benchmarks/memoryagentbench_next_steps.md
+?? research_notes/benchmarks/memoryagentbench_mab5b_raised_shared_threshold.md
+?? scripts/eval/mab5b_raised_shared_threshold_detectiveqa_n10.py
+?? tests/test_mab5b_raised_shared_threshold_detectiveqa_n10.py
 ```

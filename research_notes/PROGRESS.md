@@ -20,9 +20,15 @@
   `slot.key`; it does not compare the new Weaver latent with an old slot.
 - Canonical MAB index, results, next steps, runbook, and mechanism plan are under
   `research_notes/benchmarks/`.
-- Current next action: implement Phase 1 only, MAB-5C Decoupled
-  Retrieval-Update Thresholds. Do not implement fallback or
-  retrieved-memory-to-Weaver conditioning yet.
+- MAB-5B raised shared-threshold runner and test have now been executed on a
+  CUDA-capable runtime. Result: 10/10 valid contexts; Bank-off exact match
+  `0.0`; Bank-on exact match `0.0`; `output_changed=5`; retrieval active in all
+  contexts; final slot counts reached `[8, 8, 8, 8, 8, 8, 8, 8, 8, 8]`; no
+  cross-context leakage; query writes `0`; retrieved memory remained
+  Reasoner-only.
+- Current next action: keep MAB-5C pending as the next refinement experiment
+  only if a later decision still needs read/write threshold separation. The
+  raised shared threshold is now the stronger simple baseline.
 - Old shared-threshold behavior must remain reproducible by default.
 - `output_changed` is activation evidence, not improvement. Official exact
   match and relaxed diagnostics remain separately labeled.

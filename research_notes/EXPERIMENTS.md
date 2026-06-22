@@ -138,6 +138,7 @@ Current next experiment gate:
 | EXP-20260620-025 | 2026-06-20 | MAB data audit | Which local task supports a 10-context compressed pilot? | `completed_read_only_audit` | detective_qa has 10 rows but full history is over capacity |
 | EXP-20260620-026 | 2026-06-20 | Over-context diagnostic | Is original full-history behavior valid beyond 32,768 tokens? | `completed_diagnostic` | No explicit guard; real over-capacity prompts must be rejected before generation |
 | EXP-20260621-001 | 2026-06-21 | MAB-5A | Does compressed Bank-on improve over compressed Bank-off on detective_qa n10? | `completed` | Both exact match 0.0; retrieval active and all outputs changed |
+| EXP-20260622-001 | 2026-06-22 | MAB-5B | Does raising the shared threshold to 0.05 improve the compressed detective_qa n10 result? | `completed` | Both exact match 0.0; final slot counts rose to 8 in every context; retrieval stayed active in every context; output_changed dropped to 5 |
 
 ## Recorded Experiments
 
@@ -2605,3 +2606,60 @@ full GSM8K test performance.
     shared-threshold-only ablation
 - Detailed evidence:
   `benchmarks/memoryagentbench_mab5a_detectiveqa_compressed_n10.md`.
+
+### EXP-20260622-001: MAB-5B Raised Shared-threshold DetectiveQA n10
+
+- Phase: MAB-5B diagnostic benchmark
+- Status: `completed`
+- Research question: Does raising the shared threshold from `0.03` to `0.05`
+  reduce over-merge / over-compression enough to change the detective_qa n10
+  compressed-memory result?
+- Hypothesis: A higher shared threshold should keep retrieval active while
+  allowing more slots to accumulate before replacement.
+- Baseline/comparator: `20260621T013454Z-detectiveqa-compressed-n10`
+- Code revision: current working-tree state on `rlm-memory-bank`
+- Working tree state: existing notes and prepared runner/test present before the
+  run; no code edits were required for execution
+- Environment: `/home/baishilong/miniconda3/envs/memgen`, Python 3.10.20,
+  PyTorch 2.12.0+cu126, CUDA 12.6, single RTX A6000 selected via
+  `CUDA_VISIBLE_DEVICES=2`
+- Dataset and split: `Long_Range_Understanding / detective_qa`, 10 contexts
+- Inputs/session definition: first-query-only, compressed Bank-off vs Bank-on,
+  read-only query phase, session-local memory, no fallback, no Weaver injection
+- Configuration: `threshold=0.05`, `top_k=1`, `max_slots=8`,
+  `retrieve_policy=threshold_topk`, `update_policy=thread_update`
+- Random seed: 42
+- Batch size: 1
+- Output directory:
+  `outputs/mab/raised_shared_threshold_detectiveqa_n10/20260622T073545Z-detectiveqa-raised-shared-threshold-n10`
+- Run notes:
+  - the first direct file invocation failed with `ModuleNotFoundError:
+    No module named 'scripts.eval'`
+  - rerunning with `PYTHONPATH=/mnt/18T/baishilong/MemGen` fixed the import
+    path and produced the run artifacts
+
+#### Observations
+
+- Both compressed Bank-off and Bank-on exact match remained `0.0`.
+- Final slot counts increased to `[8, 8, 8, 8, 8, 8, 8, 8, 8, 8]`.
+- Mean final slot count reached `8.0`.
+- Retrieval stayed active in all 10 contexts, but retrieved latent count fell to
+  `200` from MAB-5A's `2248`.
+- Query write count remained `0`.
+- Cross-context leakage remained absent.
+- Retrieved memory remained Reasoner-only and never entered Weaver.
+- Retrieved score range was approximately `0.050-0.064`.
+- `matched_replace_count`, `thread_insert_count`, and `capacity_evict_count`
+  were not exposed in the current artifact schema.
+
+#### Conclusion
+
+- Hypothesis supported: partially.
+- Interpretation: Raising the shared threshold clearly increased slot counts
+  without breaking retrieval activity, which makes the simple baseline much
+  stronger than MAB-5A.
+- Exact match did not improve, so this remains mechanism evidence rather than
+  performance evidence.
+- Follow-up: keep MAB-5C pending as a refinement option if you still need to
+  separate retrieval and update thresholds more precisely.
+- Related baseline: `20260621T013454Z-detectiveqa-compressed-n10`

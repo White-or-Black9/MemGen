@@ -2,18 +2,38 @@
 
 ## Current Decision
 
-Implement and validate Phase 1 only:
+Keep MAB-5C pending as the next mechanism experiment:
 
 **MAB-5C: Decoupled Retrieval-Update Thresholds**
 
-Do not run another shared-threshold-only ablation. Do not implement retrieval
-fallback or retrieved-memory-to-Weaver conditioning during MAB-5C.
+The completed MAB-5B diagnostic now shows that a simple raised shared threshold
+can push slot counts to the maximum while keeping retrieval active in every
+context. That makes the simple baseline stronger, but it does not replace the
+need for a later decoupled-threshold check if you still want to isolate read
+versus write behavior.
+The first clean MAB-5C should start with:
 
-## Why MAB-5C Is Next
+- `retrieve_threshold=0.03`
+- `update_threshold=0.05`
+- `max_slots=8`
+- `top_k=1`
+
+## MAB-5B Status
+
+MAB-5B has completed. The run used `threshold=0.05`, kept query turns
+read-only, and remained `over_capacity_invalid` for full-history detective_qa.
+It produced the strongest simple-baseline behavior so far: slot counts reached
+`8` in every context, retrieval stayed active in every context, and official
+exact match remained `0.0` in both modes.
+
+## Why MAB-5C Is Still Optional
 
 MAB-5A showed active retrieval and output changes but no exact-match gain. With
 `threshold=0.03`, final slot counts remained `[1, 2, 2, 5, 6, 5, 6, 7, 4, 7]`
-after 25-50 chunks per context.
+after 25-50 chunks per context. MAB-5B raised the shared threshold to `0.05`
+and increased slot counts to `[8, 8, 8, 8, 8, 8, 8, 8, 8, 8]` while keeping
+retrieval active, so MAB-5C is now a refinement question rather than an urgent
+rescue step.
 
 The current single threshold controls two distinct decisions:
 
@@ -50,7 +70,7 @@ The detailed test, interface, diagnostics, and artifact contract is in
 
 ## Required Comparison
 
-Compare MAB-5C against the fixed MAB-5A run:
+Compare future MAB-5C against the fixed MAB-5A run:
 
 ```text
 20260621T013454Z-detectiveqa-compressed-n10

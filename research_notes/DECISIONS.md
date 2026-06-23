@@ -105,10 +105,13 @@ IDs and append superseding decisions rather than silently rewriting history.
   contexts; query-time retrieval active in all contexts; slot counts stayed at
   the maximum in every context; retrieved memory remained Reasoner-only; query
   writes `0`.
-- Current next action: MAB-5C is complete; the next comparison, if approved,
-  should be a capacity ablation at `max_slots=16` before any fallback or
-  Weaver-conditioning work.
-- Deferred: MAB-5D fallback and exploratory MAB-6A Weaver conditioning.
+- MAB-5D: both official exact-match accuracies `0.0`; final slot counts
+  reached 16 in every context; capacity eviction dropped versus MAB-5C;
+  retrieved memory remained Reasoner-only; query writes `0`.
+- Current next action: MAB-5D is complete; the next meaningful mechanism step
+  is exploratory MAB-6A / Version B Weaver-conditioned memory, if and only if
+  it remains isolated from Version A.
+- Deferred: exploratory MAB-6A Weaver conditioning.
 
 ### Historical Board (2026-06-18)
 
@@ -1472,3 +1475,18 @@ resolved or superseded by later R4 and MAB work.
   effects.
 - Consequence: future comparison work should cite the canonical run directory
   rather than the preliminary patched artifact.
+
+### DEC-0063: Canonicalize MAB-5D Capacity16 and Move Next to MAB-6A
+
+- Date: 2026-06-23
+- Status: accepted
+- Decision:
+  - treat `20260623T022140Z-detectiveqa-capacity16-n10` as the canonical MAB-5D result
+  - mark `20260623T015929Z-detectiveqa-decoupled-thresholds-n10` as non-canonical
+  - use MAB-5D as a completed capacity ablation and move the next mechanism
+    question to MAB-6A / Version B
+- Rationale: the canonical run cleanly isolates the effect of increasing
+  `max_slots` from 8 to 16, shows reduced eviction churn, and still leaves exact
+  match at `0.0`.
+- Consequence: future notes and comparisons should cite the canonical capacity16
+  run only; the earlier attempt remains provenance only.

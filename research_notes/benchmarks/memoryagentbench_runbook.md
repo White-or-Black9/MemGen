@@ -153,6 +153,24 @@ Operational caveat:
 - If the direct Python probe reports `cuda available: False`, switch to the
   same GPU-enabled execution path used for the canonical run.
 
+## 6.3. Capacity16 Diagnostic Run: MAB-5D n10
+
+Recommended command:
+
+```bash
+cd /mnt/18T/baishilong/MemGen
+CUDA_VISIBLE_DEVICES=<GPU_ID> /home/baishilong/miniconda3/envs/memgen/bin/python scripts/eval/mab5d_capacity16_detectiveqa_n10.py
+```
+
+Operational caveat:
+
+- The canonical MAB-5D artifact is the `20260623T022140Z-detectiveqa-capacity16-n10`
+  run. The earlier `20260623T015929Z-detectiveqa-decoupled-thresholds-n10`
+  artifact is non-canonical and should not be cited as MAB-5D.
+- Keep `retrieve_threshold=0.03`, `update_threshold=0.05`, `top_k=1`, and
+  `max_slots=16` for this diagnostic family.
+- Do not treat relaxed substring-close answers as official accuracy.
+
 ## 7. How to Run Tests
 
 Run the targeted syntax and unit checks from the MemGen repo root:
@@ -262,7 +280,8 @@ This is the turn-level or case-level trace file. Use it when you need to underst
 - Do not mix official `exact_match` with relaxed diagnostic metrics in the same conclusion.
 - Do not treat `output_changed` as improvement.
 - Do not run another threshold-only sweep as the current next experiment;
-  MAB-5C is a mechanism change with separate retrieval and update thresholds.
+  MAB-5D is the completed capacity16 ablation, and any further work should
+  move to a separate routing/usage experiment.
 
 ## 10. How to Run the Over-context Diagnostic
 
@@ -289,8 +308,9 @@ This runbook does not define mechanism changes. The canonical current action is
 in `memoryagentbench_next_steps.md`, and the implementation/experiment contract
 is in `memoryagentbench_mechanism_plan.md`.
 
-Current routing: implement MAB-5C Phase 1 only. Do not implement fallback or
-retrieved-memory-to-Weaver conditioning in that phase.
+Current routing: MAB-5D is complete. The next separate mechanism experiment is
+MAB-6A / Version B retrieved-memory-to-Weaver conditioning, and it must remain
+isolated from Version A. Do not implement fallback in this runbook path.
 
 ## 12. Reproducibility Checklist
 

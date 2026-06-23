@@ -140,6 +140,7 @@ Current next experiment gate:
 | EXP-20260621-001 | 2026-06-21 | MAB-5A | Does compressed Bank-on improve over compressed Bank-off on detective_qa n10? | `completed` | Both exact match 0.0; retrieval active and all outputs changed |
 | EXP-20260622-001 | 2026-06-22 | MAB-5B | Does raising the shared threshold to 0.05 improve the compressed detective_qa n10 result? | `completed` | Both exact match 0.0; final slot counts rose to 8 in every context; retrieval stayed active in every context; output_changed dropped to 5 |
 | EXP-20260622-002 | 2026-06-22 | MAB-5C | Does decoupling retrieval and update thresholds preserve slot growth while restoring retrieval density? | `completed` | Both exact match 0.0; final slot counts stayed at 8 in every context; query-time retrieval stayed active in every context; retrieved latents remained Reasoner-only |
+| EXP-20260623-001 | 2026-06-23 | MAB-5D | Does increasing max_slots from 8 to 16 reduce eviction churn without changing exact-match behavior? | `completed` | Both exact match 0.0; final slot counts rose to 16 in every context; capacity eviction dropped versus MAB-5C; query-time retrieval stayed active in every context |
 
 ## Recorded Experiments
 
@@ -2719,3 +2720,64 @@ full GSM8K test performance.
   Retrieval remained active in every context while the bank still grew to full
   capacity, and the canonical checked-in runner rerun is the source of truth.
 - This is diagnostic evidence, not a performance win.
+
+### EXP-20260623-001: MAB-5D Capacity16 DetectiveQA n10
+
+- Phase: MAB-5D diagnostic benchmark
+- Status: `completed`
+- Research question: Does increasing `max_slots` from 8 to 16 reduce eviction
+  churn while preserving the decoupled-threshold mechanism on detective_qa n10?
+- Hypothesis: keeping `retrieve_threshold=0.03` and `update_threshold=0.05`
+  while doubling `max_slots` should raise final slot counts to 16 in every
+  context and reduce capacity eviction, but not improve official exact match.
+- Baseline/comparator: `20260622T140741Z-detectiveqa-decoupled-thresholds-n10`
+  and `20260622T073545Z-detectiveqa-raised-shared-threshold-n10`
+- Code revision: current working-tree state on `rlm-memory-bank`
+- Working tree state: prepared runner/test present before the run; no code
+  edits were required for execution
+- Environment: `/home/baishilong/miniconda3/envs/memgen`, Python 3.10.20,
+  PyTorch 2.12.0+cu126, CUDA 12.6, single RTX A6000 selected via
+  `CUDA_VISIBLE_DEVICES=2`
+- Dataset and split: `Long_Range_Understanding / detective_qa`, 10 contexts
+- Inputs/session definition: first-query-only, compressed Bank-off vs Bank-on,
+  read-only query phase, session-local memory, no fallback, no Weaver injection
+- Configuration: `threshold=0.03`, `retrieve_threshold=0.03`,
+  `update_threshold=0.05`, `top_k=1`, `max_slots=16`,
+  `retrieve_policy=threshold_topk`, `update_policy=thread_update`
+- Output directory:
+  `outputs/mab/capacity16_detectiveqa_n10/20260623T022140Z-detectiveqa-capacity16-n10`
+- Non-canonical earlier attempt:
+  `outputs/mab/capacity16_detectiveqa_n10/20260623T015929Z-detectiveqa-decoupled-thresholds-n10`
+
+#### Observations
+
+- Both compressed Bank-off and Bank-on exact match remained `0.0`.
+- Final slot counts rose to `[16, 16, 16, 16, 16, 16, 16, 16, 16, 16]`.
+- Mean final slot count reached `16.0`.
+- Retrieval stayed active in all 10 contexts.
+- Query-turn retrieval stayed active in all 10 contexts.
+- Query write count remained `0`.
+- Cross-context leakage remained absent.
+- Retrieved memory remained Reasoner-only and never entered Weaver.
+- Retrieved latent count was `2272`, only slightly lower than MAB-5C.
+- Query-turn retrieved latent count was `80` total, with 8 latents in each
+  query turn.
+- Construction-time retrieval count was `306`.
+- `matched_replace_count=33`, `append_insert_count=160`,
+  `capacity_evict_count=133`.
+- Context 6 provides a relaxed diagnostic example:
+  gold answer `C. Misty Sketches` versus bank-on prediction
+  `答案：C. Misty Sketches\n答案`, but official exact match remained `0`.
+
+#### Conclusion
+
+- Hypothesis supported: yes for capacity/eviction behavior, no for exact-match
+  gain.
+- Interpretation: Increasing `max_slots` from 8 to 16 raises final slot counts
+  to the new capacity in every context and reduces eviction churn, but it does
+  not improve official exact match.
+- This is mechanism-positive and performance-neutral/negative.
+- Follow-up: the next meaningful mechanism direction is MAB-6A / Version B
+  retrieved-memory-to-Weaver conditioning, if and only if it remains isolated
+  from Version A.
+- Related baseline: `20260622T140741Z-detectiveqa-decoupled-thresholds-n10`

@@ -27,6 +27,7 @@ The current reference run is MAB-5A:
 | Over-context diagnostic | Synthetic boundary plus real preflight | Completed diagnostic | Original full-history path has no explicit guard; real over-capacity samples must be rejected before generation |
 | MAB-5A | Compressed Bank-off vs Bank-on, detective_qa n10 | Completed reference baseline | Both exact-match accuracies were 0.0; mechanism active in every context |
 | MAB-5B | Raised shared-threshold diagnostic, detective_qa n10 | Completed diagnostic | Both exact-match accuracies were 0.0; slot counts rose to the max in every context; retrieval remained active in every context |
+| MAB-5C | Decoupled retrieval-update thresholds, detective_qa n10 | Completed diagnostic | Both exact-match accuracies were 0.0; the canonical checked-in runner rerun reached full slot counts; query-time retrieval stayed active in every context; retrieved latents were Reasoner-only |
 
 ## Full-History Capacity Boundary
 
@@ -154,3 +155,46 @@ The resulting tradeoff strengthens the case for MAB-5C: keep retrieval density
 closer to MAB-5A while recovering the slot growth seen in MAB-5B. A clean first
 MAB-5C should start with `retrieve_threshold=0.03`,
 `update_threshold=0.05`, `max_slots=8`, and `top_k=1`.
+
+## MAB-5C Result
+
+Canonical run:
+
+- `outputs/mab/decoupled_thresholds_detectiveqa_n10/20260622T140741Z-detectiveqa-decoupled-thresholds-n10/`
+
+Preliminary non-canonical runtime-patch run:
+
+- `outputs/mab/decoupled_thresholds_detectiveqa_n10/20260622T131149Z-detectiveqa-decoupled-thresholds-n10/`
+
+| Metric | Value |
+| --- | ---: |
+| Requested / valid contexts | 10 / 10 |
+| Compressed Bank-off exact match | 0.0 |
+| Compressed Bank-on exact match | 0.0 |
+| Accuracy delta | 0.0 |
+| Output changed | 10 |
+| Retrieval-active contexts | 10 |
+| Query-turn retrieval active contexts | 10 |
+| Query write count | 0 |
+| Cross-context leakage detected | 0 |
+| Retrieved memory entered Reasoner | Yes |
+| Retrieved memory entered Weaver | No |
+| Final slot counts | `[8, 8, 8, 8, 8, 8, 8, 8, 8, 8]` |
+| Mean final slot count | `8.0` |
+| Retrieved latent count | `2288` |
+| Write count | `326` |
+| Retrieval count | `316` |
+| Construction-time retrieval count | `306` |
+| Query-turn retrieved latent count | `80` |
+| Append/insert count | `80` |
+| Matched replace count | `36` |
+| Capacity evict count | `210` |
+| Successful retrieved-score range | approximately `0.030-0.064` |
+
+MAB-5C is the first decoupled-threshold diagnostic. It preserves the
+shared-threshold defaults when the new fields are unset, and it confirms the
+mechanism split: the low retrieval threshold kept query-time retrieval active
+in all contexts while the higher update threshold still allowed the bank to
+grow to capacity. Exact match did not improve, but the mechanism signal is
+clearer than in either MAB-5A or MAB-5B. The checked-in runner rerun is the
+canonical artifact; the earlier runtime-patch result is historical only.

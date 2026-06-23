@@ -12,8 +12,8 @@ overwrite prior records; append a new entry.
   mechanism.
 - `output_changed` is not an improvement metric.
 - Current Version A injects retrieved memory into Reasoner only, not Weaver.
-- The next experiment is MAB-5C decoupled retrieve/update thresholds, not a
-  shared-threshold-only sweep.
+- MAB-5C decoupled retrieve/update thresholds has completed; it preserved
+  full slot growth while keeping query-time retrieval active in every context.
 - Earlier dated recommendations remain historical records.
 
 ## Historical Post-R2 Mechanism Boundary Note
@@ -139,6 +139,7 @@ Current next experiment gate:
 | EXP-20260620-026 | 2026-06-20 | Over-context diagnostic | Is original full-history behavior valid beyond 32,768 tokens? | `completed_diagnostic` | No explicit guard; real over-capacity prompts must be rejected before generation |
 | EXP-20260621-001 | 2026-06-21 | MAB-5A | Does compressed Bank-on improve over compressed Bank-off on detective_qa n10? | `completed` | Both exact match 0.0; retrieval active and all outputs changed |
 | EXP-20260622-001 | 2026-06-22 | MAB-5B | Does raising the shared threshold to 0.05 improve the compressed detective_qa n10 result? | `completed` | Both exact match 0.0; final slot counts rose to 8 in every context; retrieval stayed active in every context; output_changed dropped to 5 |
+| EXP-20260622-002 | 2026-06-22 | MAB-5C | Does decoupling retrieval and update thresholds preserve slot growth while restoring retrieval density? | `completed` | Both exact match 0.0; final slot counts stayed at 8 in every context; query-time retrieval stayed active in every context; retrieved latents remained Reasoner-only |
 
 ## Recorded Experiments
 
@@ -2633,10 +2634,8 @@ full GSM8K test performance.
 - Output directory:
   `outputs/mab/raised_shared_threshold_detectiveqa_n10/20260622T073545Z-detectiveqa-raised-shared-threshold-n10`
 - Run notes:
-  - the first direct file invocation failed with `ModuleNotFoundError:
-    No module named 'scripts.eval'`
-  - rerunning with `PYTHONPATH=/mnt/18T/baishilong/MemGen` fixed the import
-    path and produced the run artifacts
+  - the checked-in runner now inserts the repository root into `sys.path`, so
+    the direct repo-root invocation is the canonical entry point
 
 #### Observations
 
@@ -2660,6 +2659,63 @@ full GSM8K test performance.
   stronger than MAB-5A.
 - Exact match did not improve, so this remains mechanism evidence rather than
   performance evidence.
-- Follow-up: keep MAB-5C pending as a refinement option if you still need to
-  separate retrieval and update thresholds more precisely.
+- Follow-up: MAB-5C is complete; keep any future fallback or Weaver-conditioning
+  refinement separate from this diagnostic result.
 - Related baseline: `20260621T013454Z-detectiveqa-compressed-n10`
+
+### EXP-20260622-002: MAB-5C Decoupled Retrieval-Update Thresholds DetectiveQA n10
+
+- Phase: MAB-5C diagnostic benchmark
+- Status: `completed`
+- Research question: Can separate retrieval and update thresholds keep
+  MAB-5B-style slot growth while restoring MAB-5A-style retrieval density?
+- Hypothesis: `retrieve_threshold=0.03` and `update_threshold=0.05` should
+  preserve low retrieval-score visibility while allowing write-back to favor
+  new threads over over-merge.
+- Baseline/comparator: `20260621T013454Z-detectiveqa-compressed-n10` and
+  `20260622T073545Z-detectiveqa-raised-shared-threshold-n10`
+- Code revision: current working-tree state on `rlm-memory-bank`
+- Working tree state: prepared runner/test present before the run; no code
+  edits were required for execution
+- Environment: `/home/baishilong/miniconda3/envs/memgen`, Python 3.10.20,
+  PyTorch 2.12.0+cu126, CUDA 12.6, single RTX A6000 selected via
+  `CUDA_VISIBLE_DEVICES=2`
+- Dataset and split: `Long_Range_Understanding / detective_qa`, 10 contexts
+- Inputs/session definition: first-query-only, compressed Bank-off vs Bank-on,
+  read-only query phase, session-local memory, no fallback, no Weaver injection
+- Configuration: `threshold=0.03`, `retrieve_threshold=0.03`,
+  `update_threshold=0.05`, `top_k=1`, `max_slots=8`,
+  `retrieve_policy=threshold_topk`, `update_policy=thread_update`
+- Output directory:
+  `outputs/mab/decoupled_thresholds_detectiveqa_n10/20260622T140741Z-detectiveqa-decoupled-thresholds-n10`
+- Provenance:
+  - preliminary non-canonical runtime-patch run:
+    `outputs/mab/decoupled_thresholds_detectiveqa_n10/20260622T131149Z-detectiveqa-decoupled-thresholds-n10`
+  - canonical checked-in-runner rerun:
+    `outputs/mab/decoupled_thresholds_detectiveqa_n10/20260622T140741Z-detectiveqa-decoupled-thresholds-n10`
+
+#### Observations
+
+- Both compressed Bank-off and Bank-on exact match remained `0.0`.
+- Final slot counts stayed at `[8, 8, 8, 8, 8, 8, 8, 8, 8, 8]`.
+- Mean final slot count remained `8.0`.
+- Retrieval stayed active in all 10 contexts.
+- Query-turn retrieval stayed active in all 10 contexts.
+- Query write count remained `0`.
+- Cross-context leakage remained absent.
+- Retrieved memory remained Reasoner-only and never entered Weaver.
+- Retrieved latent count was `2288`, which is much closer to the dense
+  MAB-5A regime than to MAB-5B.
+- Query-turn retrieved latent count was `80` total, with 8 latents in each
+  query turn.
+- Construction-time retrieval count was `306`.
+- `matched_replace_count=36`, `thread_insert_count=80`,
+  `capacity_evict_count=210`.
+
+#### Conclusion
+
+- Hypothesis supported: yes for mechanism shape, no for exact-match gain.
+- Interpretation: The decoupled thresholds achieved the intended split.
+  Retrieval remained active in every context while the bank still grew to full
+  capacity, and the canonical checked-in runner rerun is the source of truth.
+- This is diagnostic evidence, not a performance win.

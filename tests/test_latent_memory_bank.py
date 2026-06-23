@@ -46,6 +46,31 @@ class LatentMemoryBankTest(unittest.TestCase):
             )
         )
 
+    def _split_threshold_bank(
+        self,
+        *,
+        max_slots=8,
+        threshold=0.7,
+        retrieve_threshold=0.03,
+        update_threshold=0.05,
+        top_k=1,
+        decay_alpha=0.0,
+    ):
+        """构造 decoupled threshold 的标准 thread_update test bank。"""
+        return LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                max_slots=max_slots,
+                threshold=threshold,
+                retrieve_threshold=retrieve_threshold,
+                update_threshold=update_threshold,
+                top_k=top_k,
+                retrieve_policy="threshold_topk",
+                update_policy="thread_update",
+                decay_alpha=decay_alpha,
+            )
+        )
+
     def _thread_write(self, bank, memory, metadata=None):
         """thread_update 的完整 write 流程：先 retrieve 再 write_back。"""
         retrieval_result = bank.retrieve_with_context(memory)
@@ -62,6 +87,13 @@ class LatentMemoryBankTest(unittest.TestCase):
         """Config：拒绝 batch_size > 1。"""
         with self.assertRaisesRegex(ValueError, "batch_size=1"):
             LatentMemoryBankConfig(batch_size=2)
+
+    def test_config_rejects_optional_thresholds_out_of_range(self):
+        """Config：retrieve_threshold / update_threshold 必须在 [-1, 1]。"""
+        with self.assertRaisesRegex(ValueError, "retrieve_threshold"):
+            LatentMemoryBankConfig(retrieve_threshold=1.5)
+        with self.assertRaisesRegex(ValueError, "update_threshold"):
+            LatentMemoryBankConfig(update_threshold=-1.5)
 
     def test_disabled_bank_is_noop(self):
         """disabled bank：write 返回 False 且不存储，retrieve 返回 []。"""
@@ -322,6 +354,48 @@ class LatentMemoryBankTest(unittest.TestCase):
             ["near", "second"],
         )
         self.assertTrue(result.threshold_passed)
+
+    def test_split_thresholds_default_none_preserves_shared_threshold_behavior(self):
+        """显式 None 的 retrieve/update threshold 行为与 legacy shared threshold 一致。"""
+        legacy_config = LatentMemoryBankConfig(
+            enabled=True,
+            max_slots=2,
+            threshold=0.5,
+            top_k=1,
+            retrieve_policy="threshold_topk",
+            update_policy="thread_update",
+            decay_alpha=0.0,
+        )
+        split_none_config = LatentMemoryBankConfig(
+            enabled=True,
+            max_slots=2,
+            threshold=0.5,
+            retrieve_threshold=None,
+            update_threshold=None,
+            top_k=1,
+            retrieve_policy="threshold_topk",
+            update_policy="thread_update",
+            decay_alpha=0.0,
+        )
+        legacy_bank = LatentMemoryBank(legacy_config)
+        split_none_bank = LatentMemoryBank(split_none_config)
+        for bank in (legacy_bank, split_none_bank):
+            empty_result = bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+            bank.write_back(torch.tensor([[1.0, 0.0]]), empty_result, {"id": "seed"})
+
+        legacy_result = legacy_bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+        split_none_result = split_none_bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+
+        self.assertEqual(legacy_result.threshold_passed, split_none_result.threshold_passed)
+        self.assertEqual(legacy_result.retrieved_indices, split_none_result.retrieved_indices)
+
+        legacy_bank.write_back(torch.tensor([[2.0, 0.0]]), legacy_result, {"id": "updated"})
+        split_none_bank.write_back(torch.tensor([[2.0, 0.0]]), split_none_result, {"id": "updated"})
+
+        self.assertEqual(
+            [slot["metadata"]["id"] for slot in legacy_bank.state_dict()["slots"]],
+            [slot["metadata"]["id"] for slot in split_none_bank.state_dict()["slots"]],
+        )
 
     def test_retrieve_accepts_prepooled_query(self):
         """支持直接传入 1D pre-pooled query。"""
@@ -633,6 +707,108 @@ class LatentMemoryBankTest(unittest.TestCase):
         self.assertEqual(event["update_reason"], "new_thread")
         self.assertTrue(event["inserted_new_thread"])
 
+    def test_thread_update_retrieve_threshold_low_update_threshold_high_inserts_new_thread(self):
+        """中间区间：score 过 retrieve_threshold 但不过 update_threshold 时应插入新线程。"""
+        bank = self._split_threshold_bank(max_slots=2)
+        score = 0.04
+        slot_vector = torch.tensor([[score, math.sqrt(1.0 - score**2)]], dtype=torch.float32)
+        self._thread_write(bank, slot_vector, {"id": "seed"})
+
+        retrieval_result = bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+        bank.write_back(
+            torch.tensor([[0.0, 1.0]]),
+            retrieval_result,
+            {"id": "new-thread"},
+        )
+
+        summary = bank.debug_summary()
+        event = summary["last_write_back"]
+        self.assertTrue(retrieval_result.threshold_passed)
+        self.assertTrue(event["retrieve_threshold_passed"])
+        self.assertFalse(event["update_threshold_passed"])
+        self.assertEqual(event["effective_retrieve_threshold"], 0.03)
+        self.assertEqual(event["effective_update_threshold"], 0.05)
+        self.assertEqual(event["write_action"], "insert")
+        self.assertEqual(event["update_reason"], "new_thread")
+        self.assertEqual(len(bank), 2)
+        self.assertEqual(
+            [slot["metadata"]["id"] for slot in bank.state_dict()["slots"]],
+            ["seed", "new-thread"],
+        )
+
+    def test_thread_update_retrieve_threshold_above_score_returns_no_slot(self):
+        """retrieve_threshold 控制检索可见性：低于有效阈值时返回空结果。"""
+        bank = self._split_threshold_bank(max_slots=2, retrieve_threshold=0.05, update_threshold=0.05)
+        score = 0.04
+        slot_vector = torch.tensor([[score, math.sqrt(1.0 - score**2)]], dtype=torch.float32)
+        self._thread_write(bank, slot_vector, {"id": "seed"})
+
+        result = bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+
+        self.assertFalse(result.threshold_passed)
+        self.assertEqual(result.slots, [])
+        self.assertAlmostEqual(result.max_score, score, places=6)
+        self.assertEqual(result.retrieved_indices, ())
+        self.assertEqual(result.retrieved_scores, ())
+
+    def test_thread_update_update_threshold_controls_replacement(self):
+        """update_threshold 控制 write_back 是否替换命中槽位。"""
+        bank = self._split_threshold_bank(max_slots=2, retrieve_threshold=0.03, update_threshold=0.05)
+        self._thread_write(bank, torch.tensor([[1.0, 0.0]]), {"id": "seed"})
+        retrieval_result = bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+        bank.write_back(torch.tensor([[2.0, 0.0]]), retrieval_result, {"id": "updated"})
+
+        summary = bank.debug_summary()
+        event = summary["last_write_back"]
+        self.assertTrue(event["retrieve_threshold_passed"])
+        self.assertTrue(event["update_threshold_passed"])
+        self.assertEqual(event["write_action"], "replace_matched")
+        self.assertEqual(event["update_reason"], "matched_thread")
+        self.assertEqual(summary["matched_replace_count"], 1)
+
+    def test_thread_update_debug_fields_complete_with_split_thresholds(self):
+        """split thresholds 的 debug event 包含有效阈值与动作统计。"""
+        bank = self._split_threshold_bank(max_slots=2, retrieve_threshold=0.03, update_threshold=0.05)
+        score = 0.04
+        self._thread_write(
+            bank,
+            torch.tensor([[score, math.sqrt(1.0 - score**2)]], dtype=torch.float32),
+            {"id": "seed"},
+        )
+        retrieval_result = bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+        bank.write_back(torch.tensor([[0.0, 1.0]]), retrieval_result, {"id": "new-thread"})
+
+        summary = bank.debug_summary()
+        event = summary["last_write_back"]
+        self.assertEqual(summary["effective_retrieve_threshold"], 0.03)
+        self.assertEqual(summary["effective_update_threshold"], 0.05)
+        self.assertEqual(summary["write_action_counts"], {"insert": 2})
+        self.assertEqual(summary["update_reason_counts"], {"new_thread": 1, "empty_bank": 1})
+        self.assertEqual(
+            set(event),
+            {
+                "matched_slot_index",
+                "max_score",
+                "threshold_passed",
+                "retrieve_threshold_passed",
+                "update_threshold_passed",
+                "effective_retrieve_threshold",
+                "effective_update_threshold",
+                "retrieved_indices",
+                "retrieved_scores",
+                "write_action",
+                "replaced_slot_index",
+                "replaced_slot_score",
+                "evicted_slot_index",
+                "evicted_slot_last_retrieved_age",
+                "eviction_basis",
+                "update_reason",
+                "inserted_new_thread",
+                "retrieval_bank_step",
+                "retrieval_step",
+            },
+        )
+
     def test_thread_update_low_score_full_evicts_largest_last_retrieved_age(self):
         """thread_update: 低分 + 已满 -> 淘汰 last_retrieved_age 最大的 slot。
         Phase R2 核心保护：满容量时淘汰最久未被检索的 slot（largest last_retrieved_age），
@@ -873,6 +1049,10 @@ class LatentMemoryBankTest(unittest.TestCase):
                 "matched_slot_index",
                 "max_score",
                 "threshold_passed",
+                "retrieve_threshold_passed",
+                "update_threshold_passed",
+                "effective_retrieve_threshold",
+                "effective_update_threshold",
                 "retrieved_indices",
                 "retrieved_scores",
                 "write_action",

@@ -53,6 +53,7 @@ write_back():
 
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field
+from collections import Counter
 import math
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
@@ -84,6 +85,8 @@ class LatentMemoryBankConfig:
     max_slots: int = 8             # 最大槽位数
     top_k: int = 1                 # topk 检索时返回的槽位数
     threshold: float = 0.7         # 余弦相似度阈值，范围 [-1, 1]
+    retrieve_threshold: Optional[float] = None  # 检索过滤阈值；None 时回退到 threshold
+    update_threshold: Optional[float] = None    # 写回匹配阈值；None 时回退到 threshold
     decay_alpha: float = 0.05      # 指数衰减系数：score *= exp(-alpha * age)；alpha=0 表示无衰减
 
     # ---------- 查询构造 ----------
@@ -111,6 +114,10 @@ class LatentMemoryBankConfig:
             raise ValueError("top_k must be greater than zero")
         if not -1.0 <= self.threshold <= 1.0:
             raise ValueError("threshold must be between -1.0 and 1.0")
+        if self.retrieve_threshold is not None and not -1.0 <= self.retrieve_threshold <= 1.0:
+            raise ValueError("retrieve_threshold must be between -1.0 and 1.0")
+        if self.update_threshold is not None and not -1.0 <= self.update_threshold <= 1.0:
+            raise ValueError("update_threshold must be between -1.0 and 1.0")
         if self.decay_alpha < 0.0:
             raise ValueError("decay_alpha must be non-negative")
         if self.pool_last_n <= 0:
@@ -201,7 +208,7 @@ class LatentMemoryRetrievalResult:
     scores: Tuple[float, ...]               # 全部槽位的得分，按原始 slot index 排序
     max_score: Optional[float]              # 最高得分（bank 为空时为 None）
     argmax_index: Optional[int]             # 最高得分对应的 slot index（bank 为空时为 None）
-    threshold_passed: bool                  # max_score 是否 >= threshold
+    threshold_passed: bool                  # 兼容字段：等价于 retrieve_threshold_passed
     retrieved_indices: Tuple[int, ...]      # 通过过滤的 slot indices
     retrieved_scores: Tuple[float, ...]     # 通过过滤的 slot scores
     bank_step: int                          # 检索时的 bank step，用于 write_back 的防过期校验
@@ -272,6 +279,20 @@ class LatentMemoryBank:
         self._capacity_evict_count = 0      # 因容量满而淘汰 slot 的次数
         self._last_write_back: Optional[Dict[str, Any]] = None
         self._write_back_trace: List[Dict[str, Any]] = []
+
+    def _effective_retrieve_threshold(self) -> float:
+        return (
+            self.config.threshold
+            if self.config.retrieve_threshold is None
+            else self.config.retrieve_threshold
+        )
+
+    def _effective_update_threshold(self) -> float:
+        return (
+            self.config.threshold
+            if self.config.update_threshold is None
+            else self.config.update_threshold
+        )
 
     # ==================================================================
     # 基本操作：容量、重置
@@ -448,6 +469,9 @@ class LatentMemoryBank:
         max_score, argmax_index, _ = scored_slots[0]
         selected_slots = scored_slots
 
+        effective_retrieve_threshold = self._effective_retrieve_threshold()
+        effective_update_threshold = self._effective_update_threshold()
+
         # --- threshold 过滤 ---
         # threshold 全不过时 selected_slots 为空，后续返回空 slots 给 Reasoner。
         # 这里不做 fallback top-1：低于 threshold 时即使有 argmax，也不返回任何 slot，
@@ -456,7 +480,7 @@ class LatentMemoryBank:
             selected_slots = [
                 item
                 for item in selected_slots
-                if item[0] >= self.config.threshold
+                if item[0] >= effective_retrieve_threshold
             ]
 
         # --- top-k 截断 ---
@@ -508,7 +532,7 @@ class LatentMemoryBank:
             scores=tuple(scores),
             max_score=max_score,
             argmax_index=argmax_index,
-            threshold_passed=max_score >= self.config.threshold,
+            threshold_passed=max_score >= effective_retrieve_threshold,
             retrieved_indices=tuple(index for _, index, _ in selected_slots),
             retrieved_scores=tuple(score for score, _, _ in selected_slots),
             bank_step=self._step,
@@ -646,10 +670,21 @@ class LatentMemoryBank:
             )
 
         # --- 判断是否匹配已有线程 ---
+        effective_update_threshold = self._effective_update_threshold()
+        effective_retrieve_threshold = self._effective_retrieve_threshold()
+        retrieve_threshold_passed = bool(
+            retrieval_result.max_score is not None
+            and retrieval_result.max_score >= effective_retrieve_threshold
+        )
+        update_threshold_passed = bool(
+            retrieval_result.max_score is not None
+            and retrieval_result.max_score >= effective_update_threshold
+        )
+
         matched = (
             bool(self._slots)
             and retrieval_result.max_score is not None
-            and retrieval_result.max_score >= self.config.threshold
+            and retrieval_result.max_score >= effective_update_threshold
         )
         matched_index = retrieval_result.argmax_index
         if matched and (
@@ -741,7 +776,11 @@ class LatentMemoryBank:
         event = {
             "matched_slot_index": matched_index,
             "max_score": retrieval_result.max_score,
-            "threshold_passed": retrieval_result.threshold_passed,
+            "threshold_passed": retrieve_threshold_passed,
+            "retrieve_threshold_passed": retrieve_threshold_passed,
+            "update_threshold_passed": update_threshold_passed,
+            "effective_retrieve_threshold": effective_retrieve_threshold,
+            "effective_update_threshold": effective_update_threshold,
             "retrieved_indices": list(retrieval_result.retrieved_indices),
             "retrieved_scores": list(retrieval_result.retrieved_scores),
             "write_action": write_action,
@@ -770,9 +809,19 @@ class LatentMemoryBank:
 
         用于实验记录中的 memory bank 状态 snapshot。
         """
+        write_action_counts = dict(Counter(self._update_action_trace))
+        update_reason_counts = dict(
+            Counter(
+                event.get("update_reason")
+                for event in self._write_back_trace
+                if event.get("update_reason") is not None
+            )
+        )
         return {
             "config": asdict(self.config),
             "enabled": self.config.enabled,
+            "effective_retrieve_threshold": self._effective_retrieve_threshold(),
+            "effective_update_threshold": self._effective_update_threshold(),
             "step": self._step,
             "retrieval_step": self._retrieval_step,  # 当前 retrieval turn，用于验证 last-retrieved decay
             "slot_count": len(self._slots),
@@ -788,6 +837,8 @@ class LatentMemoryBank:
             "thread_insert_count": self._thread_insert_count,
             "matched_replace_count": self._matched_replace_count,
             "capacity_evict_count": self._capacity_evict_count,
+            "write_action_counts": write_action_counts,
+            "update_reason_counts": update_reason_counts,
             "last_write_back": deepcopy(self._last_write_back),
             "write_back_trace": deepcopy(self._write_back_trace),
             "slots": [

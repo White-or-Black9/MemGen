@@ -67,6 +67,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0058 | 2026-06-22 | accepted | Preserve shared-threshold behavior by default |
 | DEC-0059 | 2026-06-22 | accepted | Keep Version B Weaver conditioning exploratory and isolated |
 | DEC-0060 | 2026-06-22 | accepted | Treat MAB-5B as completed diagnostic evidence that strengthens the simple raised-threshold baseline |
+| DEC-0061 | 2026-06-22 | accepted | Treat MAB-5C as completed diagnostic evidence for decoupled retrieval-update thresholds |
 
 ## Decision Template
 
@@ -99,8 +100,14 @@ IDs and append superseding decisions rather than silently rewriting history.
 - MAB-5B: both official exact-match accuracies `0.0`; retrieval active in all
   contexts; slot counts rose to the maximum in every context; output changes
   dropped to `5`; no leakage; query writes `0`.
-- Current next action: keep MAB-5C pending as the next refinement experiment if
-  later evidence still warrants separating retrieval and update thresholds.
+- MAB-5C: both official exact-match accuracies `0.0`; the canonical
+  checked-in-runner rerun is the source of truth; retrieval active in all
+  contexts; query-time retrieval active in all contexts; slot counts stayed at
+  the maximum in every context; retrieved memory remained Reasoner-only; query
+  writes `0`.
+- Current next action: MAB-5C is complete; the next comparison, if approved,
+  should be a capacity ablation at `max_slots=16` before any fallback or
+  Weaver-conditioning work.
 - Deferred: MAB-5D fallback and exploratory MAB-6A Weaver conditioning.
 
 ### Historical Board (2026-06-18)
@@ -1450,3 +1457,18 @@ resolved or superseded by later R4 and MAB work.
   - Version B must use separate tests, runner identity, artifacts, and notes
 - Rationale: Weaver was not trained for retrieved-memory-conditioned inputs, so
   this mechanism cannot be conflated with Version A or threshold decoupling.
+
+### DEC-0062: Canonicalize MAB-5C and Prefer a Capacity Ablation Next
+
+- Date: 2026-06-22
+- Status: accepted
+- Decision:
+  - treat the fixed checked-in-runner MAB-5C rerun as the canonical artifact
+  - keep the earlier runtime-patch output historical only
+  - if a follow-up is approved, use `max_slots=16` while holding
+    `retrieve_threshold=0.03`, `update_threshold=0.05`, and `top_k=1`
+- Rationale: the rerun removes the wrapper recursion ambiguity and the
+  capacity ablation isolates slot-capacity effects from threshold-decoupling
+  effects.
+- Consequence: future comparison work should cite the canonical run directory
+  rather than the preliminary patched artifact.

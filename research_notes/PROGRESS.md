@@ -26,9 +26,18 @@
   contexts; final slot counts reached `[8, 8, 8, 8, 8, 8, 8, 8, 8, 8]`; no
   cross-context leakage; query writes `0`; retrieved memory remained
   Reasoner-only.
-- Current next action: keep MAB-5C pending as the next refinement experiment
-  only if a later decision still needs read/write threshold separation. The
-  raised shared threshold is now the stronger simple baseline.
+- MAB-5C decoupled retrieval-update thresholds have now been executed on the
+  same detective_qa n10 slice. The preliminary runtime-patch artifact is
+  historical only; the canonical checked-in runner rerun produced the source
+  of truth. Result: 10/10 valid contexts; Bank-off exact match `0.0`; Bank-on
+  exact match `0.0`; `output_changed=10`; retrieval active in all contexts;
+  query-turn retrieval active in all contexts; final slot counts reached
+  `[8, 8, 8, 8, 8, 8, 8, 8, 8, 8]`; retrieved latents remained Reasoner-only;
+  query writes `0`; cross-context leakage `false`.
+- Current next action: treat MAB-5C as diagnostic evidence, not a final
+  performance win. A capacity-ablation follow-up at `max_slots=16` is the
+  next comparison if we want to separate threshold effects from slot-capacity
+  effects.
 - Old shared-threshold behavior must remain reproducible by default.
 - `output_changed` is activation evidence, not improvement. Official exact
   match and relaxed diagnostics remain separately labeled.

@@ -14,6 +14,7 @@ Phase 5 LatentMemoryBank 集成测试。
 - enabled batch_size > 1 拒绝
 """
 
+import math
 import unittest
 from types import SimpleNamespace
 
@@ -621,6 +622,62 @@ class LatentMemoryBankIntegrationTest(unittest.TestCase):
                 expected_reasoner_input,
             )
         )
+
+    def test_generate_thread_update_respects_split_thresholds(self):
+        """split thresholds：retrieve_threshold 可见、update_threshold 控制写回替换。"""
+        model = build_fake_memgen()
+        with torch.no_grad():
+            model.reasoner.embedding.weight[1] = torch.tensor([1.0, 0.0])
+
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                batch_size=1,
+                max_slots=2,
+                threshold=0.03,
+                retrieve_threshold=0.03,
+                update_threshold=0.05,
+                top_k=1,
+                retrieve_policy="threshold_topk",
+                update_policy="thread_update",
+                decay_alpha=0.0,
+                storage_device="cpu",
+            )
+        )
+        slot_memory = torch.tensor([[0.04, math.sqrt(1.0 - 0.04**2)]], dtype=torch.float32)
+        empty_result = bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+        bank.write_back(slot_memory, empty_result, {"id": "seed"})
+
+        generation_config = GenerationConfig(
+            max_new_tokens=1,
+            temperature=0.0,
+            pad_token_id=0,
+            eos_token_id=99,
+        )
+        generation_config.weaver_do_sample = False
+        generation_config.trigger_do_sample = False
+
+        MemGenModel.generate(
+            model,
+            input_ids=torch.tensor([[1]], dtype=torch.long),
+            attention_mask=torch.ones((1, 1), dtype=torch.long),
+            generation_config=generation_config,
+            latent_memory_bank=bank,
+        )
+
+        final_debug = bank.debug_summary()
+        last_write_back = final_debug["last_write_back"]
+        self.assertEqual(final_debug["effective_retrieve_threshold"], 0.03)
+        self.assertEqual(final_debug["effective_update_threshold"], 0.05)
+        self.assertTrue(last_write_back["retrieve_threshold_passed"])
+        self.assertFalse(last_write_back["update_threshold_passed"])
+        self.assertEqual(last_write_back["write_action"], "insert")
+        self.assertEqual(last_write_back["update_reason"], "new_thread")
+        self.assertEqual(final_debug["write_action_counts"], {"insert": 2})
+        self.assertEqual(final_debug["update_reason_counts"], {"empty_bank": 1, "new_thread": 1})
+        self.assertEqual(final_debug["slot_count"], 2)
+        self.assertEqual(model.weaver.prompt_inputs[0].shape[1], 1)
+        self.assertEqual(model.reasoner.recorded_inputs[0].shape[1], 4)
 
     def test_generate_rejects_enabled_batch_size_greater_than_one(self):
         """enabled bank + batch_size=2：generate() 拒绝。disabled + batch_size=2：允许。"""

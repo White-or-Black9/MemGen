@@ -133,6 +133,26 @@ Operational caveat:
   works elsewhere. Verify the exact Python process can see CUDA before starting
   a long run; `nvidia-smi` alone is not enough.
 
+## 6.2. Main Diagnostic Run: MAB-5C Decoupled Thresholds n10
+
+Recommended command:
+
+```bash
+cd /mnt/18T/baishilong/MemGen
+CUDA_VISIBLE_DEVICES=<GPU_ID> /home/baishilong/miniconda3/envs/memgen/bin/python scripts/eval/mab5c_decoupled_thresholds_detectiveqa_n10.py
+```
+
+Operational caveat:
+
+- The fixed checked-in runner is now the canonical entry point; the canonical
+  2026-06-22 rerun was launched directly from this file after the recursion bug
+  was fixed.
+- The Codex default sandbox may not expose `/dev/nvidia*` even when `nvidia-smi`
+  works elsewhere. Verify the exact Python process can see CUDA before starting
+  a long run; `nvidia-smi` alone is not enough.
+- If the direct Python probe reports `cuda available: False`, switch to the
+  same GPU-enabled execution path used for the canonical run.
+
 ## 7. How to Run Tests
 
 Run the targeted syntax and unit checks from the MemGen repo root:

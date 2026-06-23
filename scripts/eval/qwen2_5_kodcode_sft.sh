@@ -27,7 +27,7 @@ INFERENCE_LATENTS_LEN=4
 
 BATCH_SIZE=4
 
-LOAD_MODEL_PATH="MemGen/Qwen2.5-1.5B-Instruct/kodcode/weaver-sft/pn=1_pl=4_in=5_il=4"
+LOAD_MODEL_PATH="MemGen/Qwen2.5-1.5B-Instruct/kodcode/weaver-sft/pn=1_pl=4_in=5_il=4/model"
 
 # evaluate
 python -m accelerate.commands.launch \

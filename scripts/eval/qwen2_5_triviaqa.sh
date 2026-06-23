@@ -27,7 +27,7 @@ INFERENCE_LATENTS_LEN=8
 
 BATCH_SIZE=4
 
-LOAD_MODEL_PATH="MemGen/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8"
+LOAD_MODEL_PATH="MemGen/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8/model"
 
 # evaluate
 python -m accelerate.commands.launch \

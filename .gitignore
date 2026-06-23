@@ -65,7 +65,3 @@ wandb/
 
 # TensorBoard
 runs/
-tensorboard_logs/
-code_stuff/
-results/
-main_shadow.py

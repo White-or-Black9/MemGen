@@ -801,7 +801,7 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
 
         # 构建 MemGenConfig
         from transformers import AutoConfig
-        memgen_config = AutoConfig.from_pretrained(model_name)
+        memgen_config = AutoConfig.from_pretrained(model_name, trust_remote_code=True)
         memgen_config = MemGenConfig.from_pretrained(
             model_name,
             max_prompt_aug_num=max_prompt_aug_num,
@@ -814,10 +814,10 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
         )
 
         # 加载预训练模型
-        base_tokenizer = AutoTokenizer.from_pretrained(model_name)
-        reasoner_base_model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
-        weaver_base_model = AutoModelForCausalLM.from_pretrained(weaver_model_name, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
-        trigger_base_model = AutoModelForCausalLM.from_pretrained(trigger_model_name, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
+        base_tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+        reasoner_base_model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
+        weaver_base_model = AutoModelForCausalLM.from_pretrained(weaver_model_name, trust_remote_code=True, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
+        trigger_base_model = AutoModelForCausalLM.from_pretrained(trigger_model_name, trust_remote_code=True, torch_dtype=torch.bfloat16, attn_implementation="flash_attention_2")
 
         load_model_path = config_dict.get("load_model_path", None)
 

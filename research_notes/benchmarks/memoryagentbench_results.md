@@ -29,6 +29,7 @@ The current reference run is MAB-5A:
 | MAB-5B | Raised shared-threshold diagnostic, detective_qa n10 | Completed diagnostic | Both exact-match accuracies were 0.0; slot counts rose to the max in every context; retrieval remained active in every context |
 | MAB-5C | Decoupled retrieval-update thresholds, detective_qa n10 | Completed diagnostic | Both exact-match accuracies were 0.0; the canonical checked-in runner rerun reached full slot counts; query-time retrieval stayed active in every context; retrieved latents were Reasoner-only |
 | MAB-5D | Capacity16 decoupled retrieval-update thresholds, detective_qa n10 | Completed diagnostic | Both exact-match accuracies were 0.0; final slot counts rose to 16 in every context; eviction churn dropped versus MAB-5C; retrieved latents remained Reasoner-only |
+| MAB-6A | Version B Weaver-conditioned memory, detective_qa n10 | Completed exploratory diagnostic | Both exact-match accuracies remained 0.0; output_changed stayed 10/10; retrieved memory entered Weaver, raw retrieved memory no longer entered Reasoner, and query writes remained 0 |
 
 ## Full-History Capacity Boundary
 
@@ -242,3 +243,54 @@ confirms that moving from `max_slots=8` to `max_slots=16` raises final slot
 counts to the new capacity and reduces eviction churn, but it does not improve
 official exact match. The context-6 relaxed diagnostic is semantically close
 to the gold answer, but that is not counted as official accuracy.
+
+## MAB-6A Result
+
+Canonical run:
+
+- `outputs/mab/version_b_weaver_conditioned_detectiveqa_n10/20260625T023822Z-detectiveqa-version-b-weaver-conditioned-n10/`
+
+Earlier failed/intermediate runs:
+
+- `outputs/mab/version_b_weaver_conditioned_detectiveqa_n10/20260625T021750Z-detectiveqa-version-b-weaver-conditioned-n10/`
+- `outputs/mab/version_b_weaver_conditioned_detectiveqa_n10/20260625T021830Z-detectiveqa-version-b-weaver-conditioned-n10/`
+- `outputs/mab/version_b_weaver_conditioned_detectiveqa_n10/20260625T022818Z-detectiveqa-version-b-weaver-conditioned-n10/`
+
+| Metric | Value |
+| --- | ---: |
+| Requested / valid contexts | 10 / 10 |
+| Compressed Bank-off exact match | 0.0 |
+| Compressed Bank-on exact match | 0.0 |
+| Accuracy delta | 0.0 |
+| Output changed | 10 |
+| Query-turn retrieval active contexts | 10 |
+| Final slot counts | `[8, 8, 8, 8, 8, 8, 8, 8, 8, 8]` |
+| Mean final slot count | `8.0` |
+| Total write count | `326` |
+| Total retrieval count | `316` |
+| Total retrieved latent count | `2304` |
+| Query write count | `0` |
+| Query write attempt count | `0` |
+| Cross-context leakage detected | `0` |
+| Retrieved memory to Weaver | Yes |
+| Retrieved latents entered Weaver | Yes |
+| Raw retrieved memory entered Reasoner | No |
+| Retrieved latents entered Reasoner | No |
+| Weaver conditioned on retrieved memory | Yes |
+| Weaver conditioning token count | `80` |
+| Fused latent generated | Yes |
+| Write action counts | `{'insert': 80, 'replace_matched': 35, 'evict_oldest_insert': 211}` |
+| Update reason counts | `{'empty_bank': 10, 'matched_thread': 35, 'new_thread': 70, 'new_thread_bank_full': 211}` |
+
+MAB-6A is exploratory diagnostic evidence only. It differs from the MAB-5C
+canonical baseline primarily by routing retrieved reasoner-space memory into
+Weaver, then injecting only the fused latent back into Reasoner. The mechanism
+was active in all 10 contexts: outputs changed in every case, retrieved memory
+entered Weaver, raw retrieved memory no longer entered Reasoner directly, and
+query writes remained disabled. Official exact match did not improve, so this
+is not a performance win and Version A remains the default.
+
+During the run, one context emitted a tokenizer/model warning at
+`132726 > 131072` tokens while estimating the over-capacity full-history path.
+That context still remained `full_history_status=over_capacity_invalid`, and no
+full-history detective_qa generation was scored or silently truncated.

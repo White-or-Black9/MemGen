@@ -11,6 +11,7 @@ class MemGenConfig(PretrainedConfig):
         weaver_lora_config: Optional[dict] = None,
         prompt_latents_len: int = 0,
         inference_latents_len: int = 0,
+        retrieved_memory_to_weaver: bool = False,
         # trigger configs
         trigger_active: bool = False,
         trigger_lora_config: Optional[dict] = None,
@@ -24,6 +25,7 @@ class MemGenConfig(PretrainedConfig):
         self.weaver_lora_config = weaver_lora_config
         self.prompt_latents_len = prompt_latents_len
         self.inference_latents_len = inference_latents_len
+        self.retrieved_memory_to_weaver = retrieved_memory_to_weaver
 
         # trigger configs
         self.trigger_active = trigger_active

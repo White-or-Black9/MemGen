@@ -40,6 +40,7 @@ DEFAULT_MAX_SLOTS = 8
 DEFAULT_RETRIEVE_POLICY = "threshold_topk"
 DEFAULT_SYSTEM_MESSAGE = "You are a helpful assistant that can read the context and memorize it for future retrieval."
 DEFAULT_ACK = "Acknowledged."
+ALLOW_RETRIEVED_LATENTS_ENTER_WEAVER = False
 
 # Pre-edit workspace snapshot requested by the user.
 GIT_STATUS_BEFORE_EDIT = """## rlm-memory-bank...origin/rlm-memory-bank [ahead 8]
@@ -472,6 +473,7 @@ def _install_model_trace(model, trace: dict):
         }
         retrieval.update(trace.get("last_retrieval", {}))
         active = trace["active"]
+        generation_debug = dict(getattr(module, "_last_generation_debug", {}) or {})
         retrieved_count = int(retrieval.get("retrieved_latent_count", 0))
         if retrieved_count > 0:
             expected_reasoner_len = (
@@ -479,10 +481,26 @@ def _install_model_trace(model, trace: dict):
                 + int(model.weaver.prompt_latents_num)
                 + retrieved_count
             )
-            enters_reasoner = active.get("reasoner_augmented_input_len") == expected_reasoner_len
+            heuristic_enters_reasoner = (
+                active.get("reasoner_augmented_input_len") == expected_reasoner_len
+            )
         else:
-            enters_reasoner = False
-        enters_weaver = active.get("weaver_input_len") != active.get("reasoner_to_weaver_input_len")
+            heuristic_enters_reasoner = False
+        heuristic_enters_weaver = (
+            active.get("weaver_input_len") != active.get("reasoner_to_weaver_input_len")
+        )
+        enters_reasoner = bool(
+            generation_debug.get(
+                "retrieved_latents_enter_reasoner",
+                heuristic_enters_reasoner,
+            )
+        )
+        enters_weaver = bool(
+            generation_debug.get(
+                "retrieved_latents_enter_weaver",
+                heuristic_enters_weaver,
+            )
+        )
         record = {
             "input_len": int(input_ids.shape[1]),
             "output_len": int(output_ids.shape[1] - input_ids.shape[1]),
@@ -492,6 +510,7 @@ def _install_model_trace(model, trace: dict):
             "peak_cuda_memory": peak,
             "bank_debug": bank.debug_summary() if bank is not None else None,
             **retrieval,
+            **generation_debug,
             "retrieved_latents_enter_reasoner": enters_reasoner,
             "retrieved_latents_enter_weaver": enters_weaver,
         }
@@ -734,7 +753,10 @@ def _run_model(args, model, capacity: int, payload: dict, bank_mode: str, bank_c
             query_bank_proxy = lifecycle.get("query_bank_proxy")
             query_write_attempt_count = getattr(query_bank_proxy, "write_attempt_count", 0) if query_bank_proxy else 0
             query_write_count = 0
-            if any(gen["retrieved_latents_enter_weaver"] for gen in model_trace["generations"]):
+            if (
+                not ALLOW_RETRIEVED_LATENTS_ENTER_WEAVER
+                and any(gen["retrieved_latents_enter_weaver"] for gen in model_trace["generations"])
+            ):
                 raise RuntimeError("Retrieved latents entered Weaver")
             if not all(
                 (not gen["retrieved_latent_count"]) or gen["retrieved_latents_enter_reasoner"]
@@ -1116,7 +1138,10 @@ def main():
                     bank_on_result = _run_model(args, model, capacity, payload, bank_mode="on")
                     if bank_on_result["cross_context_leakage_detected"]:
                         raise RuntimeError("Cross-context leakage detected")
-                    if any(gen["retrieved_latents_enter_weaver"] for gen in bank_on_result["generations"]):
+                    if (
+                        not ALLOW_RETRIEVED_LATENTS_ENTER_WEAVER
+                        and any(gen["retrieved_latents_enter_weaver"] for gen in bank_on_result["generations"])
+                    ):
                         raise RuntimeError("Retrieved latents entered Weaver")
                     bank_on_query_tokens = bank_on_result["prompt_trace"][-1]["prompt_history_token_len"]
                     bank_off_score = _score_prediction(args, payload, bank_off_result["prediction"], tmpdir)

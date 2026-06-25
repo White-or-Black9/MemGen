@@ -455,6 +455,20 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                 "latent_memory_bank-enabled generate currently supports batch_size=1 only"
             )
 
+        generation_debug = {
+            "retrieved_memory_to_weaver": bool(
+                getattr(getattr(self, "config", None), "retrieved_memory_to_weaver", False)
+            ),
+            "retrieved_latents_enter_weaver": False,
+            "weaver_conditioned_on_retrieved_memory": False,
+            "weaver_conditioning_token_count": 0,
+            "fused_latent_generated": False,
+            "raw_retrieved_latents_enter_reasoner": False,
+            "retrieved_latents_enter_reasoner": False,
+            "query_write_count": 0,
+            "query_write_attempt_count": 0,
+        }
+
         # 初始化生成循环
         current_inputs_embeds = inputs_embeds
         current_attention_mask = attention_mask
@@ -503,6 +517,14 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                     )
                     == "thread_update"
                 )
+                retrieved_memory_to_weaver = bool(
+                    latent_memory_bank is not None
+                    and getattr(
+                        getattr(self, "config", None),
+                        "retrieved_memory_to_weaver",
+                        False,
+                    )
+                )
                 if use_thread_update:
                     retrieval_result = latent_memory_bank.retrieve_with_context(
                         candidate_inputs_embeds.detach(),
@@ -510,15 +532,58 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                         dtype=current_inputs_embeds.dtype,
                     )
 
+                retrieved_slots = None
+                retrieved_memory = None
+                retrieved_attention_mask = None
+                weaver_reasoner_inputs_embeds = candidate_inputs_embeds
+                weaver_attention_mask = candidate_attention_mask
+                weaver_position_ids = candidate_position_ids
+                if latent_memory_bank is not None and retrieved_memory_to_weaver:
+                    if use_thread_update:
+                        retrieved_slots = retrieval_result.slots
+                    else:
+                        retrieved_slots = latent_memory_bank.retrieve(
+                            candidate_inputs_embeds.detach(),
+                            device=device,
+                            dtype=current_inputs_embeds.dtype,
+                        )
+                    if retrieved_slots:
+                        retrieved_memory = torch.cat(
+                            [slot.memory for slot in retrieved_slots], dim=0
+                        ).unsqueeze(0)
+                        retrieved_attention_mask = torch.ones(
+                            (1, retrieved_memory.size(1)),
+                            device=device,
+                            dtype=current_attention_mask.dtype,
+                        )
+                        weaver_reasoner_inputs_embeds = torch.cat(
+                            [candidate_inputs_embeds, retrieved_memory], dim=1
+                        )
+                        weaver_attention_mask = torch.cat(
+                            [candidate_attention_mask, retrieved_attention_mask], dim=1
+                        )
+                        weaver_position_ids = self._generate_position_ids(
+                            weaver_attention_mask
+                        )
+                        generation_debug["retrieved_latents_enter_weaver"] = True
+                        generation_debug[
+                            "weaver_conditioned_on_retrieved_memory"
+                        ] = True
+                        generation_debug["weaver_conditioning_token_count"] = int(
+                            retrieved_memory.size(1)
+                        )
+
                 # 映射到 weaver 空间，生成 latent memory
-                weaver_inputs_embeds = self.reasoner_to_weaver(candidate_inputs_embeds)
+                weaver_inputs_embeds = self.reasoner_to_weaver(
+                    weaver_reasoner_inputs_embeds
+                )
                 if i == 0:
                     weaver_hidden_states, attn_mask, _ = weaver.augment_prompt(
-                        weaver_inputs_embeds, candidate_attention_mask, candidate_position_ids
+                        weaver_inputs_embeds, weaver_attention_mask, weaver_position_ids
                     )
                 else:
                     weaver_hidden_states, attn_mask, _ = weaver.augment_inference(
-                        weaver_inputs_embeds, candidate_attention_mask, candidate_position_ids
+                        weaver_inputs_embeds, weaver_attention_mask, weaver_position_ids
                     )
                 # 将 Weaver 输出映射回 reasoner 空间
                 latent_inputs_embeds = self.weaver_to_reasoner(weaver_hidden_states)
@@ -542,8 +607,9 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                     # 步骤：检索旧记忆 → [旧记忆] + [新 latent] 拼接注入 → 写入新 latent
                     if use_thread_update:
                         # thread_update 策略：复用 Weaver 生成前已完成的检索结果
-                        retrieved_slots = retrieval_result.slots
-                    else:
+                        if retrieved_slots is None:
+                            retrieved_slots = retrieval_result.slots
+                    elif retrieved_slots is None:
                         # 其他策略：用当前的 candidate_inputs_embeds（reasoner-space）做检索
                         retrieved_slots = latent_memory_bank.retrieve(
                             candidate_inputs_embeds.detach(),
@@ -551,32 +617,47 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                             dtype=current_inputs_embeds.dtype,
                         )
                     if retrieved_slots:
-                        # 有检索到记忆：按 [当前序列 → 旧记忆 → 新latent] 顺序拼接
-                        # 旧记忆注入在 latent 之前，reasoner 可以看到历史上下文
-                        retrieved_memory = torch.cat(
-                            [slot.memory for slot in retrieved_slots], dim=0
-                        ).unsqueeze(0)
-                        retrieved_attention_mask = torch.ones(
-                            (1, retrieved_memory.size(1)),
-                            device=device,
-                            dtype=current_attention_mask.dtype,
-                        )
-                        candidate_inputs_embeds = torch.cat(
-                            [
-                                candidate_inputs_embeds,
-                                retrieved_memory,
-                                latent_inputs_embeds,
-                            ],
-                            dim=1,
-                        )
-                        candidate_attention_mask = torch.cat(
-                            [
-                                candidate_attention_mask,
-                                retrieved_attention_mask,
-                                attn_mask,
-                            ],
-                            dim=1,
-                        )
+                        if retrieved_memory is None:
+                            retrieved_memory = torch.cat(
+                                [slot.memory for slot in retrieved_slots], dim=0
+                            ).unsqueeze(0)
+                            retrieved_attention_mask = torch.ones(
+                                (1, retrieved_memory.size(1)),
+                                device=device,
+                                dtype=current_attention_mask.dtype,
+                            )
+                        if retrieved_memory_to_weaver:
+                            candidate_inputs_embeds = torch.cat(
+                                [candidate_inputs_embeds, latent_inputs_embeds], dim=1
+                            )
+                            candidate_attention_mask = torch.cat(
+                                [candidate_attention_mask, attn_mask], dim=1
+                            )
+                            generation_debug["fused_latent_generated"] = True
+                        else:
+                            # Version A：旧记忆直接注入 Reasoner，且位于新 latent 之前。
+                            candidate_inputs_embeds = torch.cat(
+                                [
+                                    candidate_inputs_embeds,
+                                    retrieved_memory,
+                                    latent_inputs_embeds,
+                                ],
+                                dim=1,
+                            )
+                            candidate_attention_mask = torch.cat(
+                                [
+                                    candidate_attention_mask,
+                                    retrieved_attention_mask,
+                                    attn_mask,
+                                ],
+                                dim=1,
+                            )
+                            generation_debug[
+                                "raw_retrieved_latents_enter_reasoner"
+                            ] = True
+                            generation_debug[
+                                "retrieved_latents_enter_reasoner"
+                            ] = True
                     else:
                         # bank 为空或无匹配：行为和原始路径相同，只拼新 latent
                         candidate_inputs_embeds = torch.cat(
@@ -681,6 +762,7 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
             current_input_ids[:, prompt_len:],
             augmentation_pos
         )
+        self._last_generation_debug = generation_debug
 
         if return_augmentation_mask:
             return (current_input_ids, augmentation_pos)

@@ -141,6 +141,7 @@ Current next experiment gate:
 | EXP-20260622-001 | 2026-06-22 | MAB-5B | Does raising the shared threshold to 0.05 improve the compressed detective_qa n10 result? | `completed` | Both exact match 0.0; final slot counts rose to 8 in every context; retrieval stayed active in every context; output_changed dropped to 5 |
 | EXP-20260622-002 | 2026-06-22 | MAB-5C | Does decoupling retrieval and update thresholds preserve slot growth while restoring retrieval density? | `completed` | Both exact match 0.0; final slot counts stayed at 8 in every context; query-time retrieval stayed active in every context; retrieved latents remained Reasoner-only |
 | EXP-20260623-001 | 2026-06-23 | MAB-5D | Does increasing max_slots from 8 to 16 reduce eviction churn without changing exact-match behavior? | `completed` | Both exact match 0.0; final slot counts rose to 16 in every context; capacity eviction dropped versus MAB-5C; query-time retrieval stayed active in every context |
+| EXP-20260625-001 | 2026-06-25 | MAB-6A | Does routing retrieved memory into Weaver change the mechanism shape on detective_qa n10 without enabling writes or fallback? | `completed_exploratory` | Both exact match 0.0; output_changed stayed 10/10; retrieved memory entered Weaver; raw retrieved memory did not enter Reasoner directly; query writes stayed 0 |
 
 ## Recorded Experiments
 
@@ -2781,3 +2782,61 @@ full GSM8K test performance.
   retrieved-memory-to-Weaver conditioning, if and only if it remains isolated
   from Version A.
 - Related baseline: `20260622T140741Z-detectiveqa-decoupled-thresholds-n10`
+
+### EXP-20260625-001: MAB-6A Version B Weaver-conditioned Memory DetectiveQA n10
+
+- Phase: MAB-6A exploratory benchmark
+- Status: `completed_exploratory`
+- Research question: Does routing retrieved memory into Weaver, rather than
+  injecting raw retrieved memory directly into Reasoner, produce a distinct
+  mechanism shape on detective_qa n10 while preserving Version A guardrails?
+- Hypothesis: Version B routing will be mechanism-active, keep query writes at
+  zero, avoid cross-context leakage, and change outputs even if exact match does
+  not improve.
+- Baseline/comparator:
+  `outputs/mab/decoupled_thresholds_detectiveqa_n10/20260622T140741Z-detectiveqa-decoupled-thresholds-n10`
+- Canonical artifact:
+  `outputs/mab/version_b_weaver_conditioned_detectiveqa_n10/20260625T023822Z-detectiveqa-version-b-weaver-conditioned-n10`
+- Earlier failed/intermediate artifacts:
+  `20260625T021750Z-detectiveqa-version-b-weaver-conditioned-n10`,
+  `20260625T021830Z-detectiveqa-version-b-weaver-conditioned-n10`,
+  `20260625T022818Z-detectiveqa-version-b-weaver-conditioned-n10`
+- Configuration:
+  - `threshold=0.03`
+  - `retrieve_threshold=0.03`
+  - `update_threshold=0.05`
+  - `max_slots=8`
+  - `top_k=1`
+  - `retrieve_policy=threshold_topk`
+  - `update_policy=thread_update`
+  - `retrieved_memory_to_weaver=True`
+  - query mode `first-query-only`
+  - query phase `read-only`
+  - full-history detective_qa `over_capacity_invalid`
+
+#### Observations
+
+- Valid contexts: `10/10`
+- Bank-off exact match: `0.0`
+- Bank-on exact match: `0.0`
+- `output_changed=10`
+- Query-turn retrieval active contexts: `10`
+- Final slot counts: `[8, 8, 8, 8, 8, 8, 8, 8, 8, 8]`
+- Retrieved memory entered Weaver in all valid contexts.
+- Raw retrieved memory did not enter Reasoner directly.
+- `weaver_conditioning_token_count=80` across the 10 contexts.
+- `fused_latent_generated=True`
+- Query writes remained `0`; query write attempts remained `0`.
+- Cross-context leakage remained `false`.
+- One over-capacity warning was emitted at `132726 > 131072` while estimating
+  the invalid full-history path, but no full-history detective_qa generation was
+  run or scored.
+
+#### Conclusion
+
+- Hypothesis supported: partially.
+- Interpretation: Version B routing is mechanism-active and isolated as
+  intended, but it did not improve official exact match relative to MAB-5C.
+- This is not a performance win. Version A remains the default.
+- Follow-up: if more Version B work is approved, do failure analysis first
+  rather than another threshold or capacity sweep.

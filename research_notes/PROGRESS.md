@@ -42,9 +42,15 @@
   16]`; mean final slot count `16.0`; capacity eviction dropped relative to
   MAB-5C; retrieved latents remained Reasoner-only; query writes `0`;
   cross-context leakage `false`.
-- Current next action: treat MAB-5D as a capacity ablation, not a final
-  performance win. The next meaningful mechanism direction is MAB-6A / Version
-  B Weaver-conditioned memory, provided it remains isolated from Version A.
+- MAB-6A Version B Weaver-conditioned memory has now been executed on the same
+  detective_qa n10 slice. Result: 10/10 valid contexts; Bank-off exact match
+  `0.0`; Bank-on exact match `0.0`; `output_changed=10`; query-turn retrieval
+  active in all contexts; final slot counts stayed `[8, 8, 8, 8, 8, 8, 8, 8,
+  8, 8]`; retrieved memory entered Weaver; raw retrieved memory did not enter
+  Reasoner directly; query writes `0`; cross-context leakage `false`.
+- Current next action: keep Version A as the default. Treat MAB-6A as
+  mechanism-active but not a performance win, and only do further Version B
+  work as explicit exploratory follow-up.
 - Old shared-threshold behavior must remain reproducible by default.
 - `output_changed` is activation evidence, not improvement. Official exact
   match and relaxed diagnostics remain separately labeled.

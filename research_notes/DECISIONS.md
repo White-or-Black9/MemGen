@@ -68,6 +68,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0059 | 2026-06-22 | accepted | Keep Version B Weaver conditioning exploratory and isolated |
 | DEC-0060 | 2026-06-22 | accepted | Treat MAB-5B as completed diagnostic evidence that strengthens the simple raised-threshold baseline |
 | DEC-0061 | 2026-06-22 | accepted | Treat MAB-5C as completed diagnostic evidence for decoupled retrieval-update thresholds |
+| DEC-0064 | 2026-06-25 | accepted | Keep Version A as default after the MAB-6A exploratory run |
 
 ## Decision Template
 
@@ -108,10 +109,12 @@ IDs and append superseding decisions rather than silently rewriting history.
 - MAB-5D: both official exact-match accuracies `0.0`; final slot counts
   reached 16 in every context; capacity eviction dropped versus MAB-5C;
   retrieved memory remained Reasoner-only; query writes `0`.
-- Current next action: MAB-5D is complete; the next meaningful mechanism step
-  is exploratory MAB-6A / Version B Weaver-conditioned memory, if and only if
-  it remains isolated from Version A.
-- Deferred: exploratory MAB-6A Weaver conditioning.
+- MAB-6A: both official exact-match accuracies `0.0`; outputs changed in all
+  10 contexts; retrieved memory entered Weaver; raw retrieved memory did not
+  enter Reasoner directly; query writes `0`; cross-context leakage `0`.
+- Current next action: keep Version A as the default path. Treat MAB-6A as
+  exploratory mechanism evidence only.
+- Deferred: any further Version B follow-up beyond failure analysis.
 
 ### Historical Board (2026-06-18)
 
@@ -1490,3 +1493,29 @@ resolved or superseded by later R4 and MAB work.
   match at `0.0`.
 - Consequence: future notes and comparisons should cite the canonical capacity16
   run only; the earlier attempt remains provenance only.
+
+### DEC-0064: Keep Version A as Default After the MAB-6A Exploratory Run
+
+- Date: 2026-06-25
+- Status: accepted
+- Context:
+  - MAB-6A / Version B was run on detective_qa n10 against the MAB-5C canonical
+    baseline with `retrieve_threshold=0.03`, `update_threshold=0.05`,
+    `max_slots=8`, `top_k=1`, query read-only, and no fallback.
+  - The canonical artifact is
+    `20260625T023822Z-detectiveqa-version-b-weaver-conditioned-n10`.
+- Decision:
+  - keep Version A as the default path
+  - treat MAB-6A as exploratory mechanism evidence rather than a benchmark win
+  - preserve Version B behind an explicit opt-in flag and separate runner/tests
+- Rationale:
+  - MAB-6A was mechanism-active: retrieved memory entered Weaver, raw retrieved
+    memory no longer entered Reasoner directly, outputs changed in all 10
+    contexts, and query writes remained zero
+  - official exact match stayed `0.0` in both modes, so there is no performance
+    evidence to justify replacing Version A
+- Consequences:
+  - future comparisons should cite the canonical MAB-6A artifact, not the
+    earlier failed/intermediate runs
+  - if more Version B work is approved, start with failure analysis rather than
+    another threshold or capacity sweep

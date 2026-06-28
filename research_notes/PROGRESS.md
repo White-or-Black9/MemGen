@@ -1,5 +1,36 @@
 # 项目进展
 
+## Latest MAB-6B-FR Diagnostic Status (2026-06-27)
+
+- Artifact-only consolidation is complete for the format-repair, threshold,
+  capacity, and top-k diagnostics. No new inference was run.
+- Artifact roots:
+  - `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_format_repair/`
+  - `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_threshold_diagnostic/`
+  - `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_capacity_diagnostic/`
+  - `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_topk_diagnostic/`
+- Main mechanism result: `update_threshold=0.08` breaks the MAB-6B-FR
+  single-slot collapse; `max_slots=16` is the current preferred capacity under
+  `top_k=1`; increasing top-k under `retrieve_threshold=0.03` does not improve
+  exact match and gives less controlled outputs.
+- Current preferred diagnostic setting is `retrieve_threshold=0.03`,
+  `update_threshold=0.08`, `max_slots=16`, `top_k=1`. This is n10 exploratory
+  evidence only: Bank-on exact match varies between `1/10` and `2/10` across
+  otherwise matching top_k=1 runs.
+- Provenance caveat: threshold-sweep aggregates were recovered from complete
+  prediction and bank-debug rows after per-setting postprocessing failed with
+  `KeyError: 'memory_retrieved_latent_count'`; they are mechanism diagnostics,
+  not clean canonical manifests.
+- Current next action: retrieval-threshold relaxation / force-top-k diagnostic
+  with `max_slots=16`, `update_threshold=0.08`, `top_k=4`, and
+  `retrieve_threshold={0.03,0.02,0.01,0.00}`. Require 32 query-turn retrieved
+  latent tokens before interpreting top_k=4 as fully realized. Include a
+  same-run control with `max_slots=16`, `update_threshold=0.08`, `top_k=1`, and
+  `retrieve_threshold=0.03` because top_k=1 has varied between `1/10` and
+  `2/10` across runs.
+- Consolidated analysis:
+  `research_notes/MAB6B_FR_DIAGNOSTIC_SUMMARY.md`.
+
 ## Current Project State (2026-06-22)
 
 - MAB-5A detective_qa compressed-memory n10 is complete and preserved as the
@@ -48,9 +79,16 @@
   active in all contexts; final slot counts stayed `[8, 8, 8, 8, 8, 8, 8, 8,
   8, 8]`; retrieved memory entered Weaver; raw retrieved memory did not enter
   Reasoner directly; query writes `0`; cross-context leakage `false`.
-- Current next action: keep Version A as the default. Treat MAB-6A as
-  mechanism-active but not a performance win, and only do further Version B
-  work as explicit exploratory follow-up.
+- MAB-6B Weaver-space bank has now been executed on the same detective_qa n10
+  slice. Result: 10/10 valid contexts; Bank-off exact match `0.0`; Bank-on
+  exact match `0.1`; `output_changed=10`; query-turn retrieval active in all
+  contexts; final slot counts collapsed to `[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]`;
+  `memory_bank_storage_space=weaver`; `retrieval_query_space=weaver`;
+  `retrieved_memory_projected_to_weaver=false`; query writes `0`;
+  cross-context leakage `false`.
+- Current next action: keep Version A as the default until MAB-6B is
+  replicated. Treat the MAB-6B exact-match gain as exploratory positive
+  evidence rather than a default-path promotion.
 - Old shared-threshold behavior must remain reproducible by default.
 - `output_changed` is activation evidence, not improvement. Official exact
   match and relaxed diagnostics remain separately labeled.

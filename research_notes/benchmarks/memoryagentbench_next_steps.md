@@ -2,22 +2,24 @@
 
 ## Current Decision
 
-MAB-6A is completed. The canonical exploratory run is
-`20260625T023822Z-detectiveqa-version-b-weaver-conditioned-n10`. It preserved
-the MAB-5C / MAB-5D safety constraints but changed the routing path:
+MAB-6B is completed. The canonical exploratory run is
+`20260625T122323Z-detectiveqa-version-b-weaver-space-bank-n10`. It preserved
+the MAB-5C / MAB-5D safety constraints, preserved MAB-6A reproducibility, and
+changed the storage/query path:
 
 - `retrieve_threshold=0.03`
 - `update_threshold=0.05`
 - `max_slots=8`
 - `top_k=1`
 - `retrieved_memory_to_weaver=True`
+- `memory_bank_storage_space=weaver`
 
-The canonical run kept exact match at `0.0` in both modes, changed outputs in
+The canonical run improved exact match from `0.0` to `0.1`, changed outputs in
 all 10 contexts, kept query-time retrieval active in all 10 contexts, preserved
-`query_write_count=0`, preserved context isolation, routed retrieved memory
-into Weaver, and prevented raw retrieved memory from entering Reasoner
-directly. This is mechanism-active but not a performance win. Version A remains
-the default.
+`query_write_count=0`, preserved context isolation, routed retrieval and bank
+storage fully into Weaver space, and prevented raw retrieved memory from
+entering Reasoner directly. This is exploratory positive evidence, not yet
+enough to replace Version A as the default.
 
 ## MAB-5B Status
 
@@ -113,15 +115,18 @@ An increase in slots or inserts is mechanism evidence, not an accuracy claim.
 
 Proceed only if a later review still wants a follow-up:
 
-1. **Version B failure analysis:** compare MAB-6A output changes against MAB-5C
-   to identify whether Weaver conditioning is introducing a stable error mode.
+1. **Retrieval-threshold relaxation / force-top-k diagnostic:** hold
+   `max_slots=16`, `update_threshold=0.08`, and `top_k=4`, then sweep
+   `retrieve_threshold={0.03,0.02,0.01,0.00}`. Include an explicit no-threshold
+   mode only if the diagnostic contract already supports it.
 2. **Optional prompt-length audit:** isolate why the `132726 > 131072` warning
    is emitted during over-capacity full-history estimation, while keeping
    `full_history_status=over_capacity_invalid` and never scoring full-history
    generation.
-3. **Optional future capacity follow-up:** only if later evidence requires it,
-   revisit capacity or retrieval density separately; do not reintroduce
-   fallback here.
+3. **Optional future capacity / thread analysis:** if the threshold-relaxation
+   diagnostic still caps realized retrieval below four slots, investigate
+   whether the remaining bottleneck is thresholding or Weaver multi-latent
+   utilization.
 
 ## Stop Conditions
 
@@ -135,9 +140,12 @@ Proceed only if a later review still wants a follow-up:
 
 ## Immediate Handoff
 
-1. Use `20260625T023822Z-detectiveqa-version-b-weaver-conditioned-n10` as the
-   canonical MAB-6A artifact.
-2. Keep Version A as the default path.
-3. Treat MAB-6A as exploratory mechanism evidence, not as a benchmark win.
-4. If follow-up is approved, start with Version B failure analysis rather than
-   another threshold or capacity sweep.
+1. Use `20260625T122323Z-detectiveqa-version-b-weaver-space-bank-n10` as the
+   canonical MAB-6B artifact.
+2. Keep Version A as the default path until MAB-6B is replicated.
+3. Treat the MAB-6B exact-match gain as exploratory benchmark evidence, not as
+   a default-path promotion.
+4. If follow-up is approved, start with retrieval-threshold relaxation /
+   force-top-k plus the same-run `max_slots=16`, `update_threshold=0.08`,
+   `top_k=1`, `retrieve_threshold=0.03` control rather than another MAB-6B
+   replication pass.

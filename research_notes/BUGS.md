@@ -11,6 +11,20 @@ Do not delete resolved entries.
 | BUG-0002 | 2026-06-11 | high | `fixed` | Static evaluation crashed in `StaticEvalRecorder.record_batch()` after generation started |
 | BUG-0003 | 2026-06-11 | medium | `open` | Checked-in environment specifications disagree on Python, CUDA, and package versions |
 | BUG-0004 | 2026-06-11 | low | `open` | PATH-level `conda` wrapper has a CRLF shebang and cannot execute |
+| BUG-0005 | 2026-06-26 | medium | `fixed` | Top-k runner read missing `cap.DEFAULT_MAX_SLOTS` and exited before the sweep |
+| BUG-0006 | 2026-06-26 | medium | `open_contained` | Threshold-run postprocessing raised `KeyError: 'memory_retrieved_latent_count'`, leaving per-setting manifests invalid |
+| BUG-0007 | 2026-06-26 | low | `open_contained` | Capacity aggregate read empty generic action fields instead of populated `bank_on_*` write-action fields |
+
+## Current Diagnostic Runner Status (2026-06-27)
+
+- `BUG-0005` is fixed and the final top-k sweep completed all four settings.
+- `BUG-0006` does not erase the generated threshold predictions or bank traces,
+  but it prevents those per-setting manifests from being treated as clean
+  canonical runs. The root aggregate is a post-hoc recovery artifact.
+- `BUG-0007` affects report totals, not the underlying capacity run. Capacity
+  action counts must be read from per-context `bank_on_*` fields until fixed.
+- These are experiment-runner/reporting defects; no new model, memory-bank,
+  dataset, scorer, or shared-harness defect was identified in this audit.
 
 ## Current Blocking Status
 
@@ -158,6 +172,71 @@ Remaining caveats / watchlist:
   - no toy retrieval server result is valid for formal reporting
 
 ## Recorded Bugs
+
+### BUG-0005: Top-k Runner Referenced a Missing Capacity-module Default
+
+- Date found: 2026-06-26
+- Severity: medium
+- Status: `fixed`
+- Phase/experiment: MAB-6B-FR top-k diagnostic / `EXP-20260626-004`
+- Symptom: the runner exited with status 1 before starting the sweep.
+- Error:
+  `AttributeError: module 'scripts.eval.mab6b_weaver_space_bank_detectiveqa_n10_capacity_diagnostic' has no attribute 'DEFAULT_MAX_SLOTS'`
+- Root cause: the top-k runner tried to initialize state from
+  `cap.DEFAULT_MAX_SLOTS`, but the capacity diagnostic did not define that
+  module attribute.
+- Fix: use the top-k runner's own `DEFAULT_MAX_SLOTS=16` as the source value,
+  then inject and restore the capacity-module override during the run.
+- Validation:
+  - top-k runner compilation passed after the fix
+  - final top_k 1/2/4/8 underlying runs returned status 0
+  - final aggregate and per-context reports were written
+- Artifact note: the current `debug_failure_traceback.log` contains a later
+  historical CUDA OOM and no longer contains the initial AttributeError.
+
+### BUG-0006: Threshold Postprocessing Invalidated Per-setting Manifests
+
+- Date found: 2026-06-27 artifact audit
+- Severity: medium
+- Status: `open_contained`
+- Phase/experiment: MAB-6B-FR threshold diagnostic / `EXP-20260626-002`
+- Symptom: every threshold per-setting `paired_results.json` and
+  `manifest.json` reports 0 valid and 10 invalid contexts.
+- Error: `KeyError: 'memory_retrieved_latent_count'` in every raw diagnostics
+  row.
+- Impact:
+  - generation predictions, bank slot counts, retrieval indices, write traces,
+    query-write counts, and leakage fields were already recorded
+  - official exact-match and derived mechanism fields were not finalized in
+    the per-setting paired results
+  - root threshold aggregate/per-context reports were later recomputed from the
+    existing diagnostics and rescored predictions
+- Containment: label threshold results as recovered mechanism diagnostics, not
+  clean canonical per-setting runs.
+- Required fix verification: a future threshold runner smoke should produce a
+  1/1-valid manifest without post-hoc recomputation before any new full sweep.
+- Fix status: no code change was made during this notes-only audit.
+
+### BUG-0007: Capacity Aggregate Dropped Populated Write-action Counts
+
+- Date found: 2026-06-27 artifact audit
+- Severity: low
+- Status: `open_contained`
+- Phase/experiment: MAB-6B-FR capacity diagnostic / `EXP-20260626-003`
+- Symptom: root `capacity_diagnostic_aggregate.json` and summary report
+  `append_insert_count=0`, `matched_replace_count=0`, and
+  `capacity_evict_count=0` for every setting.
+- Root cause: per-context artifacts populate `bank_on_write_action_counts` and
+  `bank_on_*_count`, while the aggregate consumed the empty generic field
+  family.
+- Correct raw-trace totals:
+  - cap8: insert 80, replace_matched 60, capacity_evict 186
+  - cap16: insert 160, replace_matched 53, capacity_evict 113
+  - cap32: insert 252, replace_matched 54, capacity_evict 20
+- Impact: report bookkeeping only; final slot counts, predictions, exact match,
+  and per-context bank traces remain available.
+- Containment: use per-context `bank_on_*` fields for the consolidated analysis.
+- Fix status: no code change was made during this notes-only audit.
 
 ## Phase 7 Stability Check
 

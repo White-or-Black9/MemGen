@@ -14,6 +14,10 @@ overwrite prior records; append a new entry.
 - Current Version A injects retrieved memory into Reasoner only, not Weaver.
 - MAB-5C decoupled retrieve/update thresholds has completed; it preserved
   full slot growth while keeping query-time retrieval active in every context.
+- MAB-6B Weaver-space bank has completed on detective_qa n10. It improved
+  official exact match from `0.0` to `0.1` on the fixed slice while keeping
+  `query_write_count=0`, keeping cross-context leakage `false`, and avoiding
+  `reasoner_to_weaver` reprojection for retrieved memory.
 - Earlier dated recommendations remain historical records.
 
 ## Historical Post-R2 Mechanism Boundary Note
@@ -142,6 +146,11 @@ Current next experiment gate:
 | EXP-20260622-002 | 2026-06-22 | MAB-5C | Does decoupling retrieval and update thresholds preserve slot growth while restoring retrieval density? | `completed` | Both exact match 0.0; final slot counts stayed at 8 in every context; query-time retrieval stayed active in every context; retrieved latents remained Reasoner-only |
 | EXP-20260623-001 | 2026-06-23 | MAB-5D | Does increasing max_slots from 8 to 16 reduce eviction churn without changing exact-match behavior? | `completed` | Both exact match 0.0; final slot counts rose to 16 in every context; capacity eviction dropped versus MAB-5C; query-time retrieval stayed active in every context |
 | EXP-20260625-001 | 2026-06-25 | MAB-6A | Does routing retrieved memory into Weaver change the mechanism shape on detective_qa n10 without enabling writes or fallback? | `completed_exploratory` | Both exact match 0.0; output_changed stayed 10/10; retrieved memory entered Weaver; raw retrieved memory did not enter Reasoner directly; query writes stayed 0 |
+| EXP-20260625-002 | 2026-06-25 | MAB-6B | Does storing Weaver-space memory and querying in Weaver space avoid the MAB-6A projection round trip and change benchmark behavior? | `completed_exploratory` | Bank-off exact match 0.0 and Bank-on exact match 0.1; output_changed stayed 10/10; storage/query space moved to Weaver; query writes stayed 0 |
+| EXP-20260626-001 | 2026-06-26 | MAB-6B-FR format repair | Does a final-query answer-only prefix improve output control without changing the Weaver-space bank mechanism? | `completed_exploratory` | Canonical 10/10-valid run increased Bank-on clean-option outputs from 3/10 to 6/10 but changed Bank-on EM from 0.1 to 0.0; format was not the only bottleneck |
+| EXP-20260626-002 | 2026-06-26 | MAB-6B-FR threshold diagnostic | Does update_threshold control one-slot collapse independently of retrieve_threshold? | `completed_with_artifact_recovery` | Recovered traces show ut=0.05 ended at one slot and ut>=0.08 ended at eight slots; ut=0.08 retained 2/10 EM, but per-setting manifests are invalid after a postprocessing KeyError |
+| EXP-20260626-003 | 2026-06-26 | MAB-6B-FR capacity diagnostic | With ut=0.08 and top_k=1, what storage capacity best balances slot diversity and selection noise? | `completed_exploratory` | Bank-on EM was 0.1/0.2/0.0 for cap8/16/32; capacity changed slot counts and evictions as intended; cap16 was best on n10 |
+| EXP-20260626-004 | 2026-06-26 | MAB-6B-FR top-k diagnostic | Does broader final-query retrieval improve Weaver-space-bank accuracy at retrieve_threshold=0.03? | `completed_exploratory` | top_k=1/2/4/8 gave Bank-on EM 0.1/0.0/0.0/0.0; realized retrieval was 1/2/3/3 slots because thresholding capped top_k=4/8 |
 
 ## Recorded Experiments
 
@@ -2840,3 +2849,173 @@ full GSM8K test performance.
 - This is not a performance win. Version A remains the default.
 - Follow-up: if more Version B work is approved, do failure analysis first
   rather than another threshold or capacity sweep.
+
+### EXP-20260626-001: MAB-6B-FR Final-query Format Repair
+
+- Phase: MAB-6B-FR output-control diagnostic
+- Status: `completed_exploratory`
+- Research question: Can a constrained final-query answer-only prefix improve
+  output controllability without changing chunk processing or the Weaver-space
+  memory-bank mechanism?
+- Configuration:
+  - `retrieve_threshold=0.03`
+  - `update_threshold=0.05`
+  - `max_slots=8`
+  - `top_k=1`
+  - format repair applied to Bank-off and Bank-on final queries only
+- Canonical artifact:
+  `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_format_repair/20260626T014628Z-detectiveqa-version-b-weaver-space-bank-format-repair-n10`
+- Invalid precursor artifact:
+  `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_format_repair/20260626T014442Z-detectiveqa-version-b-weaver-space-bank-format-repair-n10`
+
+#### Observations
+
+- Canonical validity: 10/10 contexts; precursor validity: 0/10 after
+  `RecursionError: maximum recursion depth exceeded` in every context.
+- Bank-off EM: `0.0`; Bank-on EM: `0.0`; improved: `0`; regressed: `0`;
+  `output_changed=10`.
+- Final slot counts stayed at one in every context; write actions were
+  `insert=10`, `replace_matched=316`, `capacity_evict=0`.
+- Query-turn retrieval remained one slot / eight latent tokens per context.
+- Relative to the no-repair MAB-6B run, Bank-on clean-option outputs increased
+  from 3/10 to 6/10, while Bank-on EM changed from 0.1 to 0.0.
+- Invariants: query writes and attempts `0`; leakage `false`; retrieved latents
+  entered Weaver; raw retrieved latents did not enter Reasoner.
+- Missing root-level artifacts: no format-repair aggregate, per-context export,
+  summary Markdown, or run log is present.
+
+#### Conclusion
+
+- Format repair improved surface-form control but did not improve correctness.
+- Memory content compression, retrieval selection, and Weaver utilization
+  remain plausible bottlenecks.
+- The memory bank changed all outputs without reliably moving predictions
+  toward correct answers.
+
+### EXP-20260626-002: MAB-6B-FR Threshold-only Diagnostic
+
+- Phase: MAB-6B-FR memory-formation diagnostic
+- Status: `completed_with_artifact_recovery`
+- Research question: With `retrieve_threshold` fixed, does
+  `update_threshold` control one-slot collapse versus multi-slot formation?
+- Configuration:
+  - fixed `retrieve_threshold=0.03`, `max_slots=8`, `top_k=1`
+  - swept `update_threshold={0.05,0.08,0.10,0.12}`
+- Artifact root:
+  `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_threshold_diagnostic/`
+- Primary recovered reports:
+  `threshold_diagnostic_aggregate.json`,
+  `threshold_diagnostic_per_context.jsonl`, and
+  `threshold_diagnostic_summary.md`
+
+#### Observations
+
+- Recovered Bank-on EM for ut 0.05/0.08/0.10/0.12 was
+  `0.20/0.20/0.00/0.00`; Bank-off EM was `0.00` throughout.
+- `ut=0.05`: all final slot counts were 1; write actions were
+  `insert=10`, `replace_matched=316`, `capacity_evict=0`.
+- `ut=0.08/0.10/0.12`: all final slot counts were 8; each setting recorded
+  `insert=80`, `replace_matched=246`, `capacity_evict=0`.
+- Query-turn retrieval remained one slot / eight latent tokens per context.
+- Recovered invariants: query writes and attempts `0`; leakage `false`;
+  configured routing is retrieved latents to Weaver without raw retrieved
+  latents entering Reasoner.
+- Artifact caveat: every per-setting `paired_results.json` and `manifest.json`
+  reports 0/10 valid because postprocessing raised
+  `KeyError: 'memory_retrieved_latent_count'`. The root aggregate was later
+  recomputed from complete generated predictions and bank-debug rows using the
+  benchmark scorer. No threshold run log is present.
+
+#### Conclusion
+
+- `update_threshold` controls the observed single-slot collapse.
+- `update_threshold=0.08` is the current working value because it forms eight
+  slots while retaining the best recovered EM in this sweep.
+- These are strong slot-mechanism traces but recovered, not clean canonical,
+  performance evidence.
+
+### EXP-20260626-003: MAB-6B-FR Capacity Diagnostic
+
+- Phase: MAB-6B-FR storage-capacity diagnostic
+- Status: `completed_exploratory`
+- Research question: With multi-slot formation enabled and final-query
+  retrieval fixed to one slot, how does capacity affect storage dynamics and
+  output quality?
+- Configuration:
+  - fixed `retrieve_threshold=0.03`, `update_threshold=0.08`, `top_k=1`
+  - swept `max_slots={8,16,32}`
+- Artifact root:
+  `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_capacity_diagnostic/`
+- Primary reports: root `capacity_diagnostic_aggregate.*`,
+  `capacity_diagnostic_per_context.*`, `capacity_diagnostic_summary.md`, and
+  `run_capacity_full.log`; nested `smoke_test/` is excluded from the full result.
+
+#### Observations
+
+- All three settings completed 10/10 valid contexts with status 0.
+- Bank-on EM for cap8/cap16/cap32 was `0.10/0.20/0.00`; Bank-off EM was `0.00`.
+- Final slots were all 8, all 16, and `[22,24,24,28,24,21,25,32,32,20]`.
+- Raw per-context write traces give insert counts `80/160/252`, matched
+  replacements `60/53/54`, and capacity evictions `186/113/20`.
+- Final-query retrieval stayed at one slot / eight latent tokens for every
+  capacity.
+- Format-clean Bank-on outputs were `8/10`, `9/10`, and `8/10`.
+- Invariants held: query writes and attempts `0`; leakage `false`; retrieved
+  latents entered Weaver; raw retrieved latents did not enter Reasoner.
+- Artifact caveat: the root aggregate/summary generic action fields are
+  zero/empty because they read the wrong field family; the counts above are
+  recomputed from `bank_on_write_action_counts` in per-context artifacts.
+
+#### Conclusion
+
+- `max_slots` is wired correctly: effective capacity rises and eviction churn
+  falls as configured capacity increases.
+- More storage is not always better. cap16 is the current preferred balance
+  under top_k=1, while cap32 likely enlarges the retrieval-noise surface without
+  increasing final-query retrieval breadth.
+- n10 and run-to-run variance prevent a final performance claim.
+
+### EXP-20260626-004: MAB-6B-FR Top-k Diagnostic
+
+- Phase: MAB-6B-FR retrieval-breadth diagnostic
+- Status: `completed_exploratory`
+- Research question: Does increasing top-k improve correctness once the bank
+  forms multiple slots and uses the preferred cap16 capacity?
+- Configuration:
+  - fixed `max_slots=16`, `retrieve_threshold=0.03`, `update_threshold=0.08`
+  - swept `top_k={1,2,4,8}`
+- Artifact root:
+  `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_topk_diagnostic/`
+- Primary reports: `topk_diagnostic_aggregate.*`,
+  `topk_diagnostic_per_context.*`, `topk_diagnostic_summary.md`, and
+  `run_topk_full.log`
+
+#### Observations
+
+- Final aggregate Bank-on EM for top_k 1/2/4/8 was
+  `0.10/0.00/0.00/0.00`; Bank-off EM was `0.00` throughout.
+- Realized final-query retrieval was 1, 2, 3, and 3 slots, corresponding to
+  8, 16, 24, and 24 latent tokens per context.
+- The implemented `threshold_topk` policy filters scores by
+  `retrieve_threshold` before applying top-k, so top_k=4/8 were not force-top-k
+  interventions.
+- Bank-on format failures were 1/10, 6/10, 4/10, and 6/10. Top_k=4 produced
+  four empty outputs; top_k=8 produced three.
+- All final settings completed 10/10 valid contexts; query writes and attempts
+  were `0`; leakage was `false`; retrieved latents entered Weaver; raw
+  retrieved latents did not enter Reasoner.
+- Run-to-run caveat: an earlier valid top_k=1 artifact scored 2/10; the final
+  sweep's top_k=1 rerun scored 1/10 and is the row used by the aggregate.
+
+#### Conclusion
+
+- More retrieved latent tokens did not improve EM and reduced output control
+  relative to top_k=1 under `retrieve_threshold=0.03`.
+- This result does not show that force-top-k is harmful because thresholding
+  capped realized retrieval at three slots for top_k=4/8.
+- Follow-up: hold `max_slots=16`, `update_threshold=0.08`, and `top_k=4`, then
+  sweep `retrieve_threshold={0.03,0.02,0.01,0.00}` and require 32 final-query
+  latent tokens before judging Weaver multi-latent utilization. Include a
+  same-run control with `max_slots=16`, `update_threshold=0.08`, `top_k=1`, and
+  `retrieve_threshold=0.03` to separate threshold-relaxation effects from the
+  observed `1/10` versus `2/10` top_k=1 run variance.

@@ -69,6 +69,11 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0060 | 2026-06-22 | accepted | Treat MAB-5B as completed diagnostic evidence that strengthens the simple raised-threshold baseline |
 | DEC-0061 | 2026-06-22 | accepted | Treat MAB-5C as completed diagnostic evidence for decoupled retrieval-update thresholds |
 | DEC-0064 | 2026-06-25 | accepted | Keep Version A as default after the MAB-6A exploratory run |
+| DEC-0065 | 2026-06-25 | accepted | Keep Version A as default pending replication after the MAB-6B Weaver-space bank run |
+| DEC-0066 | 2026-06-27 | accepted | Use update_threshold=0.08 as the current MAB-6B-FR multi-slot working setting |
+| DEC-0067 | 2026-06-27 | accepted | Prefer max_slots=16 for current MAB-6B-FR top_k=1 diagnostics |
+| DEC-0068 | 2026-06-27 | accepted | Do not interpret top_k=4/8 results as force-top-k evidence |
+| DEC-0069 | 2026-06-27 | accepted | Relax or disable retrieve_threshold before making further top-k claims |
 
 ## Decision Template
 
@@ -87,6 +92,22 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Superseded by:
 
 ## Standing Decisions
+
+### Latest MAB-6B-FR Board (2026-06-27)
+
+- Keep Version A as the default path; none of the MAB-6B-FR n10 diagnostics is
+  sufficient for a default-path or benchmark-performance claim.
+- Use `retrieve_threshold=0.03`, `update_threshold=0.08`, `max_slots=16`, and
+  `top_k=1` as the current preferred diagnostic configuration.
+- Treat the threshold sweep as recovered mechanism evidence because its
+  per-setting manifests remain invalid after a postprocessing KeyError.
+- Do not call top_k=4/8 force-top-k: `threshold_topk` admitted only three slots
+  at the final query.
+- Next diagnostic: hold cap16/ut0.08/top_k4 and sweep
+  `retrieve_threshold={0.03,0.02,0.01,0.00}`, requiring 32 retrieved latent
+  tokens before evaluating multi-slot Weaver utilization. Include a same-run
+  cap16/ut0.08/top_k1/rt0.03 control to account for the observed `1/10` versus
+  `2/10` top_k=1 run variance.
 
 ### Current Board (2026-06-22)
 
@@ -112,9 +133,120 @@ IDs and append superseding decisions rather than silently rewriting history.
 - MAB-6A: both official exact-match accuracies `0.0`; outputs changed in all
   10 contexts; retrieved memory entered Weaver; raw retrieved memory did not
   enter Reasoner directly; query writes `0`; cross-context leakage `0`.
-- Current next action: keep Version A as the default path. Treat MAB-6A as
-  exploratory mechanism evidence only.
-- Deferred: any further Version B follow-up beyond failure analysis.
+- MAB-6B: official exact match improved from `0.0` to `0.1` on the fixed n10
+  slice; outputs changed in all 10 contexts; storage/query space moved to
+  Weaver; retrieved memory avoided `reasoner_to_weaver` reprojection; query
+  writes `0`; cross-context leakage `0`.
+- Current next action: keep Version A as the default path until MAB-6B is
+  replicated or broadened beyond the single detective_qa n10 slice.
+- Deferred: any default-path promotion before replication.
+
+### DEC-0065: Keep Version A as Default Pending Replication After MAB-6B
+
+- Date: 2026-06-25
+- Status: accepted
+- Context:
+  - MAB-6B completed on detective_qa n10 with canonical artifact
+    `20260625T122323Z-detectiveqa-version-b-weaver-space-bank-n10`.
+  - The run improved official exact match from `0.0` to `0.1` while keeping
+    `query_write_count=0`, keeping cross-context leakage `false`, and
+    confirming `memory_bank_storage_space=weaver`,
+    `retrieval_query_space=weaver`, and
+    `retrieved_memory_projected_to_weaver=false`.
+  - The same run also collapsed final slot counts to `1` in every context and
+    relied on `replace_matched` for nearly all writes.
+- Decision:
+  - Preserve MAB-6B as canonical exploratory evidence.
+  - Do not promote MAB-6B to the default path yet.
+  - Keep Version A as the default until MAB-6B is replicated on a later
+    approved slice or follow-up.
+- Alternatives considered:
+  - Promote MAB-6B immediately because official exact match improved.
+  - Reject MAB-6B because slot-count behavior changed sharply.
+- Rationale:
+  - The exact-match gain is real on the fixed slice and should be preserved.
+  - The evidence is still narrow and the slot-collapse behavior introduces a
+    new mechanism question that should be checked before default-path changes.
+- Consequences:
+  - Future follow-up should start with replication or slot-collapse analysis,
+    not a default flip.
+  - Version A remains the safe default path for normal use.
+
+### DEC-0066: Use update_threshold=0.08 as the MAB-6B-FR Working Setting
+
+- Date: 2026-06-27
+- Status: accepted
+- Context:
+  - The recovered threshold diagnostic held `retrieve_threshold=0.03`,
+    `max_slots=8`, and `top_k=1` fixed.
+  - `update_threshold=0.05` ended with one slot in all contexts and 316 matched
+    replacements.
+  - `update_threshold=0.08` ended with eight slots in all contexts, reduced
+    matched replacements to 246, and retained recovered Bank-on EM of 0.20.
+- Decision: use `update_threshold=0.08` as the current working multi-slot
+  setting for MAB-6B-FR diagnostics.
+- Rationale: it is the lowest tested value that breaks single-slot collapse
+  while retaining the strongest recovered result in the sweep.
+- Consequences: do not use `0.05` as a multi-slot control; keep the threshold
+  sweep's postprocessing-recovery caveat attached to performance statements.
+- Related experiment: `EXP-20260626-002`
+
+### DEC-0067: Prefer max_slots=16 for Current top_k=1 Diagnostics
+
+- Date: 2026-06-27
+- Status: accepted
+- Context:
+  - With `retrieve_threshold=0.03`, `update_threshold=0.08`, and `top_k=1`,
+    cap8/cap16/cap32 produced Bank-on EM of 0.10/0.20/0.00.
+  - Final slot counts and capacity evictions confirm that each capacity setting
+    took effect.
+- Decision: use `max_slots=16` as the preferred storage capacity for the next
+  bounded MAB-6B-FR diagnostics.
+- Rationale: cap16 offers the best observed n10 balance between slot diversity,
+  eviction churn, output control, and exact match. cap32 stores more memory but
+  does not increase top-1 final-query retrieval breadth.
+- Consequences: this is a diagnostic setting, not a promoted method default;
+  cap16 superiority remains moderate evidence because n=10 and run variance are
+  substantial.
+- Related experiment: `EXP-20260626-003`
+
+### DEC-0068: Do Not Interpret top_k=4/8 as Force-top-k Evidence
+
+- Date: 2026-06-27
+- Status: accepted
+- Context:
+  - top_k=2 realized two slots / 16 latent tokens.
+  - top_k=4 and top_k=8 each realized only three slots / 24 latent tokens.
+  - The `threshold_topk` implementation applies `retrieve_threshold` filtering
+    before top-k truncation.
+- Decision: classify the completed sweep as a retrieval-threshold plus top-k
+  interaction diagnostic, not a clean force-top-k test.
+- Rationale: conclusions about four- or eight-slot retrieval require those
+  numbers of candidates to reach Weaver; that did not occur.
+- Consequences: the current zero-EM top_k=4/8 rows cannot support a claim that
+  force-top-k is harmful or that Weaver cannot use four retrieved slots.
+- Related experiment: `EXP-20260626-004`
+
+### DEC-0069: Relax Retrieval Threshold Before Further Top-k Claims
+
+- Date: 2026-06-27
+- Status: accepted
+- Context: capacity is effective, but the current `retrieve_threshold=0.03`
+  caps realized top-k before four slots reach the final query.
+- Decision: the next approved diagnostic should hold `max_slots=16`,
+  `update_threshold=0.08`, and `top_k=4`, then sweep
+  `retrieve_threshold={0.03,0.02,0.01,0.00}`; an explicit no-threshold mode may
+  be added only if already supported by the diagnostic contract. Include a
+  same-run control with `max_slots=16`, `update_threshold=0.08`, `top_k=1`, and
+  `retrieve_threshold=0.03`.
+- Rationale: the experiment must first distinguish threshold scarcity from
+  Weaver multi-latent utilization failure. The control is required because
+  top_k=1 has varied between `1/10` and `2/10` across separate runs, so changes
+  must be separated from normal run variance.
+- Verification required: every context should report
+  `query_turn_retrieved_latent_count=32` before top_k=4 is treated as fully
+  realized.
+- Related experiment: `EXP-20260626-004`
 
 ### Historical Board (2026-06-18)
 

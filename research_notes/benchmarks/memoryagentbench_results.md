@@ -30,6 +30,7 @@ The current reference run is MAB-5A:
 | MAB-5C | Decoupled retrieval-update thresholds, detective_qa n10 | Completed diagnostic | Both exact-match accuracies were 0.0; the canonical checked-in runner rerun reached full slot counts; query-time retrieval stayed active in every context; retrieved latents were Reasoner-only |
 | MAB-5D | Capacity16 decoupled retrieval-update thresholds, detective_qa n10 | Completed diagnostic | Both exact-match accuracies were 0.0; final slot counts rose to 16 in every context; eviction churn dropped versus MAB-5C; retrieved latents remained Reasoner-only |
 | MAB-6A | Version B Weaver-conditioned memory, detective_qa n10 | Completed exploratory diagnostic | Both exact-match accuracies remained 0.0; output_changed stayed 10/10; retrieved memory entered Weaver, raw retrieved memory no longer entered Reasoner, and query writes remained 0 |
+| MAB-6B | Version B Weaver-space bank, detective_qa n10 | Completed exploratory diagnostic | Bank-off exact match stayed 0.0 and Bank-on exact match improved to 0.1; output_changed stayed 10/10; memory storage/query space moved to Weaver; retrieved memory avoided `reasoner_to_weaver` reprojection; query writes remained 0 |
 
 ## Full-History Capacity Boundary
 
@@ -119,6 +120,37 @@ activation evidence. The bank changed behavior without improving official exact
 match. The next experiment is not another shared-threshold sweep; it is MAB-5C,
 which separates retrieval visibility from update matching while preserving old
 behavior by default.
+
+## MAB-6B Result
+
+| Metric | Value |
+| --- | ---: |
+| Requested / valid contexts | 10 / 10 |
+| Compressed Bank-off exact match | 0.0 |
+| Compressed Bank-on exact match | 0.1 |
+| Accuracy delta | +0.1 |
+| Output changed | 10 |
+| Improved / regressed by exact match | 1 / 0 |
+| Retrieval-active contexts | 10 |
+| Query write count | 0 |
+| Cross-context leakage detected | 0 |
+| Memory bank storage space | `weaver` |
+| Retrieval query space | `weaver` |
+| Retrieved memory projected to Weaver | No |
+| Final slot counts | `[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]` |
+
+MAB-6B is exploratory diagnostic evidence, but unlike MAB-6A it improved
+official exact match on the fixed detective_qa n10 slice from `0.0` to `0.1`.
+The routing diagnostics stayed aligned with the intended Weaver-space bank
+design: `memory_bank_storage_space=weaver`, `stored_latent_space=weaver`,
+`retrieval_query_space=weaver`, and
+`retrieved_memory_projected_to_weaver=false`. Query writes remained `0` and
+cross-context leakage stayed `false`.
+
+The improvement is still narrow evidence. The same run also collapsed final
+slot counts to `1` in every context and wrote by matched replacement almost
+exclusively (`insert=10`, `replace_matched=316`), so this should be treated as
+an exploratory mechanism result rather than a default-path promotion.
 
 See:
 

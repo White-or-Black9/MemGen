@@ -12,6 +12,7 @@ class MemGenConfig(PretrainedConfig):
         prompt_latents_len: int = 0,
         inference_latents_len: int = 0,
         retrieved_memory_to_weaver: bool = False,
+        memory_bank_storage_space: str = "reasoner",
         # trigger configs
         trigger_active: bool = False,
         trigger_lora_config: Optional[dict] = None,
@@ -26,6 +27,7 @@ class MemGenConfig(PretrainedConfig):
         self.prompt_latents_len = prompt_latents_len
         self.inference_latents_len = inference_latents_len
         self.retrieved_memory_to_weaver = retrieved_memory_to_weaver
+        self.memory_bank_storage_space = memory_bank_storage_space
 
         # trigger configs
         self.trigger_active = trigger_active

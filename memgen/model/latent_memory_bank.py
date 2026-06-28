@@ -43,8 +43,10 @@ write_back():
 
 ===== 与项目架构的关系 =====
 
-- Reasoner-only injection：检索到的记忆仅注入 Reasoner，不入 Weaver。
-- Reasoner-space storage：存储的是 weaver_to_reasoner(...) 之后的 latent_inputs_embeds。
+- 默认路径仍是 Reasoner-only injection：检索到的记忆仅注入 Reasoner，不入 Weaver。
+- 默认路径仍是 reasoner-space storage：存储的是 weaver_to_reasoner(...) 之后的 latent_inputs_embeds。
+- 在显式实验分支下，bank 也可以存储 Weaver-space latents；检索 query 与 slot key
+  必须保持在同一 latent space。
 - 不对 Weaver/Trigger 训练路径做任何修改。
 - _step 按成功写入次数计数，而非 generation token 数。
 - _retrieval_step 按 enabled retrieval turn 计数。

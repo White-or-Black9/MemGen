@@ -459,6 +459,17 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
             "retrieved_memory_to_weaver": bool(
                 getattr(getattr(self, "config", None), "retrieved_memory_to_weaver", False)
             ),
+            "memory_bank_storage_space": getattr(
+                getattr(self, "config", None),
+                "memory_bank_storage_space",
+                "reasoner",
+            ),
+            "stored_latent_space": None,
+            "retrieval_query_space": None,
+            "retrieved_memory_space": None,
+            "stored_weaver_latents_in_bank": False,
+            "retrieved_weaver_latents_from_bank": False,
+            "retrieved_memory_projected_to_weaver": False,
             "retrieved_latents_enter_weaver": False,
             "weaver_conditioned_on_retrieved_memory": False,
             "weaver_conditioning_token_count": 0,
@@ -525,9 +536,35 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                         False,
                     )
                 )
+                memory_bank_storage_space = getattr(
+                    getattr(self, "config", None),
+                    "memory_bank_storage_space",
+                    "reasoner",
+                )
+                if memory_bank_storage_space not in {"reasoner", "weaver"}:
+                    raise ValueError(
+                        "memory_bank_storage_space must be 'reasoner' or 'weaver'"
+                    )
+                use_weaver_space_bank = memory_bank_storage_space == "weaver"
+                if latent_memory_bank is not None and use_weaver_space_bank and not retrieved_memory_to_weaver:
+                    raise ValueError(
+                        "memory_bank_storage_space='weaver' requires retrieved_memory_to_weaver=True"
+                    )
+                generation_debug["memory_bank_storage_space"] = memory_bank_storage_space
+
+                retrieval_query_embeds = candidate_inputs_embeds
+                retrieval_query_space = "reasoner"
+                current_weaver_inputs_embeds = None
+                if latent_memory_bank is not None and use_weaver_space_bank:
+                    current_weaver_inputs_embeds = self.reasoner_to_weaver(
+                        candidate_inputs_embeds
+                    )
+                    retrieval_query_embeds = current_weaver_inputs_embeds
+                    retrieval_query_space = "weaver"
                 if use_thread_update:
+                    generation_debug["retrieval_query_space"] = retrieval_query_space
                     retrieval_result = latent_memory_bank.retrieve_with_context(
-                        candidate_inputs_embeds.detach(),
+                        retrieval_query_embeds.detach(),
                         device=device,
                         dtype=current_inputs_embeds.dtype,
                     )
@@ -536,14 +573,16 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                 retrieved_memory = None
                 retrieved_attention_mask = None
                 weaver_reasoner_inputs_embeds = candidate_inputs_embeds
+                weaver_inputs_embeds = current_weaver_inputs_embeds
                 weaver_attention_mask = candidate_attention_mask
                 weaver_position_ids = candidate_position_ids
                 if latent_memory_bank is not None and retrieved_memory_to_weaver:
                     if use_thread_update:
                         retrieved_slots = retrieval_result.slots
                     else:
+                        generation_debug["retrieval_query_space"] = retrieval_query_space
                         retrieved_slots = latent_memory_bank.retrieve(
-                            candidate_inputs_embeds.detach(),
+                            retrieval_query_embeds.detach(),
                             device=device,
                             dtype=current_inputs_embeds.dtype,
                         )
@@ -556,9 +595,20 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                             device=device,
                             dtype=current_attention_mask.dtype,
                         )
-                        weaver_reasoner_inputs_embeds = torch.cat(
-                            [candidate_inputs_embeds, retrieved_memory], dim=1
-                        )
+                        if use_weaver_space_bank:
+                            weaver_inputs_embeds = torch.cat(
+                                [current_weaver_inputs_embeds, retrieved_memory], dim=1
+                            )
+                            generation_debug["retrieved_memory_space"] = "weaver"
+                            generation_debug["retrieved_weaver_latents_from_bank"] = True
+                        else:
+                            weaver_reasoner_inputs_embeds = torch.cat(
+                                [candidate_inputs_embeds, retrieved_memory], dim=1
+                            )
+                            generation_debug["retrieved_memory_space"] = "reasoner"
+                            generation_debug[
+                                "retrieved_memory_projected_to_weaver"
+                            ] = True
                         weaver_attention_mask = torch.cat(
                             [candidate_attention_mask, retrieved_attention_mask], dim=1
                         )
@@ -574,9 +624,10 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                         )
 
                 # 映射到 weaver 空间，生成 latent memory
-                weaver_inputs_embeds = self.reasoner_to_weaver(
-                    weaver_reasoner_inputs_embeds
-                )
+                if weaver_inputs_embeds is None:
+                    weaver_inputs_embeds = self.reasoner_to_weaver(
+                        weaver_reasoner_inputs_embeds
+                    )
                 if i == 0:
                     weaver_hidden_states, attn_mask, _ = weaver.augment_prompt(
                         weaver_inputs_embeds, weaver_attention_mask, weaver_position_ids
@@ -611,6 +662,7 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                             retrieved_slots = retrieval_result.slots
                     elif retrieved_slots is None:
                         # 其他策略：用当前的 candidate_inputs_embeds（reasoner-space）做检索
+                        generation_debug["retrieval_query_space"] = "reasoner"
                         retrieved_slots = latent_memory_bank.retrieve(
                             candidate_inputs_embeds.detach(),
                             device=device,
@@ -621,6 +673,7 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                             retrieved_memory = torch.cat(
                                 [slot.memory for slot in retrieved_slots], dim=0
                             ).unsqueeze(0)
+                            generation_debug["retrieved_memory_space"] = "reasoner"
                             retrieved_attention_mask = torch.ones(
                                 (1, retrieved_memory.size(1)),
                                 device=device,
@@ -667,14 +720,20 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                             [candidate_attention_mask, attn_mask], dim=1
                         )
                     # 将新生成的 reasoner-space latent 写入 bank
-                    # 写入的是 weaver_to_reasoner 之后的 latent_inputs_embeds（reasoner-space）
+                    if use_weaver_space_bank:
+                        bank_write_latents = weaver_hidden_states
+                        generation_debug["stored_latent_space"] = "weaver"
+                        generation_debug["stored_weaver_latents_in_bank"] = True
+                    else:
+                        bank_write_latents = latent_inputs_embeds
+                        generation_debug["stored_latent_space"] = "reasoner"
                     if use_thread_update:
                         latent_memory_bank.write_back(
-                            latent_inputs_embeds.detach(),
+                            bank_write_latents.detach(),
                             retrieval_result,
                         )
                     else:
-                        latent_memory_bank.write(latent_inputs_embeds.detach())
+                        latent_memory_bank.write(bank_write_latents.detach())
                     # pad_len：增强后比原始序列多出的长度，用于后续未增强样本的左填充对齐
                     pad_len = candidate_inputs_embeds.size(1) - current_inputs_embeds.size(1)
 

@@ -1,10 +1,9 @@
-"""MAB-6A: detective_qa Version B Weaver-conditioned memory on 10 contexts."""
+"""MAB-6B: detective_qa Version B Weaver-space bank on 10 contexts."""
 
 from __future__ import annotations
 
 import argparse
 import json
-from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 import sys
@@ -21,9 +20,9 @@ _BASE_LOAD_MODEL = base._load_model
 _BASE_RUN_MODEL = base._run_model
 
 
-EXPERIMENT_NAME = "MAB-6A: detective_qa Version B Weaver-conditioned Memory n10"
-RUN_PREFIX = "detectiveqa-version-b-weaver-conditioned-n10"
-DEFAULT_OUTPUT_ROOT = "outputs/mab/version_b_weaver_conditioned_detectiveqa_n10"
+EXPERIMENT_NAME = "MAB-6B: detective_qa Version B Weaver-space Bank n10"
+RUN_PREFIX = "detectiveqa-version-b-weaver-space-bank-n10"
+DEFAULT_OUTPUT_ROOT = "outputs/mab/version_b_weaver_space_bank_detectiveqa_n10"
 DEFAULT_THRESHOLD = 0.03
 DEFAULT_RETRIEVE_THRESHOLD = 0.03
 DEFAULT_UPDATE_THRESHOLD = 0.05
@@ -33,7 +32,11 @@ DEFAULT_RETRIEVE_POLICY = "threshold_topk"
 DEFAULT_UPDATE_POLICY = "thread_update"
 DEFAULT_REQUESTED_CONTEXTS = 10
 RESEARCH_NOTE_PATH = Path(
-    "research_notes/benchmarks/memoryagentbench_mab6a_version_b_weaver_conditioning.md"
+    "research_notes/benchmarks/memoryagentbench_mab6b_weaver_space_bank.md"
+)
+MAB6A_CANONICAL_BASELINE = (
+    "outputs/mab/version_b_weaver_conditioned_detectiveqa_n10/"
+    "20260625T023822Z-detectiveqa-version-b-weaver-conditioned-n10"
 )
 MAB5C_CANONICAL_BASELINE = (
     "outputs/mab/decoupled_thresholds_detectiveqa_n10/"
@@ -64,7 +67,14 @@ def _bank_config():
     return config
 
 
-def _build_manifest(run_id: str, args, started_at: str, *, git_status_before: str, git_status_after: str | None = None) -> dict:
+def _build_manifest(
+    run_id: str,
+    args,
+    started_at: str,
+    *,
+    git_status_before: str,
+    git_status_after: str | None = None,
+) -> dict:
     manifest = mab5c._build_manifest(
         run_id,
         args,
@@ -88,8 +98,9 @@ def _build_manifest(run_id: str, args, started_at: str, *, git_status_before: st
             "query_phase": "read-only",
             "full_history_policy": "over_capacity_invalid",
             "retrieved_memory_to_weaver": True,
-            "memory_bank_storage_space": "reasoner",
-            "comparison_baseline": MAB5C_CANONICAL_BASELINE,
+            "memory_bank_storage_space": "weaver",
+            "comparison_baseline_primary": MAB6A_CANONICAL_BASELINE,
+            "comparison_baseline_secondary": MAB5C_CANONICAL_BASELINE,
             "research_note": str(RESEARCH_NOTE_PATH),
         }
     )
@@ -99,7 +110,7 @@ def _build_manifest(run_id: str, args, started_at: str, *, git_status_before: st
 def _load_model(args):
     model, capacity = _BASE_LOAD_MODEL(args)
     model.config.retrieved_memory_to_weaver = True
-    model.config.memory_bank_storage_space = "reasoner"
+    model.config.memory_bank_storage_space = "weaver"
     return model, capacity
 
 
@@ -109,7 +120,7 @@ def _run_model(args, model, capacity: int, payload: dict, bank_mode: str, bank_c
     previous_flag = bool(getattr(model.config, "retrieved_memory_to_weaver", False))
     previous_storage = getattr(model.config, "memory_bank_storage_space", "reasoner")
     model.config.retrieved_memory_to_weaver = bank_mode == "on"
-    model.config.memory_bank_storage_space = "reasoner"
+    model.config.memory_bank_storage_space = "weaver" if bank_mode == "on" else "reasoner"
     try:
         if bank_mode == "off":
             return _BASE_RUN_MODEL(args, model, capacity, payload, bank_mode, bank_config)
@@ -162,7 +173,6 @@ def _run_model(args, model, capacity: int, payload: dict, bank_mode: str, bank_c
             if len(prompt_trace) != len(payload["chunks"]) + 1:
                 raise RuntimeError("Unexpected number of rendered turn prompts")
 
-            bank = lifecycle["bank"]
             final_debug = lifecycle["final_debug_before_reset"]
             query_bank_proxy = lifecycle.get("query_bank_proxy")
             query_write_attempt_count = getattr(query_bank_proxy, "write_attempt_count", 0) if query_bank_proxy else 0
@@ -237,8 +247,27 @@ def _build_row(
     row.update(
         {
             "retrieved_memory_to_weaver": bool(final_generation.get("retrieved_memory_to_weaver")),
+            "memory_bank_storage_space": final_generation.get("memory_bank_storage_space"),
+            "stored_latent_space": final_generation.get("stored_latent_space"),
+            "retrieval_query_space": final_generation.get("retrieval_query_space"),
+            "retrieved_memory_space": final_generation.get("retrieved_memory_space"),
+            "stored_weaver_latents_in_bank": bool(
+                final_generation.get("stored_weaver_latents_in_bank")
+            ),
+            "retrieved_weaver_latents_from_bank": bool(
+                final_generation.get("retrieved_weaver_latents_from_bank")
+            ),
+            "retrieved_memory_projected_to_weaver": bool(
+                final_generation.get("retrieved_memory_projected_to_weaver")
+            ),
+            "retrieved_latents_enter_weaver": bool(
+                final_generation.get("retrieved_latents_enter_weaver")
+            ),
             "raw_retrieved_latents_enter_reasoner": bool(
                 final_generation.get("raw_retrieved_latents_enter_reasoner")
+            ),
+            "retrieved_latents_enter_reasoner": bool(
+                final_generation.get("retrieved_latents_enter_reasoner")
             ),
             "weaver_conditioned_on_retrieved_memory": bool(
                 final_generation.get("weaver_conditioned_on_retrieved_memory")
@@ -252,6 +281,13 @@ def _build_row(
     return row
 
 
+def _load_baseline_summary(artifact_path: str) -> dict | None:
+    paired_results = Path(artifact_path) / "paired_results.json"
+    if not paired_results.exists():
+        return None
+    return _load_json(paired_results).get("summary")
+
+
 def _aggregate(rows: list[dict]) -> dict:
     summary = mab5c._aggregate(rows)
     valid = [row for row in rows if not row.get("error_or_stop_reason")]
@@ -260,8 +296,27 @@ def _aggregate(rows: list[dict]) -> dict:
             "retrieved_memory_to_weaver": all(
                 bool(row.get("retrieved_memory_to_weaver")) for row in valid
             ) if valid else True,
+            "memory_bank_storage_space": "weaver",
+            "stored_latent_space": "weaver" if valid else None,
+            "retrieval_query_space": "weaver" if valid else None,
+            "retrieved_memory_space": "weaver" if valid else None,
+            "stored_weaver_latents_in_bank": any(
+                bool(row.get("stored_weaver_latents_in_bank")) for row in valid
+            ),
+            "retrieved_weaver_latents_from_bank": any(
+                bool(row.get("retrieved_weaver_latents_from_bank")) for row in valid
+            ),
+            "retrieved_memory_projected_to_weaver": any(
+                bool(row.get("retrieved_memory_projected_to_weaver")) for row in valid
+            ),
+            "retrieved_latents_enter_weaver": any(
+                bool(row.get("retrieved_latents_enter_weaver")) for row in valid
+            ),
             "raw_retrieved_latents_enter_reasoner": any(
                 bool(row.get("raw_retrieved_latents_enter_reasoner")) for row in valid
+            ),
+            "retrieved_latents_enter_reasoner": any(
+                bool(row.get("retrieved_latents_enter_reasoner")) for row in valid
             ),
             "weaver_conditioned_on_retrieved_memory": any(
                 bool(row.get("weaver_conditioned_on_retrieved_memory")) for row in valid
@@ -274,15 +329,32 @@ def _aggregate(rows: list[dict]) -> dict:
             ),
         }
     )
-    summary["compare_against_mab5c"] = {
-        "baseline_artifact": MAB5C_CANONICAL_BASELINE,
-        "exact_match_delta": (
-            summary["compressed_bank_on_accuracy"] - summary["compressed_bank_off_accuracy"]
-            if summary["compressed_bank_on_accuracy"] is not None
-            and summary["compressed_bank_off_accuracy"] is not None
+    mab6a_summary = _load_baseline_summary(MAB6A_CANONICAL_BASELINE)
+    summary["compare_against_mab6a"] = {
+        "baseline_artifact": MAB6A_CANONICAL_BASELINE,
+        "baseline_summary_available": mab6a_summary is not None,
+        "bank_on_exact_match_delta": (
+            summary["compressed_bank_on_accuracy"] - mab6a_summary["compressed_bank_on_accuracy"]
+            if mab6a_summary is not None
+            and summary["compressed_bank_on_accuracy"] is not None
+            and mab6a_summary.get("compressed_bank_on_accuracy") is not None
             else None
         ),
-        "mechanism_change": "retrieved memory routed into Weaver instead of direct Reasoner injection",
+        "output_changed_delta": (
+            summary["num_output_changed"] - mab6a_summary["num_output_changed"]
+            if mab6a_summary is not None and mab6a_summary.get("num_output_changed") is not None
+            else None
+        ),
+        "retrieved_memory_projection_change": (
+            "reasoner_to_weaver projection removed for retrieved memory"
+        ),
+    }
+    summary["compare_against_mab5c"] = {
+        "baseline_artifact": MAB5C_CANONICAL_BASELINE,
+        "mechanism_change": (
+            "bank stores Weaver-space memory and queries in Weaver space instead of "
+            "storing reasoner-space memory and re-projecting retrieved memory"
+        ),
     }
     return summary
 
@@ -298,13 +370,14 @@ def _build_research_note(
 ) -> Path:
     valid_rows = [row for row in rows if not row.get("error_or_stop_reason")]
     lines = [
-        "# MAB-6A: detective_qa Version B Weaver-conditioned Memory n10",
+        "# MAB-6B: detective_qa Version B Weaver-space Bank n10",
         "",
         "## Purpose",
-        "Exploratory diagnostic of Version B routing: retrieved reasoner-space memory conditions Weaver, and only the fused latent is injected into Reasoner.",
+        "Exploratory diagnostic of Weaver-space bank routing: store raw Weaver hidden states in the bank, query in Weaver space, condition Weaver directly on retrieved Weaver memory, and inject only the fused latent into Reasoner.",
         "",
         "## Settings",
-        f"- Comparison baseline: `{MAB5C_CANONICAL_BASELINE}`",
+        f"- Primary comparison baseline: `{MAB6A_CANONICAL_BASELINE}`",
+        f"- Secondary comparison baseline: `{MAB5C_CANONICAL_BASELINE}`",
         f"- threshold: `{DEFAULT_THRESHOLD}`",
         f"- retrieve_threshold: `{DEFAULT_RETRIEVE_THRESHOLD}`",
         f"- update_threshold: `{DEFAULT_UPDATE_THRESHOLD}`",
@@ -316,15 +389,18 @@ def _build_research_note(
         "- query phase: read-only",
         "- full-history detective_qa: `over_capacity_invalid`",
         "- retrieved_memory_to_weaver: `True`",
+        "- memory_bank_storage_space: `weaver`",
         "",
         "## Guardrails",
-        "- MAB-6A is exploratory.",
-        "- Weaver was not trained for this input distribution.",
+        "- MAB-6B is exploratory.",
+        "- MAB-6B tests whether storing Weaver-space memory avoids Weaver->Reasoner->Weaver information loss.",
         "- Version A remains the default.",
-        "- MAB-6A differs from MAB-5C primarily by routing retrieved memory into Weaver.",
+        "- MAB-6A remains reproducible.",
+        "- MAB-6B differs from MAB-6A primarily by memory bank storage space and retrieval query space.",
+        "- MAB-6B uses Weaver-space query and Weaver-space stored memory.",
         "- Do not claim performance improvement unless official exact_match improves.",
-        "- If exact_match remains 0 but outputs change, call it mechanism-active but not a performance win.",
-        "- If outputs degrade, this supports keeping Version A as default.",
+        "- If exact_match remains 0, call it mechanism-active but not a performance win.",
+        "- Record whether retrieved memory avoided reasoner_to_weaver projection.",
         "",
         "## Run Status",
         f"- Output directory: `{output_dir}`",
@@ -332,28 +408,31 @@ def _build_research_note(
         f"- Bank-on exact match: `{summary['compressed_bank_on_accuracy']}`",
         f"- Output changed: `{summary['num_output_changed']}`",
         f"- Final slot counts: `{summary['final_slot_counts']}`",
-        f"- Retrieved memory to Weaver: `{summary['retrieved_memory_to_weaver']}`",
+        f"- Memory bank storage space: `{summary['memory_bank_storage_space']}`",
+        f"- Stored latent space: `{summary['stored_latent_space']}`",
+        f"- Retrieval query space: `{summary['retrieval_query_space']}`",
+        f"- Retrieved memory space: `{summary['retrieved_memory_space']}`",
+        f"- Stored Weaver latents in bank: `{summary['stored_weaver_latents_in_bank']}`",
+        f"- Retrieved Weaver latents from bank: `{summary['retrieved_weaver_latents_from_bank']}`",
+        f"- Retrieved memory projected to Weaver: `{summary['retrieved_memory_projected_to_weaver']}`",
         f"- Retrieved latents entered Weaver: `{summary['retrieved_latents_enter_weaver']}`",
         f"- Raw retrieved latents entered Reasoner: `{summary['raw_retrieved_latents_enter_reasoner']}`",
-        f"- Weaver conditioned on retrieved memory: `{summary['weaver_conditioned_on_retrieved_memory']}`",
-        f"- Weaver conditioning token count: `{summary['weaver_conditioning_token_count']}`",
         f"- Fused latent generated: `{summary['fused_latent_generated']}`",
         f"- Query write count: `{summary['query_write_count']}`",
         f"- Query write attempt count: `{summary['query_write_attempt_count']}`",
         f"- Cross-context leakage detected: `{summary['cross_context_leakage_detected']}`",
-        f"- Write action counts: `{summary['write_action_counts']}`",
-        f"- Update reason counts: `{summary['update_reason_counts']}`",
         "",
         "## Comparison",
+        f"- Against MAB-6A canonical: `{summary['compare_against_mab6a']}`",
         f"- Against MAB-5C canonical: `{summary['compare_against_mab5c']}`",
         "",
         "## Per-context Result Table",
-        "| context_index | exact_match_off | exact_match_on | output_changed | raw_retrieved_latents_enter_reasoner | weaver_conditioned_on_retrieved_memory |",
-        "| --- | --- | --- | --- | --- | --- |",
+        "| context_index | exact_match_off | exact_match_on | output_changed | retrieval_query_space | retrieved_memory_projected_to_weaver | raw_retrieved_latents_enter_reasoner |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in valid_rows:
         lines.append(
-            f"| {row['context_index']} | {row['bank_off_exact_match']} | {row['bank_on_exact_match']} | {row['output_changed']} | {row.get('raw_retrieved_latents_enter_reasoner')} | {row.get('weaver_conditioned_on_retrieved_memory')} |"
+            f"| {row['context_index']} | {row['bank_off_exact_match']} | {row['bank_on_exact_match']} | {row['output_changed']} | {row.get('retrieval_query_space')} | {row.get('retrieved_memory_projected_to_weaver')} | {row.get('raw_retrieved_latents_enter_reasoner')} |"
         )
     lines.extend(
         [
@@ -462,9 +541,10 @@ def main():
                             "retrieve_threshold": DEFAULT_RETRIEVE_THRESHOLD,
                             "update_threshold": DEFAULT_UPDATE_THRESHOLD,
                             "retrieved_memory_to_weaver": True,
-                            "memory_bank_storage_space": "reasoner",
-                            "mechanism": "version_b_weaver_conditioned_retrieval",
-                            "comparison_baseline": MAB5C_CANONICAL_BASELINE,
+                            "memory_bank_storage_space": "weaver",
+                            "mechanism": "version_b_weaver_space_bank",
+                            "comparison_baseline_primary": MAB6A_CANONICAL_BASELINE,
+                            "comparison_baseline_secondary": MAB5C_CANONICAL_BASELINE,
                         }
                     )
                     _write_json(run_config_path, run_config)

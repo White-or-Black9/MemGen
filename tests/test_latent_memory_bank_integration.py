@@ -282,7 +282,11 @@ def build_fake_memgen(embedding_dtype=torch.float32):
     model.tokenizer = SimpleNamespace(pad_token_id=0, eos_token_id=99)
     model.reasoner = FakeReasoner(embedding_dtype=embedding_dtype)
     model.weaver = FakeWeaver()
-    model.config = SimpleNamespace(max_inference_aug_num=3)
+    model.config = SimpleNamespace(
+        max_inference_aug_num=3,
+        retrieved_memory_to_weaver=False,
+        memory_bank_storage_space="reasoner",
+    )
     model.device = torch.device("cpu")
     model.reasoner_to_weaver = lambda tensor: tensor + 100
     model.weaver_to_reasoner = lambda tensor: tensor + 10

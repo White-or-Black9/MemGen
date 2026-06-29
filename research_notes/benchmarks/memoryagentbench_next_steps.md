@@ -115,18 +115,22 @@ An increase in slots or inserts is mechanism evidence, not an accuracy claim.
 
 Proceed only if a later review still wants a follow-up:
 
-1. **Retrieval-threshold relaxation / force-top-k diagnostic:** hold
-   `max_slots=16`, `update_threshold=0.08`, and `top_k=4`, then sweep
-   `retrieve_threshold={0.03,0.02,0.01,0.00}`. Include an explicit no-threshold
-   mode only if the diagnostic contract already supports it.
-2. **Optional prompt-length audit:** isolate why the `132726 > 131072` warning
+1. **Preserve the completed single-context EventQA result first:** treat
+   `20260629T121408Z-eventqa-65536-version-b-weaver-space-bank-n5` as
+   exploratory single-context evidence only. Do not run the remaining 4 EventQA
+   contexts until explicitly approved.
+2. **If later approved, continue EventQA with the same cautious top_k=1
+   settings:** `retrieve_threshold=0.005`, `update_threshold=0.08`, `top_k=1`,
+   and `max_slots=16`. Keep the result exploratory and use separate output /
+   note paths.
+3. **Optional prompt-length audit:** isolate why the `132726 > 131072` warning
    is emitted during over-capacity full-history estimation, while keeping
    `full_history_status=over_capacity_invalid` and never scoring full-history
    generation.
-3. **Optional future capacity / thread analysis:** if the threshold-relaxation
-   diagnostic still caps realized retrieval below four slots, investigate
-   whether the remaining bottleneck is thresholding or Weaver multi-latent
-   utilization.
+4. **Optional future multi-slot mechanism audit:** if a later approved study
+   still wants top_k>1, first design a retrieval intervention that reliably
+   reaches 32 query-turn retrieved latent tokens before interpreting answer
+   quality.
 
 ## Stop Conditions
 
@@ -145,7 +149,12 @@ Proceed only if a later review still wants a follow-up:
 2. Keep Version A as the default path until MAB-6B is replicated.
 3. Treat the MAB-6B exact-match gain as exploratory benchmark evidence, not as
    a default-path promotion.
-4. If follow-up is approved, start with retrieval-threshold relaxation /
-   force-top-k plus the same-run `max_slots=16`, `update_threshold=0.08`,
-   `top_k=1`, `retrieve_threshold=0.03` control rather than another MAB-6B
-   replication pass.
+4. The current active EventQA artifact is the single-context frozen-bank run
+   `20260629T121408Z-eventqa-65536-version-b-weaver-space-bank-n5`: preserve it
+   as exploratory evidence, not a final benchmark claim.
+5. If later follow-up is approved, continue EventQA with the cautious top_k=1
+   configuration `retrieve_threshold=0.005`, `update_threshold=0.08`,
+   `top_k=1`, `max_slots=16`, rather than reinterpreting the current
+   top_k=4 rows.
+6. Keep the single-slot-collapse caveat explicit before any broader EventQA
+   scaling or summary.

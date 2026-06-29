@@ -1,5 +1,37 @@
 # 项目进展
 
+## Latest EventQA Frozen-Context Status (2026-06-29)
+
+- The first benchmark-conformant EventQA `frozen_context_bank` single-context
+  run is now complete on `context_index=0` only.
+- Artifact root:
+  `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5/20260629T121408Z-eventqa-65536-version-b-weaver-space-bank-n5/`
+- Script:
+  `scripts/eval/mab6b_weaver_space_bank_eventqa_65536_n5.py`
+- Benchmark note:
+  `research_notes/benchmarks/memoryagentbench_mab6b_fr_eventqa_65536_n5.md`
+- Protocol result:
+  context memorization count `1`; same frozen bank reused across all 100
+  queries; total query write delta `0`; max query write delta `0`; bank
+  snapshot unchanged across queries.
+- Mechanism result:
+  construction still collapsed to one slot
+  (`final_slot_count=1`, `true_insert_count=1`,
+  `true_matched_replace_count=16`), so the main EventQA scaling risk remains
+  single-slot compression.
+- Single-context result:
+  compressed-bridge Bank-off substring EM `0/100 = 0.00`;
+  Bank-on substring EM `22/100 = 0.22`; Bank-off recall `0.15`; Bank-on
+  recall `0.22`; improved/regressed/unchanged `22/0/78`;
+  bank-off/bank-on format failures `83/19`.
+- Interpretation boundary:
+  this is the first benchmark-conformant EventQA positive signal for the
+  `frozen_context_bank` protocol, but it is still only one context and does not
+  support a final benchmark-improvement claim.
+- Current next step:
+  preserve this single-context evidence and do not run the remaining 4 EventQA
+  contexts until explicitly approved.
+
 ## Latest MAB-6B-FR Diagnostic Status (2026-06-29)
 
 - Retrieval-threshold relaxation is now complete on detective_qa n10. All

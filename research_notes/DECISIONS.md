@@ -75,6 +75,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0068 | 2026-06-27 | accepted | Do not interpret top_k=4/8 results as force-top-k evidence |
 | DEC-0069 | 2026-06-27 | accepted | Relax or disable retrieve_threshold before making further top-k claims |
 | DEC-0070 | 2026-06-29 | accepted | Use cautious top_k=1 retrieval-threshold-relaxed settings for EventQA expansion |
+| DEC-0071 | 2026-06-29 | accepted | Preserve the first EventQA frozen-context positive signal as single-context exploratory evidence only |
 
 ## Decision Template
 
@@ -112,6 +113,14 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Current cautious EventQA expansion setting:
   `retrieve_threshold=0.005`, `update_threshold=0.08`, `top_k=1`,
   `max_slots=16`.
+- The first benchmark-conformant EventQA `frozen_context_bank` run on
+  `context_index=0` is now preserved as exploratory single-context evidence:
+  Bank-off EM `0.00`, Bank-on EM `0.22`, Bank-off recall `0.15`, Bank-on
+  recall `0.22`.
+- Do not treat this as a final benchmark improvement and do not run the
+  remaining 4 EventQA contexts until explicitly approved.
+- Keep the mechanism warning explicit: construction still collapsed to one slot,
+  so single-slot compression remains the main EventQA scaling risk.
 
 ### Current Board (2026-06-22)
 
@@ -285,6 +294,43 @@ IDs and append superseding decisions rather than silently rewriting history.
   - Keep EventQA expansion exploratory and do not claim benchmark improvement
     unless a proper benchmark run supports it.
 - Related experiments: `EXP-20260629-001`
+
+### DEC-0071: Preserve the First EventQA Frozen-Context Positive Signal as Single-Context Exploratory Evidence Only
+
+- Date: 2026-06-29
+- Status: accepted
+- Context:
+  - `EXP-20260629-002` executed the benchmark-conformant
+    `frozen_context_bank` protocol on EventQA `context_index=0` with all 100
+    questions.
+  - The protocol was validated at runtime:
+    context memorization count `1`, same frozen bank reused across all 100
+    queries, total query write delta `0`, max query write delta `0`, and bank
+    snapshot unchanged after query.
+  - The run improved official substring EM from `0.00` to `0.22` and
+    `eventqa_recall` from `0.15` to `0.22` versus the compressed-bridge
+    Bank-off baseline.
+  - Construction still collapsed to one slot:
+    `final_slot_count=1`, `true_insert_count=1`,
+    `true_matched_replace_count=16`.
+- Decision:
+  - Preserve this run as the first benchmark-conformant EventQA positive
+    signal for the `frozen_context_bank` protocol.
+  - Classify it as exploratory single-context evidence only.
+  - Do not claim final benchmark improvement and do not auto-scale to the
+    remaining 4 EventQA contexts.
+- Rationale:
+  - The runtime protocol is now valid, so the positive result should be kept.
+  - The evidence is still narrow because only one context was evaluated.
+  - The persistent single-slot collapse means the mechanism risk remains
+    unresolved before broader scaling.
+- Consequences:
+  - Summaries must state that Bank-off is the compressed-bridge baseline, not
+    an official long-context full-history baseline.
+  - Future EventQA scaling requires explicit approval.
+  - Any broader EventQA interpretation must keep the single-slot-collapse caveat
+    attached.
+- Related experiments: `EXP-20260629-002`
 
 ### Historical Board (2026-06-18)
 

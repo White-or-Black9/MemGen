@@ -152,6 +152,7 @@ Current next experiment gate:
 | EXP-20260626-003 | 2026-06-26 | MAB-6B-FR capacity diagnostic | With ut=0.08 and top_k=1, what storage capacity best balances slot diversity and selection noise? | `completed_exploratory` | Bank-on EM was 0.1/0.2/0.0 for cap8/16/32; capacity changed slot counts and evictions as intended; cap16 was best on n10 |
 | EXP-20260626-004 | 2026-06-26 | MAB-6B-FR top-k diagnostic | Does broader final-query retrieval improve Weaver-space-bank accuracy at retrieve_threshold=0.03? | `completed_exploratory` | top_k=1/2/4/8 gave Bank-on EM 0.1/0.0/0.0/0.0; realized retrieval was 1/2/3/3 slots because thresholding capped top_k=4/8 |
 | EXP-20260629-001 | 2026-06-29 | MAB-6B-FR retrieval-threshold relaxation | Does relaxing retrieve_threshold let top_k=4 realize four retrieved slots before quality is judged? | `completed_exploratory` | All eight settings completed sequentially on GPU 5; no top_k=4 run reached 32 query-turn latent tokens in all 10 contexts; top_k=4 remained mechanism-inconclusive and top_k=1 stayed preferred |
+| EXP-20260629-002 | 2026-06-29 | EventQA frozen-context single-context run | Does the benchmark-conformant `frozen_context_bank` protocol show a positive signal on EventQA context_index=0 before any multi-context scaling? | `completed_exploratory` | Context was memorized once, all 100 queries reused the same frozen bank with zero query writes, Bank-off EM was 0.00, and Bank-on EM reached 0.22 on the single evaluated context |
 
 ## Recorded Experiments
 
@@ -3089,3 +3090,89 @@ full GSM8K test performance.
   `max_slots=16`.
 - This remains exploratory mechanism evidence on n10 and does not support a
   benchmark-improvement claim.
+
+### EXP-20260629-002: EventQA Frozen-Context Single-Context Run
+
+- Phase: EventQA exploratory benchmark-conformant pilot
+- Status: `completed_exploratory`
+- Research question: does the benchmark-conformant `frozen_context_bank`
+  protocol show a positive signal on EventQA `context_index=0` before any
+  multi-context scaling?
+- Configuration:
+  - `retrieve_threshold=0.005`
+  - `update_threshold=0.08`
+  - `top_k=1`
+  - `max_slots=16`
+  - `generation_max_length=40`
+  - `eventqa_protocol=frozen_context_bank`
+  - `requested_contexts=1`
+  - no `question_limit`, so all 100 questions in `context_index=0` were
+    evaluated
+- Command:
+  `CUDA_VISIBLE_DEVICES=3 /home/baishilong/miniconda3/envs/memgen/bin/python scripts/eval/mab6b_weaver_space_bank_eventqa_65536_n5.py --requested-contexts 1 --skip-research-note --eventqa-protocol frozen_context_bank`
+- Script:
+  `scripts/eval/mab6b_weaver_space_bank_eventqa_65536_n5.py`
+- Artifact root:
+  `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5/20260629T121408Z-eventqa-65536-version-b-weaver-space-bank-n5/`
+- Primary reports:
+  - `eventqa_aggregate.json`
+  - `eventqa_per_question.jsonl`
+  - `eventqa_per_context.jsonl`
+  - `diagnostics.jsonl`
+  - `research_notes/benchmarks/memoryagentbench_mab6b_fr_eventqa_65536_n5.md`
+
+#### Observations
+
+- Protocol validation:
+  - `context_memorization_count=1`
+  - `same_frozen_bank_reused_across_queries=true`
+  - all 100 queries shared the same frozen bank instance
+  - bank snapshot never changed after query
+  - total query write delta `0`
+  - max query write delta `0`
+  - blocked query write attempts total `100` with distribution `{1:100}`
+- Mechanism shape:
+  - construction `chunk_count=17`
+  - construction `final_slot_count=1`
+  - `true_insert_count=1`
+  - `true_matched_replace_count=16`
+  - `true_capacity_evict_count=0`
+  - `true_replace_old_slot_count=0`
+  - candidate slot count before top-k distribution `{1:100}`
+  - retrieved indices distribution `{(0,):100}`
+  - retrieved latent count distribution `{8:100}`
+  - raw candidate score min / max / mean
+    `0.04947 / 0.05574 / 0.05229`
+- Result on `context_index=0`:
+  - Bank-off substring EM `0/100 = 0.00`
+  - Bank-on substring EM `22/100 = 0.22`
+  - Bank-off `eventqa_recall` `15/100 = 0.15`
+  - Bank-on `eventqa_recall` `22/100 = 0.22`
+  - improved / regressed / unchanged `22 / 0 / 78`
+  - `output_changed_count=100`
+  - bank-off / bank-on format failures `83 / 19`
+  - bank-off / bank-on Chinese-script outputs `36 / 0`
+- Representative improved examples:
+  - Q2 bank-on exactly output
+    `Debbie expressed her boredom with the talk of war.`
+  - Q3 bank-on exactly output
+    `Debbie mentioned her mother, Lucian O'Kerry, during the conversation.`
+  - Q49 bank-on exactly output
+    `Marianne felt joy and a sense of ownership standing on the foundation of his new plantation.`
+- Representative unchanged wrong examples:
+  - early Q0 remained wrong
+  - late Q99 remained wrong
+
+#### Conclusion
+
+- This is the first benchmark-conformant EventQA positive signal for the
+  `frozen_context_bank` protocol.
+- The result is still only single-context evidence and must not be promoted to
+  a final benchmark-improvement claim.
+- Bank-on improved official EM over the compressed-bridge Bank-off baseline on
+  `context_index=0`.
+- The main mechanism risk remains construction-time single-slot collapse: the
+  bank behaved like one compressed latent memory slot rather than diverse event
+  slots.
+- Follow-up boundary: preserve this result and do not run the remaining 4
+  contexts until explicitly approved.

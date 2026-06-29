@@ -1,12 +1,17 @@
 import unittest
 import tempfile
+from pathlib import Path
 import json
+import importlib
+from types import SimpleNamespace
 
 import torch
 from transformers import GenerationConfig
 
 from memgen.model.configuration_memgen import MemGenConfig
 from memgen.model.latent_memory_bank import (
+    LatentMemoryBank,
+    LatentMemoryBankConfig,
     LatentMemoryRetrievalResult,
     LatentMemorySlot,
 )
@@ -32,6 +37,429 @@ def _generation_config():
 
 
 class MAB6BWeaverSpaceBankTest(unittest.TestCase):
+    def test_eventqa_runner_uses_isolated_note_and_metric(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        self.assertEqual(eventqa.SUB_DATASET, "eventqa_65536")
+        self.assertEqual(eventqa.METRIC_KEY, "substring_exact_match")
+        self.assertEqual(
+            eventqa.RESEARCH_NOTE_PATH,
+            Path(
+                "research_notes/benchmarks/"
+                "memoryagentbench_mab6b_fr_eventqa_65536_n5.md"
+            ),
+        )
+        self.assertNotEqual(eventqa.RESEARCH_NOTE_PATH, harness.RESEARCH_NOTE_PATH)
+
+    def test_eventqa_question_payload_tracks_question_and_gold_answers(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        context_payload = {
+            "context_id": "eventqa-ctx-0",
+            "context_index": 0,
+            "chunks": ["chunk-1", "chunk-2"],
+            "chunk_token_lengths": [4, 5],
+            "memorization_prompts": ["m1", "m2"],
+            "questions": ["q0", "q1"],
+            "answers": [["a0"], ["a1", "a1-alt"]],
+            "question_ids": ["qid0", "qid1"],
+            "question_types": ["type0", "type1"],
+            "qa_pair_ids": ["pair0", "pair1"],
+            "previous_events": [["p0"], ["p1"]],
+            "dataset_config": {"sub_dataset": "eventqa_65536"},
+        }
+
+        payload = eventqa.build_question_payload(context_payload, 1)
+
+        self.assertEqual(payload["context_id"], "eventqa-ctx-0")
+        self.assertEqual(payload["query_id"], 1)
+        self.assertEqual(payload["question_id"], "qid1")
+        self.assertEqual(payload["qa_pair_id"], "pair1")
+        self.assertEqual(payload["gold_answers"], ["a1", "a1-alt"])
+        self.assertIn("The event that happens next is:", payload["query_prompt"])
+
+    def test_eventqa_manifest_records_generation_length_and_episode_protocol(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        args = SimpleNamespace(
+            dataset_root="/data",
+            mab_repo="/repo",
+            checkpoint_path="/tmp/checkpoint",
+            model_checkpoint_id="checkpoint",
+            requested_contexts=1,
+            question_limit=1,
+            eventqa_protocol="frozen_context_bank",
+        )
+
+        manifest = eventqa._build_manifest(
+            "run", args, "now", git_status_before="clean"
+        )
+
+        self.assertEqual(manifest["generation_max_length"], 40)
+        self.assertEqual(manifest["effective_generation_max_length"], 40)
+        self.assertEqual(manifest["eventqa_protocol"], "frozen_context_bank")
+        self.assertFalse(manifest["context_bank_rebuilt_per_question"])
+        self.assertTrue(manifest["context_bank_reused_across_questions"])
+        self.assertEqual(
+            manifest["bank_off_mode"], "compressed_bridge_no_persistent_bank"
+        )
+        self.assertFalse(manifest["bank_off_is_official_long_context_baseline"])
+
+    def test_eventqa_protocol_cli_defaults_to_frozen_context_bank(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        args = eventqa.build_parser().parse_args([])
+
+        self.assertEqual(args.eventqa_protocol, "frozen_context_bank")
+
+    def test_eventqa_query_only_payload_does_not_replay_construction(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        payload = {
+            "chunks": ["chunk-1", "chunk-2"],
+            "chunk_token_lengths": [4, 5],
+            "memorization_prompts": ["m1", "m2"],
+            "query_prompt": "query",
+        }
+
+        query_payload = eventqa._query_only_payload(payload)
+
+        self.assertEqual(query_payload["chunks"], [])
+        self.assertEqual(query_payload["chunk_token_lengths"], [])
+        self.assertEqual(query_payload["memorization_prompts"], ["query"])
+        self.assertEqual(payload["chunks"], ["chunk-1", "chunk-2"])
+
+    def test_eventqa_frozen_query_retrieval_restores_bank_snapshot(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                threshold=0.005,
+                retrieve_threshold=0.005,
+                update_threshold=0.08,
+                top_k=1,
+                max_slots=16,
+                retrieve_policy="threshold_topk",
+                update_policy="thread_update",
+            )
+        )
+        bank.write_back(
+            torch.tensor([[1.0, 0.0]], dtype=torch.float32),
+            LatentMemoryRetrievalResult(
+                slots=[],
+                scores=(),
+                max_score=None,
+                argmax_index=None,
+                threshold_passed=False,
+                retrieved_indices=(),
+                retrieved_scores=(),
+                bank_step=0,
+            ),
+        )
+        lifecycle = {}
+        proxy = eventqa._QueryReadOnlyBank(bank, lifecycle, freeze_retrieval_state=True)
+        before = eventqa._bank_state_fingerprint(bank)
+
+        proxy.begin_query()
+        result = proxy.retrieve_with_context(
+            torch.tensor([[[1.0, 0.0]]], dtype=torch.float32)
+        )
+        proxy.write_back(torch.tensor([[[0.0, 1.0]]]), result)
+        proxy.capture_post_query()
+
+        self.assertEqual(eventqa._bank_state_fingerprint(bank), before)
+        self.assertFalse(lifecycle["bank_snapshot_changed_after_query"])
+        self.assertEqual(lifecycle["query_write_count_delta"], 0)
+        self.assertEqual(lifecycle["query_write_attempt_count_delta"], 1)
+
+    def test_eventqa_bank_fingerprint_supports_bfloat16_slots(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        class FakeBank:
+            def debug_summary(self):
+                return {
+                    "memory_retrieve_count": 1,
+                    "retrieved_latent_count": 8,
+                }
+
+            def state_dict(self):
+                return {
+                    "step": 2,
+                    "retrieval_step": 1,
+                    "slots": [
+                        {
+                            "memory": torch.tensor(
+                                [[1.0, 2.0]], dtype=torch.bfloat16
+                            ),
+                            "key": torch.tensor([[3.0, 4.0]], dtype=torch.bfloat16),
+                            "metadata": {"slot_id": 0},
+                            "created_step": 0,
+                            "last_access_step": 1,
+                            "last_retrieved_step": 1,
+                            "access_count": 1,
+                            "last_score": 0.5,
+                            "original_device": "cpu",
+                            "original_dtype": "torch.bfloat16",
+                        }
+                    ],
+                }
+
+        fingerprint = eventqa._bank_state_fingerprint(FakeBank())
+
+        self.assertIsInstance(fingerprint, str)
+        self.assertEqual(len(fingerprint), 64)
+
+    def test_eventqa_construction_trace_records_true_write_actions(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                threshold=0.005,
+                retrieve_threshold=0.005,
+                update_threshold=0.08,
+                top_k=1,
+                max_slots=16,
+                retrieve_policy="threshold_topk",
+                update_policy="thread_update",
+            )
+        )
+        lifecycle = {"construction_turn_diagnostics": []}
+        trace = {}
+        restore = eventqa._install_eventqa_bank_trace(bank, trace, lifecycle)
+
+        retrieval = bank.retrieve_with_context(
+            torch.tensor([[[1.0, 0.0]]], dtype=torch.float32)
+        )
+        bank.write_back(torch.tensor([[[1.0, 0.0]]]), retrieval)
+        restore()
+
+        self.assertEqual(len(lifecycle["construction_turn_diagnostics"]), 1)
+        turn = lifecycle["construction_turn_diagnostics"][0]
+        self.assertEqual(turn["write_action"], "insert")
+        self.assertIsNone(turn["best_matched_score"])
+        self.assertEqual(turn["slot_count_after_write"], 1)
+        self.assertEqual(trace["last_retrieval"]["scores"], [])
+
+    def test_eventqa_query_proxy_blocks_real_writes_and_records_attempts(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        class FakeBank:
+            config = SimpleNamespace(retrieve_threshold=0.005)
+
+            def __init__(self):
+                self.write_count = 0
+                self.retrieve_count = 0
+
+            def __len__(self):
+                return 1
+
+            def write_back(self, *args, **kwargs):
+                self.write_count += 1
+                return True
+
+            def debug_summary(self):
+                return {
+                    "slot_count": 1,
+                    "memory_write_count": self.write_count,
+                    "memory_retrieve_count": self.retrieve_count,
+                    "thread_insert_count": 1,
+                    "matched_replace_count": max(0, self.write_count - 1),
+                    "capacity_evict_count": 0,
+                    "write_action_counts": {
+                        "insert": 1,
+                        "replace_matched": max(0, self.write_count - 1),
+                    },
+                    "slots": [{"created_step": self.write_count}],
+                }
+
+        lifecycle = {}
+        bank = FakeBank()
+        proxy = eventqa._QueryReadOnlyBank(bank, lifecycle)
+
+        proxy.write_back("construction")
+        proxy.begin_query()
+        proxy.write_back("query")
+        proxy.capture_post_query()
+        bank.write_count = 0
+        proxy.capture_post_query()
+
+        self.assertEqual(lifecycle["pre_query_bank_summary"]["write_count"], 1)
+        self.assertEqual(lifecycle["post_query_bank_summary"]["write_count"], 1)
+        self.assertEqual(lifecycle["query_write_count_delta"], 0)
+        self.assertEqual(lifecycle["query_write_attempt_count_delta"], 1)
+        self.assertTrue(lifecycle["query_read_only_enforced"])
+
+    def test_eventqa_query_diagnostics_preserve_true_actions_and_raw_scores(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        lifecycle = {
+            "pre_query_bank_summary": {
+                "slot_count": 2,
+                "write_count": 17,
+                "retrieval_count": 16,
+                "slot_indices": [0, 1],
+                "slots": [],
+                "true_insert_count": 2,
+                "true_matched_replace_count": 15,
+                "true_capacity_evict_count": 0,
+                "true_replace_old_slot_count": 0,
+                "write_action_counts": {"insert": 2, "replace_matched": 15},
+            },
+            "post_query_bank_summary": {
+                "slot_count": 2,
+                "write_count": 17,
+                "retrieval_count": 17,
+                "slot_indices": [0, 1],
+                "slots": [],
+                "true_insert_count": 2,
+                "true_matched_replace_count": 15,
+                "true_capacity_evict_count": 0,
+                "true_replace_old_slot_count": 0,
+                "write_action_counts": {"insert": 2, "replace_matched": 15},
+            },
+            "query_write_count_delta": 0,
+            "query_write_attempt_count_delta": 1,
+            "query_read_only_enforced": True,
+        }
+        query_turn = {
+            "scores": [0.05, 0.04],
+            "retrieved_indices": [0],
+            "retrieved_scores": [0.05],
+        }
+
+        diagnostics = eventqa._query_memory_diagnostics(
+            lifecycle, query_turn, retrieve_threshold=0.005
+        )
+
+        self.assertEqual(diagnostics["query_candidate_scores"], [0.05, 0.04])
+        self.assertEqual(diagnostics["query_candidate_slot_count"], 2)
+        self.assertTrue(diagnostics["query_slot_1_existed"])
+        self.assertTrue(diagnostics["query_slot_1_lost_top_k1_ranking"])
+        self.assertEqual(diagnostics["true_insert_count"], 2)
+        self.assertEqual(diagnostics["true_matched_replace_count"], 15)
+        self.assertEqual(diagnostics["true_capacity_evict_count"], 0)
+        self.assertEqual(diagnostics["query_write_count_delta"], 0)
+
+    def test_eventqa_context_summary_distinguishes_available_and_attempted_questions(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        context_payload = {
+            "context_index": 0,
+            "context_id": "eventqa-ctx-0",
+            "question_count": 100,
+            "chunks": ["chunk"],
+            "chunk_token_lengths": [1],
+        }
+
+        summary = eventqa._build_context_summary(context_payload, [])
+
+        self.assertEqual(summary["question_count_available"], 100)
+        self.assertEqual(summary["question_count"], 0)
+
+    def test_eventqa_frozen_context_summary_records_single_memorization_and_reuse(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        context_payload = {
+            "context_index": 0,
+            "context_id": "eventqa-ctx-0",
+            "question_count": 100,
+            "chunks": ["chunk-1", "chunk-2"],
+            "chunk_token_lengths": [4, 5],
+        }
+        rows = [
+            {
+                "error_or_stop_reason": None,
+                "bank_off_substring_exact_match": 0,
+                "bank_on_substring_exact_match": 0,
+                "improved": 0,
+                "regressed": 0,
+                "output_changed": False,
+                "bank_on_final_slot_count": 2,
+                "bank_on_query_turn_retrieved_indices": [0],
+                "bank_on_query_turn_retrieved_latent_count": 8,
+                "bank_on_query_turn_score_range": {"min": 0.1, "max": 0.1},
+                "true_insert_count": 2,
+                "true_matched_replace_count": 0,
+                "true_capacity_evict_count": 0,
+                "true_replace_old_slot_count": 0,
+                "bank_on_query_turn_candidate_scores": [0.1, 0.05],
+                "bank_on_query_turn_candidate_slot_count": 2,
+                "bank_on_query_slot_1_lost_top_k1_ranking": True,
+                "query_write_count": 0,
+                "query_write_attempt_count": 1,
+                "query_read_only_enforced": True,
+                "cross_context_leakage_detected": False,
+                "retrieved_latents_enter_weaver": True,
+                "raw_retrieved_latents_enter_reasoner": False,
+                "bank_off_eventqa_recall": 0.0,
+                "bank_on_eventqa_recall": 0.0,
+                "bank_off_empty_output": False,
+                "bank_on_empty_output": False,
+                "bank_off_format_flags": {},
+                "bank_on_format_flags": {},
+                "peak_cuda_memory": 100,
+                "bank_instance_id": 123,
+                "context_memorization_performed": index == 0,
+                "query_write_count_delta": 0,
+                "bank_snapshot_changed_after_query": False,
+                "pre_query_bank_summary": {"slot_count": 2},
+                "construction_turn_diagnostics": (
+                    [
+                        {
+                            "construction_turn_index": 0,
+                            "write_action": "insert",
+                            "best_matched_score": None,
+                            "slot_count_after_write": 1,
+                        },
+                        {
+                            "construction_turn_index": 1,
+                            "write_action": "insert",
+                            "best_matched_score": 0.01,
+                            "slot_count_after_write": 2,
+                        },
+                    ]
+                    if index == 0
+                    else []
+                ),
+            }
+            for index in range(3)
+        ]
+
+        summary = eventqa._build_context_summary(
+            context_payload,
+            rows,
+            eventqa_protocol="frozen_context_bank",
+            cleanup_slot_count=0,
+        )
+
+        self.assertEqual(summary["context_memorization_count"], 1)
+        self.assertTrue(summary["same_frozen_bank_reused_across_queries"])
+        self.assertTrue(summary["all_query_write_deltas_zero"])
+        self.assertTrue(summary["bank_snapshot_unchanged_across_queries"])
+        self.assertEqual(summary["total_construction_tokens"], 9)
+        self.assertEqual(summary["final_construction_slot_count"], 2)
+        self.assertEqual(summary["construction_write_action_sequence"], ["insert", "insert"])
+        self.assertTrue(summary["bank_reset_after_context"])
+
     def test_memgen_config_defaults_reasoner_storage(self):
         config = MemGenConfig()
 

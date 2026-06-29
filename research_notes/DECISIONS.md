@@ -74,6 +74,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0067 | 2026-06-27 | accepted | Prefer max_slots=16 for current MAB-6B-FR top_k=1 diagnostics |
 | DEC-0068 | 2026-06-27 | accepted | Do not interpret top_k=4/8 results as force-top-k evidence |
 | DEC-0069 | 2026-06-27 | accepted | Relax or disable retrieve_threshold before making further top-k claims |
+| DEC-0070 | 2026-06-29 | accepted | Use cautious top_k=1 retrieval-threshold-relaxed settings for EventQA expansion |
 
 ## Decision Template
 
@@ -93,21 +94,24 @@ IDs and append superseding decisions rather than silently rewriting history.
 
 ## Standing Decisions
 
-### Latest MAB-6B-FR Board (2026-06-27)
+### Latest MAB-6B-FR Board (2026-06-29)
 
 - Keep Version A as the default path; none of the MAB-6B-FR n10 diagnostics is
   sufficient for a default-path or benchmark-performance claim.
-- Use `retrieve_threshold=0.03`, `update_threshold=0.08`, `max_slots=16`, and
-  `top_k=1` as the current preferred diagnostic configuration.
+- Use `update_threshold=0.08` and `max_slots=16` as the stable bounded
+  mechanism settings.
 - Treat the threshold sweep as recovered mechanism evidence because its
   per-setting manifests remain invalid after a postprocessing KeyError.
-- Do not call top_k=4/8 force-top-k: `threshold_topk` admitted only three slots
-  at the final query.
-- Next diagnostic: hold cap16/ut0.08/top_k4 and sweep
-  `retrieve_threshold={0.03,0.02,0.01,0.00}`, requiring 32 retrieved latent
-  tokens before evaluating multi-slot Weaver utilization. Include a same-run
-  cap16/ut0.08/top_k1/rt0.03 control to account for the observed `1/10` versus
-  `2/10` top_k=1 run variance.
+- Retrieval-threshold relaxation is now completed exploratory evidence:
+  no top_k=4 run reached 32 query-turn retrieved latent tokens in all 10
+  contexts.
+- top_k=4 therefore remains mechanism-inconclusive and must not be interpreted
+  as a valid quality comparison. The relaxed top_k=4 runs also showed weaker
+  output control, more format failures, and more empty outputs.
+- top_k=1 remains the preferred diagnostic setting for expansion to EventQA.
+- Current cautious EventQA expansion setting:
+  `retrieve_threshold=0.005`, `update_threshold=0.08`, `top_k=1`,
+  `max_slots=16`.
 
 ### Current Board (2026-06-22)
 
@@ -247,6 +251,40 @@ IDs and append superseding decisions rather than silently rewriting history.
   `query_turn_retrieved_latent_count=32` before top_k=4 is treated as fully
   realized.
 - Related experiment: `EXP-20260626-004`
+
+### DEC-0070: Use Cautious top_k=1 Retrieval-Threshold-Relaxed Settings for EventQA Expansion
+
+- Date: 2026-06-29
+- Status: accepted
+- Context:
+  - `EXP-20260629-001` completed the paired retrieval-threshold relaxation
+    sweep on detective_qa n10 with
+    `retrieve_threshold={0.03,0.02,0.01,0.005}` x `top_k={1,4}`.
+  - No top_k=4 setting reached 32 query-turn retrieved latent tokens in all 10
+    contexts, so none of the top_k=4 rows qualifies as a valid force-top-k
+    quality comparison.
+  - top_k=4 also showed weaker output control and more format / empty-output
+    failures than the corresponding top_k=1 rows.
+  - Among the relaxed top_k=1 settings, `rt=0.02`, `rt=0.01`, and `rt=0.005`
+    each reached Bank-on EM `0.1`, and `rt=0.005` had the cleanest output
+    surface.
+- Decision:
+  - Keep top_k=4 mechanism-inconclusive.
+  - Use the cautious top_k=1 setting
+    `retrieve_threshold=0.005`, `update_threshold=0.08`, `top_k=1`,
+    `max_slots=16` as the preferred EventQA expansion configuration.
+- Rationale:
+  - This preserves the strongest current output-control behavior without
+    overclaiming a benchmark gain.
+  - EventQA expansion should separate memory effects from format failure, so
+    cleaner top_k=1 behavior is more informative than inconclusive top_k=4
+    rows.
+- Consequences:
+  - Do not interpret the current top_k=4 zero-EM rows as evidence that
+    multi-slot Weaver use is bad.
+  - Keep EventQA expansion exploratory and do not claim benchmark improvement
+    unless a proper benchmark run supports it.
+- Related experiments: `EXP-20260629-001`
 
 ### Historical Board (2026-06-18)
 

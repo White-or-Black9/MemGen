@@ -1,4 +1,6 @@
 import unittest
+import tempfile
+import json
 
 import torch
 from transformers import GenerationConfig
@@ -267,6 +269,82 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
         self.assertEqual(config["max_slots"], 8)
         self.assertEqual(config["retrieve_policy"], "threshold_topk")
         self.assertEqual(config["update_policy"], "thread_update")
+
+    def test_relaxation_setting_label_and_note_suppression(self):
+        from scripts.eval import (
+            mab6b_weaver_space_bank_detectiveqa_n10_retrieve_threshold_relaxation as relax,
+        )
+
+        self.assertEqual(relax._setting_label(0.03, 1), "rt003_topk1")
+        self.assertEqual(relax._setting_label(0.005, 4), "rt0005_topk4")
+
+        note_path = relax._suppress_research_note(
+            output_dir=Path("/tmp/relaxation") / "rt003_topk1"
+        )
+        self.assertEqual(
+            note_path,
+            Path("/tmp/relaxation") / "rt003_topk1" / "suppressed_research_note.md",
+        )
+
+    def test_relaxation_aggregate_reads_worker_roots(self):
+        from scripts.eval import (
+            mab6b_weaver_space_bank_detectiveqa_n10_retrieve_threshold_relaxation as relax,
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            first = root / "rt003_topk1"
+            second = root / "rt003_topk4"
+            first.mkdir()
+            second.mkdir()
+
+            (first / "worker_result.json").write_text(
+                json.dumps(
+                    {
+                        "setting_label": "rt003_topk1",
+                        "retrieve_threshold": 0.03,
+                        "top_k": 1,
+                        "bank_off_EM": 0.0,
+                        "bank_on_EM": 0.1,
+                        "final_slot_counts": [16],
+                        "query_turn_retrieved_indices_by_context": [[0]],
+                        "query_turn_retrieved_latent_count_by_context": [8],
+                        "bank_on_format_failure_count": 1,
+                        "bank_off_format_failure_count": 0,
+                        "files_written": ["a.json"],
+                        "failed": False,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (second / "worker_result.json").write_text(
+                json.dumps(
+                    {
+                        "setting_label": "rt003_topk4",
+                        "retrieve_threshold": 0.03,
+                        "top_k": 4,
+                        "bank_off_EM": 0.0,
+                        "bank_on_EM": 0.0,
+                        "final_slot_counts": [16],
+                        "query_turn_retrieved_indices_by_context": [[0, 1, 2, 3]],
+                        "query_turn_retrieved_latent_count_by_context": [32],
+                        "bank_on_format_failure_count": 2,
+                        "bank_off_format_failure_count": 0,
+                        "files_written": ["b.json"],
+                        "failed": False,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            aggregate = relax.aggregate_existing_artifacts(root)
+
+        self.assertEqual(len(aggregate["rows"]), 2)
+        self.assertEqual(
+            [row["setting_label"] for row in aggregate["rows"]],
+            ["rt003_topk1", "rt003_topk4"],
+        )
+        self.assertTrue(aggregate["rows"][1]["top_k_4_reached_32_latents"])
 
 
 if __name__ == "__main__":

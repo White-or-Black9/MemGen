@@ -1,33 +1,43 @@
 # 项目进展
 
-## Latest MAB-6B-FR Diagnostic Status (2026-06-27)
+## Latest MAB-6B-FR Diagnostic Status (2026-06-29)
 
-- Artifact-only consolidation is complete for the format-repair, threshold,
-  capacity, and top-k diagnostics. No new inference was run.
+- Retrieval-threshold relaxation is now complete on detective_qa n10. All
+  eight settings ran sequentially on GPU 5; no new follow-up inference is
+  pending for this diagnostic.
 - Artifact roots:
   - `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_format_repair/`
   - `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_threshold_diagnostic/`
   - `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_capacity_diagnostic/`
   - `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_topk_diagnostic/`
-- Main mechanism result: `update_threshold=0.08` breaks the MAB-6B-FR
-  single-slot collapse; `max_slots=16` is the current preferred capacity under
-  `top_k=1`; increasing top-k under `retrieve_threshold=0.03` does not improve
-  exact match and gives less controlled outputs.
-- Current preferred diagnostic setting is `retrieve_threshold=0.03`,
-  `update_threshold=0.08`, `max_slots=16`, `top_k=1`. This is n10 exploratory
-  evidence only: Bank-on exact match varies between `1/10` and `2/10` across
-  otherwise matching top_k=1 runs.
-- Provenance caveat: threshold-sweep aggregates were recovered from complete
-  prediction and bank-debug rows after per-setting postprocessing failed with
-  `KeyError: 'memory_retrieved_latent_count'`; they are mechanism diagnostics,
-  not clean canonical manifests.
-- Current next action: retrieval-threshold relaxation / force-top-k diagnostic
-  with `max_slots=16`, `update_threshold=0.08`, `top_k=4`, and
-  `retrieve_threshold={0.03,0.02,0.01,0.00}`. Require 32 query-turn retrieved
-  latent tokens before interpreting top_k=4 as fully realized. Include a
-  same-run control with `max_slots=16`, `update_threshold=0.08`, `top_k=1`, and
-  `retrieve_threshold=0.03` because top_k=1 has varied between `1/10` and
-  `2/10` across runs.
+  - `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_retrieve_threshold_relaxation/20260629T005555Z-full-sweep/`
+- Retrieval-threshold relaxation artifacts:
+  - script:
+    `scripts/eval/mab6b_weaver_space_bank_detectiveqa_n10_retrieve_threshold_relaxation.py`
+  - aggregate JSON:
+    `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_retrieve_threshold_relaxation/20260629T005555Z-full-sweep/retrieve_threshold_relaxation_aggregate.json`
+  - per-context JSONL:
+    `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_retrieve_threshold_relaxation/20260629T005555Z-full-sweep/retrieve_threshold_relaxation_per_context.jsonl`
+  - benchmark note:
+    `research_notes/benchmarks/memoryagentbench_mab6b_fr_retrieve_threshold_relaxation.md`
+- Main mechanism result: `update_threshold=0.08` still breaks the MAB-6B-FR
+  single-slot collapse; `max_slots=16` remains the preferred bounded storage
+  setting; and retrieval-threshold relaxation did not make top_k=4 a valid
+  quality comparison because no top_k=4 run reached 32 query-turn retrieved
+  latent tokens in all 10 contexts.
+- top_k=4 therefore remains mechanism-inconclusive. The relaxed top_k=4 runs
+  also showed weaker output control, more format failures, and more empty
+  outputs than their top_k=1 counterparts.
+- Among the relaxed top_k=1 settings, `retrieve_threshold=0.02`,
+  `retrieve_threshold=0.01`, and `retrieve_threshold=0.005` each reached
+  Bank-on EM `1/10`; `retrieve_threshold=0.005` had the cleanest output
+  surface.
+- Current preferred expansion setting for EventQA is the cautious top_k=1
+  configuration:
+  `retrieve_threshold=0.005`, `update_threshold=0.08`, `top_k=1`,
+  `max_slots=16`.
+- Interpretation boundary: all of this remains n10 exploratory mechanism
+  evidence only. Do not claim benchmark improvement from these runs.
 - Consolidated analysis:
   `research_notes/MAB6B_FR_DIAGNOSTIC_SUMMARY.md`.
 

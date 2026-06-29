@@ -151,6 +151,7 @@ Current next experiment gate:
 | EXP-20260626-002 | 2026-06-26 | MAB-6B-FR threshold diagnostic | Does update_threshold control one-slot collapse independently of retrieve_threshold? | `completed_with_artifact_recovery` | Recovered traces show ut=0.05 ended at one slot and ut>=0.08 ended at eight slots; ut=0.08 retained 2/10 EM, but per-setting manifests are invalid after a postprocessing KeyError |
 | EXP-20260626-003 | 2026-06-26 | MAB-6B-FR capacity diagnostic | With ut=0.08 and top_k=1, what storage capacity best balances slot diversity and selection noise? | `completed_exploratory` | Bank-on EM was 0.1/0.2/0.0 for cap8/16/32; capacity changed slot counts and evictions as intended; cap16 was best on n10 |
 | EXP-20260626-004 | 2026-06-26 | MAB-6B-FR top-k diagnostic | Does broader final-query retrieval improve Weaver-space-bank accuracy at retrieve_threshold=0.03? | `completed_exploratory` | top_k=1/2/4/8 gave Bank-on EM 0.1/0.0/0.0/0.0; realized retrieval was 1/2/3/3 slots because thresholding capped top_k=4/8 |
+| EXP-20260629-001 | 2026-06-29 | MAB-6B-FR retrieval-threshold relaxation | Does relaxing retrieve_threshold let top_k=4 realize four retrieved slots before quality is judged? | `completed_exploratory` | All eight settings completed sequentially on GPU 5; no top_k=4 run reached 32 query-turn latent tokens in all 10 contexts; top_k=4 remained mechanism-inconclusive and top_k=1 stayed preferred |
 
 ## Recorded Experiments
 
@@ -3019,3 +3020,72 @@ full GSM8K test performance.
   same-run control with `max_slots=16`, `update_threshold=0.08`, `top_k=1`, and
   `retrieve_threshold=0.03` to separate threshold-relaxation effects from the
   observed `1/10` versus `2/10` top_k=1 run variance.
+
+### EXP-20260629-001: MAB-6B-FR Retrieval-Threshold Relaxation Diagnostic
+
+- Phase: MAB-6B-FR retrieval-threshold relaxation
+- Status: `completed_exploratory`
+- Research question: Does relaxing `retrieve_threshold` let top_k=4 realize the
+  intended four-slot / 32-latent final-query retrieval before answer-quality
+  claims are made?
+- Configuration:
+  - fixed `max_slots=16`, `update_threshold=0.08`
+  - swept paired settings:
+    `retrieve_threshold={0.03,0.02,0.01,0.005}` x `top_k={1,4}`
+  - all workers executed sequentially on GPU 5
+- Script:
+  `scripts/eval/mab6b_weaver_space_bank_detectiveqa_n10_retrieve_threshold_relaxation.py`
+- Artifact root:
+  `outputs/mab/version_b_weaver_space_bank_detectiveqa_n10_retrieve_threshold_relaxation/20260629T005555Z-full-sweep/`
+- Primary reports:
+  - `retrieve_threshold_relaxation_aggregate.json`
+  - `retrieve_threshold_relaxation_per_context.jsonl`
+  - `research_notes/benchmarks/memoryagentbench_mab6b_fr_retrieve_threshold_relaxation.md`
+
+#### Observations
+
+- All eight settings succeeded; no worker failed and no worker wrote the
+  benchmark note directly.
+- top_k=1 results:
+  - `rt=0.03`: Bank-on EM `0.0`, final-query retrieval `8` latent tokens in
+    all contexts, Bank-on format failures `5/10`
+  - `rt=0.02`: Bank-on EM `0.1`, final-query retrieval `8` latent tokens in
+    all contexts, Bank-on format failures `3/10`
+  - `rt=0.01`: Bank-on EM `0.1`, final-query retrieval `8` latent tokens in
+    all contexts, Bank-on format failures `3/10`
+  - `rt=0.005`: Bank-on EM `0.1`, final-query retrieval `8` latent tokens in
+    all contexts, Bank-on format failures `1/10`
+- top_k=4 results:
+  - `rt=0.03`: Bank-on EM `0.0`, final-query retrieval `24` latent tokens in
+    all contexts
+  - `rt=0.02`: Bank-on EM `0.0`, final-query retrieval `24` latent tokens in
+    all contexts
+  - `rt=0.01`: Bank-on EM `0.0`, mixed final-query retrieval
+    `24/32` latent tokens by context
+  - `rt=0.005`: Bank-on EM `0.0`, mixed final-query retrieval
+    `24/32` latent tokens by context
+- No top_k=4 run reached 32 query-turn retrieved latent tokens in all 10
+  contexts, so no top_k=4 row qualifies as a valid force-top-k quality
+  comparison.
+- top_k=4 also showed weaker output control:
+  - Bank-on format failures were `6/10`, `8/10`, `7/10`, and `3/10`
+  - empty Bank-on outputs were `5`, `4`, `3`, and `2`
+- All settings preserved the key invariants:
+  query writes and attempts `0`, cross-context leakage `false`, retrieved
+  latents entered Weaver, and raw retrieved latents did not enter Reasoner.
+
+#### Conclusion
+
+- Retrieval-threshold relaxation increased realized top_k=4 retrieval in some
+  contexts, but not enough to produce a clean four-slot intervention.
+- top_k=4 remains mechanism-inconclusive and must not be interpreted as a
+  valid quality comparison.
+- top_k=1 remains the preferred diagnostic setting for expansion to EventQA.
+- Among the relaxed top_k=1 settings, `retrieve_threshold=0.005` had the
+  cleanest output surface, while `0.02`, `0.01`, and `0.005` each reached
+  Bank-on EM `1/10`.
+- Recommended cautious EventQA expansion setting:
+  `retrieve_threshold=0.005`, `update_threshold=0.08`, `top_k=1`,
+  `max_slots=16`.
+- This remains exploratory mechanism evidence on n10 and does not support a
+  benchmark-improvement claim.

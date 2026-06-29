@@ -2,35 +2,54 @@
 
 ## Latest EventQA Frozen-Context Status (2026-06-29)
 
-- The first benchmark-conformant EventQA `frozen_context_bank` single-context
-  run is now complete on `context_index=0` only.
-- Artifact root:
-  `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5/20260629T121408Z-eventqa-65536-version-b-weaver-space-bank-n5/`
+- The benchmark-conformant EventQA `frozen_context_bank` evaluation is now
+  complete across all 5 EventQA 65536 contexts, one context per isolated run
+  root.
+- Artifact roots:
+  - `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx0/20260629T131415Z-eventqa-65536-version-b-weaver-space-bank-n5/`
+  - `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx1/20260629T131413Z-eventqa-65536-version-b-weaver-space-bank-n5/`
+  - `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx2/20260629T131413Z-eventqa-65536-version-b-weaver-space-bank-n5/`
+  - `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx3/20260629T133550Z-eventqa-65536-version-b-weaver-space-bank-n5/`
+  - `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx4/20260629T133555Z-eventqa-65536-version-b-weaver-space-bank-n5/`
 - Script:
   `scripts/eval/mab6b_weaver_space_bank_eventqa_65536_n5.py`
 - Benchmark note:
   `research_notes/benchmarks/memoryagentbench_mab6b_fr_eventqa_65536_n5.md`
+- Runner scheduling support:
+  `--context-index` now exists to force one-context-per-process execution and
+  preserve isolated output roots during safe parallel evaluation.
 - Protocol result:
-  context memorization count `1`; same frozen bank reused across all 100
-  queries; total query write delta `0`; max query write delta `0`; bank
-  snapshot unchanged across queries.
+  `frozen_context_bank` in all 5 contexts; `context_memorization_count=1`;
+  same frozen bank reused across all 100 queries per context; total query write
+  delta `0`; max query write delta `0`; bank snapshot unchanged across queries;
+  blocked query write attempts total `500` with distribution `{1:500}`; no
+  cross-context leakage.
 - Mechanism result:
-  construction still collapsed to one slot
-  (`final_slot_count=1`, `true_insert_count=1`,
-  `true_matched_replace_count=16`), so the main EventQA scaling risk remains
-  single-slot compression.
-- Single-context result:
-  compressed-bridge Bank-off substring EM `0/100 = 0.00`;
-  Bank-on substring EM `22/100 = 0.22`; Bank-off recall `0.15`; Bank-on
-  recall `0.22`; improved/regressed/unchanged `22/0/78`;
-  bank-off/bank-on format failures `83/19`.
+  all 5 contexts still collapsed to one construction-time slot
+  (`17` chunks -> `final_slot_count=1`, `true_insert_count=1`,
+  `true_matched_replace_count=16`, no capacity eviction), so the active
+  EventQA mechanism still behaves like one compressed latent memory slot rather
+  than diverse event slots.
+- Overall 5-context result:
+  compressed-bridge Bank-off substring EM `4/500 = 0.008`;
+  Bank-on substring EM `83/500 = 0.166`; absolute improvement `+0.158`;
+  Bank-off recall `0.178`; Bank-on recall `0.208`;
+  improved/regressed/unchanged `81/2/417`;
+  bank-off/bank-on format failures `377/173`;
+  bank-off/bank-on Chinese-script outputs `189/30`.
+- Per-context Bank-on EM:
+  `17/100`, `3/100`, `19/100`, `21/100`, `23/100` for
+  `context_index=0..4`.
 - Interpretation boundary:
-  this is the first benchmark-conformant EventQA positive signal for the
-  `frozen_context_bank` protocol, but it is still only one context and does not
-  support a final benchmark-improvement claim.
+  this is now strong exploratory evidence that Bank-on improves over the
+  compressed-bridge Bank-off baseline under the benchmark-conformant frozen
+  protocol, but it is still not a final benchmark-improvement claim and is not
+  an official long-context full-history comparison.
 - Current next step:
-  preserve this single-context evidence and do not run the remaining 4 EventQA
-  contexts until explicitly approved.
+  preserve this 5-context evidence, commit the EventQA result plus
+  `--context-index` scheduling support, then diagnose slot diversity /
+  matched-replacement collapse under `frozen_context_bank` rather than running
+  more full EventQA contexts immediately.
 
 ## Latest MAB-6B-FR Diagnostic Status (2026-06-29)
 

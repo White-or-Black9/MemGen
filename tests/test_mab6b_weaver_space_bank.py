@@ -92,6 +92,7 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
             checkpoint_path="/tmp/checkpoint",
             model_checkpoint_id="checkpoint",
             requested_contexts=1,
+            context_index=None,
             question_limit=1,
             eventqa_protocol="frozen_context_bank",
         )
@@ -109,6 +110,8 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
             manifest["bank_off_mode"], "compressed_bridge_no_persistent_bank"
         )
         self.assertFalse(manifest["bank_off_is_official_long_context_baseline"])
+        self.assertIsNone(manifest["context_index"])
+        self.assertEqual(manifest["selected_context_indices"], [])
 
     def test_eventqa_protocol_cli_defaults_to_frozen_context_bank(self):
         eventqa = importlib.import_module(
@@ -118,6 +121,71 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
         args = eventqa.build_parser().parse_args([])
 
         self.assertEqual(args.eventqa_protocol, "frozen_context_bank")
+        self.assertIsNone(args.context_index)
+
+    def test_eventqa_parser_accepts_context_index(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        args = eventqa.build_parser().parse_args(["--context-index", "3"])
+
+        self.assertEqual(args.context_index, 3)
+
+    def test_eventqa_select_context_indices_defaults_to_requested_prefix(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        selected = eventqa.select_context_indices(5, 2)
+
+        self.assertEqual(selected, [0, 1])
+
+    def test_eventqa_select_context_indices_honors_explicit_context_index(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        selected = eventqa.select_context_indices(5, 2, context_index=3)
+
+        self.assertEqual(selected, [3])
+
+    def test_eventqa_select_context_indices_rejects_invalid_context_index(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        with self.assertRaisesRegex(
+            ValueError, "context-index 5 is out of range for 5 matched contexts"
+        ):
+            eventqa.select_context_indices(5, 1, context_index=5)
+
+    def test_eventqa_manifest_records_selected_context_index_metadata(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        args = SimpleNamespace(
+            dataset_root="/data",
+            mab_repo="/repo",
+            checkpoint_path="/tmp/checkpoint",
+            model_checkpoint_id="checkpoint",
+            requested_contexts=5,
+            context_index=3,
+            question_limit=None,
+            eventqa_protocol="frozen_context_bank",
+        )
+
+        manifest = eventqa._build_manifest(
+            "run",
+            args,
+            "now",
+            git_status_before="clean",
+            selected_context_indices=[3],
+        )
+
+        self.assertEqual(manifest["requested_contexts"], 5)
+        self.assertEqual(manifest["context_index"], 3)
+        self.assertEqual(manifest["selected_context_indices"], [3])
 
     def test_eventqa_query_only_payload_does_not_replay_construction(self):
         eventqa = importlib.import_module(

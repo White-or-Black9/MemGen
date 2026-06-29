@@ -402,7 +402,16 @@ def count_context_matches(parquet_path: str, sub_dataset: str) -> int:
     return len(_load_rows(parquet_path, sub_dataset))
 
 
-def select_context_indices(total_matches: int, requested: int) -> list[int]:
+def select_context_indices(
+    total_matches: int, requested: int, *, context_index: int | None = None
+) -> list[int]:
+    if context_index is not None:
+        if not 0 <= context_index < total_matches:
+            raise ValueError(
+                f"context-index {context_index} is out of range for "
+                f"{total_matches} matched contexts"
+            )
+        return [context_index]
     return list(range(min(total_matches, requested)))
 
 
@@ -1075,7 +1084,14 @@ def _build_context_summary(
     return aggregate
 
 
-def _build_manifest(run_id: str, args, started_at: str, *, git_status_before: str) -> dict:
+def _build_manifest(
+    run_id: str,
+    args,
+    started_at: str,
+    *,
+    git_status_before: str,
+    selected_context_indices: list[int] | None = None,
+) -> dict:
     checkpoint_path = str(Path(args.checkpoint_path).resolve())
     protocol = args.eventqa_protocol
     frozen_protocol = protocol == "frozen_context_bank"
@@ -1127,6 +1143,8 @@ def _build_manifest(run_id: str, args, started_at: str, *, git_status_before: st
         ),
         "canonical_note_guard": str(CANONICAL_DETECTIVE_NOTE_PATH),
         "requested_contexts": args.requested_contexts,
+        "context_index": getattr(args, "context_index", None),
+        "selected_context_indices": list(selected_context_indices or []),
         "question_limit": args.question_limit,
         "context_capacity": None,
         "git_status_before": git_status_before,
@@ -1226,6 +1244,7 @@ def build_parser():
         default="/mnt/18T/baishilong/datasets/MemoryAgentBench/data/Accurate_Retrieval-00000-of-00001.parquet",
     )
     parser.add_argument("--requested-contexts", type=int, default=DEFAULT_REQUESTED_CONTEXTS)
+    parser.add_argument("--context-index", type=int)
     parser.add_argument("--question-limit", type=int)
     parser.add_argument("--chunk-size", type=int, default=DEFAULT_CHUNK_SIZE)
     parser.add_argument(
@@ -1246,12 +1265,20 @@ def main() -> int:
     output_dir = Path(args.output_root) / run_id
     output_dir.mkdir(parents=True, exist_ok=False)
     git_status_before = _git("status", "--short", "--branch")
-    manifest = _build_manifest(run_id, args, started_at, git_status_before=git_status_before)
-    _write_json(output_dir / "manifest.json", manifest)
     rows = _load_rows(args.parquet, SUB_DATASET)
-    selected_indices = select_context_indices(len(rows), args.requested_contexts)
+    selected_indices = select_context_indices(
+        len(rows), args.requested_contexts, context_index=args.context_index
+    )
     if not selected_indices:
         raise RuntimeError(f"No rows found for {SUB_DATASET}")
+    manifest = _build_manifest(
+        run_id,
+        args,
+        started_at,
+        git_status_before=git_status_before,
+        selected_context_indices=selected_indices,
+    )
+    _write_json(output_dir / "manifest.json", manifest)
 
     model, capacity = weaver_bank._load_model(args)
     manifest["context_capacity"] = capacity

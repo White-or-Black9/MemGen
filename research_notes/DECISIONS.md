@@ -76,6 +76,8 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0069 | 2026-06-27 | accepted | Relax or disable retrieve_threshold before making further top-k claims |
 | DEC-0070 | 2026-06-29 | accepted | Use cautious top_k=1 retrieval-threshold-relaxed settings for EventQA expansion |
 | DEC-0071 | 2026-06-29 | accepted | Preserve the first EventQA frozen-context positive signal as single-context exploratory evidence only |
+| DEC-0072 | 2026-06-29 | accepted | Preserve the full 5-context EventQA frozen-context result as strong exploratory evidence only |
+| DEC-0073 | 2026-06-29 | accepted | Keep `--context-index` as the EventQA runner scheduling parameter for isolated per-context evaluation |
 
 ## Decision Template
 
@@ -113,14 +115,20 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Current cautious EventQA expansion setting:
   `retrieve_threshold=0.005`, `update_threshold=0.08`, `top_k=1`,
   `max_slots=16`.
-- The first benchmark-conformant EventQA `frozen_context_bank` run on
-  `context_index=0` is now preserved as exploratory single-context evidence:
-  Bank-off EM `0.00`, Bank-on EM `0.22`, Bank-off recall `0.15`, Bank-on
-  recall `0.22`.
-- Do not treat this as a final benchmark improvement and do not run the
-  remaining 4 EventQA contexts until explicitly approved.
-- Keep the mechanism warning explicit: construction still collapsed to one slot,
-  so single-slot compression remains the main EventQA scaling risk.
+- The benchmark-conformant EventQA `frozen_context_bank` evaluation is now
+  preserved across all 5 local contexts as strong exploratory evidence:
+  Bank-off EM `4/500 = 0.008`, Bank-on EM `83/500 = 0.166`, Bank-off recall
+  `0.178`, Bank-on recall `0.208`, improved/regressed/unchanged `81/2/417`.
+- Do not treat this as a final benchmark improvement or as an official
+  long-context baseline comparison.
+- Keep the mechanism warning explicit: all 5 EventQA contexts still collapsed
+  to one construction-time slot, so single-slot compression remains the main
+  EventQA mechanism risk.
+- The EventQA runner now supports `--context-index` to force isolated
+  one-context execution for safe per-context scheduling and artifact isolation.
+- Active next step: preserve and commit the EventQA all-5 result plus
+  `--context-index`, then run a frozen-context slot-collapse /
+  matched-replacement diagnostic rather than more immediate full EventQA runs.
 
 ### Current Board (2026-06-22)
 
@@ -331,6 +339,65 @@ IDs and append superseding decisions rather than silently rewriting history.
   - Any broader EventQA interpretation must keep the single-slot-collapse caveat
     attached.
 - Related experiments: `EXP-20260629-002`
+
+### DEC-0072: Preserve the Full 5-Context EventQA Frozen-Context Result as Strong Exploratory Evidence Only
+
+- Date: 2026-06-29
+- Status: accepted
+- Context:
+  - `EXP-20260629-003` completed all 5 local EventQA 65536 contexts under the
+    benchmark-conformant `frozen_context_bank` protocol using isolated
+    per-context run roots.
+  - Protocol invariants held in all contexts: one context memorization pass,
+    frozen-bank reuse across 100 queries, query write delta `0`, blocked query
+    write attempts `{1:100}` per context, no cross-context leakage, and no bank
+    snapshot mutation after query.
+  - Overall compressed-bridge Bank-off EM was `4/500 = 0.008` and Bank-on EM
+    was `83/500 = 0.166`.
+  - All 5 contexts still collapsed to one final slot with
+    `true_insert_count=1` and `true_matched_replace_count=16`.
+- Decision:
+  - Preserve the all-5-context EventQA result as strong exploratory evidence
+    that Bank-on improves over the compressed-bridge Bank-off baseline under
+    the benchmark-conformant lifecycle.
+  - Do not promote this to a final benchmark-improvement claim.
+  - Keep the slot-collapse caveat explicit in all summaries.
+- Rationale:
+  - The 5-context run is much stronger than the earlier single-context signal
+    and demonstrates repeatable benefit under the repaired EventQA protocol.
+  - The current mechanism still behaves like a single compressed latent slot,
+    so the gain cannot yet be attributed to diverse slot retrieval.
+- Consequences:
+  - The next mechanism study should target slot diversity /
+    matched-replacement collapse under `frozen_context_bank`.
+  - More immediate full EventQA scaling is lower priority than understanding why
+    all contexts collapse to one slot.
+- Related experiments: `EXP-20260629-003`
+
+### DEC-0073: Keep `--context-index` as the EventQA Runner Scheduling Parameter for Isolated Per-context Evaluation
+
+- Date: 2026-06-29
+- Status: accepted
+- Context:
+  - The EventQA runner needed a minimal scheduling control to support one
+    context per process, one output root per process, and safe multi-GPU
+    parallel evaluation without artifact collisions.
+  - The added `--context-index` parameter leaves existing
+    `--requested_contexts` behavior intact when unset, but forces selection of
+    exactly one context when provided.
+- Decision:
+  - Keep `--context-index` in the EventQA runner as the standard scheduling
+    parameter for isolated per-context execution.
+  - Record `context_index` and `selected_context_indices` in run metadata.
+- Rationale:
+  - This is the smallest safe interface for per-context parallel evaluation and
+    avoids broader harness changes.
+- Consequences:
+  - Future EventQA parallel runs should continue to use separate output roots
+    and one context per process.
+  - Research-note and aggregation logic can treat per-context artifacts as
+    first-class benchmark evidence.
+- Related experiments: `EXP-20260629-003`
 
 ### Historical Board (2026-06-18)
 

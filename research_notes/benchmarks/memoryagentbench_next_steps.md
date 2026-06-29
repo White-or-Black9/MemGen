@@ -115,19 +115,22 @@ An increase in slots or inserts is mechanism evidence, not an accuracy claim.
 
 Proceed only if a later review still wants a follow-up:
 
-1. **Preserve the completed single-context EventQA result first:** treat
-   `20260629T121408Z-eventqa-65536-version-b-weaver-space-bank-n5` as
-   exploratory single-context evidence only. Do not run the remaining 4 EventQA
-   contexts until explicitly approved.
-2. **If later approved, continue EventQA with the same cautious top_k=1
-   settings:** `retrieve_threshold=0.005`, `update_threshold=0.08`, `top_k=1`,
-   and `max_slots=16`. Keep the result exploratory and use separate output /
-   note paths.
-3. **Optional prompt-length audit:** isolate why the `132726 > 131072` warning
+1. **Preserve and commit the completed EventQA all-5-context result first:**
+   treat the 5 isolated frozen-context runs as strong exploratory evidence
+   only, plus preserve the `--context-index` scheduling support that enabled
+   safe per-context parallel evaluation.
+2. **Recommended next experiment:** run a frozen-context slot-collapse /
+   update-threshold diagnostic rather than more immediate full EventQA runs.
+   The target is to determine whether matched-replacement collapse can be
+   broken while preserving the benchmark-conformant EventQA lifecycle.
+3. **Keep the same cautious EventQA base settings unless a later diagnostic
+   explicitly changes them:** `retrieve_threshold=0.005`,
+   `update_threshold=0.08`, `top_k=1`, and `max_slots=16`.
+4. **Optional prompt-length audit:** isolate why the `132726 > 131072` warning
    is emitted during over-capacity full-history estimation, while keeping
    `full_history_status=over_capacity_invalid` and never scoring full-history
    generation.
-4. **Optional future multi-slot mechanism audit:** if a later approved study
+5. **Optional future multi-slot mechanism audit:** if a later approved study
    still wants top_k>1, first design a retrieval intervention that reliably
    reaches 32 query-turn retrieved latent tokens before interpreting answer
    quality.
@@ -149,12 +152,13 @@ Proceed only if a later review still wants a follow-up:
 2. Keep Version A as the default path until MAB-6B is replicated.
 3. Treat the MAB-6B exact-match gain as exploratory benchmark evidence, not as
    a default-path promotion.
-4. The current active EventQA artifact is the single-context frozen-bank run
-   `20260629T121408Z-eventqa-65536-version-b-weaver-space-bank-n5`: preserve it
-   as exploratory evidence, not a final benchmark claim.
-5. If later follow-up is approved, continue EventQA with the cautious top_k=1
-   configuration `retrieve_threshold=0.005`, `update_threshold=0.08`,
-   `top_k=1`, `max_slots=16`, rather than reinterpreting the current
-   top_k=4 rows.
-6. Keep the single-slot-collapse caveat explicit before any broader EventQA
+4. The current active EventQA artifacts are the 5 isolated frozen-bank runs:
+   `ctx0/ctx1/ctx2/ctx3/ctx4` under
+   `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx*/...`.
+   Preserve them as strong exploratory evidence, not a final benchmark claim.
+5. Preserve `--context-index` as the scheduling parameter for isolated
+   per-context EventQA execution.
+6. After this result is committed, prioritize a frozen-context slot-collapse /
+   update-threshold diagnostic over more immediate full EventQA scaling.
+7. Keep the single-slot-collapse caveat explicit before any broader EventQA
    scaling or summary.

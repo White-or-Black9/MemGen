@@ -1,31 +1,45 @@
 # MAB-6B-FR EventQA 65536 n5
 
 Exploratory EventQA expansion using the cautious top_k=1 Weaver-space bank
-setting. This note preserves single-context evidence only; it is not a final
-benchmark claim.
+setting. This note preserves the completed all-5-context frozen-context result.
+It is strong exploratory evidence, not a final benchmark claim.
 
 ## Active Result Boundary
 
-- Result type: exploratory single-context evidence
-- Context coverage: `1/5` EventQA 65536 contexts
-- Evaluated context: `context_index=0`
+- Result type: strong exploratory 5-context evidence
+- Context coverage: `5/5` EventQA 65536 contexts
+- Evaluated contexts: `context_index=0..4`
 - Protocol: `frozen_context_bank`
 - Bank-off baseline: compressed bridge Bank-off only; not an official
   long-context full-history baseline because full history remains over capacity
 - Canonical detective note protected:
   `research_notes/benchmarks/memoryagentbench_mab6b_weaver_space_bank.md`
 
-## Run
+## Runs
 
-- command:
-  `CUDA_VISIBLE_DEVICES=3 /home/baishilong/miniconda3/envs/memgen/bin/python scripts/eval/mab6b_weaver_space_bank_eventqa_65536_n5.py --requested-contexts 1 --skip-research-note --eventqa-protocol frozen_context_bank`
-- run root:
-  `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5/20260629T121408Z-eventqa-65536-version-b-weaver-space-bank-n5`
 - script:
   `scripts/eval/mab6b_weaver_space_bank_eventqa_65536_n5.py`
+- runner scheduling support:
+  `--context-index` was added so one EventQA context can be forced into one
+  isolated process / output root for safe per-context parallel evaluation.
+- run roots:
+  - `ctx0`:
+    `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx0/20260629T131415Z-eventqa-65536-version-b-weaver-space-bank-n5`
+  - `ctx1`:
+    `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx1/20260629T131413Z-eventqa-65536-version-b-weaver-space-bank-n5`
+  - `ctx2`:
+    `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx2/20260629T131413Z-eventqa-65536-version-b-weaver-space-bank-n5`
+  - `ctx3`:
+    `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx3/20260629T133550Z-eventqa-65536-version-b-weaver-space-bank-n5`
+  - `ctx4`:
+    `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx4/20260629T133555Z-eventqa-65536-version-b-weaver-space-bank-n5`
 - protocol: `frozen_context_bank`
-- GPU: `3`
-- peak CUDA memory: `11151741952` bytes, about `10.39 GiB`
+- peak CUDA memory by context:
+  - `ctx0`: `11151741952` bytes
+  - `ctx1`: `11162152448` bytes
+  - `ctx2`: `11169515008` bytes
+  - `ctx3`: `11161227264` bytes
+  - `ctx4`: `11167909376` bytes
 
 ## Settings
 
@@ -39,116 +53,147 @@ benchmark claim.
 
 ## Protocol Validation
 
-- `context_memorization_count=1`
-- `same_frozen_bank_reused_across_queries=true`
-- all 100 queries shared the same frozen bank instance: `true`
-- `bank_snapshot_changed_after_query=false`
-- `total_query_write_count_delta=0`
-- `max query_write_count_delta=0`
-- blocked query write attempts total: `100`
-- blocked query write attempts distribution: `{1:100}`
+- all contexts used `frozen_context_bank`
+- `context_memorization_count=1` in all 5 contexts
+- `same_frozen_bank_reused_across_queries=true` in all 5 contexts
+- all 100 queries per context shared the same frozen bank instance
+- `bank_snapshot_changed_after_query=false` in all 5 contexts
+- `total_query_write_count_delta=0` in all 5 contexts
+- `max query_write_count_delta=0` in all 5 contexts
+- blocked query write attempts total: `500`
+- blocked query write attempts distribution: `{1:500}`
+- `cross_context_leakage_detected=false` in all 5 contexts
 
 Interpretation: the benchmark-conformant EventQA lifecycle is now runtime
-validated for this runner. Context was memorized once, the same frozen bank was
-reused across all 100 queries, and query turns remained read-only.
+validated for this runner across all 5 contexts. Each context was memorized
+once, the same frozen bank was reused across all 100 queries, and query turns
+remained read-only.
 
 ## Mechanism Summary
 
-- construction `chunk_count=17`
-- construction `final_slot_count=1`
-- `true_insert_count=1`
-- `true_matched_replace_count=16`
-- `true_capacity_evict_count=0`
-- `true_replace_old_slot_count=0`
-- candidate slot count before top-k distribution: `{1:100}`
-- retrieved indices distribution: `{(0,):100}`
-- retrieved latent count distribution: `{8:100}`
-- raw candidate score min / max / mean:
-  `0.04947 / 0.05574 / 0.05229`
+- single-slot collapse occurred in all 5 contexts
+- each context had construction `chunk_count=17`
+- each context ended with `final_slot_count=1`
+- each context had `true_insert_count=1` and `true_matched_replace_count=16`
+- `true_capacity_evict_count=0` in all 5 contexts
+- `true_replace_old_slot_count=0` in all 5 contexts
+- aggregate candidate slot count before top-k distribution: `{1:500}`
+- aggregate retrieved indices distribution: `{(0,):500}`
+- aggregate retrieved latent count distribution: `{8:500}`
+- aggregate raw candidate score min / max / mean:
+  `0.04529 / 0.07478 / 0.05641`
 
 Interpretation: construction-time single-slot collapse remains. Under the
-current EventQA context, the bank behaves like one compressed latent memory
-slot rather than diverse event slots.
+current EventQA setup, the bank behaves like one compressed latent memory slot
+rather than diverse event slots.
 
-## Context 0 Result
+## Overall Result
 
-- context_id: `eventqa-aea0f2d603e1c8a3`
-- question_count: `100`
-- Bank-off substring exact match / accuracy: `0/100 = 0.00`
-- Bank-on substring exact match / accuracy: `22/100 = 0.22`
-- Bank-off `eventqa_recall`: `15/100 = 0.15`
-- Bank-on `eventqa_recall`: `22/100 = 0.22`
-- improved / regressed / unchanged: `22 / 0 / 78`
-- `output_changed_count=100`
-- format failure counts: bank-off `83`, bank-on `19`
-- Chinese-script output counts: bank-off `36`, bank-on `0`
+- total questions: `500`
+- Bank-off substring exact match / accuracy: `4/500 = 0.008`
+- Bank-on substring exact match / accuracy: `83/500 = 0.166`
+- absolute improvement: `+0.158`
+- Bank-off `eventqa_recall`: `0.178`
+- Bank-on `eventqa_recall`: `0.208`
+- improved / regressed / unchanged: `81 / 2 / 417`
+- `output_changed_count=500`
+- format failure counts: bank-off `377`, bank-on `173`
+- Chinese-script output counts: bank-off `189`, bank-on `30`
+- per-context EM:
+  - `ctx0`: `0/100 -> 17/100`
+  - `ctx1`: `0/100 -> 3/100`
+  - `ctx2`: `0/100 -> 19/100`
+  - `ctx3`: `3/100 -> 21/100`
+  - `ctx4`: `1/100 -> 23/100`
+- per-context improved / regressed / unchanged:
+  - `ctx0`: `17 / 0 / 83`
+  - `ctx1`: `3 / 0 / 97`
+  - `ctx2`: `19 / 0 / 81`
+  - `ctx3`: `19 / 1 / 80`
+  - `ctx4`: `23 / 1 / 76`
 
 Interpretation:
 
-- This is the first benchmark-conformant EventQA positive signal for the
+- Bank-on consistently improves over the compressed-bridge Bank-off baseline
+  across all 5 local EventQA contexts.
+- This is strong exploratory evidence for the benchmark-conformant
   `frozen_context_bank` protocol.
-- It is still only one EventQA context, so it does not support a final
-  benchmark-improvement claim.
-- Bank-on improved official EM over the compressed-bridge Bank-off baseline on
-  `context_index=0`.
-- The remaining mechanism risk is the persistent single-slot collapse.
+- It is not a final benchmark-improvement claim and it is not an official full
+  long-context baseline comparison.
+- The remaining mechanism risk is the persistent single-slot collapse in all 5
+  contexts.
 
 ## Representative Examples
 
-- Improved Q2:
+- Improved `ctx0 q1`:
   - gold: `Debbie expressed her boredom with the talk of war.`
   - bank-off parsed: `paragraph 1`
   - bank-on parsed:
     `Debbie expressed her boredom with the talk of war.`
-- Improved Q3:
+- Improved `ctx1 q13`:
   - gold:
-    `Debbie mentioned her mother, Lucian O'Kerry, during the conversation.`
-  - bank-off parsed: `回答`
-  - bank-on parsed:
-    `Debbie mentioned her mother, Lucian O'Kerry, during the conversation.`
-- Improved Q49:
-  - gold:
-    `Marianne felt joy and a sense of ownership standing on the foundation of his new plantation.`
+    `The man stated that he would remain at the inn despite the host's refusal.`
   - bank-off parsed: `[list of events]`
   - bank-on parsed:
-    `Marianne felt joy and a sense of ownership standing on the foundation of his new plantation.`
-- Unchanged wrong early example Q0:
+    `The event that happens next is: "The man stated that he would remain at the inn despite the host's refusal."`
+- Improved `ctx2 q3`:
+  - gold: `Julianne complimented Pascal's abilities as a seaman.`
+  - bank-off parsed: `简短`
+  - bank-on parsed:
+    `Julianne complimented Pascal's abilities as a seaman.`
+- Improved `ctx3 q1`:
+  - gold:
+    `Miss Rosie approached the house and looked in at the window.`
+  - bank-off parsed: `[list of events that have already occurred]`
+  - bank-on parsed:
+    `Miss Rosie approached the house and looked in at the window.`
+- Improved `ctx4 q0`:
+  - gold:
+    `Charissa discovered a letter revealing Edie Arkadyevitch's infidelity.`
+  - bank-off parsed: `简短`
+  - bank-on parsed:
+    `: Charissa discovered a letter revealing Edie Arkadyevitch's infidelity.`
+- Regressed `ctx3 q42`:
+  - gold:
+    `Mrs. Sylvia kissed Davy goodbye as he was leaving for Yarmouth.`
+  - bank-off parsed:
+    `[list] 'Mrs. Sylvia handed Davy a sandwich before he departed for Hastings.', 'Mrs. Sylvia kissed Davy goodbye as he was leaving for Yarmouth.', "Mrs. Sylvia slipped a`
+  - bank-on parsed: `文摘`
+- Regressed `ctx4 q6`:
+  - gold:
+    `Edie Arkadyevitch read a liberal newspaper and contemplated its views.`
+  - bank-off parsed:
+    `without the event that Edie Arkadyevitch read a liberal newspaper and contemplated its views. Based on the context provided, the next event that logically follows is Edie Arkadyevitch visited an`
+  - bank-on parsed:
+    `: Edie Arkadyevitch attended a political rally and debated the speeches delivered.`
+- Unchanged wrong early example `ctx0 q0`:
   - gold:
     `Debbie wore a new green flowered-muslin dress that matched her slippers.`
   - bank-off parsed:
     `简短的文本中没有提供具体的后续事件。我需要进一步搜索以获取更多信息。`
   - bank-on parsed:
     `Debbie sported a lovely yellow paisley wrap that accompanied her flip-flops.`
-- Unchanged wrong late example Q99:
+- Unchanged wrong middle example `ctx2 q33`:
   - gold:
-    `Sue firmly insisted that Lucian should eat supper before praying.`
+    `M. Julianne arrived at La Reserve and was greeted with applause.`
+  - bank-off parsed: `[list]`
+  - bank-on parsed: `}`
+- Unchanged wrong late example `ctx4 q99`:
+  - gold:
+    `Agafea Mihalovna greeted Ladonna when he returned home.`
   - bank-off parsed: `[list of events]`
   - bank-on parsed:
-    `Lucian interrupted the conversation about the brat's death.`
+    `: "Ladonna taught Agafea Mihalovna how to dance at the village's annual celebration."`
 
 ## Next-Step Boundary
 
-- Do not run the remaining 4 EventQA contexts until explicitly approved.
-- Treat the current signal as exploratory evidence that the
+- Active next step: commit the all-5 EventQA result plus the
+  `--context-index` scheduling support.
+- After that, the recommended next experiment is a frozen-context
+  slot-collapse / update-threshold diagnostic, not more immediate full EventQA
+  runs.
+- Treat the current result as strong exploratory evidence that the
   `frozen_context_bank` protocol can outperform the compressed-bridge Bank-off
-  baseline on one context.
-- Before scaling, keep the single-slot-collapse risk explicit in any summary or
+  baseline across all 5 local contexts.
+- Keep the single-slot-collapse risk explicit in every summary or
   recommendation.
-
-## Git Status
-
-```
-## rlm-memory-bank...origin/rlm-memory-bank [ahead 8]
- M research_notes/DECISIONS.md
- M research_notes/EXPERIMENTS.md
- M research_notes/PROGRESS.md
- M research_notes/benchmarks/memoryagentbench_next_steps.md
- M tests/test_mab6b_weaver_space_bank.py
-?? docs/
-?? paper/
-?? research_notes/benchmarks/memoryagentbench_mab6b_fr_eventqa_65536_n5.md
-?? research_notes/benchmarks/memoryagentbench_mab6b_fr_retrieve_threshold_relaxation.md
-?? scripts/eval/mab6b_weaver_space_bank_detectiveqa_n10_retrieve_threshold_relaxation.py
-?? scripts/eval/mab6b_weaver_space_bank_detectiveqa_n10_trigger_trace.py
-?? scripts/eval/mab6b_weaver_space_bank_eventqa_65536_n5.py
-```

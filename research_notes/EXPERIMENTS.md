@@ -153,6 +153,7 @@ Current next experiment gate:
 | EXP-20260626-004 | 2026-06-26 | MAB-6B-FR top-k diagnostic | Does broader final-query retrieval improve Weaver-space-bank accuracy at retrieve_threshold=0.03? | `completed_exploratory` | top_k=1/2/4/8 gave Bank-on EM 0.1/0.0/0.0/0.0; realized retrieval was 1/2/3/3 slots because thresholding capped top_k=4/8 |
 | EXP-20260629-001 | 2026-06-29 | MAB-6B-FR retrieval-threshold relaxation | Does relaxing retrieve_threshold let top_k=4 realize four retrieved slots before quality is judged? | `completed_exploratory` | All eight settings completed sequentially on GPU 5; no top_k=4 run reached 32 query-turn latent tokens in all 10 contexts; top_k=4 remained mechanism-inconclusive and top_k=1 stayed preferred |
 | EXP-20260629-002 | 2026-06-29 | EventQA frozen-context single-context run | Does the benchmark-conformant `frozen_context_bank` protocol show a positive signal on EventQA context_index=0 before any multi-context scaling? | `completed_exploratory` | Context was memorized once, all 100 queries reused the same frozen bank with zero query writes, Bank-off EM was 0.00, and Bank-on EM reached 0.22 on the single evaluated context |
+| EXP-20260629-003 | 2026-06-29 | EventQA frozen-context all-5-context run | Does the benchmark-conformant `frozen_context_bank` protocol retain a positive signal across all 5 EventQA 65536 contexts? | `completed_exploratory` | All 5 contexts completed under isolated per-context runs; Bank-off EM was 4/500 and Bank-on EM was 83/500; protocol invariants held, but every context still collapsed to one slot |
 
 ## Recorded Experiments
 
@@ -3172,6 +3173,115 @@ full GSM8K test performance.
 - Bank-on improved official EM over the compressed-bridge Bank-off baseline on
   `context_index=0`.
 - The main mechanism risk remains construction-time single-slot collapse: the
+
+### EXP-20260629-003: EventQA Frozen-Context All-5-Context Run
+
+- Phase: EventQA exploratory benchmark-conformant expansion
+- Status: `completed_exploratory`
+- Research question: does the benchmark-conformant `frozen_context_bank`
+  protocol retain a positive signal across all 5 local EventQA 65536 contexts?
+- Configuration:
+  - `retrieve_threshold=0.005`
+  - `update_threshold=0.08`
+  - `top_k=1`
+  - `max_slots=16`
+  - `generation_max_length=40`
+  - `eventqa_protocol=frozen_context_bank`
+  - one isolated context per process via `--context-index`
+- Scheduling support:
+  - the runner now accepts `--context-index` so one EventQA context can be
+    forced into one isolated process / output root for safe multi-GPU parallel
+    evaluation
+  - run metadata now records `context_index` and
+    `selected_context_indices`
+- Commands / run roots:
+  - `ctx0`:
+    `CUDA_VISIBLE_DEVICES=6 ... --context-index 0 --output-root outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx0`
+    -> `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx0/20260629T131415Z-eventqa-65536-version-b-weaver-space-bank-n5/`
+  - `ctx1`:
+    `CUDA_VISIBLE_DEVICES=0 ... --context-index 1 --output-root outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx1`
+    -> `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx1/20260629T131413Z-eventqa-65536-version-b-weaver-space-bank-n5/`
+  - `ctx2`:
+    `CUDA_VISIBLE_DEVICES=5 ... --context-index 2 --output-root outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx2`
+    -> `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx2/20260629T131413Z-eventqa-65536-version-b-weaver-space-bank-n5/`
+  - `ctx3`:
+    `CUDA_VISIBLE_DEVICES=3 ... --context-index 3 --output-root outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx3`
+    -> `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx3/20260629T133550Z-eventqa-65536-version-b-weaver-space-bank-n5/`
+  - `ctx4`:
+    `CUDA_VISIBLE_DEVICES=0 ... --context-index 4 --output-root outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx4`
+    -> `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx4/20260629T133555Z-eventqa-65536-version-b-weaver-space-bank-n5/`
+- Primary reports per run:
+  - `eventqa_aggregate.json`
+  - `eventqa_per_question.jsonl`
+  - `eventqa_per_context.jsonl`
+  - `diagnostics.jsonl`
+  - `manifest.json`
+  - `run_config.json`
+  - `paired_results.json`
+
+#### Observations
+
+- Protocol validation held in all 5 contexts:
+  - `context_memorization_count=1`
+  - `same_frozen_bank_reused_across_queries=true`
+  - all 100 queries per context shared the same frozen bank instance
+  - `bank_snapshot_changed_after_query=false`
+  - total query write delta `0`
+  - max query write delta `0`
+  - blocked query write attempts total `500` with distribution `{1:500}`
+  - `cross_context_leakage_detected=false`
+- Overall result across `500` questions:
+  - Bank-off substring EM `4/500 = 0.008`
+  - Bank-on substring EM `83/500 = 0.166`
+  - absolute improvement `+0.158`
+  - Bank-off `eventqa_recall=0.178`
+  - Bank-on `eventqa_recall=0.208`
+  - improved / regressed / unchanged `81 / 2 / 417`
+  - `output_changed_count=500`
+  - bank-off / bank-on format failures `377 / 173`
+  - bank-off / bank-on Chinese-script outputs `189 / 30`
+- Per-context EM:
+  - `ctx0`: `0/100 -> 17/100`
+  - `ctx1`: `0/100 -> 3/100`
+  - `ctx2`: `0/100 -> 19/100`
+  - `ctx3`: `3/100 -> 21/100`
+  - `ctx4`: `1/100 -> 23/100`
+- Per-context improved / regressed / unchanged:
+  - `ctx0`: `17 / 0 / 83`
+  - `ctx1`: `3 / 0 / 97`
+  - `ctx2`: `19 / 0 / 81`
+  - `ctx3`: `19 / 1 / 80`
+  - `ctx4`: `23 / 1 / 76`
+- Mechanism shape remained collapsed in all 5 contexts:
+  - each context had `17` construction chunks
+  - each context ended with `final_slot_count=1`
+  - each context had `true_insert_count=1` and
+    `true_matched_replace_count=16`
+  - `true_capacity_evict_count=0` and `true_replace_old_slot_count=0` in all
+    contexts
+  - aggregate candidate slot count before top-k `{1:500}`
+  - aggregate retrieved indices `{(0,):500}`
+  - aggregate retrieved latent count `{8:500}`
+  - aggregate raw candidate score min / max / mean
+    `0.04529 / 0.07478 / 0.05641`
+- Representative preserved examples:
+  - improved:
+    `ctx0 q1`, `ctx1 q13`, `ctx2 q3`, `ctx3 q1`, `ctx4 q0`
+  - regressed:
+    `ctx3 q42`, `ctx4 q6`
+  - unchanged wrong examples preserved across early / middle / late positions
+
+#### Conclusion
+
+- This is strong exploratory evidence that Bank-on improves over the
+  compressed-bridge Bank-off baseline under the benchmark-conformant
+  `frozen_context_bank` lifecycle.
+- It is not a final benchmark-improvement claim and it is not an official full
+  long-context baseline comparison.
+- The gain cannot yet be attributed to diverse slot retrieval because every
+  context still collapsed to one final memory slot.
+- The next recommended mechanism study is a frozen-context slot-collapse /
+  matched-replacement diagnostic rather than more immediate full EventQA runs.
   bank behaved like one compressed latent memory slot rather than diverse event
   slots.
 - Follow-up boundary: preserve this result and do not run the remaining 4

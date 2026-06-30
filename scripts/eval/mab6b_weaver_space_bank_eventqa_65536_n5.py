@@ -75,6 +75,10 @@ BANK_CONFIG_FIELDS = (
 )
 
 
+class _ConstructionOnlyStop(RuntimeError):
+    """Signal that construction finished and query generation was skipped."""
+
+
 def _eventqa_bank_config(args) -> dict:
     retrieve_threshold = float(
         getattr(args, "retrieve_threshold", DEFAULT_RETRIEVE_THRESHOLD)
@@ -578,12 +582,33 @@ def _query_only_payload(payload: dict) -> dict:
     return query_payload
 
 
+def _construction_only_payload(context_payload: dict) -> dict:
+    if context_payload["questions"]:
+        return build_question_payload(context_payload, 0)
+    return {
+        "context_id": context_payload["context_id"],
+        "context_index": context_payload["context_index"],
+        "query_id": None,
+        "question_id": None,
+        "question_type": None,
+        "qa_pair_id": None,
+        "previous_events": [],
+        "chunks": context_payload["chunks"],
+        "chunk_token_lengths": context_payload["chunk_token_lengths"],
+        "memorization_prompts": context_payload["memorization_prompts"],
+        "query_prompt": "",
+        "question": None,
+        "gold_answers": [],
+    }
+
+
 def _eventqa_manager_factory(
     original_factory,
     capture: dict,
     *,
     external_bank=None,
     preserve_bank: bool = False,
+    construction_only: bool = False,
     generation_max_length: int = GENERATION_MAX_LENGTH,
     recorded_bank_config: dict | None = None,
 ):
@@ -676,6 +701,9 @@ def _eventqa_manager_factory(
                         tokenize=False,
                         add_generation_prompt=True,
                     )
+                    if construction_only:
+                        lifecycle["construction_only_stopped_before_query"] = True
+                        raise _ConstructionOnlyStop()
                 return messages
 
         return EventQAReadOnlyQueryManager
@@ -693,6 +721,7 @@ def _run_eventqa_model(
     *,
     external_bank=None,
     preserve_bank: bool = False,
+    construction_only: bool = False,
     recorded_bank_config: dict | None = None,
 ) -> dict:
     if bank_mode == "on" and bank_config is None:
@@ -706,20 +735,60 @@ def _run_eventqa_model(
         capture,
         external_bank=external_bank,
         preserve_bank=preserve_bank,
+        construction_only=construction_only,
         generation_max_length=int(
             getattr(args, "generation_max_length", GENERATION_MAX_LENGTH)
         ),
         recorded_bank_config=recorded_bank_config,
     )
     try:
-        result = weaver_bank._run_model(
-            args,
-            model,
-            capacity,
-            payload,
-            bank_mode,
-            bank_config,
-        )
+        try:
+            result = weaver_bank._run_model(
+                args,
+                model,
+                capacity,
+                payload,
+                bank_mode,
+                bank_config,
+            )
+        except _ConstructionOnlyStop:
+            if not construction_only or bank_mode != "on":
+                raise
+            lifecycle = capture["lifecycle"]
+            pre_query = lifecycle.get("pre_query_bank_summary")
+            if pre_query is None:
+                raise RuntimeError(
+                    "Construction-only EventQA run did not capture pre-query bank summary"
+                )
+            result = {
+                "prediction": None,
+                "pre_query_bank_summary": pre_query,
+                "post_query_bank_summary": pre_query,
+                "query_write_count_delta": 0,
+                "query_write_attempt_count_delta": 0,
+                "query_read_only_enforced": True,
+                "bank_snapshot_changed_after_query": False,
+                "true_insert_count": pre_query["true_insert_count"],
+                "true_matched_replace_count": pre_query[
+                    "true_matched_replace_count"
+                ],
+                "true_capacity_evict_count": pre_query[
+                    "true_capacity_evict_count"
+                ],
+                "true_replace_old_slot_count": pre_query[
+                    "true_replace_old_slot_count"
+                ],
+                "query_write_count": 0,
+                "query_write_attempt_count": 0,
+                "bank_reset_after_context": lifecycle.get("post_reset_slot_count") == 0,
+                "construction_only": True,
+                "construction_only_stopped_before_query": bool(
+                    lifecycle.get("construction_only_stopped_before_query")
+                ),
+                "peak_cuda_memory": None,
+            }
+            if preserve_bank:
+                result["_retained_bank"] = capture["bank"]
     finally:
         base._manager_class = original_factory
         restore_bank_trace = capture.get("restore_bank_trace")
@@ -746,18 +815,18 @@ def _run_eventqa_model(
         lifecycle.get("construction_turn_diagnostics", [])
     )
     if bank_mode == "on":
-        proxy = lifecycle["eventqa_query_bank_proxy"]
-        if "post_query_bank_summary" not in lifecycle:
+        if not construction_only and "post_query_bank_summary" not in lifecycle:
             raise RuntimeError("EventQA query post-state was not captured before bank reset")
-        result.update(
-            _query_memory_diagnostics(
-                lifecycle,
-                _query_turn(result),
-                retrieve_threshold=float(bank_config["retrieve_threshold"]),
+        if not construction_only:
+            result.update(
+                _query_memory_diagnostics(
+                    lifecycle,
+                    _query_turn(result),
+                    retrieve_threshold=float(bank_config["retrieve_threshold"]),
+                )
             )
-        )
-        if not result["query_read_only_enforced"]:
-            raise RuntimeError("EventQA query read-only assertion failed")
+            if not result["query_read_only_enforced"]:
+                raise RuntimeError("EventQA query read-only assertion failed")
         result["bank_preserved_for_context_queries"] = preserve_bank
         result["cross_context_leakage_detected"] = False
         if preserve_bank:
@@ -1106,6 +1175,7 @@ def _build_context_summary(
     *,
     eventqa_protocol: str = "independent_episode",
     cleanup_slot_count: int | None = None,
+    construction_result: dict | None = None,
 ) -> dict:
     aggregate = _aggregate_question_rows(question_rows)
     valid = [row for row in question_rows if not row.get("error_or_stop_reason")]
@@ -1125,6 +1195,8 @@ def _build_context_summary(
         memorization_rows = [
             row for row in valid if row["context_memorization_performed"]
         ]
+        if not memorization_rows and construction_result is not None:
+            memorization_rows = [construction_result]
         construction = (
             memorization_rows[0]["construction_turn_diagnostics"]
             if memorization_rows
@@ -1241,6 +1313,7 @@ def _build_manifest(
         "context_index": getattr(args, "context_index", None),
         "selected_context_indices": list(selected_context_indices or []),
         "question_limit": args.question_limit,
+        "construction_only": bool(getattr(args, "construction_only", False)),
         "context_capacity": None,
         "git_status_before": git_status_before,
         "started_at": started_at,
@@ -1342,6 +1415,7 @@ def build_parser():
     parser.add_argument("--requested-contexts", type=int, default=DEFAULT_REQUESTED_CONTEXTS)
     parser.add_argument("--context-index", type=int)
     parser.add_argument("--question-limit", type=int)
+    parser.add_argument("--construction-only", action="store_true")
     parser.add_argument("--chunk-size", type=int, default=DEFAULT_CHUNK_SIZE)
     parser.add_argument(
         "--retrieve-threshold", type=float, default=DEFAULT_RETRIEVE_THRESHOLD
@@ -1408,8 +1482,25 @@ def main() -> int:
             context_question_rows = []
             frozen_bank = None
             cleanup_slot_count = None
+            construction_result = None
             try:
+                if args.construction_only:
+                    construction_result = _run_eventqa_model(
+                        args,
+                        model,
+                        capacity,
+                        _construction_only_payload(context_payload),
+                        "on",
+                        runtime_bank_config,
+                        preserve_bank=args.eventqa_protocol == "frozen_context_bank",
+                        construction_only=True,
+                        recorded_bank_config=manifest,
+                    )
+                    if args.eventqa_protocol == "frozen_context_bank":
+                        frozen_bank = construction_result.pop("_retained_bank", None)
                 for question_index in range(question_total):
+                    if args.construction_only:
+                        break
                     payload = build_question_payload(context_payload, question_index)
                     frozen_protocol = args.eventqa_protocol == "frozen_context_bank"
                     query_payload = _query_only_payload(payload)
@@ -1484,6 +1575,7 @@ def main() -> int:
                     context_question_rows,
                     eventqa_protocol=args.eventqa_protocol,
                     cleanup_slot_count=cleanup_slot_count,
+                    construction_result=construction_result,
                 )
             )
         aggregate = {

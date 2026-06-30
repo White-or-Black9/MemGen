@@ -2,24 +2,26 @@
 
 ## Current Decision
 
-MAB-6B is completed. The canonical exploratory run is
-`20260625T122323Z-detectiveqa-version-b-weaver-space-bank-n10`. It preserved
-the MAB-5C / MAB-5D safety constraints, preserved MAB-6A reproducibility, and
-changed the storage/query path:
+The accepted EventQA result is now the 15-run frozen-context A/B/C sweep on all
+5 EventQA-65536 contexts.
 
-- `retrieve_threshold=0.03`
-- `update_threshold=0.05`
-- `max_slots=8`
-- `top_k=1`
-- `retrieved_memory_to_weaver=True`
-- `memory_bank_storage_space=weaver`
-
-The canonical run improved exact match from `0.0` to `0.1`, changed outputs in
-all 10 contexts, kept query-time retrieval active in all 10 contexts, preserved
-`query_write_count=0`, preserved context isolation, routed retrieval and bank
-storage fully into Weaver space, and prevented raw retrieved memory from
-entering Reasoner directly. This is exploratory positive evidence, not yet
-enough to replace Version A as the default.
+- Best setting: Config A
+  `retrieve_threshold=0.03`, `update_threshold=0.05`, `max_slots=8`,
+  `top_k=1`
+- Config A overall:
+  Bank-off `4/500 = 0.008`; Bank-on `114/500 = 0.228`;
+  Bank-off recall `0.178`; Bank-on recall `0.266`;
+  improved/regressed/unchanged `113/3/384`
+- Config B (`0.03/0.09/16/1`) forced 16-slot construction but dropped Bank-on
+  EM to `72/500 = 0.144`
+- Config C (`0.005/0.09/16/1`) forced 15-16-slot construction but dropped
+  Bank-on EM to `67/500 = 0.134`
+- Query-time retrieval still returned exactly one slot in every setting, so
+  multi-slot construction did not produce multi-slot use under `top_k=1`
+- Use the result as strong exploratory compressed frozen-context bridge
+  evidence scored by the official EventQA substring-exact-match metric, not as
+  a direct official long-context baseline comparison
+- Keep Config A for the next EventQA setting
 
 ## MAB-5B Status
 
@@ -115,27 +117,23 @@ An increase in slots or inserts is mechanism evidence, not an accuracy claim.
 
 Proceed only if a later review still wants a follow-up:
 
-1. **Preserve and commit the completed EventQA all-5-context result first:**
-   treat the 5 isolated frozen-context runs as strong exploratory evidence
-   only, plus preserve the `--context-index` scheduling support that enabled
-   safe per-context parallel evaluation.
-2. **Recommended next experiment:** run a frozen-context slot-collapse /
-   update-threshold diagnostic rather than more immediate full EventQA runs.
-   The target is to determine whether matched-replacement collapse can be
-   broken while preserving the benchmark-conformant EventQA lifecycle.
-3. **Keep configuration provenance explicit:** the preserved all-5 run used
-   runtime `retrieve_threshold=0.03`, `update_threshold=0.05`, `top_k=1`, and
-   `max_slots=8`, despite old manifests recording `0.005/0.08/1/16`. The latter
-   remains the intended cautious setting for a future diagnostic after the
-   runner-integrity repair; it is not the configuration of the preserved run.
-4. **Optional prompt-length audit:** isolate why the `132726 > 131072` warning
+1. **Preserve the accepted sweep as the anchor:**
+   the EventQA reference point is now the completed 15-run A/B/C sweep, not
+   only the earlier 5-run positive signal.
+2. **Recommended next EventQA setting:** keep Config A
+   (`0.03/0.05/8/1`) unless a later approved study explicitly targets a
+   different mechanism question.
+3. **If multi-slot work is revisited:** do not assume that larger
+   construction-time banks help. Design a query-time retrieval intervention
+   that actually returns more than one slot before interpreting answer quality.
+4. **Keep configuration provenance explicit:** the accepted best EventQA result
+   in this sweep is Config A, and its runtime config is
+   `retrieve_threshold=0.03`, `update_threshold=0.05`, `top_k=1`,
+   `max_slots=8`.
+5. **Optional prompt-length audit:** isolate why the `132726 > 131072` warning
    is emitted during over-capacity full-history estimation, while keeping
    `full_history_status=over_capacity_invalid` and never scoring full-history
    generation.
-5. **Optional future multi-slot mechanism audit:** if a later approved study
-   still wants top_k>1, first design a retrieval intervention that reliably
-   reaches 32 query-turn retrieved latent tokens before interpreting answer
-   quality.
 
 ## Stop Conditions
 
@@ -154,14 +152,12 @@ Proceed only if a later review still wants a follow-up:
 2. Keep Version A as the default path until MAB-6B is replicated.
 3. Treat the MAB-6B exact-match gain as exploratory benchmark evidence, not as
    a default-path promotion.
-4. The current active EventQA artifacts are the 5 isolated frozen-bank runs:
-   `ctx0/ctx1/ctx2/ctx3/ctx4` under
-   `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx*/...`.
-   Preserve them as strong exploratory evidence, not a final benchmark claim.
-   Attribute them to runtime `0.03/0.05/1/8`, not the stale manifest values.
-5. Preserve `--context-index` as the scheduling parameter for isolated
-   per-context EventQA execution.
-6. After this result is committed, prioritize a frozen-context slot-collapse /
-   update-threshold diagnostic over more immediate full EventQA scaling.
-7. Keep the single-slot-collapse caveat explicit before any broader EventQA
-   scaling or summary.
+4. The current active EventQA artifacts are the 15 accepted sweep runs under
+   `outputs/mab/eventqa_frozen_context_bank_cfg{A,B,C}_ctx*/...`.
+5. Preserve `--context-index`, runtime config integrity validation,
+   `--construction-only`, and the related EventQA regression tests as part of
+   the runner contract.
+6. Do not summarize Config B or C as improvements; they are negative but useful
+   evidence that multi-slot construction can hurt under `top_k=1`.
+7. Keep the bridge boundary explicit before any broader EventQA scaling or
+   summary.

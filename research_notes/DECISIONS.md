@@ -78,6 +78,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0071 | 2026-06-29 | accepted | Preserve the first EventQA frozen-context positive signal as single-context exploratory evidence only |
 | DEC-0072 | 2026-06-29 | accepted | Preserve the full 5-context EventQA frozen-context result as strong exploratory evidence only |
 | DEC-0073 | 2026-06-29 | accepted | Keep `--context-index` as the EventQA runner scheduling parameter for isolated per-context evaluation |
+| DEC-0074 | 2026-06-30 | accepted | Keep Config A as the best EventQA setting after the all-15-run A/B/C sweep |
 
 ## Decision Template
 
@@ -97,7 +98,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 
 ## Standing Decisions
 
-### Latest MAB-6B-FR Board (2026-06-29)
+### Latest MAB-6B-FR Board (2026-06-30)
 
 - Keep Version A as the default path; none of the MAB-6B-FR n10 diagnostics is
   sufficient for a default-path or benchmark-performance claim.
@@ -131,9 +132,19 @@ IDs and append superseding decisions rather than silently rewriting history.
   EventQA mechanism risk.
 - The EventQA runner now supports `--context-index` to force isolated
   one-context execution for safe per-context scheduling and artifact isolation.
-- Active next step: preserve and commit the EventQA all-5 result plus
-  `--context-index`, then run a frozen-context slot-collapse /
-  matched-replacement diagnostic rather than more immediate full EventQA runs.
+- The EventQA runner now also preserves runtime config integrity, supports
+  `--construction-only`, and has related regression tests.
+- The accepted EventQA A/B/C sweep is now complete across all 15 runs:
+  Config A (`0.03/0.05/8/1`) is best with Bank-on
+  `114/500 = 0.228` versus Bank-off `4/500 = 0.008`.
+- Config B (`0.03/0.09/16/1`) and Config C (`0.005/0.09/16/1`) force
+  `15-16` slot construction but reduce Bank-on EM to `72/500` and `67/500`.
+- Multi-slot construction therefore hurts EventQA under `top_k=1` in this
+  bridge, and query-time retrieval still returns exactly one slot in all three
+  settings.
+- Active next step: keep Config A for the next EventQA setting. If a later
+  study still wants multi-slot benefit, target multi-slot query-time retrieval
+  rather than only multi-slot construction.
 
 ### Current Board (2026-06-22)
 
@@ -409,6 +420,59 @@ IDs and append superseding decisions rather than silently rewriting history.
   - Research-note and aggregation logic can treat per-context artifacts as
     first-class benchmark evidence.
 - Related experiments: `EXP-20260629-003`
+
+### DEC-0074: Keep Config A as the Best EventQA Setting After the A/B/C Sweep
+
+- Date: 2026-06-30
+- Status: accepted
+- Context:
+  - The 15-run EventQA frozen-context sweep completed across
+    `3 configs x 5 contexts`.
+  - All 15 runs preserved protocol integrity: every run had matching
+    `manifest.json` and `run_config.json`, `query_write_count_delta=0`,
+    `bank_snapshot_changed_after_query=false`, and
+    `cross_context_leakage_detected=false`.
+  - Config A (`retrieve_threshold=0.03`, `update_threshold=0.05`,
+    `max_slots=8`, `top_k=1`) produced Bank-off `4/500 = 0.008` and
+    Bank-on `114/500 = 0.228`.
+  - Config B (`0.03/0.09/16/1`) produced Bank-on `72/500 = 0.144`.
+  - Config C (`0.005/0.09/16/1`) produced Bank-on `67/500 = 0.134`.
+  - Config B and C forced `15-16` slot construction, but query-time retrieval
+    still returned exactly one slot in all settings.
+- Decision:
+  - Keep Config A as the best accepted EventQA setting from this sweep.
+  - Do not promote Config B or Config C as better EventQA defaults.
+  - Preserve the runner-side runtime config integrity validation,
+    `--construction-only`, and related regression tests as part of the EventQA
+    runner contract.
+- Alternatives considered:
+  - Promote Config B because it creates stable 16-slot construction.
+  - Promote Config C because it keeps the low retrieve-threshold candidate.
+  - Treat the earlier `83/500` all-5 positive signal as the accepted anchor.
+- Rationale:
+  - Config A clearly outperformed both multi-slot candidates on Bank-on EM and
+    recall while keeping the cleanest output surface.
+  - Multi-slot construction alone did not create multi-slot query-time use
+    under `top_k=1`, so the larger-bank settings added mechanism complexity
+    without delivering better answer quality.
+  - The repaired runner reproduced a stronger Config A result than the earlier
+    preserved `83/500` positive signal.
+- Consequences:
+  - Keep Config A for the next EventQA setting.
+  - If a later approved study still wants multi-slot benefit, it must target
+    multi-slot query-time retrieval rather than only construction-time slot
+    growth.
+  - Continue to describe this result as strong exploratory compressed
+    frozen-context bridge evidence, not a direct official long-context baseline
+    comparison.
+- Verification required:
+  - benchmark note and research-note summaries must preserve the exact sweep
+    metrics and bridge boundary
+  - canonical detective note SHA / mtime must remain unchanged
+  - runner validation and regression tests must pass before commit
+- Related experiments:
+  - `EXP-20260629-003`
+  - `EXP-20260630-001`
 
 ### Historical Board (2026-06-18)
 

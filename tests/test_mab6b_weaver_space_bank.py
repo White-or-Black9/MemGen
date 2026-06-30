@@ -123,6 +123,16 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
 
         self.assertEqual(args.eventqa_protocol, "frozen_context_bank")
         self.assertIsNone(args.context_index)
+        self.assertFalse(args.construction_only)
+
+    def test_eventqa_parser_accepts_construction_only(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        args = eventqa.build_parser().parse_args(["--construction-only"])
+
+        self.assertTrue(args.construction_only)
 
     def test_eventqa_default_cli_values_are_the_runtime_bank_config(self):
         eventqa = importlib.import_module(
@@ -607,6 +617,58 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
         self.assertEqual(summary["final_construction_slot_count"], 2)
         self.assertEqual(summary["construction_write_action_sequence"], ["insert", "insert"])
         self.assertTrue(summary["bank_reset_after_context"])
+
+    def test_eventqa_construction_only_context_summary_records_bank_without_questions(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        context_payload = {
+            "context_index": 0,
+            "context_id": "eventqa-ctx-0",
+            "question_count": 100,
+            "chunks": ["chunk-1", "chunk-2"],
+            "chunk_token_lengths": [4, 5],
+        }
+        construction_result = {
+            "context_memorization_performed": True,
+            "pre_query_bank_summary": {"slot_count": 1},
+            "true_insert_count": 1,
+            "true_matched_replace_count": 1,
+            "true_capacity_evict_count": 0,
+            "true_replace_old_slot_count": 0,
+            "construction_turn_diagnostics": [
+                {
+                    "construction_turn_index": 0,
+                    "write_action": "insert",
+                    "best_matched_score": None,
+                    "slot_count_after_write": 1,
+                },
+                {
+                    "construction_turn_index": 1,
+                    "write_action": "replace_matched",
+                    "best_matched_score": 0.06,
+                    "slot_count_after_write": 1,
+                },
+            ],
+        }
+
+        summary = eventqa._build_context_summary(
+            context_payload,
+            [],
+            eventqa_protocol="frozen_context_bank",
+            cleanup_slot_count=0,
+            construction_result=construction_result,
+        )
+
+        self.assertEqual(summary["context_memorization_count"], 1)
+        self.assertEqual(summary["question_count"], 0)
+        self.assertEqual(summary["final_construction_slot_count"], 1)
+        self.assertEqual(summary["true_insert_count"], 1)
+        self.assertEqual(summary["true_matched_replace_count"], 1)
+        self.assertEqual(
+            summary["construction_write_action_sequence"],
+            ["insert", "replace_matched"],
+        )
 
     def test_memgen_config_defaults_reasoner_storage(self):
         config = MemGenConfig()

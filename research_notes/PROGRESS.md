@@ -1,62 +1,68 @@
 # 项目进展
 
-## Latest EventQA Frozen-Context Status (2026-06-29)
+## Latest EventQA Frozen-Context Status (2026-06-30)
 
-- The benchmark-conformant EventQA `frozen_context_bank` evaluation is now
-  complete across all 5 EventQA 65536 contexts, one context per isolated run
-  root.
+- The EventQA `frozen_context_bank` A/B/C sweep is now complete across all
+  `3 configs x 5 contexts = 15` runs.
 - Artifact roots:
-  - `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx0/20260629T131415Z-eventqa-65536-version-b-weaver-space-bank-n5/`
-  - `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx1/20260629T131413Z-eventqa-65536-version-b-weaver-space-bank-n5/`
-  - `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx2/20260629T131413Z-eventqa-65536-version-b-weaver-space-bank-n5/`
-  - `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx3/20260629T133550Z-eventqa-65536-version-b-weaver-space-bank-n5/`
-  - `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx4/20260629T133555Z-eventqa-65536-version-b-weaver-space-bank-n5/`
+  - Config A:
+    `outputs/mab/eventqa_frozen_context_bank_cfgA_ctx{0..4}/...`
+  - Config B:
+    `outputs/mab/eventqa_frozen_context_bank_cfgB_ctx{0..4}/...`
+  - Config C:
+    `outputs/mab/eventqa_frozen_context_bank_cfgC_ctx{0..4}/...`
 - Script:
   `scripts/eval/mab6b_weaver_space_bank_eventqa_65536_n5.py`
 - Benchmark note:
   `research_notes/benchmarks/memoryagentbench_mab6b_fr_eventqa_65536_n5.md`
-- Runner scheduling support:
-  `--context-index` now exists to force one-context-per-process execution and
-  preserve isolated output roots during safe parallel evaluation.
-- Runtime-config correction:
-  the preserved all-5 run actually used `retrieve_threshold=0.03`,
-  `update_threshold=0.05`, `top_k=1`, and `max_slots=8`. The previously
-  recorded `0.005/0.08/1/16` values came from EventQA constants written to the
-  manifests while the runtime silently consumed the DetectiveQA bank config.
-  The runner now owns and validates its runtime config, but this repair does
-  not retroactively change the preserved artifacts.
-- Protocol result:
-  `frozen_context_bank` in all 5 contexts; `context_memorization_count=1`;
-  same frozen bank reused across all 100 queries per context; total query write
-  delta `0`; max query write delta `0`; bank snapshot unchanged across queries;
-  blocked query write attempts total `500` with distribution `{1:500}`; no
-  cross-context leakage.
+- Runner preservation:
+  runtime config integrity validation is now enforced; `--context-index`
+  remains the isolated scheduling parameter; `--construction-only` is now
+  supported; related regression tests exist in
+  `tests/test_mab6b_weaver_space_bank.py`.
+- Integrity result:
+  all 15 runs completed; `manifest.json` and `run_config.json` matched the
+  intended config for every run; total / max `query_write_count_delta = 0 / 0`;
+  `bank_snapshot_changed_after_query=false`;
+  `cross_context_leakage_detected=false`; canonical detective note SHA / mtime
+  unchanged.
+- Main result:
+  Config A is the best EventQA setting in this sweep:
+  `retrieve_threshold=0.03`, `update_threshold=0.05`, `max_slots=8`, `top_k=1`.
+- Config A overall:
+  Bank-off `4/500 = 0.008`; Bank-on `114/500 = 0.228`;
+  Bank-off recall `0.178`; Bank-on recall `0.266`;
+  improved/regressed/unchanged `113/3/384`;
+  per-context Bank-on EM `0.18/0.42/0.21/0.17/0.16`;
+  final slot distribution `{1:500}`;
+  retrieved indices `{(0,):500}`;
+  candidate slot distribution `{1:500}`;
+  raw candidate score min / max / mean `0.04436 / 0.05992 / 0.05310`;
+  format failures `377/123`; Chinese-script outputs `189/23`.
+- Config B overall:
+  Bank-on `72/500 = 0.144`; recall `0.202`;
+  improved/regressed/unchanged `72/4/424`;
+  final slot distribution `{16:500}`;
+  retrieved indices `{(0,):400,(4,):100}`;
+  Bank-on format failures `141`; Bank-on Chinese-script outputs `120`.
+- Config C overall:
+  Bank-on `67/500 = 0.134`; recall `0.208`;
+  improved/regressed/unchanged `66/3/431`;
+  final slot distribution `{15:100,16:400}`;
+  retrieved indices `{(0,):300,(5,):100,(12,):100}`;
+  Bank-on format failures `165`; Bank-on Chinese-script outputs `116`.
 - Mechanism result:
-  all 5 contexts still collapsed to one construction-time slot
-  (`17` chunks -> `final_slot_count=1`, `true_insert_count=1`,
-  `true_matched_replace_count=16`, no capacity eviction), so the active
-  EventQA mechanism still behaves like one compressed latent memory slot rather
-  than diverse event slots under the actual `0.03/0.05/1/8` runtime config.
-- Overall 5-context result:
-  compressed-bridge Bank-off substring EM `4/500 = 0.008`;
-  Bank-on substring EM `83/500 = 0.166`; absolute improvement `+0.158`;
-  Bank-off recall `0.178`; Bank-on recall `0.208`;
-  improved/regressed/unchanged `81/2/417`;
-  bank-off/bank-on format failures `377/173`;
-  bank-off/bank-on Chinese-script outputs `189/30`.
-- Per-context Bank-on EM:
-  `17/100`, `3/100`, `19/100`, `21/100`, `23/100` for
-  `context_index=0..4`.
+  Config B and C force `15-16` slot construction but reduce Bank-on EM.
+  Query-time retrieval still returns exactly one slot in all three settings, so
+  multi-slot construction does not imply multi-slot use under `top_k=1`.
 - Interpretation boundary:
-  this is now strong exploratory evidence that Bank-on improves over the
-  compressed-bridge Bank-off baseline under the benchmark-conformant frozen
-  protocol, but it is still not a final benchmark-improvement claim and is not
-  an official long-context full-history comparison.
+  this remains strong exploratory compressed frozen-context bridge evidence
+  scored by the official EventQA substring exact-match metric, not a direct
+  official full-context baseline comparison.
 - Current next step:
-  preserve this 5-context evidence, commit the EventQA result plus
-  `--context-index` scheduling support, then diagnose slot diversity /
-  matched-replacement collapse under `frozen_context_bank` rather than running
-  more full EventQA contexts immediately.
+  keep Config A for the next EventQA setting and, if multi-slot behavior is
+  revisited later, target multi-slot query-time retrieval rather than only
+  multi-slot construction.
 
 ## Latest MAB-6B-FR Diagnostic Status (2026-06-29)
 

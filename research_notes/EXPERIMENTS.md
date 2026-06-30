@@ -18,6 +18,12 @@ overwrite prior records; append a new entry.
   official exact match from `0.0` to `0.1` on the fixed slice while keeping
   `query_write_count=0`, keeping cross-context leakage `false`, and avoiding
   `reasoner_to_weaver` reprojection for retrieved memory.
+- The accepted EventQA A/B/C sweep is now complete across all 15 runs.
+  Config A (`0.03/0.05/8/1`) is best with Bank-on `114/500 = 0.228` versus
+  Bank-off `4/500 = 0.008`; Config B and C force `15-16` slot construction
+  but reduce Bank-on EM. Treat this as strong exploratory compressed
+  frozen-context bridge evidence, not a direct official long-context baseline
+  comparison.
 - Earlier dated recommendations remain historical records.
 
 ## Historical Post-R2 Mechanism Boundary Note
@@ -154,6 +160,7 @@ Current next experiment gate:
 | EXP-20260629-001 | 2026-06-29 | MAB-6B-FR retrieval-threshold relaxation | Does relaxing retrieve_threshold let top_k=4 realize four retrieved slots before quality is judged? | `completed_exploratory` | All eight settings completed sequentially on GPU 5; no top_k=4 run reached 32 query-turn latent tokens in all 10 contexts; top_k=4 remained mechanism-inconclusive and top_k=1 stayed preferred |
 | EXP-20260629-002 | 2026-06-29 | EventQA frozen-context single-context run | Does the benchmark-conformant `frozen_context_bank` protocol show a positive signal on EventQA context_index=0 before any multi-context scaling? | `completed_exploratory` | Context was memorized once, all 100 queries reused the same frozen bank with zero query writes, Bank-off EM was 0.00, and Bank-on EM reached 0.22 on the single evaluated context |
 | EXP-20260629-003 | 2026-06-29 | EventQA frozen-context all-5-context run | Does the benchmark-conformant `frozen_context_bank` protocol retain a positive signal across all 5 EventQA 65536 contexts? | `completed_exploratory` | All 5 contexts completed under isolated per-context runs; Bank-off EM was 4/500 and Bank-on EM was 83/500; protocol invariants held, but every context still collapsed to one slot |
+| EXP-20260630-001 | 2026-06-30 | EventQA frozen-context config sweep | Which of Config A/B/C is the best EventQA frozen-context setting after runtime-integrity repair? | `completed_exploratory` | All 15 runs completed; Config A (`0.03/0.05/8/1`) was best at Bank-on `114/500`, while Config B/C forced 15-16-slot construction but reduced Bank-on EM to `72/500` and `67/500` |
 
 ## Recorded Experiments
 
@@ -3299,3 +3306,98 @@ full GSM8K test performance.
   slots.
 - Follow-up boundary: preserve this result and do not run the remaining 4
   contexts until explicitly approved.
+
+### EXP-20260630-001: EventQA Frozen-context A/B/C Config Sweep
+
+- Phase: EventQA frozen-context config sweep
+- Status: `completed_exploratory`
+- Research question:
+  which EventQA frozen-context configuration is best after the runner-side
+  runtime-integrity repair?
+- Hypothesis:
+  the historical actual control (`0.03/0.05/8/1`) may still outperform the
+  larger-bank multi-slot candidates, so low retrieve-threshold transfer from
+  detective_qa should not be assumed better for EventQA.
+- Baseline/comparator:
+  Config A versus Config B versus Config C under the same EventQA protocol and
+  five-context coverage.
+- Environment:
+  `memgen` Python environment, host CUDA runtime, one EventQA process per GPU.
+- Dataset and split:
+  MemoryAgentBench Accurate Retrieval EventQA-65536, `context_index=0..4`,
+  `100` questions per context, total `500` questions per config.
+- Common configuration:
+  `eventqa_protocol=frozen_context_bank`, `generation_max_length=40`,
+  `top_k=1`, `--skip-research-note`.
+- Configs:
+  - Config A:
+    `retrieve_threshold=0.03`, `update_threshold=0.05`, `max_slots=8`
+  - Config B:
+    `retrieve_threshold=0.03`, `update_threshold=0.09`, `max_slots=16`
+  - Config C:
+    `retrieve_threshold=0.005`, `update_threshold=0.09`, `max_slots=16`
+- Artifact roots:
+  - Config A:
+    `outputs/mab/eventqa_frozen_context_bank_cfgA_ctx{0..4}/...`
+  - Config B:
+    `outputs/mab/eventqa_frozen_context_bank_cfgB_ctx{0..4}/...`
+  - Config C:
+    `outputs/mab/eventqa_frozen_context_bank_cfgC_ctx{0..4}/...`
+
+#### Observations
+
+- Integrity:
+  - all 15 runs completed
+  - `manifest.json` and `run_config.json` matched intended config for every run
+  - `query_write_count_delta total/max = 0 / 0`
+  - `bank_snapshot_changed_after_query=false`
+  - `cross_context_leakage_detected=false`
+  - canonical detective note SHA / mtime unchanged
+- Config A overall:
+  - Bank-off `4/500 = 0.008`
+  - Bank-on `114/500 = 0.228`
+  - Bank-off recall `0.178`
+  - Bank-on recall `0.266`
+  - improved / regressed / unchanged `113 / 3 / 384`
+  - per-context Bank-on EM
+    `0.18 / 0.42 / 0.21 / 0.17 / 0.16`
+  - final slot distribution `{1:500}`
+  - retrieved indices `{(0,):500}`
+  - candidate slot distribution `{1:500}`
+  - Bank-on format failures `123`
+  - Bank-on Chinese-script outputs `23`
+- Config B overall:
+  - Bank-on `72/500 = 0.144`
+  - Bank-on recall `0.202`
+  - improved / regressed / unchanged `72 / 4 / 424`
+  - final slot distribution `{16:500}`
+  - retrieved indices `{(0,):400,(4,):100}`
+  - Bank-on format failures `141`
+  - Bank-on Chinese-script outputs `120`
+- Config C overall:
+  - Bank-on `67/500 = 0.134`
+  - Bank-on recall `0.208`
+  - improved / regressed / unchanged `66 / 3 / 431`
+  - final slot distribution `{15:100,16:400}`
+  - retrieved indices `{(0,):300,(5,):100,(12,):100}`
+  - Bank-on format failures `165`
+  - Bank-on Chinese-script outputs `116`
+- Mechanism:
+  - Config B and C force `15-16` slot construction
+  - query-time retrieval still returns exactly one slot in all three settings
+    because `retrieved_latent_count` stayed `{8:500}` and `top_k=1`
+
+#### Conclusion
+
+- Hypothesis supported: yes.
+- Interpretation:
+  Config A is the best EventQA setting in this sweep. Multi-slot construction
+  under `top_k=1` hurt EventQA in this compressed frozen-context bridge rather
+  than helping it.
+- Boundary:
+  this uses the official EventQA substring-exact-match / Accuracy scorer, but
+  it is still not a direct official full-context baseline comparison.
+- Follow-up:
+  keep Config A for the next EventQA setting. If a later approved study still
+  wants multi-slot benefit, design a query-time retrieval intervention that
+  actually returns more than one slot.

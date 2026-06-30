@@ -76,6 +76,19 @@
   slot-1/slot-0 pair is fixed across all 100 queries and ranks first by both
   final score and reconstructed raw cosine. Both slots are repeatedly refreshed
   during construction; query vectors and slot/chunk provenance are absent.
+- Standalone ctx4 reproducibility diagnostic:
+  `outputs/mab/eventqa_configB_ctx4_topk2_rerun/20260630T121127Z-eventqa-65536-version-b-weaver-space-bank-n5`.
+  This rerun did not reproduce the catastrophic ctx4 collapse exactly:
+  Bank-off `1/100`; Bank-on `11/100`; recall `0.28`; format failures `52`;
+  Chinese outputs `44`; final slots `16`; retrieved pairs
+  `{(3,0):84,(0,3):16}`. Compared with the accepted all-context ctx4 result,
+  EM is `+10`, format failures `-42`, Chinese outputs `-39`, and the dominant
+  pair changes away from `(1,0):100`.
+- Stability interpretation:
+  Config B `top_k=2` ctx4 remains much worse than Config B `top_k=1` ctx4, but
+  the catastrophic all-context `1/100` outcome is not stable as a single
+  deterministic failure mode. The changed dominant slot pair indicates
+  construction-path or routing instability under the same nominal config.
 - Interpretation boundary:
   this remains strong exploratory compressed frozen-context bridge evidence
   scored by the official EventQA substring exact-match metric, not a direct
@@ -83,7 +96,7 @@
 - Current next step:
   keep Config A as the highest-EM and most output-stable setting; defer
   `top_k=4`; add score-decomposition and slot/chunk-provenance diagnostics and
-  rerun Config B `top_k=2` on context 4 only before another mechanism change.
+  then rerun ctx4 only before another mechanism change.
 
 ## Latest MAB-6B-FR Diagnostic Status (2026-06-29)
 

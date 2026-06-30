@@ -161,6 +161,7 @@ Current next experiment gate:
 | EXP-20260629-002 | 2026-06-29 | EventQA frozen-context single-context run | Does the benchmark-conformant `frozen_context_bank` protocol show a positive signal on EventQA context_index=0 before any multi-context scaling? | `completed_exploratory` | Context was memorized once, all 100 queries reused the same frozen bank with zero query writes, Bank-off EM was 0.00, and Bank-on EM reached 0.22 on the single evaluated context |
 | EXP-20260629-003 | 2026-06-29 | EventQA frozen-context all-5-context run | Does the benchmark-conformant `frozen_context_bank` protocol retain a positive signal across all 5 EventQA 65536 contexts? | `completed_exploratory` | All 5 contexts completed under isolated per-context runs; Bank-off EM was 4/500 and Bank-on EM was 83/500; protocol invariants held, but every context still collapsed to one slot |
 | EXP-20260630-001 | 2026-06-30 | EventQA frozen-context config sweep | Which of Config A/B/C is the best EventQA frozen-context setting after runtime-integrity repair? | `completed_exploratory` | All 15 runs completed; Config A (`0.03/0.05/8/1`) was best at Bank-on `114/500`, while Config B/C forced 15-16-slot construction but reduced Bank-on EM to `72/500` and `67/500` |
+| EXP-20260630-003 | 2026-06-30 | EventQA ctx4 reproducibility diagnostic | Does the catastrophic ctx4 failure from the accepted end-to-end Config B `top_k=2` run reproduce under a standalone rerun? | `completed_diagnostic_only` | No exact reproduction: standalone ctx4 reached `11/100` EM with 52 format failures and 44 Chinese outputs, and the dominant pair changed from `(1,0):100` to `{(3,0):84,(0,3):16}` |
 
 ## Recorded Experiments
 
@@ -3475,3 +3476,61 @@ full GSM8K test performance.
 - Primary follow-up: add score-decomposition and slot/chunk-provenance
   diagnostics, then rerun Config B `top_k=2` on context 4 only before changing
   retrieval behavior.
+
+### EXP-20260630-003: EventQA Config B `top_k=2` ctx4 Standalone Reproducibility Diagnostic
+
+- Phase: EventQA exploratory reproducibility diagnostic
+- Status: `completed_diagnostic_only`
+- Research question:
+  does the catastrophic ctx4 collapse from the accepted all-context Config B
+  `top_k=2` run reproduce when the same nominal configuration is rerun on
+  `context_index=4` only?
+- Interpretation boundary:
+  this is a standalone reproducibility and stability diagnostic. It does not
+  replace the accepted all-context Config B `top_k=2` ablation.
+- Configuration:
+  `retrieve_threshold=0.03`, `update_threshold=0.09`, `max_slots=16`,
+  `top_k=2`, `generation_max_length=40`,
+  `eventqa_protocol=frozen_context_bank`, `requested_contexts=1`,
+  `context_index=4`.
+- Artifact:
+  `outputs/mab/eventqa_configB_ctx4_topk2_rerun/20260630T121127Z-eventqa-65536-version-b-weaver-space-bank-n5`
+
+#### Observations
+
+- Integrity:
+  `100/100` valid questions; runtime and manifest matched the intended config;
+  total / max query write-count delta `0/0`; changed snapshots `0`; leakage
+  `0`; errors `0`.
+- Result:
+  Bank-off EM `1/100`; Bank-on EM `11/100`; Bank-off recall `0.19`;
+  Bank-on recall `0.28`; format failures `52`; Chinese outputs `44`;
+  final slot count `16`; peak CUDA memory max / mean `11.17 / 9.46 GiB`.
+- Versus the accepted all-context Config B `top_k=2` ctx4 result:
+  EM `+10`, recall `-0.02`, format failures `-42`, Chinese outputs `-39`.
+- Versus Config B `top_k=1` ctx4:
+  EM `-19`, recall `-0.02`, format failures `+47`, Chinese outputs `+43`.
+- Retrieval changed materially:
+  retrieved pairs `{(3,0):84,(0,3):16}` instead of `{(1,0):100}`.
+  Top-1/top-2 margins are nearly tied, with mean `0.00123` versus `0.01382`
+  in the all-context ctx4 run.
+- Construction shape is nominally the same as the accepted all-context ctx4
+  run (`16` inserts, `1` matched replacement, no eviction), but the dominant
+  local slot pair changed and the bank summary differs.
+- Failure profile:
+  44 Chinese outputs; 52 format failures; 36 are both Chinese and format
+  failures; 18 format failures still contain the full gold answer; 17 cases
+  are recall-positive but EM-negative.
+
+#### Conclusion
+
+- The catastrophic ctx4 collapse did not reproduce exactly.
+- Config B `top_k=2` ctx4 still underperforms Config B `top_k=1` ctx4 badly,
+  but the all-context `1/100` failure mode is not a stable deterministic
+  outcome under the same nominal configuration.
+- The dominant local slot pair changes across reruns, which points to
+  construction-path or routing instability rather than pure same-bank
+  generation noise.
+- Primary follow-up:
+  add score-decomposition and slot/chunk-provenance diagnostics, then rerun
+  ctx4 only. Keep `top_k=4` deferred.

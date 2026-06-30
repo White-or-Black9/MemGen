@@ -153,9 +153,15 @@ IDs and append superseding decisions rather than silently rewriting history.
   this a same-bank query-only ablation.
 - Contexts 0-3 improve, but context 4 collapses from Config B `top_k=1`
   `30/100` to `1/100` with 94 format failures and 83 Chinese outputs.
+- A standalone rerun of Config B `top_k=2` on ctx4 alone did not reproduce the
+  catastrophic all-context outcome exactly: it reached `11/100` EM, 52 format
+  failures, and 44 Chinese outputs, with retrieved pairs `{(3,0):84,(0,3):16}`
+  rather than `{(1,0):100}`.
+- Config B `top_k=2` ctx4 therefore shows construction/routing instability
+  under the same nominal configuration rather than one stable deterministic
+  collapse mode.
 - Defer `top_k=4`. Add score-decomposition and slot/chunk-provenance
-  diagnostics, then rerun context 4 only before selecting another mechanism
-  change.
+  diagnostics, then rerun ctx4 only after those diagnostics are available.
 
 ### Current Board (2026-06-22)
 
@@ -523,11 +529,33 @@ IDs and append superseding decisions rather than silently rewriting history.
   - Do not describe it as the same bank queried with an extra slot.
   - Do not run `top_k=4` until the missing diagnostics identify the ctx4
     failure mechanism.
+  - Treat the standalone ctx4 rerun as a stability diagnostic that supplements
+    the accepted all-context ablation rather than replacing it.
 - Verification required:
   - preserve the accepted artifact path and exact global/per-context metrics
   - keep query writes, bank snapshots, leakage, and error counts at zero
   - keep the canonical detective note unchanged
 - Related experiment: `EXP-20260630-002`
+
+Follow-up reproducibility diagnostic:
+
+- Accepted standalone ctx4 rerun artifact:
+  `outputs/mab/eventqa_configB_ctx4_topk2_rerun/20260630T121127Z-eventqa-65536-version-b-weaver-space-bank-n5`
+- Runtime matched `retrieve_threshold=0.03`, `update_threshold=0.09`,
+  `max_slots=16`, `top_k=2`, `generation_max_length=40`,
+  `eventqa_protocol=frozen_context_bank`, `requested_contexts=1`,
+  `context_index=4`, with `100/100` valid questions and zero query writes,
+  snapshot changes, or cross-context leakage.
+- Result:
+  Bank-off EM `1/100`, Bank-on EM `11/100`, Bank-off recall `0.19`,
+  Bank-on recall `0.28`, format failures `52`, Chinese outputs `44`,
+  final slot count `16`.
+- Interpretation:
+  the catastrophic all-context ctx4 collapse is not stable as a single
+  deterministic outcome, but Config B `top_k=2` ctx4 remains clearly worse
+  than Config B `top_k=1` ctx4 and still requires deeper score/provenance
+  diagnostics before any further top-k scaling.
+- Related experiment: `EXP-20260630-003`
 
 ### Historical Board (2026-06-18)
 

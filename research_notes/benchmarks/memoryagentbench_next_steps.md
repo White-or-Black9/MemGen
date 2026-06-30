@@ -28,12 +28,18 @@ EventQA-65536 contexts.
   with one extra slot.
 - Contexts 0-3 improved; context 4 collapsed to `1/100` with 94 format
   failures and 83 Chinese outputs. Retrieval remained fixed per context.
+- A standalone ctx4 rerun under the same nominal Config B `top_k=2` settings
+  did not reproduce that catastrophic outcome exactly:
+  Bank-on EM `11/100`, recall `0.28`, format failures `52`, Chinese outputs
+  `44`, retrieved pairs `{(3,0):84,(0,3):16}`. This supplements the accepted
+  all-context ablation as a reproducibility/stability diagnostic; it does not
+  replace it.
 - Use the result as strong exploratory compressed frozen-context bridge
   evidence scored by the official EventQA substring-exact-match metric, not as
   a direct official long-context baseline comparison
 - Keep Config A as the highest-EM and most output-stable accepted setting
 - Defer `top_k=4`; first add score-decomposition and slot/chunk-provenance
-  diagnostics and rerun Config B `top_k=2` on context 4 only
+  diagnostics, then rerun ctx4 only after those diagnostics are available
 
 ## MAB-5B Status
 
@@ -136,7 +142,10 @@ Proceed only if a later review still wants a follow-up:
    highest-EM and cleanest-output setting.
 3. **Current mechanism diagnostic:** add score decomposition, query-vector
    diagnostics, and final-slot chunk provenance, then rerun Config B
-   `top_k=2` on context 4 only. Do not change retrieval behavior in that run.
+   `top_k=2` on context 4 only. The accepted standalone rerun
+   `outputs/mab/eventqa_configB_ctx4_topk2_rerun/20260630T121127Z-eventqa-65536-version-b-weaver-space-bank-n5`
+   shows the ctx4 failure mode is unstable, so the next rerun should happen
+   only after the extra diagnostics are recorded.
 4. **Keep configuration provenance explicit:** the accepted best EventQA result
    in this sweep is Config A, and its runtime config is
    `retrieve_threshold=0.03`, `update_threshold=0.05`, `top_k=1`,
@@ -173,6 +182,6 @@ Proceed only if a later review still wants a follow-up:
    `top_k=2` is a strong positive end-to-end multi-slot signal, but it does not
    replace Config A and must retain the context-4 collapse caveat.
 7. Defer `top_k=4` until context-4 score decomposition and provenance are
-   available.
+   available and the unstable ctx4 rerun behavior is explained.
 8. Keep the bridge boundary explicit before any broader EventQA scaling or
    summary.

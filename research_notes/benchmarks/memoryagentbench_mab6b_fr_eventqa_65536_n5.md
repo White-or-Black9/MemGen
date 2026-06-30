@@ -33,6 +33,8 @@ evidence, not a direct official full-context baseline comparison.
     `outputs/mab/eventqa_frozen_context_bank_cfgC_ctx{0..4}/...`
 - end-to-end Config B `top_k=2`:
   `outputs/mab/eventqa_configB_allctx_topk2/20260630T084500Z-eventqa-65536-version-b-weaver-space-bank-n5`
+- standalone Config B `top_k=2` ctx4 reproducibility diagnostic:
+  `outputs/mab/eventqa_configB_ctx4_topk2_rerun/20260630T121127Z-eventqa-65536-version-b-weaver-space-bank-n5`
 
 Latest completed roots:
 
@@ -371,3 +373,89 @@ diagnostics, then rerun Config B `top_k=2` on context 4 only. This is lower risk
 than changing retrieval behavior and can determine whether the pathological
 pair is selected because of query collapse, semantic slot content, or recency
 feedback before another mechanism ablation is chosen.
+
+## Config B `top_k=2` ctx4 Standalone Reproducibility Diagnostic
+
+Accepted artifact:
+
+`outputs/mab/eventqa_configB_ctx4_topk2_rerun/20260630T121127Z-eventqa-65536-version-b-weaver-space-bank-n5`
+
+This standalone rerun is a reproducibility and stability diagnostic only. It
+does not replace the accepted all-context Config B `top_k=2` ablation above.
+
+### Runtime Contract
+
+- `retrieve_threshold=0.03`
+- `update_threshold=0.09`
+- `max_slots=16`
+- `top_k=2`
+- `generation_max_length=40`
+- `context_index=4`
+- `requested_contexts=1`
+- `eventqa_protocol=frozen_context_bank`
+- `100/100` valid questions
+- query write-count delta total / max: `0 / 0`
+- bank snapshots changed after query: `0`
+- cross-context leakage detected: `0`
+
+### Result
+
+- Bank-off EM: `1/100 = 0.01`
+- Bank-on EM: `11/100 = 0.11`
+- Bank-off recall: `0.19`
+- Bank-on recall: `0.28`
+- format failures: `52/100`
+- Chinese outputs: `44/100`
+- final slot count: `16`
+- peak CUDA memory max / mean: `11.17 GiB / 9.46 GiB`
+
+### Comparison
+
+- Versus previous Config B `top_k=2` all-context ctx4:
+  EM `+10`, recall `-0.02`, format failures `-42`, Chinese outputs `-39`
+- Retrieved pair changed from `(1,0):100` to `(3,0):84` / `(0,3):16`
+- Versus Config B `top_k=1` ctx4:
+  EM `-19`, recall `-0.02`, format failures `+47`, Chinese outputs `+43`
+- Versus Config A `top_k=1` ctx4:
+  EM `-5`, recall `+0.02`, format failures `-4`, Chinese outputs `+22`
+
+### Retrieval and Construction
+
+- retrieved pair distribution: `{(3,0):84,(0,3):16}`
+- top-1 indices: `{3:84,0:16}`
+- top-2 indices: `{0:84,3:16}`
+- retrieved latent count: `{16:100}`
+- candidate slots before top-k: `{16:100}`
+- final slot count: `16`
+- routing is still nearly fixed, but fixed to a different pair than the
+  accepted all-context ctx4 run
+- construction statistics:
+  `insert=16`, `matched_replace=1`, `capacity_evict=0`, `replace_old=0`
+- the standalone ctx4 bank differs from the all-context ctx4 bank
+- top-1 minus top-2 margin mean dropped from `0.01382` in the all-context ctx4
+  run to `0.00123` in the standalone rerun
+
+### Output Failure Profile
+
+- Chinese outputs: `44`
+- format failures: `52`
+- Chinese outputs that are also format failures: `36`
+- format failures containing the full gold answer: `18`
+- recall-positive but EM-negative: `17`
+- answer-present-but-parser-lost behavior remains visible, but less severe than
+  in the all-context ctx4 collapse
+
+### Interpretation
+
+- The catastrophic ctx4 collapse is not stable as a single deterministic
+  outcome.
+- Config B `top_k=2` ctx4 remains much worse than Config B `top_k=1` ctx4.
+- The dominant slot pair changed from local `(1,0)` to local `(3,0)` / `(0,3)`,
+  indicating construction-path or routing instability rather than pure
+  same-bank generation noise.
+- This strengthens the need for score-decomposition and slot/chunk-provenance
+  diagnostics.
+- `top_k=4` remains deferred.
+
+Recommended next step: add score-decomposition and slot/chunk-provenance
+diagnostics, then rerun ctx4 only.

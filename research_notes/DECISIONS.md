@@ -149,8 +149,13 @@ IDs and append superseding decisions rather than silently rewriting history.
   `109/500`, recall `0.290`, 131 format failures, and 98 Chinese outputs. It is
   a strong positive multi-slot signal but remains slightly below Config A EM
   and substantially less output-stable.
+- The accepted end-to-end Config B `top_k=4` ablation is a negative result:
+  Bank-on EM falls to `63/500`, recall to `0.164`, format failures rise to
+  `208`, and Chinese outputs rise to `156`.
 - Changing `top_k` affects both construction and query retrieval; do not call
   this a same-bank query-only ablation.
+- `top_k=4` also fails to realize four-slot retrieval: every query retrieves
+  only three slots / 24 latent tokens.
 - Contexts 0-3 improve, but context 4 collapses from Config B `top_k=1`
   `30/100` to `1/100` with 94 format failures and 83 Chinese outputs.
 - A standalone rerun of Config B `top_k=2` on ctx4 alone did not reproduce the
@@ -160,8 +165,9 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Config B `top_k=2` ctx4 therefore shows construction/routing instability
   under the same nominal configuration rather than one stable deterministic
   collapse mode.
-- Defer `top_k=4`. Add score-decomposition and slot/chunk-provenance
-  diagnostics, then rerun ctx4 only after those diagnostics are available.
+- Do not scale `top_k` further. Add score-decomposition and slot/chunk-
+  provenance diagnostics, then rerun ctx1/ctx4-focused follow-ups only after
+  those diagnostics are available.
 
 ### Current Board (2026-06-22)
 
@@ -527,8 +533,10 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Consequences:
   - Do not describe Config B `top_k=2` as invalid or merely confounded.
   - Do not describe it as the same bank queried with an extra slot.
-  - Do not run `top_k=4` until the missing diagnostics identify the ctx4
-    failure mechanism.
+  - Config B `top_k=4` is now preserved as negative end-to-end evidence and
+    should not be treated as a candidate setting.
+  - Do not scale `top_k` further until the missing diagnostics identify the
+    unstable-context failure mechanisms.
   - Treat the standalone ctx4 rerun as a stability diagnostic that supplements
     the accepted all-context ablation rather than replacing it.
 - Verification required:
@@ -536,6 +544,7 @@ IDs and append superseding decisions rather than silently rewriting history.
   - keep query writes, bank snapshots, leakage, and error counts at zero
   - keep the canonical detective note unchanged
 - Related experiment: `EXP-20260630-002`
+- Related negative follow-up: `EXP-20260630-004`
 
 Follow-up reproducibility diagnostic:
 
@@ -556,6 +565,29 @@ Follow-up reproducibility diagnostic:
   than Config B `top_k=1` ctx4 and still requires deeper score/provenance
   diagnostics before any further top-k scaling.
 - Related experiment: `EXP-20260630-003`
+
+Negative end-to-end top_k=4 follow-up:
+
+- Accepted artifact:
+  `outputs/mab/eventqa_configB_allctx_topk4/20260630T124028Z-eventqa-65536-version-b-weaver-space-bank-n5`
+- Runtime matched `retrieve_threshold=0.03`, `update_threshold=0.09`,
+  `max_slots=16`, `top_k=4`, `generation_max_length=40`,
+  `eventqa_protocol=frozen_context_bank`, `requested_contexts=5`.
+- Result:
+  Bank-off EM `4/500`, Bank-on EM `63/500`, Bank-off recall `0.178`,
+  Bank-on recall `0.164`, format failures `208`, Chinese outputs `156`,
+  final slot counts `{15:100,16:400}`.
+- Retrieval realized only three slots for every query, with retrieved latent
+  count `{24:500}` rather than `32`.
+- Interpretation:
+  this is a failure signal, not a candidate setting. It is worse than Config B
+  `top_k=2`, worse than Config B `top_k=1`, and far worse than Config A
+  `top_k=1`, while keeping routing fixed per context and degrading output
+  stability.
+- Next action:
+  return to score-decomposition and slot/chunk-provenance diagnostics,
+  especially for unstable contexts `ctx1` and `ctx4`, instead of scaling
+  `top_k` further.
 
 ### Historical Board (2026-06-18)
 

@@ -35,6 +35,8 @@ evidence, not a direct official full-context baseline comparison.
   `outputs/mab/eventqa_configB_allctx_topk2/20260630T084500Z-eventqa-65536-version-b-weaver-space-bank-n5`
 - standalone Config B `top_k=2` ctx4 reproducibility diagnostic:
   `outputs/mab/eventqa_configB_ctx4_topk2_rerun/20260630T121127Z-eventqa-65536-version-b-weaver-space-bank-n5`
+- end-to-end Config B `top_k=4` negative ablation:
+  `outputs/mab/eventqa_configB_allctx_topk4/20260630T124028Z-eventqa-65536-version-b-weaver-space-bank-n5`
 
 Latest completed roots:
 
@@ -459,3 +461,113 @@ does not replace the accepted all-context Config B `top_k=2` ablation above.
 
 Recommended next step: add score-decomposition and slot/chunk-provenance
 diagnostics, then rerun ctx4 only.
+
+## End-to-End Config B `top_k=4` Negative Ablation
+
+Accepted artifact:
+
+`outputs/mab/eventqa_configB_allctx_topk4/20260630T124028Z-eventqa-65536-version-b-weaver-space-bank-n5`
+
+This is a valid end-to-end mechanism test because `top_k` intentionally affects
+both construction-time memory update and query-time retrieval. It is not a
+same-bank query-only comparison. It is also not a candidate setting because it
+strongly regresses globally.
+
+### Runtime Contract
+
+- `retrieve_threshold=0.03`
+- `update_threshold=0.09`
+- `max_slots=16`
+- `top_k=4`
+- `generation_max_length=40`
+- `requested_contexts=5`
+- `eventqa_protocol=frozen_context_bank`
+- `500/500` valid questions
+- query write-count delta total / max: `0 / 0`
+- blocked query write attempts: `500`
+- bank snapshots changed after query: `0`
+- cross-context leakage detected: `0`
+- errors: `0`
+
+### Global Result
+
+- Bank-off EM: `4/500 = 0.008`
+- Bank-on EM: `63/500 = 0.126`
+- Bank-off recall: `0.178`
+- Bank-on recall: `0.164`
+- format failures: `208`
+- Chinese outputs: `156`
+- final slot-count distribution: `{15:100,16:400}`
+- retrieved indices distribution:
+  `{(0,1,2):300,(1,0,2):100,(2,4,10):100}`
+- top-1 indices: `{0:300,1:100,2:100}`
+- top-2 indices: `{1:300,0:100,4:100}`
+- top-3 indices: `{2:400,10:100}`
+- top-4 indices: `{}`
+- retrieved latent-count distribution: `{24:500}`
+- candidate slots before top-k distribution: `{15:100,16:400}`
+- peak CUDA memory max / mean: `11.17 GiB / 9.45 GiB`
+
+### Key Mechanism Finding
+
+Although `top_k` was set to `4`, retrieval realized only three slots on every
+query. Retrieved latent count stayed `24` rather than `32`. Therefore
+`top_k=4` did not actually produce four-slot retrieval under the thresholded
+selection path.
+
+### Comparison
+
+- Versus Config A `top_k=1`:
+  EM `-51`, recall `-0.102`, format failures `+85`, Chinese outputs `+133`
+- Versus Config B `top_k=1`:
+  EM `-9`, recall `-0.038`, format failures `+67`, Chinese outputs `+36`
+- Versus Config B `top_k=2`:
+  EM `-46`, recall `-0.126`, format failures `+77`, Chinese outputs `+58`
+
+### Per-context Result
+
+- `ctx0`:
+  Bank-on EM `2/100`, recall `0.02`, format `94`, Chinese `0`,
+  tuple `{(1,0,2):100}`, final slots `16`,
+  delta vs Config B `top_k=2` `-17`,
+  delta vs Config B `top_k=1` `-2`,
+  delta vs Config A `top_k=1` `-16`
+- `ctx1`:
+  Bank-on EM `4/100`, recall `0.21`, format `72`, Chinese `88`,
+  tuple `{(0,1,2):100}`, final slots `16`,
+  delta vs Config B `top_k=2` `-41`,
+  delta vs Config B `top_k=1` `-11`,
+  delta vs Config A `top_k=1` `-38`
+- `ctx2`:
+  Bank-on EM `21/100`, recall `0.21`, format `0`, Chinese `29`,
+  tuple `{(0,1,2):100}`, final slots `16`,
+  delta vs Config B `top_k=2` `-1`,
+  delta vs Config B `top_k=1` `+19`,
+  delta vs Config A `top_k=1` `0`
+- `ctx3`:
+  Bank-on EM `16/100`, recall `0.18`, format `17`, Chinese `12`,
+  tuple `{(2,4,10):100}`, final slots `15`,
+  delta vs Config B `top_k=2` `-6`,
+  delta vs Config B `top_k=1` `-5`,
+  delta vs Config A `top_k=1` `-1`
+- `ctx4`:
+  Bank-on EM `20/100`, recall `0.20`, format `25`, Chinese `27`,
+  tuple `{(0,1,2):100}`, final slots `16`,
+  delta vs Config B `top_k=2` all-context `+19`,
+  delta vs Config B `top_k=1` `-10`,
+  delta vs Config A `top_k=1` `+4`
+
+### Interpretation
+
+- `top_k=4` is a failure signal.
+- It is worse than Config B `top_k=2`, worse than Config B `top_k=1`, and far
+  worse than Config A `top_k=1`.
+- It increases format failures and Chinese outputs.
+- It keeps routing fixed per context.
+- It does not realize four-slot retrieval; only three slots are retrieved.
+- It should not be kept as a candidate setting.
+- Do not scale `top_k` further.
+- The next step should return to score decomposition and slot/chunk-provenance
+  diagnostics, especially for unstable contexts `ctx1` and `ctx4`.
+- Current best multi-slot setting remains Config B `top_k=2`, but Config A
+  `top_k=1` remains the best overall EM setting.

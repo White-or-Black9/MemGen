@@ -3,8 +3,9 @@
 ## Current Decision
 
 The accepted EventQA evidence now includes the 15-run frozen-context A/B/C
-`top_k=1` sweep and the full end-to-end Config B `top_k=2` ablation on all five
-EventQA-65536 contexts.
+`top_k=1` sweep, the full end-to-end Config B `top_k=2` ablation on all five
+EventQA-65536 contexts, and the negative end-to-end Config B `top_k=4`
+ablation.
 
 - Best setting: Config A
   `retrieve_threshold=0.03`, `update_threshold=0.05`, `max_slots=8`,
@@ -34,12 +35,20 @@ EventQA-65536 contexts.
   `44`, retrieved pairs `{(3,0):84,(0,3):16}`. This supplements the accepted
   all-context ablation as a reproducibility/stability diagnostic; it does not
   replace it.
+- End-to-end Config B `top_k=4` (`0.03/0.09/16/4`) is a negative ablation:
+  Bank-on EM `63/500`, recall `0.164`, format failures `208`, Chinese outputs
+  `156`. It is worse than Config B `top_k=2`, worse than Config B `top_k=1`,
+  and far worse than Config A `top_k=1`.
+- `top_k=4` is also not a realized four-slot retrieval regime: thresholded
+  retrieval returns only 3 slots / 24 latent tokens on every query.
 - Use the result as strong exploratory compressed frozen-context bridge
   evidence scored by the official EventQA substring-exact-match metric, not as
   a direct official long-context baseline comparison
 - Keep Config A as the highest-EM and most output-stable accepted setting
-- Defer `top_k=4`; first add score-decomposition and slot/chunk-provenance
-  diagnostics, then rerun ctx4 only after those diagnostics are available
+- Keep Config B `top_k=2` as the best current multi-slot setting
+- Do not scale `top_k` further; first add score-decomposition and
+  slot/chunk-provenance diagnostics, then rerun unstable contexts after those
+  diagnostics are available
 
 ## MAB-5B Status
 
@@ -137,15 +146,19 @@ Proceed only if a later review still wants a follow-up:
 
 1. **Preserve the accepted sweep as the anchor:**
    the EventQA reference includes the completed 15-run A/B/C sweep and the
-   accepted end-to-end Config B `top_k=2` all-context ablation.
+   accepted end-to-end Config B `top_k=2` all-context ablation, plus the
+   negative end-to-end Config B `top_k=4` ablation.
 2. **Current stable setting:** keep Config A (`0.03/0.05/8/1`) as the
    highest-EM and cleanest-output setting.
 3. **Current mechanism diagnostic:** add score decomposition, query-vector
-   diagnostics, and final-slot chunk provenance, then rerun Config B
-   `top_k=2` on context 4 only. The accepted standalone rerun
+   diagnostics, and final-slot chunk provenance, then rerun focused unstable
+   contexts only. The accepted standalone rerun
    `outputs/mab/eventqa_configB_ctx4_topk2_rerun/20260630T121127Z-eventqa-65536-version-b-weaver-space-bank-n5`
-   shows the ctx4 failure mode is unstable, so the next rerun should happen
-   only after the extra diagnostics are recorded.
+   shows the ctx4 failure mode is unstable, and the accepted
+   `outputs/mab/eventqa_configB_allctx_topk4/20260630T124028Z-eventqa-65536-version-b-weaver-space-bank-n5`
+   result adds strong negative evidence on ctx1 and global output stability.
+   The next rerun should therefore happen only after the extra diagnostics are
+   recorded, with emphasis on `ctx1` and `ctx4`.
 4. **Keep configuration provenance explicit:** the accepted best EventQA result
    in this sweep is Config A, and its runtime config is
    `retrieve_threshold=0.03`, `update_threshold=0.05`, `top_k=1`,
@@ -181,7 +194,9 @@ Proceed only if a later review still wants a follow-up:
 6. Keep Config B/C `top_k=1` negative evidence scoped to `top_k=1`. Config B
    `top_k=2` is a strong positive end-to-end multi-slot signal, but it does not
    replace Config A and must retain the context-4 collapse caveat.
-7. Defer `top_k=4` until context-4 score decomposition and provenance are
-   available and the unstable ctx4 rerun behavior is explained.
+7. Preserve Config B `top_k=4` as negative end-to-end evidence, not as a
+   candidate setting.
+8. Do not scale `top_k` further until ctx1/ctx4 score decomposition and
+   provenance are available and the unstable-context behavior is explained.
 8. Keep the bridge boundary explicit before any broader EventQA scaling or
    summary.

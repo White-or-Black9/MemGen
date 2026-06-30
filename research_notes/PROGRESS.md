@@ -89,14 +89,27 @@
   the catastrophic all-context `1/100` outcome is not stable as a single
   deterministic failure mode. The changed dominant slot pair indicates
   construction-path or routing instability under the same nominal config.
+- Accepted end-to-end Config B `top_k=4` negative ablation:
+  `outputs/mab/eventqa_configB_allctx_topk4/20260630T124028Z-eventqa-65536-version-b-weaver-space-bank-n5`.
+  Global result: Bank-off `4/500`; Bank-on `63/500`; Bank-on recall `0.164`;
+  format failures `208`; Chinese outputs `156`; final slots
+  `{15:100,16:400}`. Relative to Config B `top_k=2`, EM drops by `46`, recall
+  drops by `0.126`, format failures rise by `77`, and Chinese outputs rise by
+  `58`.
+- top_k=4 mechanism result:
+  even with `top_k=4`, thresholded retrieval still realizes only 3 slots per
+  query. Retrieved latent count stays `{24:500}` rather than `32`, routing
+  remains fixed per context, and the setting is not a viable candidate.
 - Interpretation boundary:
   this remains strong exploratory compressed frozen-context bridge evidence
   scored by the official EventQA substring exact-match metric, not a direct
   official full-context baseline comparison.
 - Current next step:
-  keep Config A as the highest-EM and most output-stable setting; defer
-  `top_k=4`; add score-decomposition and slot/chunk-provenance diagnostics and
-  then rerun ctx4 only before another mechanism change.
+  keep Config A as the highest-EM and most output-stable setting; keep Config B
+  `top_k=2` as the best current multi-slot setting; do not scale `top_k`
+  further; add score-decomposition and slot/chunk-provenance diagnostics and
+  then rerun unstable contexts, especially `ctx1` and `ctx4`, before another
+  mechanism change.
 
 ## Latest MAB-6B-FR Diagnostic Status (2026-06-29)
 

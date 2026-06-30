@@ -162,6 +162,7 @@ Current next experiment gate:
 | EXP-20260629-003 | 2026-06-29 | EventQA frozen-context all-5-context run | Does the benchmark-conformant `frozen_context_bank` protocol retain a positive signal across all 5 EventQA 65536 contexts? | `completed_exploratory` | All 5 contexts completed under isolated per-context runs; Bank-off EM was 4/500 and Bank-on EM was 83/500; protocol invariants held, but every context still collapsed to one slot |
 | EXP-20260630-001 | 2026-06-30 | EventQA frozen-context config sweep | Which of Config A/B/C is the best EventQA frozen-context setting after runtime-integrity repair? | `completed_exploratory` | All 15 runs completed; Config A (`0.03/0.05/8/1`) was best at Bank-on `114/500`, while Config B/C forced 15-16-slot construction but reduced Bank-on EM to `72/500` and `67/500` |
 | EXP-20260630-003 | 2026-06-30 | EventQA ctx4 reproducibility diagnostic | Does the catastrophic ctx4 failure from the accepted end-to-end Config B `top_k=2` run reproduce under a standalone rerun? | `completed_diagnostic_only` | No exact reproduction: standalone ctx4 reached `11/100` EM with 52 format failures and 44 Chinese outputs, and the dominant pair changed from `(1,0):100` to `{(3,0):84,(0,3):16}` |
+| EXP-20260630-004 | 2026-06-30 | EventQA end-to-end top_k=4 ablation | Does Config B remain competitive when the mechanism uses `top_k=4` during both bank construction and frozen-bank query retrieval? | `completed_negative_result` | Bank-on EM fell to `63/500`, recall to `0.164`, format failures rose to `208`, Chinese outputs rose to `156`, and realized retrieval stayed at 3 slots / 24 latents rather than 4 slots / 32 latents |
 
 ## Recorded Experiments
 
@@ -3534,3 +3535,66 @@ full GSM8K test performance.
 - Primary follow-up:
   add score-decomposition and slot/chunk-provenance diagnostics, then rerun
   ctx4 only. Keep `top_k=4` deferred.
+
+### EXP-20260630-004: EventQA End-to-End Config B `top_k=4` Negative Ablation
+
+- Phase: EventQA exploratory top-k ablation
+- Status: `completed_negative_result`
+- Research question:
+  does Config B remain competitive when the mechanism uses `top_k=4` during
+  both bank construction and frozen-bank query retrieval across all five
+  contexts?
+- Interpretation boundary:
+  this is a valid end-to-end mechanism test because `top_k` intentionally
+  affects both construction-time memory update and query-time retrieval.
+  It is not a same-bank query-only comparison.
+- Configuration:
+  `retrieve_threshold=0.03`, `update_threshold=0.09`, `max_slots=16`,
+  `top_k=4`, `generation_max_length=40`,
+  `eventqa_protocol=frozen_context_bank`, `requested_contexts=5`.
+- Artifact:
+  `outputs/mab/eventqa_configB_allctx_topk4/20260630T124028Z-eventqa-65536-version-b-weaver-space-bank-n5`
+
+#### Observations
+
+- Integrity:
+  `500/500` valid questions; total / max query write-count delta `0/0`;
+  blocked query write attempts `500`; changed snapshots `0`; leakage `0`;
+  errors `0`.
+- Global result:
+  Bank-off EM `4/500`; Bank-on EM `63/500`; Bank-off recall `0.178`;
+  Bank-on recall `0.164`; format failures `208`; Chinese outputs `156`;
+  final slots `{15:100,16:400}`.
+- Retrieval:
+  tuples `{(0,1,2):300,(1,0,2):100,(2,4,10):100}`;
+  top-1 `{0:300,1:100,2:100}`;
+  top-2 `{1:300,0:100,4:100}`;
+  top-3 `{2:400,10:100}`;
+  top-4 `{}`;
+  retrieved latent count `{24:500}`;
+  candidate slots before top-k `{15:100,16:400}`.
+- Key mechanism finding:
+  although `top_k=4` was requested, thresholded retrieval realized only 3
+  slots on every query, so retrieved latent count stayed `24` instead of `32`.
+- Versus Config A `top_k=1`:
+  EM `-51`, recall `-0.102`, format failures `+85`, Chinese outputs `+133`.
+- Versus Config B `top_k=1`:
+  EM `-9`, recall `-0.038`, format failures `+67`, Chinese outputs `+36`.
+- Versus Config B `top_k=2`:
+  EM `-46`, recall `-0.126`, format failures `+77`, Chinese outputs `+58`.
+- Per-context Bank-on EM:
+  `2/100`, `4/100`, `21/100`, `16/100`, `20/100`.
+  Deltas versus Config B `top_k=2` are `-17`, `-41`, `-1`, `-6`, `+19`.
+
+#### Conclusion
+
+- `top_k=4` is a negative end-to-end ablation result.
+- It is worse than Config B `top_k=2`, worse than Config B `top_k=1`, and far
+  worse than Config A `top_k=1`.
+- It increases format failures and Chinese outputs while keeping routing fixed
+  per context.
+- It should not be kept as a candidate setting.
+- Do not scale `top_k` further.
+- Primary follow-up:
+  return to score-decomposition and slot/chunk-provenance diagnostics,
+  especially for unstable contexts `ctx1` and `ctx4`.

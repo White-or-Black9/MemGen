@@ -55,14 +55,35 @@
   Config B and C force `15-16` slot construction but reduce Bank-on EM.
   Query-time retrieval still returns exactly one slot in all three settings, so
   multi-slot construction does not imply multi-slot use under `top_k=1`.
+- Accepted end-to-end Config B `top_k=2` ablation:
+  `outputs/mab/eventqa_configB_allctx_topk2/20260630T084500Z-eventqa-65536-version-b-weaver-space-bank-n5`.
+  Changing `top_k` affects both construction and query retrieval, so this is
+  not the same frozen bank queried with one extra slot.
+- Config B `top_k=2` overall:
+  Bank-off `4/500`; Bank-on `109/500`; Bank-on recall `0.290`; format failures
+  `131`; Chinese-script outputs `98`; final slots `{15:100,16:400}`;
+  retrieved pairs `{(1,0):399,(0,1):101}`; retrieved latent count `{16:500}`.
+- Config B `top_k=2` versus Config B `top_k=1`:
+  EM `+37`, recall `+0.088`, format failures `-10`, Chinese outputs `-22`.
+  Versus Config A, it is `-5` EM and `+0.024` recall but has 75 more Chinese
+  outputs.
+- Per-context Config B `top_k=2` Bank-on EM:
+  `19/100`, `45/100`, `22/100`, `22/100`, `1/100`. Gains generalize through
+  contexts 0-3; context 4 regresses by 29 EM versus Config B `top_k=1`.
+- Context-4 diagnosis:
+  recall remains `0.30`, but 94 outputs fail format and 83 contain Chinese;
+  29 malformed raw outputs still contain the full gold answer. The local
+  slot-1/slot-0 pair is fixed across all 100 queries and ranks first by both
+  final score and reconstructed raw cosine. Both slots are repeatedly refreshed
+  during construction; query vectors and slot/chunk provenance are absent.
 - Interpretation boundary:
   this remains strong exploratory compressed frozen-context bridge evidence
   scored by the official EventQA substring exact-match metric, not a direct
   official full-context baseline comparison.
 - Current next step:
-  keep Config A for the next EventQA setting and, if multi-slot behavior is
-  revisited later, target multi-slot query-time retrieval rather than only
-  multi-slot construction.
+  keep Config A as the highest-EM and most output-stable setting; defer
+  `top_k=4`; add score-decomposition and slot/chunk-provenance diagnostics and
+  rerun Config B `top_k=2` on context 4 only before another mechanism change.
 
 ## Latest MAB-6B-FR Diagnostic Status (2026-06-29)
 

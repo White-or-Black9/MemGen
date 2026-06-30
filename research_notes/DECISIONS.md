@@ -79,6 +79,7 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0072 | 2026-06-29 | accepted | Preserve the full 5-context EventQA frozen-context result as strong exploratory evidence only |
 | DEC-0073 | 2026-06-29 | accepted | Keep `--context-index` as the EventQA runner scheduling parameter for isolated per-context evaluation |
 | DEC-0074 | 2026-06-30 | accepted | Keep Config A as the best EventQA setting after the all-15-run A/B/C sweep |
+| DEC-0075 | 2026-06-30 | accepted | Preserve end-to-end Config B `top_k=2` and diagnose context 4 before further top-k scaling |
 
 ## Decision Template
 
@@ -142,9 +143,19 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Multi-slot construction therefore hurts EventQA under `top_k=1` in this
   bridge, and query-time retrieval still returns exactly one slot in all three
   settings.
-- Active next step: keep Config A for the next EventQA setting. If a later
-  study still wants multi-slot benefit, target multi-slot query-time retrieval
-  rather than only multi-slot construction.
+- Config A remains the highest-EM and most output-stable accepted setting from
+  the A/B/C `top_k=1` sweep.
+- The accepted end-to-end Config B `top_k=2` ablation reaches Bank-on
+  `109/500`, recall `0.290`, 131 format failures, and 98 Chinese outputs. It is
+  a strong positive multi-slot signal but remains slightly below Config A EM
+  and substantially less output-stable.
+- Changing `top_k` affects both construction and query retrieval; do not call
+  this a same-bank query-only ablation.
+- Contexts 0-3 improve, but context 4 collapses from Config B `top_k=1`
+  `30/100` to `1/100` with 94 format failures and 83 Chinese outputs.
+- Defer `top_k=4`. Add score-decomposition and slot/chunk-provenance
+  diagnostics, then rerun context 4 only before selecting another mechanism
+  change.
 
 ### Current Board (2026-06-22)
 
@@ -473,6 +484,50 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Related experiments:
   - `EXP-20260629-003`
   - `EXP-20260630-001`
+
+### DEC-0075: Preserve End-to-End Config B `top_k=2` and Diagnose Context 4 Before Further Scaling
+
+- Date: 2026-06-30
+- Status: accepted
+- Context:
+  - End-to-end Config B with `retrieve_threshold=0.03`,
+    `update_threshold=0.09`, `max_slots=16`, and `top_k=2` completed all five
+    EventQA contexts with valid frozen-bank integrity.
+  - It improved Bank-on EM from Config B `top_k=1` `72/500` to `109/500` and
+    recall from `0.202` to `0.290`, approaching Config A EM `114/500` and
+    exceeding Config A recall `0.266`.
+  - Gains occurred in contexts 0-3, but context 4 regressed from Config B
+    `top_k=1` `30/100` to `1/100`, with 94 format failures and 83 Chinese
+    outputs.
+  - The same `top_k` intentionally controls construction-time retrieval and
+    query-time retrieval, so this is not a same-bank query-only comparison.
+- Decision:
+  - Preserve Config B `top_k=2` as a valid exploratory end-to-end ablation and
+    strong positive multi-slot signal.
+  - Keep Config A as the highest-EM and most output-stable accepted setting.
+  - Defer `top_k=4` until context 4 is diagnosed.
+  - Make the next action a context-4-only score-decomposition and
+    slot/chunk-provenance diagnostic rerun, not another retrieval intervention.
+- Rationale:
+  - The `+37` EM gain over Config B `top_k=1` generalizes beyond context 0 and
+    shows that multi-slot use can help this bridge.
+  - Context 4 is dominated by malformed generation: 29 format failures still
+    contain the full gold answer, and 82 of 83 Chinese outputs are format
+    failures.
+  - Offline reconstruction shows the ctx4 local slot-1/slot-0 pair is top by
+    both final score and raw cosine, while both slots are repeatedly refreshed.
+    Existing artifacts lack query vectors and slot/chunk provenance, so they
+    cannot isolate query collapse, slot content, and recency feedback.
+- Consequences:
+  - Do not describe Config B `top_k=2` as invalid or merely confounded.
+  - Do not describe it as the same bank queried with an extra slot.
+  - Do not run `top_k=4` until the missing diagnostics identify the ctx4
+    failure mechanism.
+- Verification required:
+  - preserve the accepted artifact path and exact global/per-context metrics
+  - keep query writes, bank snapshots, leakage, and error counts at zero
+  - keep the canonical detective note unchanged
+- Related experiment: `EXP-20260630-002`
 
 ### Historical Board (2026-06-18)
 

@@ -2,8 +2,9 @@
 
 ## Current Decision
 
-The accepted EventQA result is now the 15-run frozen-context A/B/C sweep on all
-5 EventQA-65536 contexts.
+The accepted EventQA evidence now includes the 15-run frozen-context A/B/C
+`top_k=1` sweep and the full end-to-end Config B `top_k=2` ablation on all five
+EventQA-65536 contexts.
 
 - Best setting: Config A
   `retrieve_threshold=0.03`, `update_threshold=0.05`, `max_slots=8`,
@@ -18,10 +19,21 @@ The accepted EventQA result is now the 15-run frozen-context A/B/C sweep on all
   Bank-on EM to `67/500 = 0.134`
 - Query-time retrieval still returned exactly one slot in every setting, so
   multi-slot construction did not produce multi-slot use under `top_k=1`
+- End-to-end Config B `top_k=2` (`0.03/0.09/16/2`) reached Bank-off `4/500`,
+  Bank-on `109/500`, recall `0.290`, 131 format failures, and 98 Chinese
+  outputs. It improved Config B `top_k=1` by 37 EM and approached Config A by
+  five EM, but remained much less output-stable.
+- This is a valid end-to-end ablation. Because `top_k` affects both bank
+  construction and query retrieval, it is not the same frozen bank queried
+  with one extra slot.
+- Contexts 0-3 improved; context 4 collapsed to `1/100` with 94 format
+  failures and 83 Chinese outputs. Retrieval remained fixed per context.
 - Use the result as strong exploratory compressed frozen-context bridge
   evidence scored by the official EventQA substring-exact-match metric, not as
   a direct official long-context baseline comparison
-- Keep Config A for the next EventQA setting
+- Keep Config A as the highest-EM and most output-stable accepted setting
+- Defer `top_k=4`; first add score-decomposition and slot/chunk-provenance
+  diagnostics and rerun Config B `top_k=2` on context 4 only
 
 ## MAB-5B Status
 
@@ -118,14 +130,13 @@ An increase in slots or inserts is mechanism evidence, not an accuracy claim.
 Proceed only if a later review still wants a follow-up:
 
 1. **Preserve the accepted sweep as the anchor:**
-   the EventQA reference point is now the completed 15-run A/B/C sweep, not
-   only the earlier 5-run positive signal.
-2. **Recommended next EventQA setting:** keep Config A
-   (`0.03/0.05/8/1`) unless a later approved study explicitly targets a
-   different mechanism question.
-3. **If multi-slot work is revisited:** do not assume that larger
-   construction-time banks help. Design a query-time retrieval intervention
-   that actually returns more than one slot before interpreting answer quality.
+   the EventQA reference includes the completed 15-run A/B/C sweep and the
+   accepted end-to-end Config B `top_k=2` all-context ablation.
+2. **Current stable setting:** keep Config A (`0.03/0.05/8/1`) as the
+   highest-EM and cleanest-output setting.
+3. **Current mechanism diagnostic:** add score decomposition, query-vector
+   diagnostics, and final-slot chunk provenance, then rerun Config B
+   `top_k=2` on context 4 only. Do not change retrieval behavior in that run.
 4. **Keep configuration provenance explicit:** the accepted best EventQA result
    in this sweep is Config A, and its runtime config is
    `retrieve_threshold=0.03`, `update_threshold=0.05`, `top_k=1`,
@@ -153,11 +164,15 @@ Proceed only if a later review still wants a follow-up:
 3. Treat the MAB-6B exact-match gain as exploratory benchmark evidence, not as
    a default-path promotion.
 4. The current active EventQA artifacts are the 15 accepted sweep runs under
-   `outputs/mab/eventqa_frozen_context_bank_cfg{A,B,C}_ctx*/...`.
+   `outputs/mab/eventqa_frozen_context_bank_cfg{A,B,C}_ctx*/...` plus
+   `outputs/mab/eventqa_configB_allctx_topk2/20260630T084500Z-eventqa-65536-version-b-weaver-space-bank-n5`.
 5. Preserve `--context-index`, runtime config integrity validation,
    `--construction-only`, and the related EventQA regression tests as part of
    the runner contract.
-6. Do not summarize Config B or C as improvements; they are negative but useful
-   evidence that multi-slot construction can hurt under `top_k=1`.
-7. Keep the bridge boundary explicit before any broader EventQA scaling or
+6. Keep Config B/C `top_k=1` negative evidence scoped to `top_k=1`. Config B
+   `top_k=2` is a strong positive end-to-end multi-slot signal, but it does not
+   replace Config A and must retain the context-4 collapse caveat.
+7. Defer `top_k=4` until context-4 score decomposition and provenance are
+   available.
+8. Keep the bridge boundary explicit before any broader EventQA scaling or
    summary.

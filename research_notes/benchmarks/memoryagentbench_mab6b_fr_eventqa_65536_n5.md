@@ -1,8 +1,9 @@
 # MAB-6B-FR EventQA 65536 n5
 
 EventQA frozen-context-bank configuration sweep on all 5 local EventQA-65536
-contexts. This note preserves the accepted 15-run A/B/C sweep as strong
-exploratory evidence, not a direct official full-context baseline comparison.
+contexts. This note preserves both the accepted 15-run A/B/C `top_k=1` sweep
+and the accepted end-to-end Config B `top_k=2` ablation as strong exploratory
+evidence, not a direct official full-context baseline comparison.
 
 ## Result Boundary
 
@@ -30,6 +31,8 @@ exploratory evidence, not a direct official full-context baseline comparison.
     `outputs/mab/eventqa_frozen_context_bank_cfgB_ctx{0..4}/...`
   - Config C:
     `outputs/mab/eventqa_frozen_context_bank_cfgC_ctx{0..4}/...`
+- end-to-end Config B `top_k=2`:
+  `outputs/mab/eventqa_configB_allctx_topk2/20260630T084500Z-eventqa-65536-version-b-weaver-space-bank-n5`
 
 Latest completed roots:
 
@@ -222,10 +225,149 @@ Interpretation:
 
 ## Recommendation Boundary
 
-- Keep Config A for the next EventQA setting
-- Do not promote Config B or C as better EventQA defaults
-- If a later study wants multi-slot benefit, it must explicitly target
-  multi-slot query-time retrieval rather than only multi-slot construction
+- Config A remains the highest-EM and most output-stable accepted setting
+- Do not promote Config B or C `top_k=1` as better EventQA defaults
+- Treat the end-to-end Config B `top_k=2` result below as a strong positive
+  multi-slot signal, but do not treat it as the same frozen bank queried with
+  one additional slot
+- Defer `top_k=4` until the Config B `top_k=2` context-4 collapse is understood
 - Keep the caveat explicit in every summary:
   this is strong exploratory compressed frozen-context bridge evidence, not a
   direct official full-context baseline comparison
+
+## End-to-End Config B `top_k=2` Ablation
+
+Accepted artifact:
+
+`outputs/mab/eventqa_configB_allctx_topk2/20260630T084500Z-eventqa-65536-version-b-weaver-space-bank-n5`
+
+This is a valid end-to-end Config B ablation. The mechanism intentionally uses
+the same `top_k` during construction-time memory update and query-time
+retrieval. Changing `top_k` therefore changes both bank construction and query
+retrieval; this result must not be interpreted as the same frozen bank queried
+with one extra slot.
+
+### Global Comparison
+
+| Setting | Bank-off EM | Bank-on EM | Bank-on recall | Format failures | Chinese outputs | Final slots |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Config A `top_k=1` | 4/500 | 114/500 | 0.266 | 123 | 23 | `{1:500}` |
+| Config B `top_k=1` | 4/500 | 72/500 | 0.202 | 141 | 120 | `{16:500}` |
+| Config B `top_k=2` | 4/500 | 109/500 | 0.290 | 131 | 98 | `{15:100,16:400}` |
+
+- Config B `top_k=2` versus Config B `top_k=1`:
+  EM `+37`, recall `+0.088`, format failures `-10`, Chinese outputs `-22`
+- Config B `top_k=2` versus Config A `top_k=1`:
+  EM `-5`, recall `+0.024`, format failures `+8`, Chinese outputs `+75`
+
+### Per-context Results
+
+| Context | Off EM | On EM | On recall | Format | Chinese | Retrieved pair | Final slots | vs B k1 | vs A k1 |
+| ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: |
+| 0 | 0/100 | 19/100 | 0.23 | 21 | 0 | `(1,0):100` | 16 | +15 | +1 |
+| 1 | 0/100 | 45/100 | 0.45 | 1 | 1 | `(1,0):99,(0,1):1` | 16 | +30 | +3 |
+| 2 | 0/100 | 22/100 | 0.22 | 1 | 0 | `(0,1):100` | 16 | +20 | +1 |
+| 3 | 3/100 | 22/100 | 0.25 | 14 | 14 | `(1,0):100` | 15 | +1 | +5 |
+| 4 | 1/100 | 1/100 | 0.30 | 94 | 83 | `(1,0):100` | 16 | -29 | -15 |
+
+### Retrieval and Integrity
+
+- retrieved pairs: `{(1,0):399,(0,1):101}`
+- top-1 indices: `{1:399,0:101}`
+- top-2 indices: `{0:399,1:101}`
+- candidate slots before top-k: `{16:400,15:100}`
+- retrieved latent count: `{16:500}`
+- routing remained fixed per context; only one context-1 question swapped pair
+  order
+- one host-access launch completed on GPU 2; no failed attempt occurred
+- `500/500` valid questions; manifest and `run_config.json` matched
+  `retrieve_threshold=0.03`, `update_threshold=0.09`, `max_slots=16`,
+  `top_k=2`, `generation_max_length=40`, `requested_contexts=5`, and
+  `eventqa_protocol=frozen_context_bank`
+- total / maximum query write-count delta: `0 / 0`
+- blocked query write attempts: `500`
+- changed bank snapshots: `0`; cross-context leakage: `0`; errors: `0`
+
+### Interpretation
+
+- End-to-end `top_k=2` is a strong positive signal for the multi-slot
+  mechanism: it raises Config B from `72/500` to `109/500`, approaches Config
+  A's `114/500`, and exceeds Config A recall (`0.290` versus `0.266`).
+- Output stability remains worse than Config A, especially Chinese-script
+  outputs (`98` versus `23`).
+- Gains generalize across contexts 0-3. Context 4 catastrophically regresses
+  and is the dominant remaining concern.
+- Retrieval remains fixed per context rather than question-specific.
+- `top_k=4` remains deferred until the context-4 collapse is understood.
+
+## Context-4 Collapse Diagnosis
+
+Exact comparison from artifacts:
+
+| Setting | Bank-on EM | Recall | Format failures | Chinese outputs | Retrieval |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Config A `top_k=1` | 16/100 | 0.26 | 56 | 22 | `(0,):100` |
+| Config B `top_k=1` | 30/100 | 0.30 | 5 | 1 | `(0,):100` |
+| Config B `top_k=2` | 1/100 | 0.30 | 94 | 83 | `(1,0):100` |
+
+The failure is primarily generation-format instability rather than loss of all
+answer evidence. Of 83 Chinese-script outputs, 82 are also format failures.
+Of 94 format failures, 29 still contain the full gold answer in raw output.
+Those 29 are exactly the recall-positive / EM-negative cases: malformed short
+prefixes such as `iston`, `人`, or `顿也` become the parsed answer while the
+correct answer remains on a later line. This explains recall `0.30` with EM
+`0.01`.
+
+Retrieval and construction evidence:
+
+- the final-score top pair is `(1,0)` for all 100 queries; top-1 minus top-2
+  margin ranges `0.01208-0.01626` with mean `0.01382`
+- after removing the recorded recency factor offline, raw cosine still ranks
+  ctx4 slots `(1,0)` first for all 100 queries; the pair is not an index-tie
+  artifact
+- ctx4 slot 1 has `created_step=2`, `access_count=15`, age `0`; slot 0 has
+  `created_step=3`, `access_count=14`, age `0`
+- construction performed `16` inserts and `1` matched replacement; capacity
+  eviction and replace-old counts are `0`
+- top_k=2 repeatedly refreshed both slots through construction while later
+  slots remained stale; this recency feedback strongly separates the pair from
+  later slots, although cosine also ranks the pair highest
+- Config B `top_k=1` constructed a different bank path: ctx4 slot 0 alone had
+  `created_step=2`, `access_count=15`, age `0`, and its next final-score slot
+  was slot 14 while its next raw-cosine slot was slot 3
+- ctx1 and ctx2 have the same `16 insert + 1 matched replace` structure and
+  similarly fixed local slot-0/slot-1 routing, but produce 45 and 22 EM with
+  almost no format or Chinese failures. Slot indices are context-local; the
+  ctx4 slot-1/slot-0 pair, not slot 1 globally, is pathological.
+
+Evidence limits:
+
+- artifacts do not store slot key tensors, query vectors, key/query norms, or
+  query-to-query similarity, so query-representation collapse cannot be tested
+  directly
+- artifacts do not map final slots to source chunk text or preserve which
+  chunk last replaced each slot, so semantic slot provenance is unavailable
+- raw cosine can be reconstructed from final score and recorded age, but the
+  stored diagnostics cannot separate bad slot content from bad query content
+
+Hypothesis assessment:
+
+- H1 slot-pair content/provenance problem: plausible and consistent with the
+  context-local failure, but unproven because chunk provenance is absent
+- H2 construction instability: strongly supported; changing `top_k` changes
+  the construction path and creates a different ctx4 bank, while contexts 0-3
+  improve
+- H3 recency feedback: supported as an amplifying lock-in mechanism, but not
+  the sole ranking cause because raw cosine also ranks `(1,0)` first
+- H4 query representation collapse: plausible from fixed routing, but query
+  vectors are absent and the hypothesis cannot be tested offline
+- H5 generation instability: strongly supported by 94 malformed outputs, 83
+  Chinese outputs, and 29 raw outputs that contain gold but fail EM
+- H6 dataset difficulty: rejected as the primary cause because the same ctx4
+  questions reach 30/100 under Config B `top_k=1`
+
+Primary next action: add score-decomposition and slot/chunk-provenance
+diagnostics, then rerun Config B `top_k=2` on context 4 only. This is lower risk
+than changing retrieval behavior and can determine whether the pathological
+pair is selected because of query collapse, semantic slot content, or recency
+feedback before another mechanism ablation is chosen.

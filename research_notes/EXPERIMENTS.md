@@ -3401,3 +3401,77 @@ full GSM8K test performance.
   keep Config A for the next EventQA setting. If a later approved study still
   wants multi-slot benefit, design a query-time retrieval intervention that
   actually returns more than one slot.
+
+### EXP-20260630-002: EventQA End-to-End Config B `top_k=2` Ablation
+
+- Phase: EventQA exploratory multi-slot ablation
+- Status: `completed_exploratory`
+- Research question:
+  does Config B improve when the mechanism uses `top_k=2` during both bank
+  construction and frozen-bank query retrieval across all five contexts?
+- Interpretation boundary:
+  this is end-to-end Config B with `top_k=2`, not the same frozen bank queried
+  with one extra slot, because `top_k` affects both construction and query
+  retrieval.
+- Configuration:
+  `retrieve_threshold=0.03`, `update_threshold=0.09`, `max_slots=16`,
+  `top_k=2`, `generation_max_length=40`,
+  `eventqa_protocol=frozen_context_bank`, `requested_contexts=5`.
+- Artifact:
+  `outputs/mab/eventqa_configB_allctx_topk2/20260630T084500Z-eventqa-65536-version-b-weaver-space-bank-n5`
+
+#### Observations
+
+- Global result:
+  Bank-off EM `4/500`; Bank-on EM `109/500`; Bank-on recall `0.290`;
+  Bank-on format failures `131`; Chinese-script outputs `98`;
+  final slots `{15:100,16:400}`.
+- Versus Config B `top_k=1`:
+  EM `+37`, recall `+0.088`, format failures `-10`, Chinese outputs `-22`.
+- Versus Config A `top_k=1`:
+  EM `-5`, recall `+0.024`, format failures `+8`, Chinese outputs `+75`.
+- Per-context Bank-on EM:
+  `19/100`, `45/100`, `22/100`, `22/100`, `1/100`.
+  Deltas versus Config B `top_k=1` are `+15`, `+30`, `+20`, `+1`, `-29`.
+- Retrieval:
+  pairs `{(1,0):399,(0,1):101}`; candidate slots
+  `{16:400,15:100}`; retrieved latent count `{16:500}`. Routing remained
+  fixed per context except for one pair-order swap in context 1.
+- Integrity:
+  one host-access GPU-2 launch, no failed attempt, `500/500` valid questions,
+  matching manifest/runtime config, total/max query write delta `0/0`, blocked
+  query writes `500`, changed snapshots `0`, leakage `0`, errors `0`.
+
+#### Context-4 Failure Analysis
+
+- Exact baselines:
+  Config A `top_k=1` reached `16/100` EM, recall `0.26`, 56 format failures,
+  and 22 Chinese outputs; Config B `top_k=1` reached `30/100` EM, recall
+  `0.30`, 5 format failures, and 1 Chinese output.
+- Config B `top_k=2` retained recall `0.30` but collapsed to `1/100` EM with
+  94 format failures and 83 Chinese outputs.
+- Chinese/format intersection is `82`; 29 format failures still contain the
+  full gold answer in raw output. A malformed first-line prefix is parsed as
+  the answer, explaining the recall/EM gap.
+- The ctx4 pair `(1,0)` is returned for all 100 queries. Final-score top-1/top-2
+  margins have mean `0.01382` and range `0.01208-0.01626`.
+- Reconstructed raw cosine also ranks local slots `(1,0)` first for all
+  queries, so the ordering is not only recency or index tie-breaking.
+- Both local slots are repeatedly refreshed during construction: slot 1 has
+  `created_step=2`, `access_count=15`, age `0`; slot 0 has
+  `created_step=3`, `access_count=14`, age `0`. Construction records 16
+  inserts and 1 matched replacement with no eviction.
+- Final-slot chunk provenance, slot keys, and query vectors are absent, so the
+  current artifacts cannot distinguish pathological slot content from query
+  representation collapse.
+
+#### Conclusion
+
+- End-to-end Config B `top_k=2` is a strong positive multi-slot signal because
+  gains generalize across contexts 0-3 and overall EM approaches Config A.
+- It does not replace Config A as the output-stable setting because context 4
+  catastrophically regresses and global Chinese outputs remain much higher.
+- `top_k=4` remains deferred.
+- Primary follow-up: add score-decomposition and slot/chunk-provenance
+  diagnostics, then rerun Config B `top_k=2` on context 4 only before changing
+  retrieval behavior.

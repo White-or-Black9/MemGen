@@ -112,13 +112,18 @@ IDs and append superseding decisions rather than silently rewriting history.
   as a valid quality comparison. The relaxed top_k=4 runs also showed weaker
   output control, more format failures, and more empty outputs.
 - top_k=1 remains the preferred diagnostic setting for expansion to EventQA.
-- Current cautious EventQA expansion setting:
+- Current intended setting for a future EventQA diagnostic after the
+  runtime-config repair:
   `retrieve_threshold=0.005`, `update_threshold=0.08`, `top_k=1`,
-  `max_slots=16`.
+  `max_slots=16`. This is not the configuration of the preserved EventQA runs.
 - The benchmark-conformant EventQA `frozen_context_bank` evaluation is now
   preserved across all 5 local contexts as strong exploratory evidence:
   Bank-off EM `4/500 = 0.008`, Bank-on EM `83/500 = 0.166`, Bank-off recall
   `0.178`, Bank-on recall `0.208`, improved/regressed/unchanged `81/2/417`.
+- Configuration provenance is corrected: these preserved runs used runtime
+  `retrieve_threshold=0.03`, `update_threshold=0.05`, `top_k=1`, and
+  `max_slots=8`. The old manifest claim `0.005/0.08/1/16` was not the runtime
+  configuration and must not be used to attribute the result.
 - Do not treat this as a final benchmark improvement or as an official
   long-context baseline comparison.
 - Keep the mechanism warning explicit: all 5 EventQA contexts still collapsed
@@ -354,6 +359,10 @@ IDs and append superseding decisions rather than silently rewriting history.
     snapshot mutation after query.
   - Overall compressed-bridge Bank-off EM was `4/500 = 0.008` and Bank-on EM
     was `83/500 = 0.166`.
+  - Configuration audit correction: the run used actual runtime
+    `retrieve_threshold=0.03`, `update_threshold=0.05`, `top_k=1`, and
+    `max_slots=8`; the preserved manifests incorrectly recorded the intended
+    `0.005/0.08/1/16` configuration.
   - All 5 contexts still collapsed to one final slot with
     `true_insert_count=1` and `true_matched_replace_count=16`.
 - Decision:
@@ -362,6 +371,8 @@ IDs and append superseding decisions rather than silently rewriting history.
     the benchmark-conformant lifecycle.
   - Do not promote this to a final benchmark-improvement claim.
   - Keep the slot-collapse caveat explicit in all summaries.
+  - Attribute the result to runtime `0.03/0.05/1/8`; do not attribute it to
+    the previously claimed cautious `0.005/0.08/1/16` configuration.
 - Rationale:
   - The 5-context run is much stronger than the earlier single-context signal
     and demonstrates repeatable benefit under the repaired EventQA protocol.

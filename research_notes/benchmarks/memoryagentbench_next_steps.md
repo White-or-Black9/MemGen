@@ -123,9 +123,11 @@ Proceed only if a later review still wants a follow-up:
    update-threshold diagnostic rather than more immediate full EventQA runs.
    The target is to determine whether matched-replacement collapse can be
    broken while preserving the benchmark-conformant EventQA lifecycle.
-3. **Keep the same cautious EventQA base settings unless a later diagnostic
-   explicitly changes them:** `retrieve_threshold=0.005`,
-   `update_threshold=0.08`, `top_k=1`, and `max_slots=16`.
+3. **Keep configuration provenance explicit:** the preserved all-5 run used
+   runtime `retrieve_threshold=0.03`, `update_threshold=0.05`, `top_k=1`, and
+   `max_slots=8`, despite old manifests recording `0.005/0.08/1/16`. The latter
+   remains the intended cautious setting for a future diagnostic after the
+   runner-integrity repair; it is not the configuration of the preserved run.
 4. **Optional prompt-length audit:** isolate why the `132726 > 131072` warning
    is emitted during over-capacity full-history estimation, while keeping
    `full_history_status=over_capacity_invalid` and never scoring full-history
@@ -156,6 +158,7 @@ Proceed only if a later review still wants a follow-up:
    `ctx0/ctx1/ctx2/ctx3/ctx4` under
    `outputs/mab/version_b_weaver_space_bank_eventqa_65536_n5_ctx*/...`.
    Preserve them as strong exploratory evidence, not a final benchmark claim.
+   Attribute them to runtime `0.03/0.05/1/8`, not the stale manifest values.
 5. Preserve `--context-index` as the scheduling parameter for isolated
    per-context EventQA execution.
 6. After this result is committed, prioritize a frozen-context slot-collapse /

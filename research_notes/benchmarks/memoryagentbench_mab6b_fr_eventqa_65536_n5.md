@@ -1,8 +1,8 @@
 # MAB-6B-FR EventQA 65536 n5
 
-Exploratory EventQA expansion using the cautious top_k=1 Weaver-space bank
-setting. This note preserves the completed all-5-context frozen-context result.
-It is strong exploratory evidence, not a final benchmark claim.
+Exploratory EventQA expansion using a top_k=1 Weaver-space bank. This note
+preserves the completed all-5-context frozen-context result. It is strong
+exploratory evidence, not a final benchmark claim.
 
 ## Active Result Boundary
 
@@ -43,13 +43,27 @@ It is strong exploratory evidence, not a final benchmark claim.
 
 ## Settings
 
-- retrieve_threshold: `0.005`
-- update_threshold: `0.08`
+- retrieve_threshold: `0.03`
+- update_threshold: `0.05`
 - top_k: `1`
-- max_slots: `16`
+- max_slots: `8`
 - generation_max_length: `40`
 - metric: `substring_exact_match`
 - optional metric: `eventqa_recall`
+
+### Runtime-Config Correction
+
+- The preserved all-5 run used the actual runtime config
+  `retrieve_threshold=0.03`, `update_threshold=0.05`, `top_k=1`, and
+  `max_slots=8`.
+- The earlier claim that these artifacts used the intended cautious config
+  `retrieve_threshold=0.005`, `update_threshold=0.08`, `top_k=1`, and
+  `max_slots=16` is corrected and must not be used to attribute this result.
+- The old `run_config.json` and `manifest.json` files contain the intended
+  constants rather than the runtime values because the runner passed the
+  DetectiveQA `_bank_config()` into execution.
+- The frozen-context lifecycle evidence and recorded result numbers remain
+  valid; only the configuration provenance is corrected.
 
 ## Protocol Validation
 
@@ -83,9 +97,9 @@ remained read-only.
 - aggregate raw candidate score min / max / mean:
   `0.04529 / 0.07478 / 0.05641`
 
-Interpretation: construction-time single-slot collapse remains. Under the
-current EventQA setup, the bank behaves like one compressed latent memory slot
-rather than diverse event slots.
+Interpretation: construction-time single-slot collapse remains under the actual
+`0.03/0.05/1/8` runtime config. The bank behaves like one compressed latent
+memory slot rather than diverse event slots.
 
 ## Overall Result
 
@@ -187,9 +201,9 @@ Interpretation:
 
 ## Next-Step Boundary
 
-- Active next step: commit the all-5 EventQA result plus the
-  `--context-index` scheduling support.
-- After that, the recommended next experiment is a frozen-context
+- The all-5 result and `--context-index` scheduling support are preserved, with
+  the historical runtime config corrected above.
+- After runtime-config integrity repair, the recommended next experiment is a frozen-context
   slot-collapse / update-threshold diagnostic, not more immediate full EventQA
   runs.
 - Treat the current result as strong exploratory evidence that the

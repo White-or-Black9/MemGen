@@ -3,6 +3,7 @@ import tempfile
 from pathlib import Path
 import json
 import importlib
+import inspect
 from types import SimpleNamespace
 
 import torch
@@ -122,6 +123,85 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
 
         self.assertEqual(args.eventqa_protocol, "frozen_context_bank")
         self.assertIsNone(args.context_index)
+
+    def test_eventqa_default_cli_values_are_the_runtime_bank_config(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        args = eventqa.build_parser().parse_args([])
+
+        config = eventqa._eventqa_bank_config(args)
+
+        self.assertEqual(config["retrieve_threshold"], 0.005)
+        self.assertEqual(config["update_threshold"], 0.08)
+        self.assertEqual(config["max_slots"], 16)
+        self.assertEqual(config["top_k"], 1)
+        self.assertEqual(config["decay_alpha"], 0.05)
+        self.assertEqual(args.generation_max_length, 40)
+        self.assertNotEqual(config, harness._bank_config())
+
+    def test_eventqa_cli_overrides_match_runtime_and_manifest(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        args = eventqa.build_parser().parse_args(
+            [
+                "--retrieve-threshold", "0.02",
+                "--update-threshold", "0.09",
+                "--max-slots", "12",
+                "--top-k", "3",
+                "--decay-alpha", "0.01",
+                "--generation-max-length", "55",
+                "--eventqa-protocol", "independent_episode",
+                "--context-index", "3",
+                "--requested-contexts", "4",
+            ]
+        )
+        runtime_config = eventqa._eventqa_bank_config(args)
+        manifest = eventqa._build_manifest(
+            "run",
+            args,
+            "now",
+            git_status_before="clean",
+            selected_context_indices=[3],
+        )
+        bank = LatentMemoryBank(LatentMemoryBankConfig(**runtime_config))
+
+        eventqa._assert_runtime_bank_config_matches(bank.config, manifest)
+        self.assertEqual(manifest["retrieve_threshold"], 0.02)
+        self.assertEqual(manifest["update_threshold"], 0.09)
+        self.assertEqual(manifest["max_slots"], 12)
+        self.assertEqual(manifest["top_k"], 3)
+        self.assertEqual(manifest["decay_alpha"], 0.01)
+        self.assertEqual(manifest["generation_max_length"], 55)
+        self.assertEqual(manifest["eventqa_protocol"], "independent_episode")
+        self.assertEqual(manifest["context_index"], 3)
+        self.assertEqual(manifest["requested_contexts"], 4)
+
+    def test_eventqa_runtime_config_mismatch_fails_with_values(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        args = eventqa.build_parser().parse_args([])
+        runtime_config = eventqa._eventqa_bank_config(args)
+        manifest = eventqa._build_manifest(
+            "run", args, "now", git_status_before="clean"
+        )
+        manifest["update_threshold"] = 0.05
+        bank = LatentMemoryBank(LatentMemoryBankConfig(**runtime_config))
+
+        with self.assertRaisesRegex(
+            RuntimeError,
+            r"update_threshold.*actual.*0\.08.*recorded.*0\.05",
+        ):
+            eventqa._assert_runtime_bank_config_matches(bank.config, manifest)
+
+    def test_eventqa_main_does_not_use_detectiveqa_bank_config(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        self.assertNotIn("weaver_bank._bank_config", inspect.getsource(eventqa.main))
 
     def test_eventqa_parser_accepts_context_index(self):
         eventqa = importlib.import_module(

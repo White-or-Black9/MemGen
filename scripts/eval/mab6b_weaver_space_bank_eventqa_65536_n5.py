@@ -22,7 +22,9 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.eval import mab5a_detectiveqa_compressed_n10 as base
+from scripts.eval import mab3_bank_on_full_history as mab3
 from scripts.eval import mab6b_weaver_space_bank_detectiveqa_n10 as weaver_bank
+from memgen.model.latent_memory_bank import LatentMemoryBankConfig
 
 
 EXPERIMENT_NAME = "MAB-6B-FR EventQA 65536 Weaver-space Bank n5"
@@ -44,6 +46,7 @@ DEFAULT_RETRIEVE_THRESHOLD = 0.005
 DEFAULT_UPDATE_THRESHOLD = 0.08
 DEFAULT_TOP_K = 1
 DEFAULT_MAX_SLOTS = 16
+DEFAULT_DECAY_ALPHA = 0.05
 DEFAULT_RETRIEVE_POLICY = "threshold_topk"
 DEFAULT_UPDATE_POLICY = "thread_update"
 METRIC_KEY = "substring_exact_match"
@@ -55,6 +58,77 @@ EVENTQA_QUERY_TEMPLATE = (
     "Based on the context you memorized, complete the task below:\n\n"
     "{question}\n\n The event that happens next is:"
 )
+BANK_CONFIG_FIELDS = (
+    "enabled",
+    "batch_size",
+    "max_slots",
+    "top_k",
+    "threshold",
+    "decay_alpha",
+    "pool_last_n",
+    "retrieve_policy",
+    "update_policy",
+    "storage_device",
+    "debug",
+    "retrieve_threshold",
+    "update_threshold",
+)
+
+
+def _eventqa_bank_config(args) -> dict:
+    retrieve_threshold = float(
+        getattr(args, "retrieve_threshold", DEFAULT_RETRIEVE_THRESHOLD)
+    )
+    config = mab3.version_a_bank_config(
+        top_k=int(getattr(args, "top_k", DEFAULT_TOP_K)),
+        threshold=retrieve_threshold,
+        retrieve_policy=DEFAULT_RETRIEVE_POLICY,
+    )
+    config.update(
+        {
+            "retrieve_threshold": retrieve_threshold,
+            "update_threshold": float(
+                getattr(args, "update_threshold", DEFAULT_UPDATE_THRESHOLD)
+            ),
+            "max_slots": int(getattr(args, "max_slots", DEFAULT_MAX_SLOTS)),
+            "top_k": int(getattr(args, "top_k", DEFAULT_TOP_K)),
+            "decay_alpha": float(
+                getattr(args, "decay_alpha", DEFAULT_DECAY_ALPHA)
+            ),
+            "retrieve_policy": DEFAULT_RETRIEVE_POLICY,
+            "update_policy": DEFAULT_UPDATE_POLICY,
+        }
+    )
+    return config
+
+
+def _assert_runtime_bank_config_matches(actual_config, recorded: dict) -> None:
+    actual = {
+        field: (
+            getattr(actual_config, field)
+            if hasattr(actual_config, field)
+            else actual_config[field]
+        )
+        for field in BANK_CONFIG_FIELDS
+    }
+    recorded_config = {
+        field: recorded.get(
+            field,
+            recorded.get("latent_memory_bank_config", {}).get(field),
+        )
+        for field in BANK_CONFIG_FIELDS
+    }
+    mismatches = {
+        field: {"actual": actual[field], "recorded": recorded_config[field]}
+        for field in BANK_CONFIG_FIELDS
+        if actual[field] != recorded_config[field]
+    }
+    if mismatches:
+        details = ", ".join(
+            f"{field}: actual={values['actual']!r}, recorded={values['recorded']!r}"
+            for field, values in mismatches.items()
+        )
+        raise RuntimeError(f"EventQA runtime bank config mismatch: {details}")
 
 
 def _bank_state_fingerprint(bank) -> str:
@@ -510,6 +584,8 @@ def _eventqa_manager_factory(
     *,
     external_bank=None,
     preserve_bank: bool = False,
+    generation_max_length: int = GENERATION_MAX_LENGTH,
+    recorded_bank_config: dict | None = None,
 ):
     def factory(
         chunks,
@@ -534,14 +610,14 @@ def _eventqa_manager_factory(
 
         class EventQAReadOnlyQueryManager(parent):
             def __init__(self, tokenizer, actor_rollout_wg, config, is_validation=False):
-                config.max_response_length = GENERATION_MAX_LENGTH
+                config.max_response_length = generation_max_length
                 super().__init__(
                     tokenizer,
                     actor_rollout_wg,
                     config,
                     is_validation=is_validation,
                 )
-                self.generation_config.max_new_tokens = GENERATION_MAX_LENGTH
+                self.generation_config.max_new_tokens = generation_max_length
 
             def _create_session_memory_bank(self, actual_batch_size):
                 from interactions.multiturn_interaction import (
@@ -560,6 +636,12 @@ def _eventqa_manager_factory(
                 lifecycle["bank_created"] = bank is not None
                 if bank is None:
                     return None
+                if recorded_bank_config is None:
+                    raise RuntimeError("EventQA recorded bank config is required")
+                _assert_runtime_bank_config_matches(
+                    bank.config,
+                    recorded_bank_config,
+                )
                 lifecycle["bank"] = bank
                 lifecycle["created_bank_id"] = id(bank)
                 lifecycle["initial_slot_count"] = len(bank)
@@ -611,7 +693,12 @@ def _run_eventqa_model(
     *,
     external_bank=None,
     preserve_bank: bool = False,
+    recorded_bank_config: dict | None = None,
 ) -> dict:
+    if bank_mode == "on" and bank_config is None:
+        raise RuntimeError("EventQA bank-on runtime config is required")
+    if bank_mode == "on" and recorded_bank_config is None:
+        raise RuntimeError("EventQA bank-on recorded config is required")
     original_factory = base._manager_class
     capture = {}
     base._manager_class = _eventqa_manager_factory(
@@ -619,6 +706,10 @@ def _run_eventqa_model(
         capture,
         external_bank=external_bank,
         preserve_bank=preserve_bank,
+        generation_max_length=int(
+            getattr(args, "generation_max_length", GENERATION_MAX_LENGTH)
+        ),
+        recorded_bank_config=recorded_bank_config,
     )
     try:
         result = weaver_bank._run_model(
@@ -637,7 +728,9 @@ def _run_eventqa_model(
 
     lifecycle = capture["lifecycle"]
     result["eventqa_protocol"] = args.eventqa_protocol
-    result["effective_generation_max_length"] = GENERATION_MAX_LENGTH
+    result["effective_generation_max_length"] = int(
+        getattr(args, "generation_max_length", GENERATION_MAX_LENGTH)
+    )
     result["rendered_query_messages"] = lifecycle["rendered_query_messages"]
     result["rendered_query_prompt"] = lifecycle["rendered_query_prompt"]
     result["bank_instance_id"] = (
@@ -660,7 +753,7 @@ def _run_eventqa_model(
             _query_memory_diagnostics(
                 lifecycle,
                 _query_turn(result),
-                retrieve_threshold=DEFAULT_RETRIEVE_THRESHOLD,
+                retrieve_threshold=float(bank_config["retrieve_threshold"]),
             )
         )
         if not result["query_read_only_enforced"]:
@@ -761,7 +854,9 @@ def _build_question_row(
         "eventqa_protocol": bank_on_result["eventqa_protocol"],
         "bank_off_mode": "compressed_bridge_no_persistent_bank",
         "bank_off_is_official_long_context_baseline": False,
-        "effective_generation_max_length": GENERATION_MAX_LENGTH,
+        "effective_generation_max_length": bank_on_result[
+            "effective_generation_max_length"
+        ],
         "bank_off_rendered_query_prompt": bank_off_result["rendered_query_prompt"],
         "bank_on_rendered_query_prompt": bank_on_result["rendered_query_prompt"],
         "bank_off_rendered_query_messages": bank_off_result[
@@ -1095,6 +1190,10 @@ def _build_manifest(
     checkpoint_path = str(Path(args.checkpoint_path).resolve())
     protocol = args.eventqa_protocol
     frozen_protocol = protocol == "frozen_context_bank"
+    bank_config = _eventqa_bank_config(args)
+    generation_max_length = int(
+        getattr(args, "generation_max_length", GENERATION_MAX_LENGTH)
+    )
     return {
         "experiment_name": EXPERIMENT_NAME,
         "run_id": run_id,
@@ -1107,14 +1206,10 @@ def _build_manifest(
         "optional_metric": OPTIONAL_METRIC_KEY,
         "checkpoint_path": checkpoint_path,
         "model_checkpoint_id": args.model_checkpoint_id,
-        "retrieve_threshold": DEFAULT_RETRIEVE_THRESHOLD,
-        "update_threshold": DEFAULT_UPDATE_THRESHOLD,
-        "top_k": DEFAULT_TOP_K,
-        "max_slots": DEFAULT_MAX_SLOTS,
-        "retrieve_policy": DEFAULT_RETRIEVE_POLICY,
-        "update_policy": DEFAULT_UPDATE_POLICY,
-        "generation_max_length": GENERATION_MAX_LENGTH,
-        "effective_generation_max_length": GENERATION_MAX_LENGTH,
+        **bank_config,
+        "latent_memory_bank_config": dict(bank_config),
+        "generation_max_length": generation_max_length,
+        "effective_generation_max_length": generation_max_length,
         "eventqa_protocol": protocol,
         "context_bank_rebuilt_per_question": not frozen_protocol,
         "context_bank_reused_across_questions": frozen_protocol,
@@ -1163,14 +1258,15 @@ def _build_note(
     lines = [
         "# MAB-6B-FR EventQA 65536 n5",
         "",
-        "Exploratory EventQA expansion using the cautious top_k=1 Weaver-space bank setting.",
+        "Exploratory EventQA expansion using an explicit Weaver-space bank configuration.",
         "",
         "## Settings",
-        f"- retrieve_threshold: `{DEFAULT_RETRIEVE_THRESHOLD}`",
-        f"- update_threshold: `{DEFAULT_UPDATE_THRESHOLD}`",
-        f"- top_k: `{DEFAULT_TOP_K}`",
-        f"- max_slots: `{DEFAULT_MAX_SLOTS}`",
-        f"- generation_max_length: `{GENERATION_MAX_LENGTH}`",
+        f"- retrieve_threshold: `{manifest['retrieve_threshold']}`",
+        f"- update_threshold: `{manifest['update_threshold']}`",
+        f"- top_k: `{manifest['top_k']}`",
+        f"- max_slots: `{manifest['max_slots']}`",
+        f"- decay_alpha: `{manifest['decay_alpha']}`",
+        f"- generation_max_length: `{manifest['generation_max_length']}`",
         f"- EventQA protocol: `{manifest['eventqa_protocol']}`",
         f"- Bank-off mode: `{manifest['bank_off_mode']}`",
         f"- metric: `{METRIC_KEY}`",
@@ -1248,6 +1344,18 @@ def build_parser():
     parser.add_argument("--question-limit", type=int)
     parser.add_argument("--chunk-size", type=int, default=DEFAULT_CHUNK_SIZE)
     parser.add_argument(
+        "--retrieve-threshold", type=float, default=DEFAULT_RETRIEVE_THRESHOLD
+    )
+    parser.add_argument(
+        "--update-threshold", type=float, default=DEFAULT_UPDATE_THRESHOLD
+    )
+    parser.add_argument("--max-slots", type=int, default=DEFAULT_MAX_SLOTS)
+    parser.add_argument("--top-k", type=int, default=DEFAULT_TOP_K)
+    parser.add_argument("--decay-alpha", type=float, default=DEFAULT_DECAY_ALPHA)
+    parser.add_argument(
+        "--generation-max-length", type=int, default=GENERATION_MAX_LENGTH
+    )
+    parser.add_argument(
         "--eventqa-protocol",
         choices=EVENTQA_PROTOCOLS,
         default=DEFAULT_EVENTQA_PROTOCOL,
@@ -1271,12 +1379,17 @@ def main() -> int:
     )
     if not selected_indices:
         raise RuntimeError(f"No rows found for {SUB_DATASET}")
+    runtime_bank_config = _eventqa_bank_config(args)
     manifest = _build_manifest(
         run_id,
         args,
         started_at,
         git_status_before=git_status_before,
         selected_context_indices=selected_indices,
+    )
+    _assert_runtime_bank_config_matches(
+        LatentMemoryBankConfig(**runtime_bank_config),
+        manifest,
     )
     _write_json(output_dir / "manifest.json", manifest)
 
@@ -1325,9 +1438,10 @@ def main() -> int:
                             capacity,
                             bank_on_payload,
                             "on",
-                            weaver_bank._bank_config(),
+                            runtime_bank_config,
                             external_bank=frozen_bank,
                             preserve_bank=frozen_protocol,
+                            recorded_bank_config=manifest,
                         )
                         if frozen_protocol:
                             retained_bank = bank_on_result.pop("_retained_bank")

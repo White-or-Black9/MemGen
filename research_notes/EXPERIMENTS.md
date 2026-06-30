@@ -3086,9 +3086,11 @@ full GSM8K test performance.
 - Among the relaxed top_k=1 settings, `retrieve_threshold=0.005` had the
   cleanest output surface, while `0.02`, `0.01`, and `0.005` each reached
   Bank-on EM `1/10`.
-- Recommended cautious EventQA expansion setting:
+- Recommended cautious setting for a future EventQA diagnostic after the
+  runtime-config repair:
   `retrieve_threshold=0.005`, `update_threshold=0.08`, `top_k=1`,
-  `max_slots=16`.
+  `max_slots=16`. This is not the configuration of EXP-20260629-002 or
+  EXP-20260629-003.
 - This remains exploratory mechanism evidence on n10 and does not support a
   benchmark-improvement claim.
 
@@ -3100,15 +3102,19 @@ full GSM8K test performance.
   protocol show a positive signal on EventQA `context_index=0` before any
   multi-context scaling?
 - Configuration:
-  - `retrieve_threshold=0.005`
-  - `update_threshold=0.08`
+  - actual runtime `retrieve_threshold=0.03`
+  - actual runtime `update_threshold=0.05`
   - `top_k=1`
-  - `max_slots=16`
+  - actual runtime `max_slots=8`
   - `generation_max_length=40`
   - `eventqa_protocol=frozen_context_bank`
   - `requested_contexts=1`
   - no `question_limit`, so all 100 questions in `context_index=0` were
     evaluated
+- Configuration correction: the runner wrote intended constants
+  `retrieve_threshold=0.005`, `update_threshold=0.08`, and `max_slots=16` to
+  the manifest but passed the DetectiveQA `0.03/0.05/8` config to runtime.
+  This experiment must be attributed to the actual runtime values above.
 - Command:
   `CUDA_VISIBLE_DEVICES=3 /home/baishilong/miniconda3/envs/memgen/bin/python scripts/eval/mab6b_weaver_space_bank_eventqa_65536_n5.py --requested-contexts 1 --skip-research-note --eventqa-protocol frozen_context_bank`
 - Script:
@@ -3181,13 +3187,20 @@ full GSM8K test performance.
 - Research question: does the benchmark-conformant `frozen_context_bank`
   protocol retain a positive signal across all 5 local EventQA 65536 contexts?
 - Configuration:
-  - `retrieve_threshold=0.005`
-  - `update_threshold=0.08`
+  - actual runtime `retrieve_threshold=0.03`
+  - actual runtime `update_threshold=0.05`
   - `top_k=1`
-  - `max_slots=16`
+  - actual runtime `max_slots=8`
   - `generation_max_length=40`
   - `eventqa_protocol=frozen_context_bank`
   - one isolated context per process via `--context-index`
+- Configuration correction:
+  - the preserved manifests recorded the intended cautious values
+    `retrieve_threshold=0.005`, `update_threshold=0.08`, and `max_slots=16`
+  - runtime instead received the imported DetectiveQA config
+    `retrieve_threshold=0.03`, `update_threshold=0.05`, and `max_slots=8`
+  - the all-5 result remains valid frozen-context evidence, but it must be
+    attributed only to the actual runtime config
 - Scheduling support:
   - the runner now accepts `--context-index` so one EventQA context can be
     forced into one isolated process / output root for safe multi-GPU parallel
@@ -3275,7 +3288,7 @@ full GSM8K test performance.
 
 - This is strong exploratory evidence that Bank-on improves over the
   compressed-bridge Bank-off baseline under the benchmark-conformant
-  `frozen_context_bank` lifecycle.
+  `frozen_context_bank` lifecycle under runtime `0.03/0.05/1/8`.
 - It is not a final benchmark-improvement claim and it is not an official full
   long-context baseline comparison.
 - The gain cannot yet be attributed to diverse slot retrieval because every

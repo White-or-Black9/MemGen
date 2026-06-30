@@ -18,6 +18,13 @@
 - Runner scheduling support:
   `--context-index` now exists to force one-context-per-process execution and
   preserve isolated output roots during safe parallel evaluation.
+- Runtime-config correction:
+  the preserved all-5 run actually used `retrieve_threshold=0.03`,
+  `update_threshold=0.05`, `top_k=1`, and `max_slots=8`. The previously
+  recorded `0.005/0.08/1/16` values came from EventQA constants written to the
+  manifests while the runtime silently consumed the DetectiveQA bank config.
+  The runner now owns and validates its runtime config, but this repair does
+  not retroactively change the preserved artifacts.
 - Protocol result:
   `frozen_context_bank` in all 5 contexts; `context_memorization_count=1`;
   same frozen bank reused across all 100 queries per context; total query write
@@ -29,7 +36,7 @@
   (`17` chunks -> `final_slot_count=1`, `true_insert_count=1`,
   `true_matched_replace_count=16`, no capacity eviction), so the active
   EventQA mechanism still behaves like one compressed latent memory slot rather
-  than diverse event slots.
+  than diverse event slots under the actual `0.03/0.05/1/8` runtime config.
 - Overall 5-context result:
   compressed-bridge Bank-off substring EM `4/500 = 0.008`;
   Bank-on substring EM `83/500 = 0.166`; absolute improvement `+0.158`;
@@ -83,10 +90,10 @@
   `retrieve_threshold=0.01`, and `retrieve_threshold=0.005` each reached
   Bank-on EM `1/10`; `retrieve_threshold=0.005` had the cleanest output
   surface.
-- Current preferred expansion setting for EventQA is the cautious top_k=1
-  configuration:
+- Current intended setting for a future EventQA diagnostic, after the
+  runtime-config repair, is the cautious top_k=1 configuration:
   `retrieve_threshold=0.005`, `update_threshold=0.08`, `top_k=1`,
-  `max_slots=16`.
+  `max_slots=16`. This is not the configuration of the preserved all-5 run.
 - Interpretation boundary: all of this remains n10 exploratory mechanism
   evidence only. Do not claim benchmark improvement from these runs.
 - Consolidated analysis:

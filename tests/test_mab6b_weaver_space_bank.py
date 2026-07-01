@@ -124,6 +124,323 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
         self.assertEqual(args.eventqa_protocol, "frozen_context_bank")
         self.assertIsNone(args.context_index)
         self.assertFalse(args.construction_only)
+        self.assertFalse(args.reseed_per_context)
+        self.assertFalse(args.trace_score_decomposition)
+        self.assertFalse(args.save_frozen_bank)
+        self.assertFalse(args.bank_transition_diagnostics)
+
+    def test_eventqa_diagnostic_cli_flags_are_opt_in(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        args = eventqa.build_parser().parse_args(
+            [
+                "--reseed-per-context",
+                "--trace-score-decomposition",
+                "--save-frozen-bank",
+                "--bank-transition-diagnostics",
+            ]
+        )
+
+        self.assertTrue(args.reseed_per_context)
+        self.assertTrue(args.trace_score_decomposition)
+        self.assertTrue(args.save_frozen_bank)
+        self.assertTrue(args.bank_transition_diagnostics)
+
+    def test_eventqa_tensor_hash_is_stable_and_includes_shape_and_dtype(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        tensor = torch.tensor([[1.0, 2.0]], dtype=torch.float32)
+
+        first = eventqa._tensor_hash(tensor)
+        second = eventqa._tensor_hash(tensor.clone())
+        changed = eventqa._tensor_hash(torch.tensor([[1.0, 3.0]]))
+        reshaped = eventqa._tensor_hash(tensor.reshape(2, 1))
+        changed_dtype = eventqa._tensor_hash(tensor.to(torch.float64))
+
+        self.assertEqual(first, second)
+        self.assertNotEqual(first, changed)
+        self.assertNotEqual(first, reshaped)
+        self.assertNotEqual(first, changed_dtype)
+
+    def test_eventqa_runtime_metadata_has_reproducibility_fields(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        args = eventqa.build_parser().parse_args(
+            ["--requested-contexts", "1", "--context-index", "3"]
+        )
+
+        metadata = eventqa._runtime_reproducibility_metadata(
+            args,
+            selected_context_indices=[3],
+            argv=["runner.py", "--context-index", "3"],
+        )
+
+        for key in (
+            "argv",
+            "git_commit",
+            "git_dirty",
+            "python_version",
+            "torch_version",
+            "transformers_version",
+            "cuda_version",
+            "gpu",
+            "dtype",
+            "checkpoint_path",
+            "dataset_path",
+            "seed",
+            "deterministic_state",
+            "process_layout",
+        ):
+            self.assertIn(key, metadata)
+        self.assertEqual(metadata["process_layout"]["mode"], "single_context")
+        self.assertEqual(metadata["process_layout"]["selected_context_indices"], [3])
+
+    def test_eventqa_manifest_only_enables_diagnostics_when_requested(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        normal_args = eventqa.build_parser().parse_args([])
+        diagnostic_args = eventqa.build_parser().parse_args(
+            ["--reseed-per-context", "--trace-score-decomposition"]
+        )
+
+        normal = eventqa._build_manifest(
+            "normal",
+            normal_args,
+            "now",
+            git_status_before="clean",
+            selected_context_indices=[0, 1, 2, 3, 4],
+        )
+        diagnostic = eventqa._build_manifest(
+            "diagnostic",
+            diagnostic_args,
+            "now",
+            git_status_before="clean",
+            selected_context_indices=[0, 1, 2, 3, 4],
+        )
+
+        self.assertFalse(normal["diagnostics_enabled"])
+        self.assertNotIn("reproducibility_diagnostics", normal)
+        self.assertTrue(diagnostic["diagnostics_enabled"])
+        self.assertEqual(
+            diagnostic["diagnostic_options"],
+            {
+                "reseed_per_context": True,
+                "trace_score_decomposition": True,
+                "save_frozen_bank": False,
+                "bank_transition_diagnostics": False,
+            },
+        )
+
+    def test_eventqa_transition_artifacts_are_strictly_opt_in(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        row = {
+            "context_index": 0,
+            "context_id": "ctx-0",
+            "query_id": 0,
+            "question_id": None,
+            "qa_pair_id": "pair-0",
+            "gold_answers": ["gold"],
+            "bank_off_prediction": "wrong",
+            "bank_on_prediction": "gold",
+            "bank_off_parsed_prediction": "wrong",
+            "bank_on_parsed_prediction": "gold",
+            "bank_off_substring_exact_match": 0,
+            "bank_on_substring_exact_match": 1,
+            "bank_off_eventqa_recall": 0.0,
+            "bank_on_eventqa_recall": 1.0,
+            "bank_off_format_flags": {},
+            "bank_on_format_flags": {},
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            eventqa._write_bank_transition_artifacts(root, [row], enabled=False)
+            self.assertFalse((root / "bank_transition_diagnostics.jsonl").exists())
+            self.assertFalse((root / "bank_transition_aggregate.json").exists())
+
+            eventqa._write_bank_transition_artifacts(root, [row], enabled=True)
+            diagnostics = root / "bank_transition_diagnostics.jsonl"
+            aggregate = root / "bank_transition_aggregate.json"
+            self.assertTrue(diagnostics.is_file())
+            self.assertTrue(aggregate.is_file())
+            self.assertTrue(json.loads(diagnostics.read_text())["helpful_memory"])
+
+    def test_eventqa_reseed_per_context_records_effective_seed(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        metadata = eventqa._prepare_context_rng(
+            base_seed=42,
+            context_index=3,
+            reseed_per_context=True,
+        )
+
+        self.assertTrue(metadata["reseed_applied"])
+        self.assertEqual(metadata["effective_seed"], 45)
+        for key in (
+            "python_random_state_hash",
+            "numpy_random_state_hash",
+            "torch_cpu_rng_state_hash",
+            "torch_cuda_rng_state_hash",
+            "deterministic_state",
+        ):
+            self.assertIn(key, metadata)
+
+    def test_eventqa_bank_tensor_snapshot_records_slot_hashes_and_metadata(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(enabled=True, max_slots=2, top_k=1)
+        )
+        bank.write(torch.tensor([[3.0, 4.0]], dtype=torch.float32))
+        slot = bank._slots[0]
+        slot.created_step = 7
+        slot.last_retrieved_step = 5
+        slot.access_count = 2
+
+        snapshot = eventqa._bank_tensor_snapshot(
+            bank, context_index=1, context_id="ctx-1"
+        )
+
+        self.assertEqual(snapshot["slot_count"], 1)
+        self.assertEqual(snapshot["context_index"], 1)
+        self.assertEqual(len(snapshot["combined_frozen_bank_hash"]), 64)
+        recorded = snapshot["slots"][0]
+        self.assertEqual(recorded["slot_index"], 0)
+        self.assertEqual(recorded["created_step"], 7)
+        self.assertEqual(recorded["last_retrieved_step"], 5)
+        self.assertEqual(recorded["access_count"], 2)
+        self.assertEqual(recorded["memory_token_count"], 1)
+        self.assertEqual(len(recorded["memory_tensor_hash"]), 64)
+        self.assertEqual(len(recorded["key_tensor_hash"]), 64)
+        self.assertAlmostEqual(recorded["memory_norm"], 5.0)
+
+    def test_eventqa_score_decomposition_matches_bank_formula(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                max_slots=2,
+                top_k=1,
+                retrieve_threshold=0.1,
+                decay_alpha=0.5,
+            )
+        )
+        bank.write(torch.tensor([[1.0, 0.0]], dtype=torch.float32))
+        bank.write(torch.tensor([[0.0, 1.0]], dtype=torch.float32))
+        bank._slots[0].last_retrieved_step = 1
+        bank._slots[1].last_retrieved_step = 2
+        query = torch.tensor([1.0, 0.0], dtype=torch.float32)
+
+        decomposition = eventqa._compute_score_decomposition(
+            bank,
+            query,
+            retrieval_step=3,
+            selected_indices=[0],
+            query_id="q0",
+        )
+
+        slot0 = decomposition["slots"][0]
+        self.assertAlmostEqual(slot0["raw_cosine"], 1.0)
+        self.assertEqual(slot0["last_retrieved_age"], 2)
+        self.assertAlmostEqual(slot0["decay_factor"], 0.36787944117)
+        self.assertAlmostEqual(slot0["final_score"], 0.36787944117)
+        self.assertTrue(slot0["threshold_passed"])
+        self.assertTrue(slot0["selected_by_topk"])
+        self.assertEqual(slot0["raw_cosine_rank"], 1)
+        self.assertEqual(slot0["final_score_rank"], 1)
+
+    def test_eventqa_construction_provenance_includes_slot_targets(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        turns = [
+            {
+                "construction_turn_index": 0,
+                "write_action": "insert",
+                "target_slot_index": 0,
+                "replaced_slot_index": None,
+            },
+            {
+                "construction_turn_index": 1,
+                "write_action": "replace_matched",
+                "target_slot_index": 0,
+                "replaced_slot_index": 0,
+            },
+        ]
+        context_payload = {
+            "context_index": 2,
+            "chunks": ["chunk zero", "chunk one"],
+            "memorization_prompts": ["prompt zero", "prompt one"],
+        }
+
+        enriched = eventqa._enrich_construction_provenance(
+            turns, context_payload
+        )
+
+        self.assertEqual(enriched[0]["context_index"], 2)
+        self.assertEqual(enriched[0]["chunk_index"], 0)
+        self.assertEqual(enriched[0]["target_slot_index"], 0)
+        self.assertIsNone(enriched[0]["replaced_slot_index"])
+        self.assertEqual(enriched[1]["replaced_slot_index"], 0)
+        self.assertEqual(len(enriched[0]["chunk_text_hash"]), 64)
+        self.assertEqual(len(enriched[0]["memorization_prompt_hash"]), 64)
+
+    def test_eventqa_question_identity_falls_back_to_index_and_text_hash(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        context_payload = {
+            "question_ids": [None],
+            "qa_pair_ids": [None],
+            "questions": ["What happened next?"],
+        }
+
+        identities = eventqa._question_identity_records(context_payload)
+
+        self.assertEqual(identities[0]["question_index"], 0)
+        self.assertIsNone(identities[0]["question_id"])
+        self.assertIsNone(identities[0]["qa_pair_id"])
+        self.assertEqual(len(identities[0]["question_text_hash"]), 64)
+        self.assertEqual(identities[0]["stable_fallback_id"], "question_index:0")
+
+    def test_eventqa_save_frozen_bank_serializes_scoring_state(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(enabled=True, max_slots=2, top_k=1)
+        )
+        bank.write(torch.tensor([[1.0, 2.0]], dtype=torch.float32))
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "bank.pt"
+            eventqa._save_frozen_bank(
+                path,
+                bank,
+                context_index=0,
+                context_id="ctx-0",
+                runtime_metadata={"run_id": "run"},
+            )
+            payload = torch.load(path, weights_only=False)
+
+        self.assertEqual(payload["context_id"], "ctx-0")
+        self.assertEqual(payload["context_index"], 0)
+        self.assertEqual(payload["retrieval_step"], bank._retrieval_step)
+        self.assertEqual(len(payload["slots"]), 1)
+        self.assertIn("memory", payload["slots"][0])
+        self.assertIn("key", payload["slots"][0])
+        self.assertIn("bank_config", payload)
 
     def test_eventqa_parser_accepts_construction_only(self):
         eventqa = importlib.import_module(
@@ -397,7 +714,12 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
         )
         lifecycle = {"construction_turn_diagnostics": []}
         trace = {}
-        restore = eventqa._install_eventqa_bank_trace(bank, trace, lifecycle)
+        restore = eventqa._install_eventqa_bank_trace(
+            bank,
+            trace,
+            lifecycle,
+            trace_construction_provenance=True,
+        )
 
         retrieval = bank.retrieve_with_context(
             torch.tensor([[[1.0, 0.0]]], dtype=torch.float32)
@@ -410,7 +732,73 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
         self.assertEqual(turn["write_action"], "insert")
         self.assertIsNone(turn["best_matched_score"])
         self.assertEqual(turn["slot_count_after_write"], 1)
+        self.assertEqual(turn["slot_count_before_write"], 0)
+        self.assertEqual(turn["target_slot_index"], 0)
+        self.assertIsNone(turn["replaced_slot_index"])
+        self.assertEqual(turn["created_step_after_write"], 1)
+        self.assertEqual(turn["access_count_after_write"], 0)
         self.assertEqual(trace["last_retrieval"]["scores"], [])
+
+    def test_eventqa_default_construction_trace_schema_is_unchanged(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(enabled=True, update_policy="thread_update")
+        )
+        lifecycle = {"construction_turn_diagnostics": []}
+        restore = eventqa._install_eventqa_bank_trace(bank, {}, lifecycle)
+
+        retrieval = bank.retrieve_with_context(torch.tensor([1.0, 0.0]))
+        bank.write_back(torch.tensor([[1.0, 0.0]]), retrieval)
+        restore()
+
+        turn = lifecycle["construction_turn_diagnostics"][0]
+        self.assertNotIn("target_slot_index", turn)
+        self.assertNotIn("retrieval_score_decomposition_before_write", turn)
+
+    def test_eventqa_query_trace_records_opt_in_score_decomposition(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                max_slots=2,
+                top_k=1,
+                retrieve_threshold=0.01,
+                decay_alpha=0.05,
+            )
+        )
+        bank.write(torch.tensor([[1.0, 0.0]], dtype=torch.float32))
+        lifecycle = {
+            "construction_turn_diagnostics": [],
+            "query_phase_active": True,
+        }
+        trace = {}
+        score_state = {}
+        restore = eventqa._install_eventqa_bank_trace(
+            bank,
+            trace,
+            lifecycle,
+            trace_score_decomposition=True,
+            score_trace_state=score_state,
+            query_id="query-0",
+        )
+
+        result = bank.retrieve_with_context(
+            torch.tensor([[[1.0, 0.0]]], dtype=torch.float32)
+        )
+        restore()
+
+        decomposition = lifecycle["query_score_decomposition"]
+        self.assertEqual(decomposition["query_id"], "query-0")
+        self.assertEqual(decomposition["retrieved_indices"], [0])
+        self.assertEqual(decomposition["retrieved_latent_count"], 1)
+        self.assertTrue(decomposition["slots"][0]["selected_by_topk"])
+        self.assertEqual(list(result.retrieved_indices), [0])
+        self.assertIn("first_query", score_state)
+        self.assertIn("previous_query", score_state)
 
     def test_eventqa_query_proxy_blocks_real_writes_and_records_attempts(self):
         eventqa = importlib.import_module(

@@ -6,7 +6,11 @@ import argparse
 import gc
 import hashlib
 import json
+import math
 import os
+import pickle
+import platform
+import random
 from datetime import datetime, timezone
 from pathlib import Path
 import subprocess
@@ -24,6 +28,10 @@ if str(REPO_ROOT) not in sys.path:
 from scripts.eval import mab5a_detectiveqa_compressed_n10 as base
 from scripts.eval import mab3_bank_on_full_history as mab3
 from scripts.eval import mab6b_weaver_space_bank_detectiveqa_n10 as weaver_bank
+from scripts.eval.eventqa_transition_diagnostics import (
+    aggregate_transition_rows,
+    build_transition_diagnostic,
+)
 from memgen.model.latent_memory_bank import LatentMemoryBankConfig
 
 
@@ -77,6 +85,372 @@ BANK_CONFIG_FIELDS = (
 
 class _ConstructionOnlyStop(RuntimeError):
     """Signal that construction finished and query generation was skipped."""
+
+
+def _tensor_hash(tensor: torch.Tensor) -> str:
+    """Hash tensor metadata and exact storage bytes on CPU."""
+    canonical = tensor.detach().to("cpu").contiguous()
+    digest = hashlib.sha256()
+    digest.update(str(canonical.dtype).encode("ascii"))
+    digest.update(json.dumps(list(canonical.shape)).encode("ascii"))
+    raw = canonical.reshape(-1).view(torch.uint8).numpy().tobytes()
+    digest.update(raw)
+    return digest.hexdigest()
+
+
+def _hash_value(value) -> str:
+    return hashlib.sha256(pickle.dumps(value, protocol=5)).hexdigest()
+
+
+def _deterministic_state() -> dict:
+    return {
+        "deterministic_algorithms_enabled": bool(
+            torch.are_deterministic_algorithms_enabled()
+        ),
+        "cudnn_deterministic": bool(torch.backends.cudnn.deterministic),
+        "cudnn_benchmark": bool(torch.backends.cudnn.benchmark),
+    }
+
+
+def _rng_state_hashes() -> dict:
+    try:
+        import numpy as np
+
+        numpy_hash = _hash_value(np.random.get_state())
+    except (ImportError, RuntimeError, TypeError, ValueError):
+        numpy_hash = None
+    cuda_hash = None
+    if torch.cuda.is_available():
+        try:
+            cuda_hash = _tensor_hash(torch.cuda.get_rng_state(torch.cuda.current_device()))
+        except RuntimeError:
+            cuda_hash = None
+    return {
+        "python_random_state_hash": _hash_value(random.getstate()),
+        "numpy_random_state_hash": numpy_hash,
+        "torch_cpu_rng_state_hash": _tensor_hash(torch.get_rng_state()),
+        "torch_cuda_rng_state_hash": cuda_hash,
+        "deterministic_state": _deterministic_state(),
+    }
+
+
+def _prepare_context_rng(
+    *, base_seed: int, context_index: int, reseed_per_context: bool
+) -> dict:
+    effective_seed = None
+    if reseed_per_context:
+        effective_seed = int(base_seed) + int(context_index)
+        from main import set_seed
+
+        set_seed(effective_seed, use_gpu=torch.cuda.is_available())
+    return {
+        "base_seed": int(base_seed),
+        "context_index": int(context_index),
+        "reseed_applied": bool(reseed_per_context),
+        "effective_seed": effective_seed,
+        **_rng_state_hashes(),
+    }
+
+
+def _resolved_snapshot_hash(path: str) -> str | None:
+    parts = Path(path).resolve().parts
+    if "snapshots" not in parts:
+        return None
+    index = parts.index("snapshots")
+    return parts[index + 1] if index + 1 < len(parts) else None
+
+
+def _runtime_reproducibility_metadata(
+    args,
+    *,
+    selected_context_indices: list[int],
+    argv: list[str] | None = None,
+    model=None,
+) -> dict:
+    try:
+        import transformers
+
+        transformers_version = transformers.__version__
+    except (ImportError, AttributeError):
+        transformers_version = None
+    try:
+        git_commit = _git("rev-parse", "HEAD")
+        git_status = _git("status", "--short")
+    except (OSError, subprocess.CalledProcessError):
+        git_commit = None
+        git_status = None
+    gpu = None
+    if torch.cuda.is_available():
+        logical_id = torch.cuda.current_device()
+        gpu = {
+            "logical_device_id": logical_id,
+            "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
+            "name": torch.cuda.get_device_name(logical_id),
+        }
+    dtype = "torch.bfloat16"
+    tokenizer_path = checkpoint_path = str(Path(args.checkpoint_path).resolve())
+    if model is not None:
+        try:
+            dtype = str(model.reasoner.get_input_embeddings().weight.dtype)
+        except (AttributeError, RuntimeError):
+            pass
+        tokenizer = getattr(model, "tokenizer", None)
+        tokenizer_path = str(
+            getattr(tokenizer, "name_or_path", tokenizer_path)
+        )
+    selected = list(selected_context_indices)
+    return {
+        "argv": list(sys.argv if argv is None else argv),
+        "git_commit": git_commit,
+        "git_dirty": None if git_status is None else bool(git_status),
+        "git_status": git_status,
+        "python_version": platform.python_version(),
+        "python_executable": sys.executable,
+        "torch_version": torch.__version__,
+        "transformers_version": transformers_version,
+        "cuda_version": torch.version.cuda,
+        "gpu": gpu,
+        "dtype": dtype,
+        "checkpoint_path": checkpoint_path,
+        "checkpoint_snapshot_hash": _resolved_snapshot_hash(checkpoint_path),
+        "tokenizer_path": tokenizer_path,
+        "dataset_path": str(Path(args.parquet).resolve()),
+        "data_config_path": str(Path(args.data_config).resolve()),
+        "seed": int(args.seed),
+        "deterministic_state": _deterministic_state(),
+        "process_layout": {
+            "mode": "single_context" if getattr(args, "context_index", None) is not None else "all_context",
+            "requested_contexts": int(args.requested_contexts),
+            "context_index": getattr(args, "context_index", None),
+            "selected_context_indices": selected,
+            "reseed_per_context": bool(getattr(args, "reseed_per_context", False)),
+        },
+    }
+
+
+def _bank_tensor_snapshot(bank, *, context_index: int, context_id: str) -> dict:
+    slots = []
+    digest = hashlib.sha256()
+    for index, slot in enumerate(bank._slots):
+        memory_hash = _tensor_hash(slot.memory)
+        key_hash = _tensor_hash(slot.key)
+        recorded = {
+            "slot_index": index,
+            "memory_tensor_hash": memory_hash,
+            "key_tensor_hash": key_hash,
+            "memory_shape": list(slot.memory.shape),
+            "key_shape": list(slot.key.shape),
+            "memory_dtype": str(slot.memory.dtype),
+            "key_dtype": str(slot.key.dtype),
+            "created_step": int(slot.created_step),
+            "last_retrieved_step": int(slot.last_retrieved_step),
+            "access_count": int(slot.access_count),
+            "memory_token_count": int(slot.memory.shape[0]),
+            "key_norm": float(slot.key.detach().float().norm().item()),
+            "memory_norm": float(slot.memory.detach().float().norm().item()),
+        }
+        slots.append(recorded)
+        digest.update(json.dumps(recorded, sort_keys=True).encode("utf-8"))
+    digest.update(str(int(bank._retrieval_step)).encode("ascii"))
+    return {
+        "context_index": int(context_index),
+        "context_id": context_id,
+        "slot_count": len(slots),
+        "retrieval_step": int(bank._retrieval_step),
+        "combined_frozen_bank_hash": digest.hexdigest(),
+        "slots": slots,
+    }
+
+
+def _bank_config_values(config) -> dict:
+    return {
+        field: getattr(config, field)
+        for field in BANK_CONFIG_FIELDS
+        if hasattr(config, field)
+    }
+
+
+def _save_frozen_bank(
+    path: Path,
+    bank,
+    *,
+    context_index: int,
+    context_id: str,
+    runtime_metadata: dict,
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    state = bank.state_dict()
+    slots = []
+    for slot in state["slots"]:
+        saved = dict(slot)
+        saved["memory"] = slot["memory"].detach().to("cpu").contiguous()
+        saved["key"] = slot["key"].detach().to("cpu").contiguous()
+        slots.append(saved)
+    torch.save(
+        {
+            "format_version": 1,
+            "replay_supported": False,
+            "replay_limitation": (
+                "Serialization is implemented; load/replay is intentionally deferred."
+            ),
+            "context_index": int(context_index),
+            "context_id": context_id,
+            "step": int(state["step"]),
+            "retrieval_step": int(state["retrieval_step"]),
+            "slots": slots,
+            "bank_config": _bank_config_values(bank.config),
+            "runtime_metadata": runtime_metadata,
+            "bank_snapshot": _bank_tensor_snapshot(
+                bank, context_index=context_index, context_id=context_id
+            ),
+        },
+        path,
+    )
+
+
+def _query_vector(bank, query_or_hidden_states: torch.Tensor) -> torch.Tensor:
+    if query_or_hidden_states.ndim == 1:
+        return query_or_hidden_states.detach()
+    return bank.build_query(query_or_hidden_states)
+
+
+def _rank_by(values: list[float]) -> list[int]:
+    order = sorted(range(len(values)), key=lambda index: (-values[index], index))
+    ranks = [0] * len(values)
+    for rank, index in enumerate(order, start=1):
+        ranks[index] = rank
+    return ranks
+
+
+def _compute_score_decomposition(
+    bank,
+    query_or_hidden_states: torch.Tensor,
+    *,
+    retrieval_step: int,
+    selected_indices: list[int],
+    query_id,
+    first_query: torch.Tensor | None = None,
+    previous_query: torch.Tensor | None = None,
+) -> dict:
+    query = _query_vector(bank, query_or_hidden_states)
+    raw_cosines = []
+    final_scores = []
+    ages = []
+    decays = []
+    for slot in bank._slots:
+        key = slot.key.to(device=query.device, dtype=query.dtype)
+        cosine = float(
+            torch.nn.functional.cosine_similarity(
+                query.unsqueeze(0), key.unsqueeze(0), dim=-1
+            ).item()
+        )
+        age = max(0, int(retrieval_step) - int(slot.last_retrieved_step))
+        decay = math.exp(-float(bank.config.decay_alpha) * age)
+        raw_cosines.append(cosine)
+        ages.append(age)
+        decays.append(decay)
+        final_scores.append(cosine * decay)
+    raw_ranks = _rank_by(raw_cosines)
+    final_ranks = _rank_by(final_scores)
+    selected = set(selected_indices)
+
+    def query_cosine(reference):
+        if reference is None:
+            return None
+        reference = reference.to(device=query.device, dtype=query.dtype)
+        return float(
+            torch.nn.functional.cosine_similarity(
+                query.unsqueeze(0), reference.unsqueeze(0), dim=-1
+            ).item()
+        )
+
+    return {
+        "query_id": query_id,
+        "query_vector_hash": _tensor_hash(query),
+        "query_norm": float(query.detach().float().norm().item()),
+        "query_cosine_to_first": query_cosine(first_query),
+        "query_cosine_to_previous": query_cosine(previous_query),
+        "retrieval_step": int(retrieval_step),
+        "retrieved_indices": list(selected_indices),
+        "retrieved_latent_count": sum(
+            int(bank._slots[index].memory.shape[0]) for index in selected
+        ),
+        "slots": [
+            {
+                "slot_index": index,
+                "raw_cosine": raw_cosines[index],
+                "last_retrieved_age": ages[index],
+                "decay_factor": decays[index],
+                "final_score": final_scores[index],
+                "threshold_passed": bool(
+                    final_scores[index] >= bank.config.retrieve_threshold
+                ),
+                "raw_cosine_rank": raw_ranks[index],
+                "final_score_rank": final_ranks[index],
+                "selected_by_topk": index in selected,
+            }
+            for index in range(len(bank._slots))
+        ],
+    }
+
+
+def _text_hash(text: str | None) -> str | None:
+    if text is None:
+        return None
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _question_identity_records(context_payload: dict) -> list[dict]:
+    questions = list(context_payload.get("questions", []))
+    question_ids = list(context_payload.get("question_ids", []))
+    pair_ids = list(context_payload.get("qa_pair_ids", []))
+    identities = []
+    for index, question in enumerate(questions):
+        question_id = question_ids[index] if index < len(question_ids) else None
+        pair_id = pair_ids[index] if index < len(pair_ids) else None
+        identities.append(
+            {
+                "question_index": index,
+                "question_id": question_id,
+                "qa_pair_id": pair_id,
+                "question_text_hash": _text_hash(question),
+                "stable_fallback_id": (
+                    str(question_id)
+                    if question_id is not None
+                    else (
+                        str(pair_id)
+                        if pair_id is not None
+                        else f"question_index:{index}"
+                    )
+                ),
+            }
+        )
+    return identities
+
+
+def _enrich_construction_provenance(
+    turns: list[dict], context_payload: dict
+) -> list[dict]:
+    chunks = list(context_payload.get("chunks", []))
+    prompts = list(context_payload.get("memorization_prompts", []))
+    enriched = []
+    for turn in turns:
+        item = dict(turn)
+        index = int(item["construction_turn_index"])
+        item.update(
+            {
+                "context_index": int(context_payload["context_index"]),
+                "chunk_index": index if index < len(chunks) else None,
+                "source_index": index if index < len(chunks) else None,
+                "chunk_text_hash": _text_hash(chunks[index]) if index < len(chunks) else None,
+                "memorization_prompt_hash": (
+                    _text_hash(prompts[index]) if index < len(prompts) else None
+                ),
+                "provenance_missing_fields": ["external_source_id"],
+            }
+        )
+        enriched.append(item)
+    return enriched
 
 
 def _eventqa_bank_config(args) -> dict:
@@ -203,11 +577,43 @@ def _restore_retrieval_state(bank, state: dict) -> None:
         slot.last_score = slot_state["last_score"]
 
 
-def _install_eventqa_bank_trace(bank, trace: dict, lifecycle: dict):
+def _install_eventqa_bank_trace(
+    bank,
+    trace: dict,
+    lifecycle: dict,
+    *,
+    trace_construction_provenance: bool = False,
+    trace_score_decomposition: bool = False,
+    score_trace_state: dict | None = None,
+    query_id=None,
+):
     original_retrieve = bank.retrieve_with_context
     original_write_back = bank.write_back
+    score_trace_state = score_trace_state if score_trace_state is not None else {}
 
     def tracked_retrieve(self, *args, **kwargs):
+        decomposition = None
+        query_vector = None
+        query_phase_active = bool(lifecycle.get("query_phase_active"))
+        if trace_score_decomposition:
+            query_vector = _query_vector(self, args[0]).detach().to("cpu").clone()
+            decomposition = _compute_score_decomposition(
+                self,
+                args[0],
+                retrieval_step=int(self._retrieval_step) + 1,
+                selected_indices=[],
+                query_id=query_id if query_phase_active else None,
+                first_query=(
+                    score_trace_state.get("first_query")
+                    if query_phase_active
+                    else None
+                ),
+                previous_query=(
+                    score_trace_state.get("previous_query")
+                    if query_phase_active
+                    else None
+                ),
+            )
         result = original_retrieve(*args, **kwargs)
         trace["last_retrieval"] = {
             "scores": list(result.scores),
@@ -224,28 +630,100 @@ def _install_eventqa_bank_trace(bank, trace: dict, lifecycle: dict):
             ),
             "retrieval_step": int(result.retrieval_step),
         }
+        if decomposition is not None:
+            selected = set(result.retrieved_indices)
+            decomposition["retrieved_indices"] = list(result.retrieved_indices)
+            decomposition["retrieved_latent_count"] = sum(
+                int(slot.memory.shape[0]) for slot in result.slots
+            )
+            for slot in decomposition["slots"]:
+                slot["selected_by_topk"] = slot["slot_index"] in selected
+            trace["last_score_decomposition"] = decomposition
+            if query_phase_active:
+                lifecycle["query_score_decomposition"] = decomposition
+                if "first_query" not in score_trace_state:
+                    score_trace_state["first_query"] = query_vector
+                score_trace_state["previous_query"] = query_vector
         return result
 
     def tracked_write_back(self, memory, retrieval_result, *args, **kwargs):
+        slot_count_before = len(self)
         result = original_write_back(memory, retrieval_result, *args, **kwargs)
         debug = self.debug_summary()
         write_event = debug.get("last_write_back") or {}
-        lifecycle.setdefault("construction_turn_diagnostics", []).append(
-            {
+        replaced_slot_index = write_event.get("replaced_slot_index")
+        evicted_slot_index = write_event.get("evicted_slot_index")
+        write_action = write_event.get("write_action")
+        if replaced_slot_index is not None:
+            target_slot_index = int(replaced_slot_index)
+        elif evicted_slot_index is not None:
+            target_slot_index = int(evicted_slot_index)
+        elif write_action == "insert" and len(self):
+            target_slot_index = len(self) - 1
+        else:
+            target_slot_index = None
+        target_slot = (
+            self._slots[target_slot_index]
+            if target_slot_index is not None and target_slot_index < len(self._slots)
+            else None
+        )
+        turn = {
                 "construction_turn_index": len(
                     lifecycle.get("construction_turn_diagnostics", [])
                 ),
-                "write_action": write_event.get("write_action"),
+                "write_action": write_action,
                 "best_matched_score": (
                     None
                     if retrieval_result.max_score is None
                     else float(retrieval_result.max_score)
                 ),
                 "candidate_scores": [float(score) for score in retrieval_result.scores],
+                "retrieved_indices_before_write": list(
+                    retrieval_result.retrieved_indices
+                ),
+                "retrieved_scores_before_write": [
+                    float(score) for score in retrieval_result.retrieved_scores
+                ],
+                "slot_count_before_write": int(slot_count_before),
                 "slot_count_after_write": int(debug["slot_count"]),
                 "write_count_after_write": int(debug["memory_write_count"]),
+                "target_slot_index": target_slot_index,
+                "replaced_slot_index": replaced_slot_index,
+                "evicted_slot_index": evicted_slot_index,
+                "created_step_after_write": (
+                    None if target_slot is None else int(target_slot.created_step)
+                ),
+                "last_retrieved_step_after_write": (
+                    None
+                    if target_slot is None
+                    else int(target_slot.last_retrieved_step)
+                ),
+                "access_count_after_write": (
+                    None if target_slot is None else int(target_slot.access_count)
+                ),
+                "per_slot_access_count_after_write": [
+                    int(slot.access_count) for slot in self._slots
+                ],
+                "retrieval_score_decomposition_before_write": trace.get(
+                    "last_score_decomposition"
+                ),
             }
-        )
+        if not trace_construction_provenance:
+            for field in (
+                "retrieved_indices_before_write",
+                "retrieved_scores_before_write",
+                "slot_count_before_write",
+                "target_slot_index",
+                "replaced_slot_index",
+                "evicted_slot_index",
+                "created_step_after_write",
+                "last_retrieved_step_after_write",
+                "access_count_after_write",
+                "per_slot_access_count_after_write",
+                "retrieval_score_decomposition_before_write",
+            ):
+                turn.pop(field)
+        lifecycle.setdefault("construction_turn_diagnostics", []).append(turn)
         return result
 
     bank.retrieve_with_context = MethodType(tracked_retrieve, bank)
@@ -448,6 +926,24 @@ def _write_jsonl(path: Path, rows) -> None:
             handle.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
+def _write_bank_transition_artifacts(
+    output_dir: Path, question_rows: list[dict], *, enabled: bool
+) -> None:
+    if not enabled:
+        return
+    transition_rows = [
+        build_transition_diagnostic(row) for row in question_rows
+    ]
+    _write_jsonl(
+        output_dir / "bank_transition_diagnostics.jsonl",
+        transition_rows,
+    )
+    _write_json(
+        output_dir / "bank_transition_aggregate.json",
+        aggregate_transition_rows(transition_rows),
+    )
+
+
 def _load_json(path: Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -609,6 +1105,12 @@ def _eventqa_manager_factory(
     external_bank=None,
     preserve_bank: bool = False,
     construction_only: bool = False,
+    capture_bank_tensor_snapshot: bool = False,
+    trace_score_decomposition: bool = False,
+    score_trace_state: dict | None = None,
+    context_index: int | None = None,
+    context_id: str | None = None,
+    query_id=None,
     generation_max_length: int = GENERATION_MAX_LENGTH,
     recorded_bank_config: dict | None = None,
 ):
@@ -674,7 +1176,13 @@ def _eventqa_manager_factory(
                     raise RuntimeError("New EventQA context bank was not empty")
                 lifecycle["construction_turn_diagnostics"] = []
                 capture["restore_bank_trace"] = _install_eventqa_bank_trace(
-                    bank, bank_trace, lifecycle
+                    bank,
+                    bank_trace,
+                    lifecycle,
+                    trace_construction_provenance=capture_bank_tensor_snapshot,
+                    trace_score_decomposition=trace_score_decomposition,
+                    score_trace_state=score_trace_state,
+                    query_id=query_id,
                 )
                 proxy = _QueryReadOnlyBank(
                     bank,
@@ -695,6 +1203,15 @@ def _eventqa_manager_factory(
                     proxy = lifecycle.get("eventqa_query_bank_proxy")
                     if proxy is not None:
                         proxy.begin_query()
+                        lifecycle["query_phase_active"] = True
+                        if capture_bank_tensor_snapshot:
+                            lifecycle["pre_query_bank_tensor_snapshot"] = (
+                                _bank_tensor_snapshot(
+                                    proxy.bank,
+                                    context_index=int(context_index),
+                                    context_id=str(context_id),
+                                )
+                            )
                     lifecycle["rendered_query_messages"] = messages[0]
                     lifecycle["rendered_query_prompt"] = self.tokenizer.apply_chat_template(
                         messages[0],
@@ -723,6 +1240,7 @@ def _run_eventqa_model(
     preserve_bank: bool = False,
     construction_only: bool = False,
     recorded_bank_config: dict | None = None,
+    score_trace_state: dict | None = None,
 ) -> dict:
     if bank_mode == "on" and bank_config is None:
         raise RuntimeError("EventQA bank-on runtime config is required")
@@ -736,6 +1254,18 @@ def _run_eventqa_model(
         external_bank=external_bank,
         preserve_bank=preserve_bank,
         construction_only=construction_only,
+        capture_bank_tensor_snapshot=bool(
+            getattr(args, "trace_score_decomposition", False)
+            or getattr(args, "save_frozen_bank", False)
+            or getattr(args, "reseed_per_context", False)
+        ),
+        trace_score_decomposition=bool(
+            getattr(args, "trace_score_decomposition", False)
+        ),
+        score_trace_state=score_trace_state,
+        context_index=payload.get("context_index"),
+        context_id=payload.get("context_id"),
+        query_id=payload.get("query_id"),
         generation_max_length=int(
             getattr(args, "generation_max_length", GENERATION_MAX_LENGTH)
         ),
@@ -814,6 +1344,14 @@ def _run_eventqa_model(
     result["construction_turn_diagnostics"] = list(
         lifecycle.get("construction_turn_diagnostics", [])
     )
+    if "pre_query_bank_tensor_snapshot" in lifecycle:
+        result["pre_query_bank_tensor_snapshot"] = lifecycle[
+            "pre_query_bank_tensor_snapshot"
+        ]
+    if "query_score_decomposition" in lifecycle:
+        result["query_score_decomposition"] = lifecycle[
+            "query_score_decomposition"
+        ]
     if bank_mode == "on":
         if not construction_only and "post_query_bank_summary" not in lifecycle:
             raise RuntimeError("EventQA query post-state was not captured before bank reset")
@@ -1266,6 +1804,18 @@ def _build_manifest(
     generation_max_length = int(
         getattr(args, "generation_max_length", GENERATION_MAX_LENGTH)
     )
+    diagnostic_options = {
+        "reseed_per_context": bool(
+            getattr(args, "reseed_per_context", False)
+        ),
+        "trace_score_decomposition": bool(
+            getattr(args, "trace_score_decomposition", False)
+        ),
+        "save_frozen_bank": bool(getattr(args, "save_frozen_bank", False)),
+        "bank_transition_diagnostics": bool(
+            getattr(args, "bank_transition_diagnostics", False)
+        ),
+    }
     return {
         "experiment_name": EXPERIMENT_NAME,
         "run_id": run_id,
@@ -1314,6 +1864,8 @@ def _build_manifest(
         "selected_context_indices": list(selected_context_indices or []),
         "question_limit": args.question_limit,
         "construction_only": bool(getattr(args, "construction_only", False)),
+        "diagnostics_enabled": any(diagnostic_options.values()),
+        "diagnostic_options": diagnostic_options,
         "context_capacity": None,
         "git_status_before": git_status_before,
         "started_at": started_at,
@@ -1436,6 +1988,10 @@ def build_parser():
     )
     parser.add_argument("--skip-research-note", action="store_true")
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--reseed-per-context", action="store_true")
+    parser.add_argument("--trace-score-decomposition", action="store_true")
+    parser.add_argument("--save-frozen-bank", action="store_true")
+    parser.add_argument("--bank-transition-diagnostics", action="store_true")
     return parser
 
 
@@ -1469,6 +2025,18 @@ def main() -> int:
 
     model, capacity = weaver_bank._load_model(args)
     manifest["context_capacity"] = capacity
+    diagnostics_enabled = bool(manifest["diagnostics_enabled"])
+    runtime_metadata = None
+    reproducibility_contexts: list[dict] = []
+    construction_provenance_rows: list[dict] = []
+    score_decomposition_rows: list[dict] = []
+    if diagnostics_enabled:
+        runtime_metadata = _runtime_reproducibility_metadata(
+            args,
+            selected_context_indices=selected_indices,
+            model=model,
+        )
+        manifest["reproducibility_diagnostics"] = runtime_metadata
     _write_json(output_dir / "run_config.json", manifest)
 
     all_question_rows: list[dict] = []
@@ -1476,6 +2044,27 @@ def main() -> int:
     try:
         for context_index in selected_indices:
             context_payload = build_context_payload(args, rows[context_index], context_index, started_at)
+            context_rng = None
+            context_diagnostics = None
+            score_trace_state: dict = {}
+            frozen_bank_saved = False
+            if diagnostics_enabled:
+                context_rng = _prepare_context_rng(
+                    base_seed=args.seed,
+                    context_index=context_index,
+                    reseed_per_context=args.reseed_per_context,
+                )
+                context_diagnostics = {
+                    "context_index": context_index,
+                    "context_id": context_payload["context_id"],
+                    "question_ids": list(context_payload["question_ids"]),
+                    "question_identity": _question_identity_records(
+                        context_payload
+                    ),
+                    "rng_before_construction": context_rng,
+                    "bank_tensor_snapshot": None,
+                    "frozen_bank_path": None,
+                }
             question_total = context_payload["question_count"]
             if args.question_limit is not None:
                 question_total = min(question_total, args.question_limit)
@@ -1495,9 +2084,36 @@ def main() -> int:
                         preserve_bank=args.eventqa_protocol == "frozen_context_bank",
                         construction_only=True,
                         recorded_bank_config=manifest,
+                        score_trace_state=score_trace_state,
                     )
                     if args.eventqa_protocol == "frozen_context_bank":
                         frozen_bank = construction_result.pop("_retained_bank", None)
+                    if diagnostics_enabled:
+                        construction_result["construction_turn_diagnostics"] = (
+                            _enrich_construction_provenance(
+                                construction_result["construction_turn_diagnostics"],
+                                context_payload,
+                            )
+                        )
+                        construction_provenance_rows.extend(
+                            construction_result["construction_turn_diagnostics"]
+                        )
+                        context_diagnostics["bank_tensor_snapshot"] = (
+                            construction_result.get("pre_query_bank_tensor_snapshot")
+                        )
+                    if args.save_frozen_bank and frozen_bank is not None:
+                        frozen_path = (
+                            output_dir / "frozen_banks" / f"context_{context_index}.pt"
+                        )
+                        _save_frozen_bank(
+                            frozen_path,
+                            frozen_bank,
+                            context_index=context_index,
+                            context_id=context_payload["context_id"],
+                            runtime_metadata=runtime_metadata,
+                        )
+                        context_diagnostics["frozen_bank_path"] = str(frozen_path)
+                        frozen_bank_saved = True
                 for question_index in range(question_total):
                     if args.construction_only:
                         break
@@ -1533,6 +2149,7 @@ def main() -> int:
                             external_bank=frozen_bank,
                             preserve_bank=frozen_protocol,
                             recorded_bank_config=manifest,
+                            score_trace_state=score_trace_state,
                         )
                         if frozen_protocol:
                             retained_bank = bank_on_result.pop("_retained_bank")
@@ -1542,6 +2159,55 @@ def main() -> int:
                                 raise RuntimeError(
                                     "EventQA frozen protocol replaced the context bank"
                                 )
+                        if diagnostics_enabled and question_index == 0:
+                            bank_on_result["construction_turn_diagnostics"] = (
+                                _enrich_construction_provenance(
+                                    bank_on_result["construction_turn_diagnostics"],
+                                    context_payload,
+                                )
+                            )
+                            construction_provenance_rows.extend(
+                                bank_on_result["construction_turn_diagnostics"]
+                            )
+                            context_diagnostics["bank_tensor_snapshot"] = (
+                                bank_on_result.get("pre_query_bank_tensor_snapshot")
+                            )
+                        if args.trace_score_decomposition:
+                            decomposition = bank_on_result.get(
+                                "query_score_decomposition"
+                            )
+                            if decomposition is not None:
+                                decomposition = dict(decomposition)
+                                decomposition.update(
+                                    {
+                                        "context_index": context_index,
+                                        "context_id": context_payload["context_id"],
+                                        "question_index": question_index,
+                                        "question_id": payload["question_id"],
+                                    }
+                                )
+                                score_decomposition_rows.append(decomposition)
+                        if (
+                            args.save_frozen_bank
+                            and frozen_bank is not None
+                            and not frozen_bank_saved
+                        ):
+                            frozen_path = (
+                                output_dir
+                                / "frozen_banks"
+                                / f"context_{context_index}.pt"
+                            )
+                            _save_frozen_bank(
+                                frozen_path,
+                                frozen_bank,
+                                context_index=context_index,
+                                context_id=context_payload["context_id"],
+                                runtime_metadata=runtime_metadata,
+                            )
+                            context_diagnostics["frozen_bank_path"] = str(
+                                frozen_path
+                            )
+                            frozen_bank_saved = True
                         bank_off_score = _score_prediction(
                             args, payload, bank_off_result["prediction"], tmpdir
                         )
@@ -1578,6 +2244,8 @@ def main() -> int:
                     construction_result=construction_result,
                 )
             )
+            if diagnostics_enabled:
+                reproducibility_contexts.append(context_diagnostics)
         aggregate = {
             "run_id": run_id,
             "context_count": len(per_context_rows),
@@ -1590,6 +2258,40 @@ def main() -> int:
         _write_jsonl(output_dir / "diagnostics.jsonl", all_question_rows)
         _write_jsonl(output_dir / "eventqa_per_question.jsonl", all_question_rows)
         _write_jsonl(output_dir / "eventqa_per_context.jsonl", per_context_rows)
+        _write_bank_transition_artifacts(
+            output_dir,
+            all_question_rows,
+            enabled=args.bank_transition_diagnostics,
+        )
+        if diagnostics_enabled:
+            runtime_metadata["context_ids"] = [
+                item["context_id"] for item in reproducibility_contexts
+            ]
+            runtime_metadata["question_ids_by_context"] = {
+                str(item["context_index"]): item["question_ids"]
+                for item in reproducibility_contexts
+            }
+            runtime_metadata["question_identity_by_context"] = {
+                str(item["context_index"]): item["question_identity"]
+                for item in reproducibility_contexts
+            }
+            _write_json(
+                output_dir / "reproducibility_diagnostics.json",
+                {
+                    "run_id": run_id,
+                    "runtime_metadata": runtime_metadata,
+                    "contexts": reproducibility_contexts,
+                },
+            )
+            _write_jsonl(
+                output_dir / "construction_provenance.jsonl",
+                construction_provenance_rows,
+            )
+            if args.trace_score_decomposition:
+                _write_jsonl(
+                    output_dir / "score_decomposition.jsonl",
+                    score_decomposition_rows,
+                )
         manifest["finished_at"] = _utc_now()
         manifest["context_count"] = len(per_context_rows)
         manifest["question_count_total"] = sum(row["question_count"] for row in per_context_rows)

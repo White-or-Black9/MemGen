@@ -82,6 +82,110 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
         self.assertEqual(payload["qa_pair_id"], "pair1")
         self.assertEqual(payload["gold_answers"], ["a1", "a1-alt"])
         self.assertIn("The event that happens next is:", payload["query_prompt"])
+        self.assertNotIn(
+            "Output exactly one event from the candidate list.",
+            payload["query_prompt"],
+        )
+
+    def test_eventqa_strict_prompt_is_opt_in_and_preserves_official_tail(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        context_payload = {
+            "context_id": "eventqa-ctx-0",
+            "context_index": 0,
+            "chunks": ["chunk-1"],
+            "chunk_token_lengths": [4],
+            "memorization_prompts": ["m1"],
+            "questions": ["q0"],
+            "answers": [["a0"]],
+            "question_ids": ["qid0"],
+            "question_types": ["type0"],
+            "qa_pair_ids": ["pair0"],
+            "previous_events": [["p0"]],
+            "dataset_config": {"sub_dataset": "eventqa_65536"},
+            "strict_official_eventqa_prompt": True,
+        }
+
+        payload = eventqa.build_question_payload(context_payload, 0)
+
+        self.assertIn("The event that happens next is:", payload["query_prompt"])
+        self.assertIn(
+            "Output exactly one event from the candidate list.",
+            payload["query_prompt"],
+        )
+        self.assertIn("Do not output Chinese", payload["query_prompt"])
+        self.assertNotIn("Answer:", payload["query_prompt"])
+        self.assertTrue(
+            payload["query_prompt"].rstrip().endswith(
+                "The event that happens next is:"
+            )
+        )
+
+    def test_eventqa_first_line_prompt_is_opt_in_and_lightweight(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        context_payload = {
+            "context_id": "eventqa-ctx-0",
+            "context_index": 0,
+            "chunks": ["chunk-1"],
+            "chunk_token_lengths": [4],
+            "memorization_prompts": ["m1"],
+            "questions": ["q0"],
+            "answers": [["a0"]],
+            "question_ids": ["qid0"],
+            "question_types": ["type0"],
+            "qa_pair_ids": ["pair0"],
+            "previous_events": [["p0"]],
+            "dataset_config": {"sub_dataset": "eventqa_65536"},
+            "first_line_official_eventqa_prompt": True,
+        }
+
+        payload = eventqa.build_question_payload(context_payload, 0)
+
+        self.assertIn(
+            "In your response, only include the event answer on the first line.",
+            payload["query_prompt"],
+        )
+        self.assertIn("The event that happens next is:", payload["query_prompt"])
+        self.assertNotIn("Answer:", payload["query_prompt"])
+        self.assertNotIn(
+            "Output exactly one event from the candidate list.",
+            payload["query_prompt"],
+        )
+        self.assertNotIn("Do not output Chinese", payload["query_prompt"])
+
+    def test_eventqa_first_line_prompt_and_bank_modes_share_same_visible_query(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+
+        context_payload = {
+            "context_id": "eventqa-ctx-0",
+            "context_index": 0,
+            "chunks": ["chunk-1"],
+            "chunk_token_lengths": [4],
+            "memorization_prompts": ["m1"],
+            "questions": ["q0"],
+            "answers": [["a0"]],
+            "question_ids": ["qid0"],
+            "question_types": ["type0"],
+            "qa_pair_ids": ["pair0"],
+            "previous_events": [["p0"]],
+            "dataset_config": {"sub_dataset": "eventqa_65536"},
+            "first_line_official_eventqa_prompt": True,
+        }
+
+        bank_off_payload = eventqa.build_question_payload(context_payload, 0)
+        bank_on_payload = eventqa.build_question_payload(context_payload, 0)
+
+        self.assertEqual(
+            bank_off_payload["query_prompt"],
+            bank_on_payload["query_prompt"],
+        )
 
     def test_eventqa_manifest_records_generation_length_and_episode_protocol(self):
         eventqa = importlib.import_module(
@@ -128,6 +232,8 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
         self.assertFalse(args.trace_score_decomposition)
         self.assertFalse(args.save_frozen_bank)
         self.assertFalse(args.bank_transition_diagnostics)
+        self.assertFalse(args.strict_official_eventqa_prompt)
+        self.assertFalse(args.first_line_official_eventqa_prompt)
 
     def test_eventqa_diagnostic_cli_flags_are_opt_in(self):
         eventqa = importlib.import_module(
@@ -580,6 +686,7 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
             context_index=3,
             question_limit=None,
             eventqa_protocol="frozen_context_bank",
+            strict_official_eventqa_prompt=True,
         )
 
         manifest = eventqa._build_manifest(
@@ -593,6 +700,48 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
         self.assertEqual(manifest["requested_contexts"], 5)
         self.assertEqual(manifest["context_index"], 3)
         self.assertEqual(manifest["selected_context_indices"], [3])
+        self.assertTrue(manifest["strict_official_eventqa_prompt"])
+        self.assertIn(
+            "Output exactly one event from the candidate list.",
+            manifest["eventqa_query_template"],
+        )
+        self.assertTrue(
+            manifest["eventqa_query_template"].rstrip().endswith(
+                "The event that happens next is:"
+            )
+        )
+
+    def test_eventqa_manifest_records_first_line_prompt_template(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        args = SimpleNamespace(
+            dataset_root="/data",
+            mab_repo="/repo",
+            checkpoint_path="/tmp/checkpoint",
+            model_checkpoint_id="checkpoint",
+            requested_contexts=5,
+            context_index=3,
+            question_limit=None,
+            eventqa_protocol="frozen_context_bank",
+            strict_official_eventqa_prompt=False,
+            first_line_official_eventqa_prompt=True,
+        )
+
+        manifest = eventqa._build_manifest(
+            "run",
+            args,
+            "now",
+            git_status_before="clean",
+            selected_context_indices=[3],
+        )
+
+        self.assertTrue(manifest["first_line_official_eventqa_prompt"])
+        self.assertIn(
+            "In your response, only include the event answer on the first line.",
+            manifest["eventqa_query_template"],
+        )
+        self.assertNotIn("Answer:", manifest["eventqa_query_template"])
 
     def test_eventqa_query_only_payload_does_not_replay_construction(self):
         eventqa = importlib.import_module(

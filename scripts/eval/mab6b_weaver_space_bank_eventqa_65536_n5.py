@@ -66,6 +66,22 @@ EVENTQA_QUERY_TEMPLATE = (
     "Based on the context you memorized, complete the task below:\n\n"
     "{question}\n\n The event that happens next is:"
 )
+FIRST_LINE_OFFICIAL_EVENTQA_QUERY_TEMPLATE = (
+    "Based on the context you memorized, complete the task below:\n\n"
+    "{question}\n\n"
+    "In your response, only include the event answer on the first line.\n\n"
+    "The event that happens next is:"
+)
+STRICT_OFFICIAL_EVENTQA_QUERY_TEMPLATE = (
+    "Based on the context you memorized, complete the task below:\n\n"
+    "{question}\n\n"
+    "You must follow these output rules:\n"
+    "- Output exactly one event from the candidate list.\n"
+    "- Output only the event text.\n"
+    "- Do not include explanations, prefixes, extra lines, numbering, quotes, or markdown.\n"
+    "- Do not output Chinese or any non-English text.\n\n"
+    "The event that happens next is:"
+)
 BANK_CONFIG_FIELDS = (
     "enabled",
     "batch_size",
@@ -81,6 +97,17 @@ BANK_CONFIG_FIELDS = (
     "retrieve_threshold",
     "update_threshold",
 )
+
+def _eventqa_query_template(
+    *,
+    strict_official_eventqa_prompt: bool = False,
+    first_line_official_eventqa_prompt: bool = False,
+) -> str:
+    if strict_official_eventqa_prompt:
+        return STRICT_OFFICIAL_EVENTQA_QUERY_TEMPLATE
+    if first_line_official_eventqa_prompt:
+        return FIRST_LINE_OFFICIAL_EVENTQA_QUERY_TEMPLATE
+    return EVENTQA_QUERY_TEMPLATE
 
 
 class _ConstructionOnlyStop(RuntimeError):
@@ -1047,11 +1074,23 @@ def build_context_payload(args, row: dict, context_index: int, timestamp: str) -
         "source": row.get("metadata", {}).get("source"),
         "timestamp": timestamp,
         "template": prepared.get("template"),
+        "strict_official_eventqa_prompt": bool(
+            getattr(args, "strict_official_eventqa_prompt", False)
+        ),
+        "first_line_official_eventqa_prompt": bool(
+            getattr(args, "first_line_official_eventqa_prompt", False)
+        ),
     }
 
 
 def build_question_payload(context_payload: dict, question_index: int) -> dict:
     question = context_payload["questions"][question_index]
+    strict_official_eventqa_prompt = bool(
+        context_payload.get("strict_official_eventqa_prompt", False)
+    )
+    first_line_official_eventqa_prompt = bool(
+        context_payload.get("first_line_official_eventqa_prompt", False)
+    )
     return {
         "dataset_config": context_payload["dataset_config"],
         "context_id": context_payload["context_id"],
@@ -1064,7 +1103,10 @@ def build_question_payload(context_payload: dict, question_index: int) -> dict:
         "chunks": context_payload["chunks"],
         "chunk_token_lengths": context_payload["chunk_token_lengths"],
         "memorization_prompts": context_payload["memorization_prompts"],
-        "query_prompt": EVENTQA_QUERY_TEMPLATE.format(question=question),
+        "query_prompt": _eventqa_query_template(
+            strict_official_eventqa_prompt=strict_official_eventqa_prompt,
+            first_line_official_eventqa_prompt=first_line_official_eventqa_prompt,
+        ).format(question=question),
         "question": question,
         "gold_answers": list(context_payload["answers"][question_index]),
     }
@@ -1835,6 +1877,20 @@ def _build_manifest(
         "eventqa_protocol": protocol,
         "context_bank_rebuilt_per_question": not frozen_protocol,
         "context_bank_reused_across_questions": frozen_protocol,
+        "strict_official_eventqa_prompt": bool(
+            getattr(args, "strict_official_eventqa_prompt", False)
+        ),
+        "first_line_official_eventqa_prompt": bool(
+            getattr(args, "first_line_official_eventqa_prompt", False)
+        ),
+        "eventqa_query_template": _eventqa_query_template(
+            strict_official_eventqa_prompt=bool(
+                getattr(args, "strict_official_eventqa_prompt", False)
+            ),
+            first_line_official_eventqa_prompt=bool(
+                getattr(args, "first_line_official_eventqa_prompt", False)
+            ),
+        ),
         "protocol_limitation": (
             None
             if frozen_protocol
@@ -1989,6 +2045,8 @@ def build_parser():
     parser.add_argument("--skip-research-note", action="store_true")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--reseed-per-context", action="store_true")
+    parser.add_argument("--strict-official-eventqa-prompt", action="store_true")
+    parser.add_argument("--first-line-official-eventqa-prompt", action="store_true")
     parser.add_argument("--trace-score-decomposition", action="store_true")
     parser.add_argument("--save-frozen-bank", action="store_true")
     parser.add_argument("--bank-transition-diagnostics", action="store_true")

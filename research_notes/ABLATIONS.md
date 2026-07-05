@@ -1,5 +1,34 @@
 # Ablation Plan
 
+## Harmful Memory Attribution Diagnostic (2026-07-04)
+
+This line is **not** a standard method ablation. It is an oracle
+counterfactual diagnostic over a frozen P7 context-4 bank. Gold-derived EM and
+no-gold labels are used only after generation to classify effects; they are
+not available to a deployable inference policy.
+
+- Completed smoke q0-9:
+  `outputs/mab/eventqa_harmful_memory_attribution_smoke/20260704T001049Z-p7-context4-q0-9/`
+- Completed expansion q0-99:
+  `outputs/mab/eventqa_harmful_memory_attribution_context4_full/20260704T001824Z-p7-context4-q0-99/`
+- Conditions: full, leave-one-slot-out, leave-one-tuple-out, slot-only, and
+  tuple-only for the dominant ordered tuple `[1,0]`.
+- Current result: q0-99 supports a harmful ordered-tuple interaction in one
+  frozen bank. It does not establish a general policy or final performance
+  improvement.
+- Detailed note:
+  `research_notes/benchmarks/eventqa_harmful_memory_attribution.md`.
+
+Paused future candidates:
+
+- attribution across the other P7 repeats;
+- top-1 fallback;
+- dominant-tuple suppression;
+- injection budget;
+- score-margin gate.
+
+No candidate above is implemented or currently scheduled.
+
 ## Goal
 
 Separate the effects of retrieval, recurrent updates, memory capacity, and session

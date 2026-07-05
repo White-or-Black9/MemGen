@@ -539,11 +539,13 @@ examples = dict
 ## Research-Specific Watchlist
 
 - Current status note after 2026-06-18 consolidation:
+  - Historical snapshot only; later MAB-6B/EventQA status supersedes the two
+    target-task and Version-B bullets below.
   - Phase R2 superseded the current Version A-aligned decay / full-bank
     eviction behavior with last-retrieved semantics.
   - Phase 8A and Phase 8C-alt records remain historical exploratory evidence.
-  - No formal target-task TriviaQA result exists yet.
-  - Version B remains not started.
+  - At this snapshot, no formal target-task TriviaQA result existed yet.
+  - At this snapshot, Version B had not started.
 - Disabled mode differs from original outputs.
 - Memory persists across samples or sessions.
 - Retrieval mutates training behavior or training configuration.

@@ -1,573 +1,385 @@
-# MAB-6B-FR EventQA 65536 n5
-
-EventQA frozen-context-bank configuration sweep on all 5 local EventQA-65536
-contexts. This note preserves both the accepted 15-run A/B/C `top_k=1` sweep
-and the accepted end-to-end Config B `top_k=2` ablation as strong exploratory
-evidence, not a direct official full-context baseline comparison.
-
-## Result Boundary
-
-- Result type: strong exploratory 5-context sweep evidence
-- Context coverage: `5/5` EventQA 65536 contexts
-- Evaluated contexts: `context_index=0..4`
-- Protocol: `frozen_context_bank`
-- Official scorer used: MAB EventQA `substring_exact_match` / Accuracy
-- Baseline boundary: compressed frozen-context bridge Bank-off only; not an
-  official long-context full-history baseline because full history remains over
-  capacity
-- Canonical detective note protected:
-  `research_notes/benchmarks/memoryagentbench_mab6b_weaver_space_bank.md`
-
-## Artifact Roots
-
-- script:
-  `scripts/eval/mab6b_weaver_space_bank_eventqa_65536_n5.py`
-- benchmark note:
-  `research_notes/benchmarks/memoryagentbench_mab6b_fr_eventqa_65536_n5.md`
-- sweep roots:
-  - Config A:
-    `outputs/mab/eventqa_frozen_context_bank_cfgA_ctx{0..4}/...`
-  - Config B:
-    `outputs/mab/eventqa_frozen_context_bank_cfgB_ctx{0..4}/...`
-  - Config C:
-    `outputs/mab/eventqa_frozen_context_bank_cfgC_ctx{0..4}/...`
-- end-to-end Config B `top_k=2`:
-  `outputs/mab/eventqa_configB_allctx_topk2/20260630T084500Z-eventqa-65536-version-b-weaver-space-bank-n5`
-- standalone Config B `top_k=2` ctx4 reproducibility diagnostic:
-  `outputs/mab/eventqa_configB_ctx4_topk2_rerun/20260630T121127Z-eventqa-65536-version-b-weaver-space-bank-n5`
-- end-to-end Config B `top_k=4` negative ablation:
-  `outputs/mab/eventqa_configB_allctx_topk4/20260630T124028Z-eventqa-65536-version-b-weaver-space-bank-n5`
-
-Latest completed roots:
-
-- Config A:
-  - `ctx0`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgA_ctx0/20260630T013527Z-eventqa-65536-version-b-weaver-space-bank-n5`
-  - `ctx1`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgA_ctx1/20260630T014820Z-eventqa-65536-version-b-weaver-space-bank-n5`
-  - `ctx2`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgA_ctx2/20260630T015305Z-eventqa-65536-version-b-weaver-space-bank-n5`
-  - `ctx3`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgA_ctx3/20260630T015738Z-eventqa-65536-version-b-weaver-space-bank-n5`
-  - `ctx4`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgA_ctx4/20260630T020219Z-eventqa-65536-version-b-weaver-space-bank-n5`
-- Config B:
-  - `ctx0`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgB_ctx0/20260630T013529Z-eventqa-65536-version-b-weaver-space-bank-n5`
-  - `ctx1`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgB_ctx1/20260630T014820Z-eventqa-65536-version-b-weaver-space-bank-n5`
-  - `ctx2`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgB_ctx2/20260630T015305Z-eventqa-65536-version-b-weaver-space-bank-n5`
-  - `ctx3`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgB_ctx3/20260630T015738Z-eventqa-65536-version-b-weaver-space-bank-n5`
-  - `ctx4`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgB_ctx4/20260630T020219Z-eventqa-65536-version-b-weaver-space-bank-n5`
-- Config C:
-  - `ctx0`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgC_ctx0/20260630T013526Z-eventqa-65536-version-b-weaver-space-bank-n5`
-  - `ctx1`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgC_ctx1/20260630T014820Z-eventqa-65536-version-b-weaver-space-bank-n5`
-  - `ctx2`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgC_ctx2/20260630T015305Z-eventqa-65536-version-b-weaver-space-bank-n5`
-  - `ctx3`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgC_ctx3/20260630T015738Z-eventqa-65536-version-b-weaver-space-bank-n5`
-  - `ctx4`:
-    `outputs/mab/eventqa_frozen_context_bank_cfgC_ctx4/20260630T020219Z-eventqa-65536-version-b-weaver-space-bank-n5`
-
-## Runner Preservation
-
-- runtime config integrity validation is now enforced by the runner:
-  `manifest.json` and `run_config.json` matched the intended config for all 15
-  completed runs
-- `--context-index` remains the scheduling control for isolated one-context
-  execution
-- `--construction-only` is now supported for EventQA construction-only bank
-  inspection
-- related EventQA regression tests exist in
-  `tests/test_mab6b_weaver_space_bank.py`
-
-## Sweep Design
-
-Common settings:
-
-- `eventqa_protocol=frozen_context_bank`
-- `generation_max_length=40`
-- `top_k=1`
-- `context_index=0..4`
-- `--skip-research-note`
-
-Configurations:
-
-- Config A, historical actual control:
-  `retrieve_threshold=0.03`, `update_threshold=0.05`, `max_slots=8`,
-  `top_k=1`
-- Config B, keep retrieve threshold and force larger bank:
-  `retrieve_threshold=0.03`, `update_threshold=0.09`, `max_slots=16`,
-  `top_k=1`
-- Config C, low retrieve-threshold multi-slot candidate:
-  `retrieve_threshold=0.005`, `update_threshold=0.09`, `max_slots=16`,
-  `top_k=1`
-
-## Integrity
-
-- all 15 runs completed
-- `manifest.json` and `run_config.json` matched intended config for every run
-- `query_write_count_delta total/max = 0 / 0`
-- `bank_snapshot_changed_after_query=false`
-- `cross_context_leakage_detected=false`
-- `context_memorization_count=1` in every completed run
-- query turns remained read-only in every completed run
-- canonical detective note unchanged:
-  - SHA256:
-    `9494ad0ec468633c7703a7ae956dcd00f80cf8c41373652712cdd257bce1fc13`
-  - mtime:
-    `2026-06-28 16:47:29.322403473 +0800`
-
-## Main Conclusion
-
-- Config A is the best EventQA setting in this sweep:
-  `retrieve_threshold=0.03`, `update_threshold=0.05`, `max_slots=8`, `top_k=1`
-- Config A obtains Bank-off `4/500` and Bank-on `114/500` on EventQA-65536
-  across all 5 contexts
-- Config B and C force `15-16` slot construction but reduce Bank-on EM
-- multi-slot formation hurts EventQA under `top_k=1` in this compressed bridge
-- query-time retrieval still returns exactly one slot, so multi-slot
-  construction does not imply multi-slot use
-- the result uses the MAB EventQA official `substring_exact_match` / Accuracy
-  scorer, but it is still a compressed frozen-context bridge result rather than
-  a direct official full-context baseline comparison
-
-## Config A
-
-- `retrieve_threshold=0.03`
-- `update_threshold=0.05`
-- `max_slots=8`
-- `top_k=1`
-- Bank-off EM / Accuracy: `4/500 = 0.008`
-- Bank-on EM / Accuracy: `114/500 = 0.228`
-- Bank-off recall: `0.178`
-- Bank-on recall: `0.266`
-- improved / regressed / unchanged: `113 / 3 / 384`
-- per-context Bank-on EM:
-  - `ctx0 0.18`
-  - `ctx1 0.42`
-  - `ctx2 0.21`
-  - `ctx3 0.17`
-  - `ctx4 0.16`
-- final_slot_count distribution: `{1: 500}`
-- retrieved_indices distribution: `{(0,): 500}`
-- retrieved_latent_count distribution: `{8: 500}`
-- candidate_slot_count_before_topk distribution: `{1: 500}`
-- raw candidate score min / max / mean:
-  `0.04436 / 0.05992 / 0.05310`
-- format failures: Bank-off `377`, Bank-on `123`
-- Chinese-script outputs: Bank-off `189`, Bank-on `23`
-
-## Config B
-
-- `retrieve_threshold=0.03`
-- `update_threshold=0.09`
-- `max_slots=16`
-- `top_k=1`
-- Bank-on EM / Accuracy: `72/500 = 0.144`
-- Bank-on recall: `0.202`
-- improved / regressed / unchanged: `72 / 4 / 424`
-- final_slot_count distribution: `{16: 500}`
-- retrieved_indices distribution: `{(0,): 400, (4,): 100}`
-- format failures: Bank-on `141`
-- Chinese-script outputs: Bank-on `120`
-
-## Config C
-
-- `retrieve_threshold=0.005`
-- `update_threshold=0.09`
-- `max_slots=16`
-- `top_k=1`
-- Bank-on EM / Accuracy: `67/500 = 0.134`
-- Bank-on recall: `0.208`
-- improved / regressed / unchanged: `66 / 3 / 431`
-- final_slot_count distribution: `{15: 100, 16: 400}`
-- retrieved_indices distribution: `{(0,): 300, (5,): 100, (12,): 100}`
-- format failures: Bank-on `165`
-- Chinese-script outputs: Bank-on `116`
-
-## Mechanism Interpretation
-
-- Config A remained a one-slot bridge:
-  `construction_final_slot_count distribution = {1: 5}`,
-  `true_insert_count distribution = {1: 5}`,
-  `true_matched_replace_count distribution = {16: 5}`
-- Config B forced multi-slot construction:
-  `construction_final_slot_count distribution = {16: 5}`,
-  `true_insert_count distribution = {16: 5}`,
-  `true_matched_replace_count distribution = {1: 5}`
-- Config C also forced multi-slot construction:
-  `construction_final_slot_count distribution = {15: 1, 16: 4}`,
-  `true_insert_count distribution = {15: 1, 16: 4}`,
-  `true_matched_replace_count distribution = {1: 4, 2: 1}`
-- Despite larger banks in B and C, query-time retrieval still returned only one
-  slot in every query because `top_k=1` and the recorded
-  `retrieved_latent_count distribution` stayed `{8: 500}` for every config
-- Multi-slot construction therefore changed which single slot was chosen, but
-  did not create multi-slot query-time use
-
-## Comparison to the Earlier Preserved Positive Result
-
-- Earlier preserved all-5 result:
-  Bank-off `4/500 = 0.008`, Bank-on `83/500 = 0.166`
-- Reproduced / repaired Config A:
-  Bank-off `4/500 = 0.008`, Bank-on `114/500 = 0.228`
-- Config B: `72/500 = 0.144`
-- Config C: `67/500 = 0.134`
-
-Interpretation:
-
-- The repaired runner and clean rerun did not merely reproduce the earlier
-  `83/500` positive signal; Config A improved it to `114/500`
-- The multi-slot candidates did not beat either the earlier preserved signal or
-  the repaired Config A result
-
-## Recommendation Boundary
-
-- Config A remains the highest-EM and most output-stable accepted setting
-- Do not promote Config B or C `top_k=1` as better EventQA defaults
-- Treat the end-to-end Config B `top_k=2` result below as a strong positive
-  multi-slot signal, but do not treat it as the same frozen bank queried with
-  one additional slot
-- Defer `top_k=4` until the Config B `top_k=2` context-4 collapse is understood
-- Keep the caveat explicit in every summary:
-  this is strong exploratory compressed frozen-context bridge evidence, not a
-  direct official full-context baseline comparison
-
-## End-to-End Config B `top_k=2` Ablation
-
-Accepted artifact:
-
-`outputs/mab/eventqa_configB_allctx_topk2/20260630T084500Z-eventqa-65536-version-b-weaver-space-bank-n5`
-
-This is a valid end-to-end Config B ablation. The mechanism intentionally uses
-the same `top_k` during construction-time memory update and query-time
-retrieval. Changing `top_k` therefore changes both bank construction and query
-retrieval; this result must not be interpreted as the same frozen bank queried
-with one extra slot.
-
-### Global Comparison
-
-| Setting | Bank-off EM | Bank-on EM | Bank-on recall | Format failures | Chinese outputs | Final slots |
-| --- | ---: | ---: | ---: | ---: | ---: | --- |
-| Config A `top_k=1` | 4/500 | 114/500 | 0.266 | 123 | 23 | `{1:500}` |
-| Config B `top_k=1` | 4/500 | 72/500 | 0.202 | 141 | 120 | `{16:500}` |
-| Config B `top_k=2` | 4/500 | 109/500 | 0.290 | 131 | 98 | `{15:100,16:400}` |
-
-- Config B `top_k=2` versus Config B `top_k=1`:
-  EM `+37`, recall `+0.088`, format failures `-10`, Chinese outputs `-22`
-- Config B `top_k=2` versus Config A `top_k=1`:
-  EM `-5`, recall `+0.024`, format failures `+8`, Chinese outputs `+75`
-
-### Per-context Results
-
-| Context | Off EM | On EM | On recall | Format | Chinese | Retrieved pair | Final slots | vs B k1 | vs A k1 |
-| ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: |
-| 0 | 0/100 | 19/100 | 0.23 | 21 | 0 | `(1,0):100` | 16 | +15 | +1 |
-| 1 | 0/100 | 45/100 | 0.45 | 1 | 1 | `(1,0):99,(0,1):1` | 16 | +30 | +3 |
-| 2 | 0/100 | 22/100 | 0.22 | 1 | 0 | `(0,1):100` | 16 | +20 | +1 |
-| 3 | 3/100 | 22/100 | 0.25 | 14 | 14 | `(1,0):100` | 15 | +1 | +5 |
-| 4 | 1/100 | 1/100 | 0.30 | 94 | 83 | `(1,0):100` | 16 | -29 | -15 |
-
-### Retrieval and Integrity
-
-- retrieved pairs: `{(1,0):399,(0,1):101}`
-- top-1 indices: `{1:399,0:101}`
-- top-2 indices: `{0:399,1:101}`
-- candidate slots before top-k: `{16:400,15:100}`
-- retrieved latent count: `{16:500}`
-- routing remained fixed per context; only one context-1 question swapped pair
-  order
-- one host-access launch completed on GPU 2; no failed attempt occurred
-- `500/500` valid questions; manifest and `run_config.json` matched
-  `retrieve_threshold=0.03`, `update_threshold=0.09`, `max_slots=16`,
-  `top_k=2`, `generation_max_length=40`, `requested_contexts=5`, and
-  `eventqa_protocol=frozen_context_bank`
-- total / maximum query write-count delta: `0 / 0`
-- blocked query write attempts: `500`
-- changed bank snapshots: `0`; cross-context leakage: `0`; errors: `0`
-
-### Interpretation
-
-- End-to-end `top_k=2` is a strong positive signal for the multi-slot
-  mechanism: it raises Config B from `72/500` to `109/500`, approaches Config
-  A's `114/500`, and exceeds Config A recall (`0.290` versus `0.266`).
-- Output stability remains worse than Config A, especially Chinese-script
-  outputs (`98` versus `23`).
-- Gains generalize across contexts 0-3. Context 4 catastrophically regresses
-  and is the dominant remaining concern.
-- Retrieval remains fixed per context rather than question-specific.
-- `top_k=4` remains deferred until the context-4 collapse is understood.
-
-## Context-4 Collapse Diagnosis
-
-Exact comparison from artifacts:
-
-| Setting | Bank-on EM | Recall | Format failures | Chinese outputs | Retrieval |
-| --- | ---: | ---: | ---: | ---: | --- |
-| Config A `top_k=1` | 16/100 | 0.26 | 56 | 22 | `(0,):100` |
-| Config B `top_k=1` | 30/100 | 0.30 | 5 | 1 | `(0,):100` |
-| Config B `top_k=2` | 1/100 | 0.30 | 94 | 83 | `(1,0):100` |
-
-The failure is primarily generation-format instability rather than loss of all
-answer evidence. Of 83 Chinese-script outputs, 82 are also format failures.
-Of 94 format failures, 29 still contain the full gold answer in raw output.
-Those 29 are exactly the recall-positive / EM-negative cases: malformed short
-prefixes such as `iston`, `人`, or `顿也` become the parsed answer while the
-correct answer remains on a later line. This explains recall `0.30` with EM
-`0.01`.
-
-Retrieval and construction evidence:
-
-- the final-score top pair is `(1,0)` for all 100 queries; top-1 minus top-2
-  margin ranges `0.01208-0.01626` with mean `0.01382`
-- after removing the recorded recency factor offline, raw cosine still ranks
-  ctx4 slots `(1,0)` first for all 100 queries; the pair is not an index-tie
-  artifact
-- ctx4 slot 1 has `created_step=2`, `access_count=15`, age `0`; slot 0 has
-  `created_step=3`, `access_count=14`, age `0`
-- construction performed `16` inserts and `1` matched replacement; capacity
-  eviction and replace-old counts are `0`
-- top_k=2 repeatedly refreshed both slots through construction while later
-  slots remained stale; this recency feedback strongly separates the pair from
-  later slots, although cosine also ranks the pair highest
-- Config B `top_k=1` constructed a different bank path: ctx4 slot 0 alone had
-  `created_step=2`, `access_count=15`, age `0`, and its next final-score slot
-  was slot 14 while its next raw-cosine slot was slot 3
-- ctx1 and ctx2 have the same `16 insert + 1 matched replace` structure and
-  similarly fixed local slot-0/slot-1 routing, but produce 45 and 22 EM with
-  almost no format or Chinese failures. Slot indices are context-local; the
-  ctx4 slot-1/slot-0 pair, not slot 1 globally, is pathological.
-
-Evidence limits:
-
-- artifacts do not store slot key tensors, query vectors, key/query norms, or
-  query-to-query similarity, so query-representation collapse cannot be tested
-  directly
-- artifacts do not map final slots to source chunk text or preserve which
-  chunk last replaced each slot, so semantic slot provenance is unavailable
-- raw cosine can be reconstructed from final score and recorded age, but the
-  stored diagnostics cannot separate bad slot content from bad query content
-
-Hypothesis assessment:
-
-- H1 slot-pair content/provenance problem: plausible and consistent with the
-  context-local failure, but unproven because chunk provenance is absent
-- H2 construction instability: strongly supported; changing `top_k` changes
-  the construction path and creates a different ctx4 bank, while contexts 0-3
-  improve
-- H3 recency feedback: supported as an amplifying lock-in mechanism, but not
-  the sole ranking cause because raw cosine also ranks `(1,0)` first
-- H4 query representation collapse: plausible from fixed routing, but query
-  vectors are absent and the hypothesis cannot be tested offline
-- H5 generation instability: strongly supported by 94 malformed outputs, 83
-  Chinese outputs, and 29 raw outputs that contain gold but fail EM
-- H6 dataset difficulty: rejected as the primary cause because the same ctx4
-  questions reach 30/100 under Config B `top_k=1`
-
-Primary next action: add score-decomposition and slot/chunk-provenance
-diagnostics, then rerun Config B `top_k=2` on context 4 only. This is lower risk
-than changing retrieval behavior and can determine whether the pathological
-pair is selected because of query collapse, semantic slot content, or recency
-feedback before another mechanism ablation is chosen.
-
-## Config B `top_k=2` ctx4 Standalone Reproducibility Diagnostic
-
-Accepted artifact:
-
-`outputs/mab/eventqa_configB_ctx4_topk2_rerun/20260630T121127Z-eventqa-65536-version-b-weaver-space-bank-n5`
-
-This standalone rerun is a reproducibility and stability diagnostic only. It
-does not replace the accepted all-context Config B `top_k=2` ablation above.
-
-### Runtime Contract
-
-- `retrieve_threshold=0.03`
-- `update_threshold=0.09`
-- `max_slots=16`
-- `top_k=2`
-- `generation_max_length=40`
-- `context_index=4`
-- `requested_contexts=1`
-- `eventqa_protocol=frozen_context_bank`
-- `100/100` valid questions
-- query write-count delta total / max: `0 / 0`
-- bank snapshots changed after query: `0`
-- cross-context leakage detected: `0`
-
-### Result
-
-- Bank-off EM: `1/100 = 0.01`
-- Bank-on EM: `11/100 = 0.11`
-- Bank-off recall: `0.19`
-- Bank-on recall: `0.28`
-- format failures: `52/100`
-- Chinese outputs: `44/100`
-- final slot count: `16`
-- peak CUDA memory max / mean: `11.17 GiB / 9.46 GiB`
-
-### Comparison
-
-- Versus previous Config B `top_k=2` all-context ctx4:
-  EM `+10`, recall `-0.02`, format failures `-42`, Chinese outputs `-39`
-- Retrieved pair changed from `(1,0):100` to `(3,0):84` / `(0,3):16`
-- Versus Config B `top_k=1` ctx4:
-  EM `-19`, recall `-0.02`, format failures `+47`, Chinese outputs `+43`
-- Versus Config A `top_k=1` ctx4:
-  EM `-5`, recall `+0.02`, format failures `-4`, Chinese outputs `+22`
-
-### Retrieval and Construction
-
-- retrieved pair distribution: `{(3,0):84,(0,3):16}`
-- top-1 indices: `{3:84,0:16}`
-- top-2 indices: `{0:84,3:16}`
-- retrieved latent count: `{16:100}`
-- candidate slots before top-k: `{16:100}`
-- final slot count: `16`
-- routing is still nearly fixed, but fixed to a different pair than the
-  accepted all-context ctx4 run
-- construction statistics:
-  `insert=16`, `matched_replace=1`, `capacity_evict=0`, `replace_old=0`
-- the standalone ctx4 bank differs from the all-context ctx4 bank
-- top-1 minus top-2 margin mean dropped from `0.01382` in the all-context ctx4
-  run to `0.00123` in the standalone rerun
-
-### Output Failure Profile
-
-- Chinese outputs: `44`
-- format failures: `52`
-- Chinese outputs that are also format failures: `36`
-- format failures containing the full gold answer: `18`
-- recall-positive but EM-negative: `17`
-- answer-present-but-parser-lost behavior remains visible, but less severe than
-  in the all-context ctx4 collapse
-
-### Interpretation
-
-- The catastrophic ctx4 collapse is not stable as a single deterministic
-  outcome.
-- Config B `top_k=2` ctx4 remains much worse than Config B `top_k=1` ctx4.
-- The dominant slot pair changed from local `(1,0)` to local `(3,0)` / `(0,3)`,
-  indicating construction-path or routing instability rather than pure
-  same-bank generation noise.
-- This strengthens the need for score-decomposition and slot/chunk-provenance
-  diagnostics.
-- `top_k=4` remains deferred.
-
-Recommended next step: add score-decomposition and slot/chunk-provenance
-diagnostics, then rerun ctx4 only.
-
-## End-to-End Config B `top_k=4` Negative Ablation
-
-Accepted artifact:
-
-`outputs/mab/eventqa_configB_allctx_topk4/20260630T124028Z-eventqa-65536-version-b-weaver-space-bank-n5`
-
-This is a valid end-to-end mechanism test because `top_k` intentionally affects
-both construction-time memory update and query-time retrieval. It is not a
-same-bank query-only comparison. It is also not a candidate setting because it
-strongly regresses globally.
-
-### Runtime Contract
-
-- `retrieve_threshold=0.03`
-- `update_threshold=0.09`
-- `max_slots=16`
-- `top_k=4`
-- `generation_max_length=40`
-- `requested_contexts=5`
-- `eventqa_protocol=frozen_context_bank`
-- `500/500` valid questions
-- query write-count delta total / max: `0 / 0`
-- blocked query write attempts: `500`
-- bank snapshots changed after query: `0`
-- cross-context leakage detected: `0`
-- errors: `0`
-
-### Global Result
-
-- Bank-off EM: `4/500 = 0.008`
-- Bank-on EM: `63/500 = 0.126`
-- Bank-off recall: `0.178`
-- Bank-on recall: `0.164`
-- format failures: `208`
-- Chinese outputs: `156`
-- final slot-count distribution: `{15:100,16:400}`
-- retrieved indices distribution:
-  `{(0,1,2):300,(1,0,2):100,(2,4,10):100}`
-- top-1 indices: `{0:300,1:100,2:100}`
-- top-2 indices: `{1:300,0:100,4:100}`
-- top-3 indices: `{2:400,10:100}`
-- top-4 indices: `{}`
-- retrieved latent-count distribution: `{24:500}`
-- candidate slots before top-k distribution: `{15:100,16:400}`
-- peak CUDA memory max / mean: `11.17 GiB / 9.45 GiB`
-
-### Key Mechanism Finding
-
-Although `top_k` was set to `4`, retrieval realized only three slots on every
-query. Retrieved latent count stayed `24` rather than `32`. Therefore
-`top_k=4` did not actually produce four-slot retrieval under the thresholded
-selection path.
-
-### Comparison
-
-- Versus Config A `top_k=1`:
-  EM `-51`, recall `-0.102`, format failures `+85`, Chinese outputs `+133`
-- Versus Config B `top_k=1`:
-  EM `-9`, recall `-0.038`, format failures `+67`, Chinese outputs `+36`
-- Versus Config B `top_k=2`:
-  EM `-46`, recall `-0.126`, format failures `+77`, Chinese outputs `+58`
-
-### Per-context Result
-
-- `ctx0`:
-  Bank-on EM `2/100`, recall `0.02`, format `94`, Chinese `0`,
-  tuple `{(1,0,2):100}`, final slots `16`,
-  delta vs Config B `top_k=2` `-17`,
-  delta vs Config B `top_k=1` `-2`,
-  delta vs Config A `top_k=1` `-16`
-- `ctx1`:
-  Bank-on EM `4/100`, recall `0.21`, format `72`, Chinese `88`,
-  tuple `{(0,1,2):100}`, final slots `16`,
-  delta vs Config B `top_k=2` `-41`,
-  delta vs Config B `top_k=1` `-11`,
-  delta vs Config A `top_k=1` `-38`
-- `ctx2`:
-  Bank-on EM `21/100`, recall `0.21`, format `0`, Chinese `29`,
-  tuple `{(0,1,2):100}`, final slots `16`,
-  delta vs Config B `top_k=2` `-1`,
-  delta vs Config B `top_k=1` `+19`,
-  delta vs Config A `top_k=1` `0`
-- `ctx3`:
-  Bank-on EM `16/100`, recall `0.18`, format `17`, Chinese `12`,
-  tuple `{(2,4,10):100}`, final slots `15`,
-  delta vs Config B `top_k=2` `-6`,
-  delta vs Config B `top_k=1` `-5`,
-  delta vs Config A `top_k=1` `-1`
-- `ctx4`:
-  Bank-on EM `20/100`, recall `0.20`, format `25`, Chinese `27`,
-  tuple `{(0,1,2):100}`, final slots `16`,
-  delta vs Config B `top_k=2` all-context `+19`,
-  delta vs Config B `top_k=1` `-10`,
-  delta vs Config A `top_k=1` `+4`
-
-### Interpretation
-
-- `top_k=4` is a failure signal.
-- It is worse than Config B `top_k=2`, worse than Config B `top_k=1`, and far
-  worse than Config A `top_k=1`.
-- It increases format failures and Chinese outputs.
-- It keeps routing fixed per context.
-- It does not realize four-slot retrieval; only three slots are retrieved.
-- It should not be kept as a candidate setting.
-- Do not scale `top_k` further.
-- The next step should return to score decomposition and slot/chunk-provenance
-  diagnostics, especially for unstable contexts `ctx1` and `ctx4`.
-- Current best multi-slot setting remains Config B `top_k=2`, but Config A
-  `top_k=1` remains the best overall EM setting.
+# MAB-6B-FR EventQA 65536 n5: Current Experiment Record
+
+Updated: 2026-07-03 (Asia/Shanghai)
+
+## Scope and Evidence Boundary
+
+This note is the durable project record for recent EventQA-65536 experiments
+under the MAB-6B frozen-context-bank runner. It consolidates the historical
+A/B/C/D exploration, the P1--P7 search, reproducibility runs, prompt ablations,
+and offline failure analyses. It does not claim a direct official full-history
+long-context baseline: Bank-off is the runner's compressed bridge without a
+persistent Memory Bank because the rendered full history exceeds capacity.
+
+- Dataset/task: MemoryAgentBench `Accurate_Retrieval/eventqa_65536`.
+- Protocol: `frozen_context_bank`, five contexts, 100 questions per context.
+- Common generation limit: `40`.
+- Primary metric: official EventQA `substring_exact_match` / Accuracy.
+- Auxiliary metric: `eventqa_recall`.
+- Current evidence source: completed run artifacts and the frozen stage summary
+  in `outputs/mab/eventqa_current_stage_consolidated_summary.{md,json}`.
+- Protected DetectiveQA note is intentionally not edited:
+  `research_notes/benchmarks/memoryagentbench_mab6b_weaver_space_bank.md`.
+
+## Current Decision
+
+1. **P7 non-strict is the paper-level main EventQA candidate among the current
+   tested configurations.** Across five repeats it has the best official EM and
+   the lowest format-failure burden among P4/P6/P7.
+2. **P6 remains the lower-update-threshold comparison and earlier
+   recall-oriented baseline.** Its five-repeat mean recall exceeds P7 by only
+   `0.0044`, weakening the earlier claim of a meaningful recall advantage.
+3. **P4 is lower and is not a main candidate.**
+4. **Strict and first-line prompt variants are negative ablations.** Neither
+   improves the official result; first-line is especially harmful.
+5. **P7 non-strict uses the default EventQA prompt wrapper and the official
+   MemoryAgentBench scorer/parser path unchanged.** No parser repair,
+   candidate normalization, output repair, strict prompt, or first-line prompt
+   is used.
+6. **The dominant unresolved failure is no-gold / memory-conditioned generation
+   corruption, not parser or first-line mismatch.**
+7. **Next mechanism direction:** harmful-slot and harmful-tuple attribution and
+   suppression, with utility or routing gates. This work has not started.
+
+## Protocol and Official Prompt/Scorer Verification
+
+P7 non-strict uses:
+
+```text
+Based on the context you memorized, complete the task below:
+
+{question}
+
+The event that happens next is:
+```
+
+This wrapper is character-identical to the local upstream MemoryAgentBench
+EventQA `Long_context_agent` template snapshot. The runner path is:
+
+```text
+mab6b_weaver_space_bank_eventqa_65536_n5.py::_score_prediction
+  -> scripts/eval/mab2_mab_bridge.py
+  -> MemoryAgentBench/utils/eval_other_utils.py::post_process
+  -> _process_eventqa_dataset
+  -> parse_output / calculate_metrics
+```
+
+Bank-off and Bank-on use the same visible query prompt and the same scoring
+path. Bank-on memory enters through the latent Weaver path, not visible prompt
+text. P7 non-strict has both prompt flags disabled and performs no parser or
+post-processing repair.
+
+Common P-series settings are `decay_alpha=0.05`, `requested_contexts=5`,
+`eventqa_protocol=frozen_context_bank`, `generation_max_length=40`, and
+`retrieved_memory_to_weaver=true`. Diagnostic P-series runs use per-context
+reseeding, score decomposition, frozen-bank saving, and bank-transition
+diagnostics.
+
+## Table 1. Main Non-strict Families
+
+| Family | Configuration `(rt, ut, slots, top_k, decay)` | Repeats | Bank-on EM mean±std [min,max] | Bank-on recall mean±std [min,max] | Format failures mean±std [min,max] | Helpful / harmful / format harm | Decision |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| P7 | `(0.05, 0.10, 16, 2, 0.05)` | 5 | `0.197±0.020 [0.162,0.220]` | `0.254±0.028 [0.212,0.298]` | `121.4±8.8 [108,135]` | `98.4±10.1 / 4.0±0.0 / 28.4±9.3` | Paper-level main candidate |
+| P6 | `(0.05, 0.095, 16, 2, 0.05)` | 5 | `0.169±0.018 [0.150,0.194]` | `0.258±0.016 [0.236,0.280]` | `165.8±19.8 [137,187]` | `83.6±9.4 / 3.2±0.7 / 44.6±9.0` | Lower-UT comparison; earlier recall baseline |
+| P4 | `(0.03, 0.095, 16, 2, 0.05)` | 2 | `0.149±0.015 [0.134,0.164]` | `0.259±0.007 [0.252,0.266]` | `245.0±50.0 [195,295]` | `74.5±7.5 / 4.0±0.0 / 55.0±4.0` | Lower; control only |
+
+Across these repeat sets, Bank-off is stable at EM `0.008±0.000` and recall
+`0.178±0.000`. All main-family runs finish with 16 slots for every query.
+Construction totals across five contexts are:
+
+- P4 repeats: `insert=80`, `matched_replace=4`, `capacity_evict=1` each.
+- The original three P6 repeats each recorded `insert=80`,
+  `matched_replace=4`, `capacity_evict=1`; rep4/rep5 retain complete
+  construction diagnostics in their run roots.
+- The original three P7 repeats recorded `insert=80`,
+  `matched_replace=2/1/2`, `capacity_evict=3/4/3`; rep4/rep5 retain complete
+  construction diagnostics in their run roots.
+
+P7 improves official EM and output stability relative to P6 while maintaining
+comparable recall (`0.254` versus `0.258`). P6 remains useful for isolating the
+update-threshold change, but no longer shows a meaningful recall advantage.
+
+## Table 2. Prompt Ablations
+
+Non-strict rows are repeat means; strict and first-line rows are single runs.
+`--` means the frozen stage summary did not retain that auxiliary count.
+
+| Setting | EM | Recall | Format failures | Chinese outputs | Helpful | Harmful | Format harm | Conclusion |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| P7 non-strict | `0.197` | `0.254` | `121.4` | `151.8` | `98.4` | `4.0` | `28.4` | Main, 5 repeats |
+| S7 strict | `0.154` | `0.184` | `126` | `240` | `74` | `5` | `15` | Negative |
+| FL-P7 first-line | `0.090` | `0.182` | `193` | `338` | `43` | `11` | `46` | Strong negative |
+| P6 non-strict | `0.169` | `0.258` | `165.8` | `189.8` | `83.6` | `3.2` | `44.6` | Lower-UT comparison, 5 repeats |
+| S6 strict | `0.088` | `0.224` | `291` | `329` | `42` | `6` | `69` | Negative |
+| FL-P6 first-line | `0.146` | `0.256` | `215` | `206` | `66` | `6` | `55` | Negative |
+| P4 non-strict | `0.149` | `0.259` | `245.0` | `271.5` | `74.5` | `4.0` | `55.0` | Lower control |
+| S4 strict | `0.078` | `0.230` | `244` | `379` | `39` | `8` | `76` | Negative |
+| FL-P4 first-line | `0.080` | `0.260` | `296` | `334` | `35` | `8` | `90` | Negative |
+
+Prompt-only format control did not improve official EM. In P7, the lightweight
+first-line instruction is worse than both non-strict and strict prompting.
+These variants remain negative ablations rather than main protocols.
+
+## Table 3. Failure Taxonomy
+
+Counts aggregate the relevant repeats and classify Bank-on EM failures.
+
+| Family | Parser-sensitive | No-gold | Clean wrong | First-line noise, no gold | First-line noise, later gold | Empty/degenerate | Conclusion |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| P7 | `60/1213 (4.9%)` | `1153/1213 (95.1%)` | `715` | `337` | `60` | `87` | Predominantly no-gold/corruption |
+| P6 | `149/1245 (12.0%)` | `1096/1245 (88.0%)` | `708` | `370` | `149` | `5` | Predominantly no-gold/corruption |
+| P4 | `109/851 (12.8%)` | `742/851 (87.2%)` | `334` | `387` | `109` | `3` | Predominantly no-gold/corruption |
+
+Most failures cannot be recovered by a first-line instruction or parser repair
+because the raw output does not contain the gold event. Latent memory can help
+correctness but can also destabilize generation: cases where Bank-off is clean
+and Bank-on becomes a format failure are `100` for P7, `123` for P6, and `109`
+for P4.
+
+## Table 4. Context 4 Limitation
+
+| Family/run | EM | Recall | Format failures | Taxonomy/routing headline | Interpretation |
+| --- | ---: | ---: | ---: | --- | --- |
+| P7 original | `0.000` | `0.190` | `98` | Dominant tuple `[1,0]` | Collapse |
+| P7 rep2 | `0.000` | `0.120` | `94` | Dominant tuple `[1,0]` | Collapse |
+| P7 rep3 | `0.000` | `0.140` | `95` | Dominant tuple `[1,0]` | Collapse |
+| P7 rep4 | `0.030` | `0.350` | `83` | Complete diagnostics saved | Small EM recovery, still poor |
+| P7 rep5 | `0.000` | `0.340` | `99` | Complete diagnostics saved | EM collapse persists |
+| P7 mean (5) | `0.006` | `0.228` | `93.8` | `[1,0]` selected `300/300` in original three-run diagnostic subset | Severe limitation |
+| P6 rep1 | `0.100` | `0.330` | `60` | Different construction/bank | Better recall and EM |
+| P6 rep2 | `0.010` | `0.300` | `87` | Different construction/bank | Unstable |
+| P6 rep3 | `0.170` | `0.320` | `43` | Different construction/bank | Best ctx4 repeat |
+| P6 rep4 | `0.000` | `0.180` | `97` | Complete diagnostics saved | Collapse |
+| P6 rep5 | `0.000` | `0.200` | `98` | Complete diagnostics saved | Collapse |
+| P6 mean (5) | `0.056` | `0.266` | `77.0` | Better mean than P7 but unstable | Both new repeats zero EM |
+
+Across the original three-run P7 context-4 taxonomy, `first_line_noise_no_gold`
+accounts for approximately `247--249` cases and
+`first_line_noise_later_gold` for `40`. The dominant tuple
+has format-failure rate `0.957` and no-gold rate `0.867`. In the dominant
+`0.08--0.09` top-score bucket (`n=230`), EM is `0`, recall `0.152`, format
+failure `0.961`, and no-gold `0.865`. Context 4 is an extreme instance of the
+global generation-corruption problem, not a unique parser bug.
+
+## Experiment Inventory
+
+Artifact key: `A` aggregate, `C` per-context JSONL, `Q` per-question JSONL,
+`P` paired results, `S` score decomposition, `T` transition diagnostics,
+`R` construction provenance, `F` frozen banks, `L` run log. `-` means absent.
+All rows marked complete have 500/500 valid questions unless noted.
+
+### Historical and Controlled Runs
+
+| Experiment | Output root | Config `(rt,ut,slots,k)` | On EM / recall / format | Files | Status and decision |
+| --- | --- | --- | --- | --- | --- |
+| Initial A, 15-run per-context sweep | `outputs/mab/eventqa_frozen_context_bank_cfgA_ctx{0..4}` | `(0.03,0.05,8,1)` | `0.228 / 0.266 / 123` | per-context artifacts | Historical best at that stage; one-slot bridge |
+| Initial B, 15-run per-context sweep | `outputs/mab/eventqa_frozen_context_bank_cfgB_ctx{0..4}` | `(0.03,0.09,16,1)` | `0.144 / 0.202 / 141` | per-context artifacts | Lower than A |
+| Initial C, 15-run per-context sweep | `outputs/mab/eventqa_frozen_context_bank_cfgC_ctx{0..4}` | `(0.005,0.09,16,1)` | `0.134 / 0.208 / 165` | per-context artifacts | Lower than A/B |
+| B top-k2 ctx0 pilot | `outputs/mab/eventqa_configB_ctx0_topk2` | `(0.03,0.09,16,2)` | `0.110 / 0.270 / 67` on 100 questions | `ACQP-----` | Pilot only; superseded by all-context run |
+| B top-k2 all-context | `outputs/mab/eventqa_configB_allctx_topk2` | `(0.03,0.09,16,2)` | `0.218 / 0.290 / 131` | `ACQP-----` | Positive multi-slot signal; context-4 unstable |
+| B top-k2 ctx4 rerun | `outputs/mab/eventqa_configB_ctx4_topk2_rerun` | `(0.03,0.09,16,2)` | `0.110 / 0.280 / 52` on 100 questions | `ACQP-----` | Dominant tuple changed; instability confirmed |
+| B top-k4 | `outputs/mab/eventqa_configB_allctx_topk4` | `(0.03,0.09,16,4)` | `0.126 / 0.164 / 208` | `ACQP-----` | Negative; only three slots realized |
+| A rerun | `outputs/mab/eventqa_configA_rt003_ut005_cap8_topk1_rerun` | `(0.03,0.05,8,1)` | `0.118 / 0.148 / 135` | `ACQP-----` | Reproducibility warning; not current anchor |
+| B2 rerun | `outputs/mab/eventqa_configB_rt003_ut009_cap16_topk2_rerun` | `(0.03,0.09,16,2)` | `0.118 / 0.262 / 254` | `ACQP-----` | Reproducibility warning |
+| D rerun | `outputs/mab/eventqa_configD_rt003_ut009_cap8_topk1` | `(0.03,0.09,8,1)` | `0.156 / 0.234 / 186` | `ACQP-----` | Diagnostic only |
+| Controlled A rep1/2 | `outputs/mab/eventqa_controlled_A_rep{1,2}` | `(0.03,0.05,8,1)` | `0.154/0.226`; recall `0.212/0.236`; format `142/53` | `ACQPSTRF-` | Bank hashes differ; unstable Bank-on |
+| Controlled B2 rep1/2 | `outputs/mab/eventqa_controlled_B2_rep{1,2}` | `(0.03,0.09,16,2)` | `0.184/0.134`; recall `0.288/0.250`; format `149/192` | `ACQPSTRF-` | Construction instability |
+| Controlled D rep1/2 | `outputs/mab/eventqa_controlled_D_rep{1,2}` | `(0.03,0.09,8,1)` | `0.222/0.146`; recall `0.262/0.260`; format `145/189` | `ACQPSTRF-` | Construction instability |
+
+No raw EventQA run with `construction_only=true` was found in the inventoried
+roots. Threshold sensitivity is nevertheless preserved in
+`outputs/mab/eventqa_score_diagnostics/construction_threshold_sensitivity.json`;
+the absence of a distinct construction-only run root is recorded rather than
+inferred away.
+
+### P-series Search and Reproducibility
+
+| Experiment | Output root | Config `(rt,ut,slots,k)` | On EM / recall / format | Chinese | Helpful/harmful/format harm | Decision |
+| --- | --- | --- | ---: | ---: | ---: | --- |
+| P1 | `outputs/mab/eventqa_p1_rt003_ut0095_cap16_topk1` | `(0.03,0.095,16,1)` | `0.172 / 0.232 / 183` | `81` | `83/1/30` | Best top-k1 in bounded P1--P3 |
+| P2 | `outputs/mab/eventqa_p2_rt004_ut0095_cap16_topk1` | `(0.04,0.095,16,1)` | `0.080 / 0.190 / 265` | `103` | `40/4/55` | Reject |
+| P3 | `outputs/mab/eventqa_p3_rt005_ut0095_cap16_topk1` | `(0.05,0.095,16,1)` | `0.112 / 0.188 / 195` | `101` | `53/1/38` | Reject |
+| P4 initial | `outputs/mab/eventqa_p4_rt003_ut0095_cap16_topk2` | `(0.03,0.095,16,2)` | `0.172 / 0.262 / 141` | `221` | `85/3/45` | Control candidate; repeats lower |
+| P5 | `outputs/mab/eventqa_p5_rt004_ut0095_cap16_topk2` | `(0.04,0.095,16,2)` | `0.162 / 0.268 / 202` | `226` | `80/3/53` | Below P6 |
+| P6 initial diagnostic | `outputs/mab/eventqa_p6_rt005_ut0095_cap16_topk2` | `(0.05,0.095,16,2)` | `0.178 / 0.272 / 156` | `167` | `88/3/47` | Selected for reproducibility |
+| P4 repro 1/2 | `outputs/mab/eventqa_p4_repro_rep{1,2}_rt003_ut0095_cap16_topk2` | `(0.03,0.095,16,2)` | `0.134/0.164`; recall `0.252/0.266`; format `295/195` | `288/255` | `67/4/59`; `82/4/51` | Lower control |
+| P6 repro 1--5 | `outputs/mab/eventqa_p6_repro_rep{1..5}_rt005_ut0095_cap16_topk2` | `(0.05,0.095,16,2)` | `0.194/0.150/0.166/0.150/0.184`; recall `0.280/0.264/0.266/0.236/0.244`; format `149/187/185/171/137` | `153/196/217/202/181` | New: rep4 `74/3/43`, rep5 `91/3/30` | Lower-UT comparison |
+| P7 original/rep2--5 | `outputs/mab/eventqa_p7*_rt005_ut010_cap16_topk2` | `(0.05,0.10,16,2)` | `0.200/0.212/0.162/0.190/0.220`; recall `0.252/0.240/0.212/0.266/0.298`; format `125/119/135/108/120` | `160/129/192/148/130` | New: rep4 `95/4/38`, rep5 `110/4/39` | Paper-level main |
+
+Every P-series run above has `A,C,Q,P,S,T,R,F,L` present and completed.
+
+### Prompt Ablation Roots
+
+| Experiment | Output root | Prompt mode | On EM / recall / format | Decision |
+| --- | --- | --- | ---: | --- |
+| S4 | `outputs/mab/eventqa_strict_p4_rt003_ut0095_cap16_topk2` | strict | `0.078 / 0.230 / 244` | Negative |
+| S6 | `outputs/mab/eventqa_strict_p6_rt005_ut0095_cap16_topk2` | strict | `0.088 / 0.224 / 291` | Negative |
+| S7 | `outputs/mab/eventqa_strict_p7_rt005_ut010_cap16_topk2` | strict | `0.154 / 0.184 / 126` | Negative |
+| FL-P4 | `outputs/mab/eventqa_firstline_p4_rt003_ut0095_cap16_topk2` | first-line | `0.080 / 0.260 / 296` | Negative |
+| FL-P6 | `outputs/mab/eventqa_firstline_p6_rt005_ut0095_cap16_topk2` | first-line | `0.146 / 0.256 / 215` | Negative |
+| FL-P7 | `outputs/mab/eventqa_firstline_p7_rt005_ut010_cap16_topk2` | first-line | `0.090 / 0.182 / 193` | Strong negative |
+
+All prompt-ablation roots have `A,C,Q,P,S,T,R,F,L` present and completed. The
+strict P6/P7 roots contain abandoned partial timestamp directories; the table
+uses the timestamp directory containing the complete 500-question aggregate.
+
+## Chronological Experiment Timeline
+
+1. **Initial A/B/C sweep (2026-06-30).** Tested capacity/update alternatives at
+   `top_k=1`. A led with EM `0.228`; larger banks B/C did not help. Historical
+   decision: retain A while investigating multi-slot retrieval.
+2. **B top-k2 and top-k4.** Top-k2 raised recall and gave a positive multi-slot
+   signal, but context 4 collapsed and a standalone rerun changed the dominant
+   tuple. Top-k4 regressed and realized only three retrieved slots. Decision:
+   avoid top-k4; instrument construction and routing.
+3. **Controlled A/B2/D reruns (2026-07-01).** Per-context reseeding preserved
+   RNG state, but all frozen-bank hashes differed between repeats and score
+   divergence appeared around construction turn 1. Decision: treat Bank-on as
+   construction-path unstable and rely on repeat statistics.
+4. **Offline score diagnostic.** Scores occupied a narrow range and did not
+   cleanly distinguish useful from harmful memory. Fixed thresholds alone were
+   judged insufficient; margin/hysteresis/utility-aware routing became plausible.
+5. **Bounded P1--P6 search.** Fixed `max_slots=16`, `ut=0.095`, and crossed
+   `rt={0.03,0.04,0.05}` with `top_k={1,2}`. P6 was the best single bounded
+   candidate (`0.178` EM, `0.272` recall), motivating reproducibility runs.
+6. **P4/P6 reproducibility.** The initial three P6 repeats averaged EM `0.170`
+   and recall `0.270`; P4 was lower. This motivated retaining P6 as the early
+   recall-oriented reference.
+7. **P7 update-threshold test and repeats (2026-07-02).** Raising `ut` from
+   `0.095` to `0.10` improved mean EM and reduced format failures, but lowered
+   recall. Decision: promote P7 as current main; keep P6 as a trade-off.
+8. **P7 context-4 diagnosis.** P7 reached zero EM in context 4 across the first
+   three repeats with fixed tuple `[1,0]`. After five repeats, context-4 EM is
+   `0/0/0/0.03/0`; the limitation remains material.
+9. **Format taxonomy and all-context mechanism diagnosis.** Between `87%` and
+   `95%` of examined family failures were no-gold. Decision: parser repair and
+   first-line prompt constraints cannot address the dominant failure.
+10. **Strict prompt ablation.** Strict official-style instructions reduced P7
+    EM/recall. Decision: negative ablation.
+11. **First-line prompt ablation.** Lightweight first-line instructions further
+    reduced P7 EM and increased failures. Decision: strong negative ablation.
+12. **Official prompt/scorer verification.** Confirmed P7 non-strict uses the
+    local upstream default wrapper and unchanged official scorer/parser path.
+13. **Stage consolidation (2026-07-03).** Frozen current conclusion in
+    `eventqa_current_stage_consolidated_summary.{md,json}`; this note now makes
+    that conclusion durable for project continuation and paper writing.
+14. **Five-repeat stability completion (2026-07-03).** Added P7 rep4/rep5 and
+    P6 rep4/rep5. P7 now has EM `0.197±0.020`, recall `0.254±0.028`, and
+    format failures `121.4±8.8`; P6 has `0.169±0.018`, `0.258±0.016`, and
+    `165.8±19.8`. Decision: strengthen P7 to paper-level main candidate and
+    retain P6 as the lower-UT comparison rather than a meaningful recall winner.
+
+## Diagnostic Reports and Artifact Pointers
+
+- Frozen stage summary:
+  `outputs/mab/eventqa_current_stage_consolidated_summary.{md,json}`
+- P7 versus P6/P4 repeat summary:
+  `outputs/mab/eventqa_p7_vs_p6_final_summary.{md,json}`
+- P7 context-4 diagnosis:
+  `outputs/mab/eventqa_p7_context4_failure_diagnosis.{md,json}`
+- Format taxonomy:
+  `outputs/mab/eventqa_format_failure_taxonomy.{md,json}`
+- All-context format/mechanism diagnosis:
+  `outputs/mab/eventqa_all_context_format_mechanism_diagnosis.{md,json}`
+- P7 default prompt/scorer verification:
+  `outputs/mab/eventqa_p7_non_strict_official_prompt_scorer_verification.{md,json}`
+- Score diagnostics:
+  `outputs/mab/eventqa_score_diagnostics/`
+- P6 stability diagnostics:
+  `outputs/mab/eventqa_p6_stability_diagnostics/`
+- Comprehensive inventory generated with this update:
+  `outputs/mab/eventqa_recent_experiments_full_inventory_and_notes_update.{md,json}`
+- Five-repeat stability checkpoint:
+  `outputs/mab/eventqa_five_repeat_stability_summary.{md,json}`
+
+## Claims Safe for Paper Drafting
+
+- **Supported:** P7 improves repeat-mean official EventQA EM and lowers format
+  failures relative to P6 under the unchanged official scorer/parser and local
+  upstream default EventQA prompt wrapper.
+- **Supported:** P7 maintains recall comparable to P6; the five-repeat mean gap
+  is only `0.0044` in P6's favor.
+- **Supported negative result:** strict and first-line prompt-only controls do
+  not improve official EM in this setting.
+- **Supported diagnosis:** the observed family-level failure pool is dominated
+  by raw outputs that do not contain the gold event; parser-sensitive cases are
+  a minority.
+- **Partially supported mechanism hypothesis:** fixed dominant routing and a
+  pathological context-local tuple are associated with P7 context-4 failure.
+  Causality and a general suppression rule remain unproven.
+
+## Limitations
+
+- P7 is the current main candidate, not a final SOTA claim.
+- P7 and P6 remain close on recall; five repeats do not support a meaningful
+  P6 recall advantage.
+- Frozen banks differ across repeated Bank-on runs despite per-context
+  reseeding; repeat statistics are required.
+- P7 context 4 remains near zero EM (`0.006` mean); P6 is better there on
+  average (`0.056`) but rep4 and rep5 are both zero.
+- Fixed routing and narrow score ranges indicate that the current retrieval
+  score does not reliably separate useful from harmful memory.
+- The compressed Bank-off bridge is not an official full-history baseline.
+- Harmful-slot/tuple suppression has not yet been implemented or evaluated.
+
+## Next Steps
+
+Do not continue prompt-only formatting variants and do not modify the official
+parser/scorer for the main result. The next focused mechanism stage should:
+
+1. Attribute utility and corruption to selected slots and slot tuples.
+2. Test whether failures concentrate in repeatable harmful tuples across banks.
+3. Evaluate a minimal opt-in utility gate, routing-margin gate, or harmful-tuple
+   suppression mechanism only after the attribution criterion is fixed.
+4. Preserve P7 as the paper-level main candidate and P6 as the lower-UT
+   comparison / earlier recall-oriented baseline.
+5. Use bounded experiments with repeats; do not infer stability from one bank.
+
+## Paper-ready Mini Summary
+
+Under the unchanged official MemoryAgentBench EventQA scorer/parser, P7
+non-strict is the current main candidate and uses the default EventQA prompt
+wrapper character-identical to the local upstream snapshot. Across five runs,
+P7 improves official exact match (`0.197±0.020` vs. `0.169±0.018`) and reduces
+format failures (`121.4±8.8` vs. `165.8±19.8`) relative to P6 while maintaining
+comparable recall (`0.254±0.028` vs. `0.258±0.016`). P6 is retained as the
+lower-update-threshold comparison. Strict and first-line prompt controls are negative
+ablations. Error analysis shows that most remaining failures are no-gold,
+memory-conditioned generation corruption rather than parser mismatch, making
+harmful-slot and harmful-tuple attribution and suppression the next mechanism
+direction.
+
+## Project cleanup review checkpoint
+
+- **Date/time:** 2026-07-03 19:40 CST.
+- **Current paper-critical files:**
+  `scripts/eval/mab6b_weaver_space_bank_eventqa_65536_n5.py`,
+  `scripts/eval/mab2_mab_bridge.py`, the memory-bank/model integration under
+  `memgen/model/`, `tests/test_mab6b_weaver_space_bank.py`,
+  `tests/test_latent_memory_bank.py`,
+  `tests/test_latent_memory_bank_integration.py`, and this EventQA note.
+- **Current paper-critical outputs:** all P7 and P6 five-repeat run families;
+  P4 original/repeat controls; strict and first-line ablation families;
+  `eventqa_five_repeat_stability_summary.{md,json}`;
+  `eventqa_current_stage_consolidated_summary.{md,json}`;
+  `eventqa_p7_vs_p6_final_summary.{md,json}`; official prompt/scorer
+  verification; format taxonomy; all-context mechanism diagnosis; and P7
+  context-4 diagnosis.
+- **Must not be touched:** the protected DetectiveQA canonical note
+  `research_notes/benchmarks/memoryagentbench_mab6b_weaver_space_bank.md`,
+  accepted canonical result artifacts, official MemoryAgentBench scorer/parser,
+  and existing experiment outputs.
+- **Cleanup candidates requiring user approval:** three incomplete 8 KB
+  `eventqa_A_stability_rep{1,2,3}_rt003_ut005_cap8_topk1` log-only directories;
+  surplus frozen-context launch directories after an exact manifest audit;
+  root file `1` (nonempty path listing); runtime tmux logs; Python bytecode
+  caches; older sweep outputs for archival only; and untracked non-mainline
+  diagnostic/plan files.
+- **Next recommended action:** review and freeze a paper artifact manifest with
+  paths, completion markers, note references, sizes, and checksums; then obtain
+  explicit approval for the Level 1 deletion and Level 2 archive lists before
+  changing any artifact location.
+- **Current result reminder:** P7 non-strict remains the paper-level main
+  EventQA candidate at five repeats (`EM 0.197±0.020`,
+  `Recall 0.254±0.028`, format failures `121.4±8.8`); P6 remains the
+  lower-update-threshold comparison.

@@ -2,6 +2,26 @@
 
 ## Current Planning State（当前计划状态）
 
+> Updated 2026-07-04. Historical R4 and pre-MAB planning below is retained for
+> provenance; its claims that Version B is unimplemented or the next active
+> step are superseded by this section.
+
+- Current final target remains **Session-Local Latent Memory Bank / Latent
+  Memory Bank Improves Long-Context Reasoning**.
+- Current EventQA checkpoint: P7 non-strict is the paper-level main candidate
+  among tested configurations, supported by five repeats. This is not yet a
+  general proof of long-context improvement. Evidence:
+  `outputs/mab/eventqa_five_repeat_stability_summary.md` and `.json`.
+- Context 4 remains the main limitation. A frozen-bank q0-99 oracle
+  counterfactual now supports an ordered tuple-level harmful interaction for
+  P7 source-run tuple `[1,0]`. Evidence:
+  `outputs/mab/eventqa_harmful_memory_attribution_context4_full/20260704T001824Z-p7-context4-q0-99/`.
+- Further attribution expansion and utility-gate implementation are paused.
+- Current work is research-note consolidation and planning the next approved
+  project action; it is not paper drafting or a new experiment phase.
+
+### Historical planning snapshot below
+
 - Accepted formal results: Phase 0-7.
 - Historical / exploratory records: Phase 8A GSM8K pilot, Phase 8C-alt
   controlled mechanism study, Phase 8D-0 / R4-1A infrastructure discovery, R4
@@ -41,10 +61,16 @@
   - threshold=0.04 overrides were in-memory diagnostics only
   - default threshold 0.7 incompatible with TriviaQA decayed-score scale
   - memory timing issue (pre-evidence write) may confound threshold-only fixes
-- Version B status: not started and blocked until target-task evidence and a
-  separate approval justify it.
+- Version B status at the time of this historical snapshot: not started. This
+  statement is superseded by the completed MAB-6A/MAB-6B and EventQA work
+  summarized above and in
+  `research_notes/benchmarks/memoryagentbench_mab6b_fr_eventqa_65536_n5.md`.
 
 ## Current Next Step（当前下一步）
+
+> Superseded on 2026-07-04 by the current planning state above. The numbered
+> R4 actions below are retained as historical provenance, not as the active
+> execution plan.
 
 1. R4 infrastructure validation and threshold calibration are complete with
    caveats.
@@ -680,10 +706,13 @@ R4-1D implementation result:
 
 ## Phase 9：Version B
 
-状态：deferred future work，不是当前下一步。
+状态：historical plan, superseded. Exploratory Version B / Weaver-space bank
+work was later implemented and evaluated in MAB-6A, MAB-6B, and EventQA. See
+`research_notes/benchmarks/memoryagentbench_mab6b_weaver_space_bank.md` and
+`research_notes/benchmarks/memoryagentbench_mab6b_fr_eventqa_65536_n5.md`.
 
-只有在 TriviaQA 上证明 Version A 有足够价值之后才开始；当前不做
-进一步设计和实现。
+The original gate text below is retained for provenance and is not the current
+project state.
 
 实现完整流程：
 

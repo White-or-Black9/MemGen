@@ -1,0 +1,41 @@
+{
+  "date": "2026-07-05",
+  "working_title": "Session-Local Latent Memory Banks for Long-Context Reasoning in MemGen",
+  "final_scoped_claim": "We add a session-local latent memory bank to MemGen and show that it improves long-context event reasoning without retraining the Trigger, Weaver, or Reasoner.",
+  "operational_scope": "Frozen P7 on EventQA-65536 under the local MemoryAgentBench frozen-bank contract.",
+  "claims_not_made": [
+    "general long-context improvement across benchmarks",
+    "multi-turn dialogue or LoCoMo-QA improvement",
+    "general agent-memory improvement",
+    "universal memory-bank effectiveness",
+    "uniform EventQA context improvement",
+    "superiority over summaries RAG or matched-budget text before completion",
+    "cost efficiency from combined paired cost records"
+  ],
+  "supporting_evidence": {
+    "p7_em_mean": 0.197,
+    "p7_em_std": 0.020,
+    "bank_off_em": 0.008,
+    "p7_recall_mean": 0.254,
+    "p7_recall_std": 0.028,
+    "bank_off_recall": 0.178,
+    "p7_minus_p6_em": 0.0280,
+    "p7_minus_p6_recall": -0.0044,
+    "p7_minus_p6_format_failures": -44.4
+  },
+  "benchmark_roles": {
+    "EventQA-65536": "main_positive_benchmark",
+    "LoCoMo-QA": "diagnostic_limitation_appendix"
+  },
+  "why_locomo_is_not_positive": "P7 has zero exact match on all 304 paired questions despite active retrieval; the open-ended latent-only query contract requires exact conversational fact decoding unlike EventQA closed-set event selection.",
+  "locomo_paper_placement": "Limitations and appendix only; do not claim multi-turn improvement.",
+  "remaining_eventqa_evidence": [
+    "method-separable Bank-off and P7 cost",
+    "text-summary baseline",
+    "BM25 top-2 RAG baseline",
+    "16-token matched-budget baseline",
+    "P7 no-query-retrieval ablation",
+    "unified final tables"
+  ],
+  "next_action": "Run a method-separable EventQA cost smoke on context 0 questions 0-9 for Disabled and frozen P7 after logging and schema preparation."
+}

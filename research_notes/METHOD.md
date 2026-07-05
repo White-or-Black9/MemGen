@@ -2,14 +2,49 @@
 
 ## Working Title
 
-Session-Level Retrieval-Augmented Recurrent Latent Memory Bank for MemGen Inference
+Session-Local Latent Memory Banks for Long-Context Reasoning in MemGen
 
-## Research Question
+## Paper-Facing Method Scope
+
+For the current paper, P7 is presented as an inference-time, session-local
+latent memory bank for MemGen. The bank stores, retrieves, updates, replaces,
+and reuses Weaver-space latent memories within one session. Trigger, Weaver,
+and Reasoner remain frozen; no component retraining is performed.
+
+The paper evaluates this method primarily on EventQA-65536 long-context event
+reasoning under the local MemoryAgentBench `frozen_context_bank` contract. The
+method is not presented as a solved multi-turn dialogue-memory system, and the
+current evidence does not support LoCoMo-QA or general conversational-memory
+improvement.
+
+The paper-facing P7 definition remains unchanged:
+
+- `retrieve_threshold=0.05`
+- `update_threshold=0.10`
+- `max_slots=16`
+- `top_k=2`
+- `decay_alpha=0.05`
+- session-local Weaver-space latent bank
+- no Trigger, Weaver, or Reasoner retraining
+- no cross-sample memory sharing
+- query-time writes blocked under frozen-bank evaluation
+
+The authoritative paper claim and evidence boundary are maintained in
+`research_notes/PAPER_SCOPE.md`.
+
+## Current Paper Research Question
+
+Can a frozen inference-time session-local latent memory bank improve MemGen's
+long-context event reasoning on EventQA-65536 without retraining Trigger,
+Weaver, or Reasoner?
+
+## Historical Broader Research Question
 
 Can a session-local latent memory bank help MemGen explicitly preserve,
 retrieve, and update early useful latent memories for later reuse in multi-turn,
 long-trajectory, or context-truncated inference, without retraining Weaver or
-Trigger?
+Trigger? This remains a broader future research direction, not the supported
+claim of the current paper.
 
 ## Scope
 
@@ -18,6 +53,37 @@ Trigger?
 - One bank instance per session.
 - No cross-sample sharing until explicitly approved.
 - Memory-bank experiments default to `batch_size=1`.
+
+## Current Paper-Method Freeze
+
+For the current paper-preparation phase, the main paper-facing method is frozen
+to the P7 session-local latent memory bank on the EventQA / MAB-6B track.
+
+- Fixed P7 parameters:
+  `retrieve_threshold=0.05`, `update_threshold=0.10`, `max_slots=16`,
+  `top_k=2`, `decay_alpha=0.05`.
+- Current paper-method boundary:
+  session-local latent memory bank; Weaver-space bank path / MAB-6B-style
+  mechanism; write / retrieve / update / replacement / reset; threshold-based
+  write and retrieval; `top_k=2` retrieval; frozen-context and query-time
+  retrieval protocol where applicable; no Trigger / Weaver retraining; no
+  cross-sample memory sharing.
+- Explicit exclusions from the current main method:
+  utility gate, tuple suppression, top-1 fallback, score-margin gating,
+  learned utility prediction, and any non-oracle harmful-memory detector.
+- Harmful tuple attribution on EventQA context 4 is analysis-only. It is a
+  known limitation signal and future-work motivation, not an implemented method
+  improvement.
+- Evidence boundary:
+  current support comes from the P7 non-strict five-repeat EventQA checkpoint
+  summarized in `outputs/mab/eventqa_five_repeat_stability_summary.md` and
+  `outputs/mab/eventqa_current_stage_consolidated_summary.md`. This is the best
+  tested current candidate, not final proof of general long-context
+  improvement.
+
+The historical Version A / Version B implementation notes below remain useful
+for mechanism lineage and code interpretation, but they should not be confused
+with the frozen current paper-facing P7 method boundary.
 
 ## Current Mechanism Definition
 
@@ -486,7 +552,10 @@ is not merged into current runtime configuration in Phase 4.
 
 ## Current Validation Status
 
-Validated on 2026-06-16 after Phase R2 and R2-fix:
+Validated on 2026-06-16 after Phase R2 and R2-fix. This is a historical
+validation snapshot; its statements about Version B and target-task results
+are superseded by the later MAB-6B/EventQA records and
+`research_notes/benchmarks/eventqa_harmful_memory_attribution.md`:
 
 - The current suite passes 76/76 unit, integration, and controlled-harness tests.
 - `latent_memory_bank.enabled=false` exactly reproduces the accepted Phase 3
@@ -503,8 +572,8 @@ Validated on 2026-06-16 after Phase R2 and R2-fix:
   lower slot index.
 - Current `write_back(...)` creates replacement / inserted slots using
   `retrieval_result.retrieval_step`.
-- Version B has not started.
-- No target-task main result exists yet.
+- At this 2026-06-16 snapshot, Version B had not started and no target-task
+  main result existed yet.
 
 ## Open Questions
 

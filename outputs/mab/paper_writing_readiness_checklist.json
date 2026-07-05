@@ -1,0 +1,43 @@
+{
+  "date": "2026-07-05",
+  "ready_for_paper": {
+    "working_title_and_scoped_claim": true,
+    "p7_method_definition": true,
+    "eventqa_protocol": true,
+    "eventqa_main_effectiveness": true,
+    "p7_p6_comparison": true,
+    "bank_off_effectiveness": true,
+    "context_wise_analysis": true,
+    "helpful_harmful_analysis": true,
+    "format_failure_analysis": true,
+    "context_4_limitation": true,
+    "locomo_limitation_interpretation": true
+  },
+  "not_ready_yet": {
+    "final_eventqa_main_table": false,
+    "method_separable_cost_row": false,
+    "text_summary_baseline": false,
+    "bm25_rag_baseline": false,
+    "matched_budget_baseline": false,
+    "no_query_retrieval_ablation": false,
+    "final_unified_manifest_and_table": false,
+    "cost_effectiveness_figure": false
+  },
+  "draftable_now": [
+    "Introduction with scoped claim",
+    "Method",
+    "Benchmark and protocol",
+    "existing EventQA result subsection",
+    "failure analysis",
+    "Limitations",
+    "appendix protocol and diagnostics"
+  ],
+  "must_wait": [
+    "final comparative Results prose",
+    "explicit-text baseline conclusions",
+    "efficiency and cost claims",
+    "final Abstract quantitative emphasis",
+    "final Conclusion wording"
+  ],
+  "next_gate": "Method-separable EventQA context-0 q0-9 Disabled/P7 cost smoke, followed by BM25 top-2 RAG smoke."
+}

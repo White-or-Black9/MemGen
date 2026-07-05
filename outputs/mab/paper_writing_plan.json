@@ -1,0 +1,84 @@
+{
+  "date": "2026-07-05",
+  "working_title": "Session-Local Latent Memory Banks for Long-Context Reasoning in MemGen",
+  "abstract_thesis": "A bounded session-local Weaver-space latent memory bank improves EventQA long-context event reasoning in frozen MemGen without retraining Trigger, Weaver, or Reasoner, while context-specific and conversational exact-fact limitations remain.",
+  "sections": [
+    {
+      "section": "Introduction",
+      "claims": ["long-context inference needs reusable memory", "MemGen lacks an explicit session-local reuse bank", "P7 improves scoped EventQA event reasoning without retraining"],
+      "status": "draftable_now"
+    },
+    {
+      "section": "Method",
+      "claims": ["frozen components", "Weaver-space session-local bank", "write retrieve update replacement reset", "read-only frozen-bank QA"],
+      "status": "draftable_now"
+    },
+    {
+      "section": "Benchmark and Protocol",
+      "claims": ["EventQA-65536 main benchmark", "local official prompt parser scorer", "Bank-off P6 P7 comparison", "LoCoMo diagnostic only"],
+      "status": "draftable_now"
+    },
+    {
+      "section": "Main Results",
+      "claims": ["P7 versus Bank-off", "P7 versus P6", "format failure reduction", "context-wise heterogeneity"],
+      "status": "partial_waiting_for_final_baseline_table"
+    },
+    {
+      "section": "Analysis",
+      "claims": ["helpful harmful transitions", "retrieval versus correctness", "format sensitivity", "context-4 failure", "cost caveats"],
+      "status": "partial_cost_and_explicit_text_pending"
+    },
+    {
+      "section": "Limitations",
+      "claims": ["not general long-context proof", "not multi-turn improvement", "LoCoMo exact-fact failure", "context-4 limitation"],
+      "status": "draftable_now"
+    },
+    {
+      "section": "Appendix",
+      "claims": ["prompts and scorer", "repeat and context tables", "historical ablations", "LoCoMo audits", "reproducibility"],
+      "status": "draftable_partial"
+    }
+  ],
+  "main_contributions": [
+    "inference-time session-local latent bank",
+    "frozen-context read-only query protocol",
+    "five-repeat EventQA effectiveness",
+    "context and harmful-memory failure analysis",
+    "LoCoMo diagnostic boundary"
+  ],
+  "main_table_rows": ["Disabled", "Text-summary", "BM25 top-2 RAG", "16-token matched-budget RAG", "P6", "Frozen P7"],
+  "figures": [
+    "method and bank lifecycle",
+    "main EM recall repeat dispersion",
+    "per-context comparison",
+    "transition and failure taxonomy",
+    "optional cost-effectiveness after valid costs"
+  ],
+  "remaining_experiments": [
+    "method-separable EventQA cost",
+    "text-summary baseline",
+    "BM25 top-2 RAG",
+    "16-token matched-budget RAG",
+    "P7 no-query-retrieval"
+  ],
+  "experiment_order": [
+    "freeze schemas and aggregate existing rows",
+    "cost smoke context0 q0-9",
+    "full cost pass",
+    "BM25 RAG smoke and run",
+    "matched-budget RAG",
+    "text-summary baseline",
+    "no-query-retrieval",
+    "final tables figures and claim audit"
+  ],
+  "stop_conditions": [
+    "unlabeled protocol mismatch",
+    "P7 or frozen component change",
+    "query write or bank mutation",
+    "silent context truncation",
+    "combined or uncontrolled cost measurement",
+    "missing retrieval and prompt provenance",
+    "incomplete or schema-incompatible baseline",
+    "exploratory evidence promoted as repeated main evidence"
+  ]
+}

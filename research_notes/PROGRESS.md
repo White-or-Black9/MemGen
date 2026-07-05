@@ -1,5 +1,80 @@
 # 项目进展
 
+## Current Paper-Writing Status (2026-07-05)
+
+- Paper scope is fixed to **Session-Local Latent Memory Banks for Long-Context
+  Reasoning in MemGen**.
+- Final scoped claim: **We add a session-local latent memory bank to MemGen and
+  show that it improves long-context event reasoning without retraining the
+  Trigger, Weaver, or Reasoner.**
+- Operational evidence scope: frozen P7 on EventQA-65536 under the local
+  MemoryAgentBench `frozen_context_bank` contract.
+- EventQA is the main positive benchmark.
+- LoCoMo-QA is diagnostic / limitation evidence only; it does not support a
+  claim of multi-turn dialogue improvement.
+- P7/P6 five-repeat effectiveness, prompt ablations, context breakdowns,
+  format analysis, and context-4 diagnostics do not need rerunning by default.
+- Missing EventQA paper-facing evidence:
+  - method-separable Bank-off/P7 latency and peak GPU memory;
+  - text-summary memory baseline;
+  - BM25 top-2 retrieved-text/RAG baseline;
+  - 16-token matched-budget explicit-text baseline;
+  - P7 no-query-retrieval ablation;
+  - unified final effectiveness, cost, and appendix tables.
+- When experiments resume, the next run is a method-separable EventQA cost
+  smoke on context 0, questions 0-9, for standalone Disabled and frozen P7.
+- `research_notes/PAPER_SCOPE.md` is the authoritative current claim boundary;
+  older broad targets remain historical or future research goals.
+
+## Current Main-Method Freeze (2026-07-04)
+
+- Current paper-facing main method is now frozen to P7 session-local latent
+  memory bank on the EventQA / MAB-6B track.
+- Fixed P7 parameters:
+  `retrieve_threshold=0.05`, `update_threshold=0.10`, `max_slots=16`,
+  `top_k=2`, `decay_alpha=0.05`.
+- This freeze is for the current paper-preparation phase only. It does not
+  claim that P7 has already proved general long-context improvement.
+- Harmful attribution remains mechanism analysis and a known limitation study.
+  It is not an implemented method improvement.
+- Utility gate, tuple suppression, top-1 fallback, score-margin gate, and
+  other non-oracle harmful-memory policies are not implemented and are no
+  longer current-phase main-method targets.
+- Next formal comparisons, cost analysis, and writing preparation should treat
+  P7 as the main method anchor.
+- Historical broad target: **Latent Memory Bank Improves Long-Context
+  Reasoning**. The current paper claim is narrower and is governed by
+  `research_notes/PAPER_SCOPE.md`.
+
+## Latest Harmful Memory Attribution Status (2026-07-04)
+
+- Added the frozen-bank oracle diagnostic runner
+  `scripts/eval/eventqa_harmful_memory_attribution.py` and focused coverage in
+  `tests/test_eventqa_harmful_memory_attribution.py`; the focused tests passed
+  before the completed diagnostic runs.
+- Completed the context-4 q0-9 smoke at
+  `outputs/mab/eventqa_harmful_memory_attribution_smoke/20260704T001049Z-p7-context4-q0-9/`.
+  Full-bank replay matched `10/10` questions.
+- Completed the same-bank context-4 q0-99 expansion at
+  `outputs/mab/eventqa_harmful_memory_attribution_context4_full/20260704T001824Z-p7-context4-q0-99/`.
+  Full-bank replay matched `100/100`, including official EM, recall, retrieved
+  original slot IDs, raw prediction hashes, parsed predictions, and format
+  flags.
+- In this frozen bank, full retrieval selected ordered tuple `[1,0]` for all
+  100 questions. `tuple-only:1,0` reproduced the full-bank aggregate collapse,
+  while each slot alone was substantially cleaner.
+- `drop-tuple:1,0` changed EM from `0/100` to `15/100` and format failures from
+  `98/100` to `2/100`. This supports a tuple-level harmful interaction for one
+  frozen P7 context-4 bank; it is not a general performance conclusion.
+- The detailed evidence boundary and condition table are recorded in
+  `research_notes/benchmarks/eventqa_harmful_memory_attribution.md`.
+- Follow-up attribution across repeats is paused. No utility gate or other
+  non-oracle runtime policy has been implemented, and none of these policies is
+  part of the frozen current main method.
+- Current attribution evidence is used to guide later method correction; it
+  does not expand the EventQA-scoped paper claim or establish a general
+  long-context result.
+
 ## Latest EventQA Frozen-Context Status (2026-06-30)
 
 - The EventQA `frozen_context_bank` A/B/C sweep is now complete across all

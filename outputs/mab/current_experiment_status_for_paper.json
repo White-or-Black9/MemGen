@@ -1,0 +1,62 @@
+{
+  "date": "2026-07-05",
+  "paper_state": "scoped_eventqa_paper_preparation",
+  "eventqa": {
+    "role": "main_positive_benchmark",
+    "status": "main_effectiveness_ready_baselines_and_cost_incomplete",
+    "p7": {"em_mean": 0.197, "em_std": 0.020, "recall_mean": 0.254, "recall_std": 0.028, "format_failures_mean": 121.4, "format_failures_std": 8.8},
+    "bank_off": {"em": 0.008, "recall": 0.178},
+    "context_4": {"p7_em_mean": 0.006, "p7_recall_mean": 0.228, "p7_format_failures_mean": 93.8}
+  },
+  "locomo": {
+    "role": "diagnostic_limitation",
+    "status": "protocol_correct_no_positive_qa_evidence",
+    "disabled_em": 0.0,
+    "p7_em": 0.0,
+    "disabled_f1": 0.01834,
+    "p7_f1": 0.02084,
+    "paired_both_wrong": 304,
+    "p7_no_context_denial": 138,
+    "p7_refusal": 153,
+    "query_retrieval_active_every_row": true,
+    "retrieved_latent_count": 16,
+    "query_write_count": 0
+  },
+  "reliable_evidence": [
+    "frozen P7 method definition",
+    "EventQA P7 P6 five-repeat effectiveness",
+    "Bank-off effectiveness",
+    "context and transition metrics",
+    "prompt and format ablations",
+    "context-4 limitation",
+    "LoCoMo row-level protocol invariants and deterministic scores"
+  ],
+  "missing_evidence": [
+    "method-separable EventQA cost",
+    "text-summary baseline",
+    "BM25 RAG baseline",
+    "matched-budget baseline",
+    "P7 no-query-retrieval",
+    "final unified tables and manifest"
+  ],
+  "unreliable_or_non_paper_facing": [
+    "combined EventQA paired latency and peak memory",
+    "LoCoMo construction Trigger Weaver latency and memory diagnostics",
+    "multi-factor historical rows as causal P7 ablations",
+    "single-bank oracle attribution as a general mechanism result"
+  ],
+  "frozen_decisions": [
+    "EventQA-scoped title and claim",
+    "EventQA main and LoCoMo limitation roles",
+    "frozen P7 parameters and no retraining",
+    "reuse P7 P6 effectiveness repeats",
+    "unchanged EventQA prompt parser scorer"
+  ],
+  "open_decisions": [
+    "summary generator and budget",
+    "BM25 and capacity-safe truncation",
+    "matched-budget row definitions",
+    "no-query-retrieval interface",
+    "main effectiveness versus cost table layout"
+  ]
+}

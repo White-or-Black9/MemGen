@@ -1,5 +1,85 @@
 # Experiment Log
 
+## Current Paper-Facing Experiment Summary (2026-07-05)
+
+This section is the current paper-facing result index. Detailed historical
+experiment records below are preserved and should not be interpreted as
+expanding the current claim beyond `research_notes/PAPER_SCOPE.md`.
+
+### EventQA-65536: Main Positive Evidence
+
+- Protocol: local MemoryAgentBench EventQA-65536 `frozen_context_bank`, five
+  contexts, 500 questions per repeat, unchanged non-strict prompt/parser/scorer.
+- Frozen P7 Bank-on EM: `0.197+-0.020`.
+- Bank-off EM: `0.008`.
+- Frozen P7 Bank-on recall: `0.254+-0.028`.
+- Bank-off recall: `0.178`.
+- P7 versus P6:
+  - EM: `+0.0280`;
+  - recall: `-0.0044`;
+  - format failures: `-44.4` per 500-question run.
+- Context 4 limitation:
+  - P7 EM mean: `0.006`;
+  - recall mean: `0.228`;
+  - format failures: `93.8/100`.
+- Interpretation: P7 supports the scoped claim of improved long-context event
+  reasoning on EventQA, but gains are not uniform across contexts.
+
+### LoCoMo-QA: Diagnostic / Limitation Evidence
+
+- Scope: session-level paired pilot, two conversations, 304 QA rows per mode.
+- Disabled EM: `0`.
+- P7 EM: `0`.
+- Disabled token F1: `0.01834`.
+- P7 token F1: `0.02084`.
+- All `304/304` paired rows are exact-match wrong.
+- P7 no-context denial: `138/304`.
+- P7 refusal: `153/304`.
+- Query retrieval is active on every P7 row.
+- `retrieved_latent_count=16` on every P7 row.
+- `query_write_count=0` on every P7 row.
+- Interpretation: the protocol is mechanically correct, but there is no
+  positive multi-turn QA improvement. LoCoMo is limitation evidence about
+  latent-only exact conversational fact recovery.
+
+### Remaining Paper-Facing Runs
+
+- method-separable EventQA Bank-off/P7 cost;
+- text-summary memory baseline;
+- BM25 top-2 retrieved-text/RAG baseline;
+- 16-token matched-budget baseline;
+- P7 no-query-retrieval ablation;
+- final unified table package.
+
+## Current Paper-Method Boundary (2026-07-04)
+
+- The current paper-facing main method is frozen to P7 session-local latent
+  memory bank on the EventQA / MAB-6B track.
+- Fixed P7 parameters:
+  `retrieve_threshold=0.05`, `update_threshold=0.10`, `max_slots=16`,
+  `top_k=2`, `decay_alpha=0.05`.
+- Treat future formal comparisons and paper-preparation summaries as centered
+  on P7.
+- Utility gate, tuple suppression, top-1 fallback, score-margin gate, learned
+  utility prediction, and non-oracle harmful-memory detection are not current
+  method implementations.
+- EventQA harmful attribution artifacts are mechanism-analysis evidence only.
+  They document a limitation of P7 and a future-work direction; they do not
+  constitute a method improvement experiment.
+- Current evidence supports P7 as the best tested candidate on this track, not
+  as final proof of general long-context improvement.
+
+## Latest EventQA Attribution Evidence Boundary (2026-07-04)
+
+- `EXP-20260704-001` and `EXP-20260704-002` are oracle diagnostic
+  counterfactuals on one frozen P7 context-4 bank.
+- They support feasibility of ordered-tuple harmful-memory attribution, not a
+  deployable gate and not general long-context performance improvement.
+- Official scorer/parser behavior is unchanged. The original frozen bank and
+  canonical outputs are read-only inputs.
+- Follow-up attribution expansion is paused. These runs are not part of the
+  frozen current main method implementation.
+
 Record every experiment, including failed, aborted, and exploratory runs. Never
 overwrite prior records; append a new entry.
 
@@ -75,7 +155,8 @@ Historical / exploratory records:
 - Phase R2 / R2-fix define the current mechanism but did not run formal
   target-task experiments.
 
-Current mechanism to use for future experiments:
+Historical pre-MAB mechanism snapshot (superseded by later MAB-6B/EventQA
+experiments):
 
 - Reasoner-only retrieved-memory injection.
 - Retrieved memory does not enter Weaver.
@@ -84,12 +165,12 @@ Current mechanism to use for future experiments:
 - Enabled memory requires `batch_size=1`.
 - Retrieval uses last-retrieved decay with no fallback top-1.
 
-Current next experiment gate:
+Historical next experiment gate:
 
 - R4 infrastructure validation is complete with caveats. Before any larger
   TriviaQA run, decide whether to keep default `threshold=0.7` and search for
   naturally matching samples, or design a threshold calibration / ablation plan.
-- Version B remains deferred.
+- Version B was deferred at this snapshot.
 
 ## Experiment Index
 
@@ -165,6 +246,67 @@ Current next experiment gate:
 | EXP-20260630-004 | 2026-06-30 | EventQA end-to-end top_k=4 ablation | Does Config B remain competitive when the mechanism uses `top_k=4` during both bank construction and frozen-bank query retrieval? | `completed_negative_result` | Bank-on EM fell to `63/500`, recall to `0.164`, format failures rose to `208`, Chinese outputs rose to `156`, and realized retrieval stayed at 3 slots / 24 latents rather than 4 slots / 32 latents |
 
 ## Recorded Experiments
+
+### EXP-20260704-001: EventQA Harmful Attribution Smoke q0-9
+
+- Status: completed; follow-up represented by `EXP-20260704-002`
+- Artifact:
+  `outputs/mab/eventqa_harmful_memory_attribution_smoke/20260704T001049Z-p7-context4-q0-9/`
+- Source run:
+  `outputs/mab/eventqa_p7_rt005_ut010_cap16_topk2/20260702T084825Z-eventqa-65536-version-b-weaver-space-bank-n5`
+- Setup: frozen `context_4.pt`, context 4, questions `0..9`, official
+  scorer/parser unchanged, pristine bank clone per question and condition.
+- Conditions: `full`, `drop-slot:0`, `drop-slot:1`, `drop-tuple:1,0`,
+  `slot-only:0`, `slot-only:1`, `tuple-only:1,0`.
+- Replay: `10/10` full-bank questions matched.
+- Key metrics:
+  - full and tuple-only `[1,0]`: EM `0/10`, recall `0.20`, no-gold `8/10`,
+    format failures `10/10`;
+  - drop-tuple `[1,0]`: EM `3/10`, recall `0.30`, no-gold `7/10`, format
+    failures `1/10`;
+  - slot-only 0: EM `3/10`, format failures `3/10`;
+  - slot-only 1: EM `5/10`, format failures `0/10`.
+- Observation: initial evidence supported a tuple-level interaction rather than
+  either slot being independently sufficient for the collapse.
+- Caveat: single bank and `n=10`; exploratory only.
+- Evidence: `replay_validation.json` and `attribution_summary.json` in the
+  artifact directory.
+
+### EXP-20260704-002: EventQA Harmful Attribution Context-4 q0-99
+
+- Status: completed; further attribution expansion paused
+- Artifact:
+  `outputs/mab/eventqa_harmful_memory_attribution_context4_full/20260704T001824Z-p7-context4-q0-99/`
+- Setup: same source run and frozen context-4 bank as
+  `EXP-20260704-001`, questions `0..99`, same seven conditions.
+- Replay: `100/100` full-bank questions matched on official EM, recall,
+  retrieved original slot IDs, raw prediction hash, parsed prediction, and
+  format flags.
+- Key metrics:
+  - full: EM `0/100`, recall `0.19`, no-gold `81/100`, format failures
+    `98/100`;
+  - drop-slot 0: EM `1/100`, recall `0.34`, no-gold `66/100`, format failures
+    `89/100`;
+  - drop-slot 1: EM `3/100`, recall `0.14`, no-gold `86/100`, format failures
+    `70/100`;
+  - drop-tuple `[1,0]`: EM `15/100`, recall `0.15`, no-gold `85/100`, format
+    failures `2/100`;
+  - slot-only 0: EM `30/100`, recall `0.31`, no-gold `69/100`, format
+    failures `35/100`;
+  - slot-only 1: EM `26/100`, recall `0.30`, no-gold `70/100`, format
+    failures `15/100`;
+  - tuple-only `[1,0]`: identical aggregate to full.
+- Observation: full retrieval selected `[1,0]` on all 100 questions;
+  tuple-only `[1,0]` reproduced the collapse; dropping that ordered tuple
+  yielded 15 rescues and 96 format improvements, with no EM regressions.
+- Interpretation: clear feasibility evidence for an ordered tuple-level
+  harmful interaction in this bank. The remaining no-gold and recall results
+  show that tuple removal is not a complete answer-quality solution.
+- Caveats: one frozen bank, context 4 only, oracle diagnostic, no cross-repeat
+  evidence, no non-oracle utility policy, and no final paper-level claim.
+- Evidence: `replay_validation.json`, `attribution_summary.json`,
+  `attribution_per_context.json`, and `attribution_per_question.jsonl` in the
+  artifact directory.
 
 ### EXP-20260611-001: Official GSM8K SFT Smoke Baseline
 

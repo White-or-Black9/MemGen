@@ -1,0 +1,131 @@
+{
+  "working_title": "Session-Local Latent Memory Banks for Long-Context Reasoning in MemGen",
+  "final_claim": "We add a session-local latent memory bank to MemGen and show that it improves long-context event reasoning on EventQA-65536 under the local MemoryAgentBench frozen-bank contract without retraining the Trigger, Weaver, or Reasoner.",
+  "claim_boundary": {
+    "main_positive_benchmark": "EventQA-65536",
+    "diagnostic_benchmark": "LoCoMo-QA",
+    "not_claimed": [
+      "general long-context improvement across benchmarks",
+      "multi-turn dialogue improvement",
+      "LoCoMo-QA improvement",
+      "general agent-memory effectiveness",
+      "superiority to text-summary or RAG baselines before those rows exist"
+    ]
+  },
+  "paper_structure": [
+    "Abstract",
+    "Introduction",
+    "Related Work",
+    "Method",
+    "Experimental Setup",
+    "Main Results",
+    "Analysis",
+    "Limitations",
+    "Conclusion",
+    "Appendix"
+  ],
+  "sections_ready_now": [
+    "Frozen P7 method",
+    "Core EventQA benchmark and frozen-bank protocol",
+    "P7 versus Bank-off effectiveness",
+    "P7 versus P6 comparison",
+    "Context-wise behavior",
+    "Format-failure analysis",
+    "Context-4 limitation",
+    "LoCoMo limitation interpretation"
+  ],
+  "sections_waiting": [
+    {
+      "section": "Related Work",
+      "reason": "verified literature citations are not part of the current evidence package"
+    },
+    {
+      "section": "Final main-comparison narrative",
+      "reason": "text-summary, BM25, matched-budget, and no-query-retrieval rows are missing"
+    },
+    {
+      "section": "Cost and efficiency claims",
+      "reason": "method-separable latency and peak-memory measurements are missing"
+    },
+    {
+      "section": "Final abstract and conclusion emphasis",
+      "reason": "must reflect the completed baseline and cost results"
+    }
+  ],
+  "tables": [
+    {
+      "name": "Main EventQA effectiveness",
+      "readiness": "partial",
+      "missing": ["text-summary", "BM25 top-2", "16-token matched-budget"]
+    },
+    {
+      "name": "P7 versus P6",
+      "readiness": "ready_core_metrics",
+      "missing": []
+    },
+    {
+      "name": "Context-wise breakdown",
+      "readiness": "evidence_ready_packaging_pending",
+      "missing": []
+    },
+    {
+      "name": "Format-failure analysis",
+      "readiness": "evidence_ready_packaging_pending",
+      "missing": []
+    },
+    {
+      "name": "Cost latency and memory",
+      "readiness": "not_ready",
+      "missing": ["method-separable Bank-off and P7", "explicit-baseline costs"]
+    },
+    {
+      "name": "Explicit-memory and budget controls",
+      "readiness": "not_ready",
+      "missing": ["text-summary", "BM25 top-2", "16-token matched-budget", "P7 no-query-retrieval"]
+    },
+    {
+      "name": "LoCoMo diagnostic appendix",
+      "readiness": "ready_as_negative_diagnostic",
+      "missing": []
+    }
+  ],
+  "figures": [
+    {
+      "name": "Method architecture",
+      "readiness": "concept_ready"
+    },
+    {
+      "name": "Frozen-bank protocol",
+      "readiness": "concept_ready"
+    },
+    {
+      "name": "EventQA main result",
+      "readiness": "ready_for_bankoff_p6_p7_only"
+    },
+    {
+      "name": "Context-wise variance and failure",
+      "readiness": "data_ready_packaging_pending"
+    },
+    {
+      "name": "LoCoMo limitation",
+      "readiness": "optional_appendix"
+    }
+  ],
+  "next_recommended_experiment": {
+    "name": "Method-separable EventQA cost smoke",
+    "scope": "context 0, questions 0-9, separate Bank-off and P7 processes",
+    "required_measurements": [
+      "construction latency",
+      "query latency",
+      "end-to-end latency",
+      "peak GPU memory"
+    ],
+    "paper_status": "validation only, not a final cost row"
+  },
+  "constraints_observed": {
+    "inference_run": false,
+    "gpu_used": false,
+    "source_code_modified": false,
+    "existing_experiment_artifacts_modified": false
+  }
+}

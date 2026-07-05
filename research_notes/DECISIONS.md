@@ -80,6 +80,9 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0073 | 2026-06-29 | accepted | Keep `--context-index` as the EventQA runner scheduling parameter for isolated per-context evaluation |
 | DEC-0074 | 2026-06-30 | accepted | Keep Config A as the best EventQA setting after the all-15-run A/B/C sweep |
 | DEC-0075 | 2026-06-30 | accepted | Preserve end-to-end Config B `top_k=2` and diagnose context 4 before further top-k scaling |
+| DEC-0076 | 2026-07-04 | accepted | Summarize harmful attribution and pause further attribution expansion |
+| DEC-0077 | 2026-07-04 | accepted | Freeze P7 as the current main paper-method version |
+| DEC-0078 | 2026-07-05 | accepted | Scope the current paper to EventQA-65536 long-context event reasoning |
 
 ## Decision Template
 
@@ -98,6 +101,158 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Superseded by:
 
 ## Standing Decisions
+
+### DEC-0078: Scope the Current Paper to EventQA Long-Context Event Reasoning
+
+- Date: 2026-07-05
+- Status: accepted
+- Context:
+  - Frozen P7 has reusable five-repeat positive evidence on EventQA-65536.
+  - The same P7 mechanism is protocol-correct on LoCoMo-QA but does not produce
+    positive exact conversational QA evidence.
+  - EventQA queries expose an event prefix and six candidate answers, whereas
+    LoCoMo queries expose only an open-ended question and require exact
+    latent-to-fact decoding.
+- Decision:
+  - Use the working title **Session-Local Latent Memory Banks for Long-Context
+    Reasoning in MemGen**.
+  - Use the main paper claim: **We add a session-local latent memory bank to
+    MemGen and show that it improves long-context event reasoning without
+    retraining the Trigger, Weaver, or Reasoner.**
+  - Restrict the operational evidence scope to frozen P7 on EventQA-65536
+    under the local MemoryAgentBench frozen-bank contract.
+  - Treat EventQA as the main positive benchmark.
+  - Treat LoCoMo as diagnostic / limitation evidence only.
+  - Make no current claim of multi-turn dialogue improvement.
+  - Complete EventQA missing baselines and final tables before full Results
+    drafting.
+- Rationale:
+  - The EventQA/LoCoMo result gap is explained primarily by task contract and
+    evidence form, not by a different P7 mechanism.
+  - Narrowing the claim aligns the manuscript with positive durable evidence
+    while preserving LoCoMo as an informative limitation.
+- Consequences:
+  - `research_notes/PAPER_SCOPE.md` is the authoritative paper-scope entry.
+  - Historical broad multi-turn or general-memory targets remain future goals,
+    not supported claims of the current paper.
+  - P7/P6 five-repeat effectiveness, prompt ablations, context analysis, format
+    analysis, and context-4 diagnostics are reused without rerunning by default.
+  - The immediate experimental frontier is method-separable cost, text-summary,
+    BM25/RAG, matched-budget, and no-query-retrieval evidence on EventQA.
+- Related evidence:
+  - `outputs/mab/eventqa_five_repeat_stability_summary.md`
+  - `outputs/mab/eventqa_paper_completion_plan.md`
+  - `outputs/mab/locomo_vs_eventqa_experiment_comparison.md`
+  - `outputs/mab/locomo_vs_eventqa_result_gap_analysis.md`
+- Supersedes:
+  - Any current-paper interpretation of the earlier broad multi-turn or
+    general long-context target. It does not erase those historical research
+    goals.
+- Superseded by: none
+
+### DEC-0077: Freeze P7 as the Current Main Paper-Method Version
+
+- Date: 2026-07-04
+- Status: accepted
+- Context:
+  - The current paper-facing EventQA checkpoint is the P7 non-strict
+    five-repeat result summarized in
+    `outputs/mab/eventqa_five_repeat_stability_summary.md` and
+    `outputs/mab/eventqa_current_stage_consolidated_summary.md`.
+  - P7 is the best tested EventQA candidate so far on the current paper track:
+    EM `0.197+-0.020`, recall `0.254+-0.028`, format failures `121.4+-8.8`.
+  - Harmful attribution on one frozen context-4 bank supports mechanism
+    analysis, but no non-oracle correction policy has been implemented.
+- Decision:
+  - Freeze P7 as the current main paper-method version for the present phase.
+  - The fixed P7 runtime parameters are `retrieve_threshold=0.05`,
+    `update_threshold=0.10`, `max_slots=16`, `top_k=2`, and
+    `decay_alpha=0.05`.
+  - Treat the current paper method boundary as:
+    session-local latent memory bank, Weaver-space bank path /
+    MAB-6B-style mechanism, write / retrieve / update / replacement / reset,
+    threshold-based write and retrieval, `top_k=2` retrieval, frozen-context /
+    query-time retrieval protocol where applicable, no Trigger / Weaver
+    retraining, and no cross-sample memory sharing.
+  - Explicitly exclude utility gate, tuple suppression, top-1 fallback,
+    score-margin gating, learned utility prediction, and any non-oracle
+    harmful-memory detector from the current main method.
+  - Treat EventQA harmful tuple attribution only as mechanism analysis, a known
+    limitation of P7, and motivation for future work; it is not an implemented
+    method improvement.
+- Rationale:
+  - The project needs a stable paper-facing method anchor for baseline
+    comparison, cost analysis, and writing preparation.
+  - P7 currently has the strongest tested EventQA trade-off among accepted
+    settings, while harmful attribution remains single-bank oracle evidence
+    rather than a deployable runtime policy.
+  - Freezing the main method avoids scope drift into partially specified
+    mechanism fixes before the paper-facing evidence base is complete.
+- Consequences:
+  - Formal follow-up comparisons and paper-preparation work should use P7 as
+    the main method anchor.
+  - Harmful attribution remains analysis only; do not present it as a method
+    implementation.
+  - Do not implement utility gate, tuple suppression, top-1 fallback, or other
+    non-oracle harmful-memory policies in the current phase.
+  - Historical broad target: **Latent Memory Bank Improves Long-Context
+    Reasoning**. DEC-0078 now governs the narrower EventQA-scoped paper claim.
+- Verification required:
+  - Keep the EventQA note and summaries aligned with the frozen P7 parameter
+    set and the current evidence boundary.
+- Related experiments:
+  - `EXP-20260702-P7-five-repeat` artifact family under
+    `outputs/mab/eventqa_p7*_rt005_ut010_cap16_topk2/`
+  - `EXP-20260704-001`
+  - `EXP-20260704-002`
+- Supersedes:
+  - Open-ended method-target drift toward utility gate / tuple suppression /
+    top-1 fallback as current-phase implementation goals.
+- Superseded by: DEC-0078 for paper-claim scope only; the P7 method freeze
+  remains active.
+
+### DEC-0076: Summarize Harmful Attribution and Pause Further Expansion
+
+- Date: 2026-07-04
+- Status: accepted
+- Context:
+  - The q0-9 smoke and q0-99 context-4 expansion are complete on the same P7
+    frozen bank.
+  - Full-bank replay matched all `100/100` expanded questions.
+  - Full and tuple-only `[1,0]` both produced EM `0/100` and format failure
+    `98/100`; drop-tuple `[1,0]` produced EM `15/100` and format failure
+    `2/100`; each slot alone was substantially cleaner than the tuple.
+  - Evidence is recorded in
+    `outputs/mab/eventqa_harmful_memory_attribution_context4_full/20260704T001824Z-p7-context4-q0-99/`.
+- Decision:
+  - Summarize the completed attribution evidence and pause further attribution
+    expansion for now.
+  - Do not implement a utility gate or another non-oracle policy yet.
+  - Do not expand attribution to the other P7 repeats unless a later mechanism
+    revision is approved.
+  - Preserve the broad target as a future research direction; DEC-0078 governs
+    the narrower supported claim of the current paper.
+- Rationale:
+  - q0-99 provides a clear, distributed tuple-level harmful-interaction signal
+    sufficient to establish attribution feasibility for this frozen bank.
+  - The evidence remains limited to one bank and one context, while no-gold
+    remains high after tuple removal; it is not yet a general mechanism or
+    performance result.
+  - The current requested phase is project-note consolidation and planning for
+    the next writing action, not another mechanism experiment.
+- Consequences:
+  - Preserve the diagnostic script, tests, and artifacts.
+  - Treat top-1 fallback, tuple suppression, injection budget, score-margin
+    gating, and query redesign as paused candidates, not implemented methods.
+  - Keep P7 non-strict five-repeat evidence as the current EventQA paper-level
+    candidate among tested settings, while retaining the context-4 limitation.
+- Future trigger:
+  - Revisit attribution expansion or a non-oracle policy only after explicit
+    approval of a mechanism revision.
+- Related experiments: `EXP-20260704-001`, `EXP-20260704-002`
+- Supersedes: the open-ended attribution-planning state only; no prior result
+  or architectural invariant is superseded.
+- Superseded by: none
 
 ### Latest MAB-6B-FR Board (2026-06-30)
 

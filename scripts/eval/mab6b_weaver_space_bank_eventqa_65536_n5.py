@@ -32,7 +32,10 @@ from scripts.eval.eventqa_transition_diagnostics import (
     aggregate_transition_rows,
     build_transition_diagnostic,
 )
-from memgen.model.latent_memory_bank import LatentMemoryBankConfig
+from memgen.model.latent_memory_bank import (
+    LatentMemoryBankConfig,
+    LatentMemoryRetrievalResult,
+)
 
 
 EXPERIMENT_NAME = "MAB-6B-FR EventQA 65536 Weaver-space Bank n5"
@@ -803,11 +806,13 @@ class _QueryReadOnlyBank:
         lifecycle: dict,
         *,
         freeze_retrieval_state: bool = False,
+        disable_query_retrieval: bool = False,
         preserve_on_reset: bool = False,
     ):
         self.bank = bank
         self.lifecycle = lifecycle
         self.freeze_retrieval_state = freeze_retrieval_state
+        self.disable_query_retrieval = disable_query_retrieval
         self.preserve_on_reset = preserve_on_reset
         self.read_only = False
         self.write_attempt_count = 0
@@ -828,6 +833,18 @@ class _QueryReadOnlyBank:
         return self.retrieve_with_context(*args, **kwargs).slots
 
     def retrieve_with_context(self, *args, **kwargs):
+        if self.read_only and self.disable_query_retrieval:
+            return LatentMemoryRetrievalResult(
+                slots=[],
+                scores=(),
+                max_score=None,
+                argmax_index=None,
+                threshold_passed=False,
+                retrieved_indices=(),
+                retrieved_scores=(),
+                bank_step=self.bank._step,
+                retrieval_step=self.bank._retrieval_step,
+            )
         if not self.read_only or not self.freeze_retrieval_state:
             return self.bank.retrieve_with_context(*args, **kwargs)
         retrieval_state = _capture_retrieval_state(self.bank)
@@ -1146,6 +1163,7 @@ def _eventqa_manager_factory(
     *,
     external_bank=None,
     preserve_bank: bool = False,
+    disable_query_retrieval: bool = False,
     construction_only: bool = False,
     capture_bank_tensor_snapshot: bool = False,
     trace_score_decomposition: bool = False,
@@ -1230,6 +1248,7 @@ def _eventqa_manager_factory(
                     bank,
                     lifecycle,
                     freeze_retrieval_state=True,
+                    disable_query_retrieval=disable_query_retrieval,
                     preserve_on_reset=preserve_bank,
                 )
                 lifecycle["query_bank_proxy"] = proxy
@@ -1280,6 +1299,7 @@ def _run_eventqa_model(
     *,
     external_bank=None,
     preserve_bank: bool = False,
+    disable_query_retrieval: bool = False,
     construction_only: bool = False,
     recorded_bank_config: dict | None = None,
     score_trace_state: dict | None = None,
@@ -1295,6 +1315,7 @@ def _run_eventqa_model(
         capture,
         external_bank=external_bank,
         preserve_bank=preserve_bank,
+        disable_query_retrieval=disable_query_retrieval,
         construction_only=construction_only,
         capture_bank_tensor_snapshot=bool(
             getattr(args, "trace_score_decomposition", False)

@@ -82,7 +82,9 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0075 | 2026-06-30 | accepted | Preserve end-to-end Config B `top_k=2` and diagnose context 4 before further top-k scaling |
 | DEC-0076 | 2026-07-04 | accepted | Summarize harmful attribution and pause further attribution expansion |
 | DEC-0077 | 2026-07-04 | accepted | Freeze P7 as the current main paper-method version |
-| DEC-0078 | 2026-07-05 | accepted | Scope the current paper to EventQA-65536 long-context event reasoning |
+| DEC-0078 | 2026-07-05 | superseded | Scope the current paper to EventQA-65536 long-context event reasoning |
+| DEC-0079 | 2026-07-05 | accepted | Use the reviewed outline for the long-horizon LLM-agent paper framing |
+| DEC-0080 | 2026-07-07 | accepted | Park the consolidated draft before skeptical review and preserve the scoped claim boundary |
 
 ## Decision Template
 
@@ -102,10 +104,78 @@ IDs and append superseding decisions rather than silently rewriting history.
 
 ## Standing Decisions
 
-### DEC-0078: Scope the Current Paper to EventQA Long-Context Event Reasoning
+### DEC-0080: Park the Consolidated Draft Before Skeptical Review
+
+- Date: 2026-07-07
+- Status: accepted
+- Context:
+  - The EventQA comparison package, explicit-memory controls, query-retrieval
+    ablation, cost table, analysis tables, method figures, LoCoMo limitation
+    appendix, and verified bibliography are integrated into `paper/draft_v0.md`.
+  - All D01-D13 writing TODOs are closed.
+  - The user chose not to begin skeptical review in this phase.
+- Decision:
+  - Treat the current manuscript as a consolidated draft checkpoint, not as a
+    reviewed or submission-ready paper.
+  - Preserve frozen P7 and the EventQA-scoped positive claim.
+  - Preserve LoCoMo only as limitation evidence.
+  - Park further paper work until skeptical review is explicitly reopened.
+- Rationale:
+  - Additional prose polishing without independent review is unlikely to expose
+    the strongest remaining rejection risks.
+  - No required EventQA experiment row remains missing from the current scoped
+    draft.
+- Consequences:
+  - Do not launch new EventQA experiments by default.
+  - Do not interpret the broad title as benchmark-general proof.
+  - On resume, begin with skeptical review rather than another writing or
+    threshold-tuning pass.
+- Related decisions: DEC-0077, DEC-0078, DEC-0079.
+
+### DEC-0079: Use the Reviewed Long-Horizon LLM-Agent Outline
 
 - Date: 2026-07-05
 - Status: accepted
+- Context:
+  - `paper/outline.md` has been reviewed as the intended paper organization.
+  - The outline focuses on inference-time latent memory management for
+    long-horizon LLM agents and evaluates long-context reasoning; it does not
+    make multi-turn dialogue improvement a contribution.
+  - Frozen P7 and EventQA remain the strongest current positive evidence.
+- Decision:
+  - Make `paper/outline.md` authoritative for the working title, motivation,
+    key idea, contributions, RQ1-RQ4, and manuscript section structure.
+  - Use **Inference-Time Latent Memory Management for Long-Horizon LLM Agents**
+    as the working title.
+  - Frame the method as a session-local bank that stores, retrieves, updates,
+    replaces, and reuses latent memories during inference.
+  - Keep EventQA-65536 as the current positive operational evidence rather than
+    defining the full paper goal as EventQA-specific.
+  - Keep LoCoMo only as optional diagnostic or limitation evidence; it is not a
+    required benchmark or a positive contribution.
+- Rationale:
+  - The reviewed outline expresses the intended paper problem and organization,
+    while the existing EventQA evidence provides a defensible empirical anchor.
+  - Separating paper scope from current evidence scope avoids both an
+    EventQA-only method framing and unsupported benchmark-general claims.
+- Consequences:
+  - Current research notes and paper-facing files must follow the outline.
+  - Verified metrics, method parameters, limitations, and artifact provenance
+    remain unchanged.
+  - Missing explicit-text controls, no-query-retrieval ablation, and separable
+    cost measurements remain evidence gaps.
+- Supersedes:
+  - DEC-0078 for working title, paper goal, and organizational scope.
+- Does not supersede:
+  - DEC-0078's EventQA operational evidence boundary and associated claim
+    limitations.
+- Superseded by: none
+
+### DEC-0078: Scope the Current Paper to EventQA Long-Context Event Reasoning
+
+- Date: 2026-07-05
+- Status: superseded for title, paper goal, and organizational scope by
+  DEC-0079; retained for EventQA operational evidence boundaries
 - Context:
   - Frozen P7 has reusable five-repeat positive evidence on EventQA-65536.
   - The same P7 mechanism is protocol-correct on LoCoMo-QA but does not produce
@@ -148,7 +218,7 @@ IDs and append superseding decisions rather than silently rewriting history.
   - Any current-paper interpretation of the earlier broad multi-turn or
     general long-context target. It does not erase those historical research
     goals.
-- Superseded by: none
+- Superseded by: DEC-0079 for title, paper goal, and organizational scope
 
 ### DEC-0077: Freeze P7 as the Current Main Paper-Method Version
 
@@ -195,8 +265,8 @@ IDs and append superseding decisions rather than silently rewriting history.
     implementation.
   - Do not implement utility gate, tuple suppression, top-1 fallback, or other
     non-oracle harmful-memory policies in the current phase.
-  - Historical broad target: **Latent Memory Bank Improves Long-Context
-    Reasoning**. DEC-0078 now governs the narrower EventQA-scoped paper claim.
+  - DEC-0079 now governs the long-horizon LLM-agent paper framing, while the
+    EventQA operational evidence remains scoped as recorded in DEC-0078.
 - Verification required:
   - Keep the EventQA note and summaries aligned with the frozen P7 parameter
     set and the current evidence boundary.
@@ -208,8 +278,8 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Supersedes:
   - Open-ended method-target drift toward utility gate / tuple suppression /
     top-1 fallback as current-phase implementation goals.
-- Superseded by: DEC-0078 for paper-claim scope only; the P7 method freeze
-  remains active.
+- Superseded by: DEC-0079 for paper framing only; the P7 method freeze remains
+  active.
 
 ### DEC-0076: Summarize Harmful Attribution and Pause Further Expansion
 
@@ -230,8 +300,8 @@ IDs and append superseding decisions rather than silently rewriting history.
   - Do not implement a utility gate or another non-oracle policy yet.
   - Do not expand attribution to the other P7 repeats unless a later mechanism
     revision is approved.
-  - Preserve the broad target as a future research direction; DEC-0078 governs
-    the narrower supported claim of the current paper.
+  - Preserve the long-horizon latent-memory-management target; DEC-0079 governs
+    paper framing and DEC-0078 remains the EventQA evidence boundary.
 - Rationale:
   - q0-99 provides a clear, distributed tuple-level harmful-interaction signal
     sufficient to establish attribution feasibility for this frozen bank.

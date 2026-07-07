@@ -1,0 +1,41 @@
+{
+  "schema_version": "eventqa-paper-aggregate-config/v1",
+  "methods": [
+    {
+      "method_id": "bank_off",
+      "display_name": "Disabled / compressed Bank-off",
+      "mode": "bank_off",
+      "runs": [
+        "outputs/mab/eventqa_p7_rt005_ut010_cap16_topk2/20260702T084825Z-eventqa-65536-version-b-weaver-space-bank-n5",
+        "outputs/mab/eventqa_p7_repro_rep2_rt005_ut010_cap16_topk2/20260702T092248Z-eventqa-65536-version-b-weaver-space-bank-n5",
+        "outputs/mab/eventqa_p7_repro_rep3_rt005_ut010_cap16_topk2/20260702T092248Z-eventqa-65536-version-b-weaver-space-bank-n5",
+        "outputs/mab/eventqa_p7_repro_rep4_rt005_ut010_cap16_topk2/20260703T084941Z-eventqa-65536-version-b-weaver-space-bank-n5",
+        "outputs/mab/eventqa_p7_repro_rep5_rt005_ut010_cap16_topk2/20260703T084941Z-eventqa-65536-version-b-weaver-space-bank-n5"
+      ]
+    },
+    {
+      "method_id": "p6",
+      "display_name": "P6 non-strict",
+      "mode": "bank_on",
+      "runs": [
+        "outputs/mab/eventqa_p6_repro_rep1_rt005_ut0095_cap16_topk2/20260702T070726Z-eventqa-65536-version-b-weaver-space-bank-n5",
+        "outputs/mab/eventqa_p6_repro_rep2_rt005_ut0095_cap16_topk2/20260702T070726Z-eventqa-65536-version-b-weaver-space-bank-n5",
+        "outputs/mab/eventqa_p6_repro_rep3_rt005_ut0095_cap16_topk2/20260702T080732Z-eventqa-65536-version-b-weaver-space-bank-n5",
+        "outputs/mab/eventqa_p6_repro_rep4_rt005_ut0095_cap16_topk2/20260703T091039Z-eventqa-65536-version-b-weaver-space-bank-n5",
+        "outputs/mab/eventqa_p6_repro_rep5_rt005_ut0095_cap16_topk2/20260703T091014Z-eventqa-65536-version-b-weaver-space-bank-n5"
+      ]
+    },
+    {
+      "method_id": "p7",
+      "display_name": "Frozen P7 non-strict",
+      "mode": "bank_on",
+      "runs": [
+        "outputs/mab/eventqa_p7_rt005_ut010_cap16_topk2/20260702T084825Z-eventqa-65536-version-b-weaver-space-bank-n5",
+        "outputs/mab/eventqa_p7_repro_rep2_rt005_ut010_cap16_topk2/20260702T092248Z-eventqa-65536-version-b-weaver-space-bank-n5",
+        "outputs/mab/eventqa_p7_repro_rep3_rt005_ut010_cap16_topk2/20260702T092248Z-eventqa-65536-version-b-weaver-space-bank-n5",
+        "outputs/mab/eventqa_p7_repro_rep4_rt005_ut010_cap16_topk2/20260703T084941Z-eventqa-65536-version-b-weaver-space-bank-n5",
+        "outputs/mab/eventqa_p7_repro_rep5_rt005_ut010_cap16_topk2/20260703T084941Z-eventqa-65536-version-b-weaver-space-bank-n5"
+      ]
+    }
+  ]
+}

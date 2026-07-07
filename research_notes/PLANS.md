@@ -2,23 +2,35 @@
 
 ## Current Planning State（当前计划状态）
 
-> Updated 2026-07-04. Historical R4 and pre-MAB planning below is retained for
+> Updated 2026-07-07. Historical R4 and pre-MAB planning below is retained for
 > provenance; its claims that Version B is unimplemented or the next active
 > step are superseded by this section.
 
-- Current final target remains **Session-Local Latent Memory Bank / Latent
-  Memory Bank Improves Long-Context Reasoning**.
+- `paper/outline.md` is authoritative for the current paper organization.
+- Current working title: **Inference-Time Latent Memory Management for
+  Long-Horizon LLM Agents**.
+- The paper studies a session-local bank that stores, retrieves, updates,
+  replaces, and reuses latent memories during inference on long-context
+  reasoning tasks.
 - Current EventQA checkpoint: P7 non-strict is the paper-level main candidate
   among tested configurations, supported by five repeats. This is not yet a
-  general proof of long-context improvement. Evidence:
+  benchmark-general proof. EventQA is the current positive evidence source,
+  not the definition of the full paper goal. Evidence:
   `outputs/mab/eventqa_five_repeat_stability_summary.md` and `.json`.
 - Context 4 remains the main limitation. A frozen-bank q0-99 oracle
   counterfactual now supports an ordered tuple-level harmful interaction for
   P7 source-run tuple `[1,0]`. Evidence:
   `outputs/mab/eventqa_harmful_memory_attribution_context4_full/20260704T001824Z-p7-context4-q0-99/`.
 - Further attribution expansion and utility-gate implementation are paused.
-- Current work is research-note consolidation and planning the next approved
-  project action; it is not paper drafting or a new experiment phase.
+- The EventQA comparison, explicit-memory controls, no-query-retrieval
+  ablation, method-separable cost package, tables, method figures, LoCoMo
+  limitation appendix, and bibliography are complete for the current draft.
+- Current state is `park_and_continue_later`: do not launch more EventQA runs
+  or start skeptical review unless the paper line is explicitly reopened.
+- Reopen sequence:
+  1. independent skeptical review;
+  2. resolve review-blocking manuscript or evidence issues;
+  3. convert to the selected venue template only after the review gate.
 
 ### Historical planning snapshot below
 

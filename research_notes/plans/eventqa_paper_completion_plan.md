@@ -1,10 +1,15 @@
-# EventQA Paper Completion Plan
+# EventQA Evidence Completion Plan
 
 Date: 2026-07-05
 
 ## Decision
 
-Use EventQA as the main positive benchmark for **Session-Local Latent Memory Banks for Long-Context Reasoning in MemGen**. Reuse the completed P7/P6 five-repeat effectiveness evidence. Do not rerun those rows by default.
+Use EventQA as the main current positive evidence for **Inference-Time Latent
+Memory Management for Long-Horizon LLM Agents**. Reuse the completed P7/P6
+five-repeat effectiveness evidence. Do not rerun those rows by default.
+
+This plan completes the EventQA evidence package; it does not redefine the
+paper goal or title as EventQA-specific.
 
 ## Claim Boundary
 
@@ -16,8 +21,7 @@ Supported:
 
 Not supported:
 
-- general long-context improvement beyond EventQA;
-- multi-turn conversational-memory improvement;
+- benchmark-general long-context improvement;
 - superiority to text summaries, RAG, or matched-budget explicit text;
 - paper-facing cost superiority.
 
@@ -54,6 +58,9 @@ Not supported:
 
 Run only `context_index=0`, questions `0..9`, Disabled and frozen P7, with separate per-method cost accounting. Keep the official non-strict prompt/scorer and all P7 parameters unchanged. Stop if costs are combined, query writes are nonzero, bank state changes, or schemas diverge.
 
-## LoCoMo Placement
+## Optional LoCoMo Placement
 
-Retain LoCoMo only in Limitations or appendix diagnostic evidence. State that construction and retrieval were protocol-correct but exact QA remained at zero EM and frequent no-context/refusal behavior persisted. Do not use it to support the main claim.
+If retained, place LoCoMo only in Limitations or appendix diagnostic evidence.
+It is not required by the outline. State that construction and retrieval were
+protocol-correct but exact QA remained at zero EM and frequent
+no-context/refusal behavior persisted.

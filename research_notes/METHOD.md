@@ -2,20 +2,21 @@
 
 ## Working Title
 
-Session-Local Latent Memory Banks for Long-Context Reasoning in MemGen
+Inference-Time Latent Memory Management for Long-Horizon LLM Agents
 
 ## Paper-Facing Method Scope
 
-For the current paper, P7 is presented as an inference-time, session-local
-latent memory bank for MemGen. The bank stores, retrieves, updates, replaces,
-and reuses Weaver-space latent memories within one session. Trigger, Weaver,
-and Reasoner remain frozen; no component retraining is performed.
+For the current paper, P7 instantiates an inference-time, session-local latent
+memory bank for MemGen-style long-horizon LLM agents. The bank stores,
+retrieves, updates, replaces, and reuses Weaver-space latent memories within
+one session. Trigger, Weaver, and Reasoner remain frozen; no component
+retraining is performed.
 
-The paper evaluates this method primarily on EventQA-65536 long-context event
-reasoning under the local MemoryAgentBench `frozen_context_bank` contract. The
-method is not presented as a solved multi-turn dialogue-memory system, and the
-current evidence does not support LoCoMo-QA or general conversational-memory
-improvement.
+The paper focuses on latent memory management across long-horizon inference.
+The current positive evaluation is EventQA-65536 long-context event reasoning
+under the local MemoryAgentBench `frozen_context_bank` contract. This benchmark
+scope constrains the current empirical claim, not the method's motivating
+problem or the paper's organizational scope.
 
 The paper-facing P7 definition remains unchanged:
 
@@ -32,19 +33,15 @@ The paper-facing P7 definition remains unchanged:
 The authoritative paper claim and evidence boundary are maintained in
 `research_notes/PAPER_SCOPE.md`.
 
-## Current Paper Research Question
+## Paper Research Questions
 
-Can a frozen inference-time session-local latent memory bank improve MemGen's
-long-context event reasoning on EventQA-65536 without retraining Trigger,
-Weaver, or Reasoner?
-
-## Historical Broader Research Question
-
-Can a session-local latent memory bank help MemGen explicitly preserve,
-retrieve, and update early useful latent memories for later reuse in multi-turn,
-long-trajectory, or context-truncated inference, without retraining Weaver or
-Trigger? This remains a broader future research direction, not the supported
-claim of the current paper.
+- RQ1: Does the proposed memory bank preserve original MemGen behavior when
+  disabled?
+- RQ2: Does it produce meaningful write, retrieval, update, replacement, and
+  reset behavior during inference?
+- RQ3: Does session-level latent memory reuse improve long-context reasoning?
+- RQ4: Which bank design choices, including thresholds, top-k, capacity, and
+  replacement policy, matter most?
 
 ## Scope
 

@@ -3,7 +3,14 @@
 This plan maps each unresolved experiment to the exact paper claim and table it
 would support. Smoke runs are validation gates, not paper results.
 
+These experiments complete the current EventQA evidence package for the
+long-horizon latent-memory-management outline; they do not narrow the paper
+title or method motivation to EventQA.
+
 ## 1. Method-Separable Cost Smoke
+
+Status: completed through the full five-context pass on 2026-07-06. The smoke
+validated instrumentation; the full pass filled the Disabled/P7 Table 5 rows.
 
 - Why needed: existing paired artifacts combine Bank-off and P7 timing and use
   a shared peak-memory maximum, so they cannot support per-method efficiency
@@ -101,5 +108,5 @@ would support. Smoke runs are validation gates, not paper results.
 6. P7 no-query-retrieval ablation.
 7. Unified final tables and artifact manifest.
 
-The cost smoke is first because it is small, directly resolves a known invalid
-paper row, and validates accounting needed by every later baseline.
+The cost stage is complete for Disabled/P7. Reuse the validated accounting
+contract for every later explicit-text baseline.

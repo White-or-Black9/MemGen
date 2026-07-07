@@ -2,6 +2,13 @@
 
 Date: 2026-07-04
 
+> **Superseded on 2026-07-05 for paper target and benchmark organization.**
+> This file is retained as historical planning provenance. The current paper
+> organization is `paper/outline.md`; current evidence and writing routes are
+> `research_notes/PAPER_SCOPE.md` and
+> `research_notes/PAPER_WRITING_PLAN.md`. In particular, multi-turn dialogue is
+> no longer a paper contribution or required benchmark axis.
+
 ## Paper Target
 
 `Latent Memory Bank Improves Long-Context and Multi-Turn Reasoning.`

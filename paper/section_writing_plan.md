@@ -1,6 +1,8 @@
 # Section Writing Plan
 
-This file maps each manuscript section to its evidence and writing gate.
+This file maps the reviewed `paper/outline.md` to evidence and writing gates.
+The long-horizon LLM-agent framing defines the paper; EventQA defines the
+current positive operational evidence.
 
 ## Abstract
 
@@ -12,10 +14,11 @@ This file maps each manuscript section to its evidence and writing gate.
   - `research_notes/PAPER_SCOPE.md`
   - `outputs/mab/eventqa_five_repeat_stability_summary.md`
   - `outputs/mab/eventqa_current_stage_consolidated_summary.md`
-- Missing evidence: explicit-text baselines and method-separable cost.
-- Overclaim warning: do not imply benchmark generality, RAG superiority, cost
-  efficiency, or multi-turn success.
-- Readiness: provisional draft now; final version waits for baseline tables.
+- Completed support: explicit-text baselines, no-query-retrieval ablation, and
+  method-separable cost rows.
+- Overclaim warning: do not imply benchmark generality, RAG superiority, or
+  cost efficiency.
+- Readiness: abstract polished against the completed evidence tables.
 
 ## 1. Introduction
 
@@ -27,25 +30,26 @@ This file maps each manuscript section to its evidence and writing gate.
   - `research_notes/METHOD.md`
   - `research_notes/DECISIONS.md` (DEC-0077 and DEC-0078)
   - `outputs/mab/paper_scope_claim_redirect.md`
-- Missing evidence: verified literature citations and final comparator breadth.
+- Completed support: verified closest-neighbor citations in
+  `paper/references.bib`; completed explicit-memory comparator package.
 - Overclaim warning: describe the scientific gap, not local engineering history;
   scope the empirical claim to EventQA.
-- Readiness: structure and contribution paragraph ready; citations pending.
+- Readiness: introduction positioning, citations, and prose polish complete.
 
 ## 2. Related Work
 
 - Writing goal: position session-local latent memory among latent recurrence,
   long-context inference, RAG, summaries, agent memory, and dialogue memory.
-- Key message: this paper studies frozen inference-time latent reuse, not a new
-  training objective or a general conversational-memory system.
+- Key message: this paper studies frozen inference-time latent reuse for
+  long-horizon agents, not a new training objective.
 - Evidence to cite:
   - current method boundary in `research_notes/PAPER_SCOPE.md`
-  - verified external literature to be collected separately
-- Missing evidence: citation shortlist, closest-neighbor comparison, and exact
-  novelty boundary against prior latent-memory systems.
+  - verified external literature in `paper/references.bib`
+- Completed support: citation shortlist, closest-neighbor comparison, and
+  operational novelty boundary against prior latent-memory systems.
 - Overclaim warning: do not claim novelty or superiority from memory; do not
   criticize RAG before the explicit-text baseline is run.
-- Readiness: subsection outline ready; prose waits for citation verification.
+- Readiness: subsection prose and verified venue metadata polished.
 
 ## 3. Method
 
@@ -60,7 +64,8 @@ This file maps each manuscript section to its evidence and writing gate.
 - Missing evidence: none for the frozen P7 definition.
 - Overclaim warning: exclude utility gate, tuple suppression, top-1 fallback,
   and oracle attribution from the method.
-- Readiness: ready to draft now.
+- Readiness: drafted in Limitations and Appendix A with reliable-field and
+  excluded-field boundaries recorded.
 
 ## 4. Experimental Setup
 
@@ -70,13 +75,13 @@ This file maps each manuscript section to its evidence and writing gate.
   prompt/parser/scorer and context/question set.
 - Evidence to cite:
   - `outputs/mab/eventqa_paper_completion_plan.md`
-  - `outputs/mab/eventqa_final_table_inventory.md`
+  - `outputs/mab/eventqa_final_comparison_package.md`
   - `research_notes/EXPERIMENTS.md`
-- Missing evidence: final summary/RAG/matched-budget protocols and cost
-  measurement protocol.
+- Missing evidence: none for the EventQA comparison package itself; only final
+  table rendering and figure formatting remain.
 - Overclaim warning: Bank-off is compressed no-bank, not official full-history;
   substring EM is not strict full-string EM.
-- Readiness: core setup ready; baseline/cost subsection remains open.
+- Readiness: ready.
 
 ## 5. Main Results
 
@@ -92,11 +97,11 @@ This file maps each manuscript section to its evidence and writing gate.
     `121.4+-8.8`;
   - Bank-off EM `0.008`, recall `0.178`;
   - P7-P6 EM `+0.0280`, recall `-0.0044`, format failures `-44.4`.
-- Missing evidence: summary, RAG, matched-budget, no-query-retrieval, and valid
-  method-separable cost rows.
+- Missing evidence: none for the completed EventQA comparator package. The only
+  remaining gap is converting the package into final paper tables/figures.
 - Overclaim warning: do not call P7 generally superior or cost efficient; do
   not hide context 4.
-- Readiness: current-result subsection ready; final comparison narrative waits.
+- Readiness: ready.
 
 ## 6. Analysis
 
@@ -109,18 +114,19 @@ This file maps each manuscript section to its evidence and writing gate.
   - `outputs/mab/eventqa_p7_context4_failure_diagnosis.md`
   - `outputs/mab/eventqa_format_failure_taxonomy.md`
   - `outputs/mab/eventqa_harmful_memory_attribution_context4_full/`
-- Missing evidence: no-query-retrieval component result; explicit-text and cost
-  comparisons.
+- Missing evidence: none for component attribution and explicit-memory control
+  references; all are now present in the unified EventQA package.
 - Overclaim warning: harmful tuple evidence is oracle and single-bank; score
   association is not causal proof.
-- Readiness: context/format/transition analysis ready; component/cost analysis waits.
+- Readiness: ready, with cost wording caveats.
 
 ## 7. Limitations
 
 - Writing goal: state the exact empirical and mechanism boundary before the
   reader infers general memory claims.
-- Key message: EventQA supports event reasoning, while LoCoMo exposes failure
-  of latent-only exact conversational fact recovery.
+- Key message: the verified EventQA result is context-dependent and does not
+  establish benchmark-general performance. LoCoMo may be retained as optional
+  latent-to-fact limitation evidence.
 - Evidence to cite:
   - `outputs/mab/locomo_vs_eventqa_experiment_comparison.md`
   - `outputs/mab/locomo_vs_eventqa_result_gap_analysis.md`
@@ -140,7 +146,7 @@ This file maps each manuscript section to its evidence and writing gate.
   requires stronger utility control and latent-to-fact decoding for broader use.
 - Evidence to cite: main EventQA result and limitation section only.
 - Missing evidence: final baseline/cost results may change comparative emphasis.
-- Overclaim warning: do not conclude general long-context or multi-turn success.
+- Overclaim warning: do not conclude benchmark-general success.
 - Readiness: provisional draft now; freeze last.
 
 ## Appendix
@@ -152,8 +158,10 @@ This file maps each manuscript section to its evidence and writing gate.
 - Evidence to cite:
   - `outputs/mab/eventqa_final_table_inventory.md`
   - EventQA prompt/scorer verification and per-context artifacts
-  - LoCoMo prompt, answer, pipeline, and diagnostics audits
-- Missing evidence: final new baseline artifacts and unified manifest.
+  - packaged LoCoMo prompt, answer, pipeline, and diagnostics audit in
+    `paper/appendix_locomo_diagnostic.md`
+- Missing evidence: none for the scoped appendix modules.
 - Overclaim warning: clearly label historical, exploratory, single-run,
   single-bank, and oracle evidence.
-- Readiness: existing appendix modules ready; final assembly waits for new rows.
+- Readiness: LoCoMo boundary appendix assembled; other optional appendix modules
+  remain available if selected during final polish.

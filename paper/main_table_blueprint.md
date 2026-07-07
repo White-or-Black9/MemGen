@@ -13,23 +13,28 @@ required; no numeric placeholder should be interpreted as a result.
   - BM25 top-2 retrieved-text baseline;
   - 16-token matched-budget retrieved-text baseline;
   - P6;
+  - P7 no-query-retrieval;
   - frozen P7.
 - Planned columns: method, memory representation, retrieval form, repeat count,
   EM mean and dispersion, recall mean and dispersion, format failures, and
   protocol notes.
 - Existing available numbers:
-  - Bank-off: EM `0.008`, recall `0.178`; representative format failures
-    `377/500`.
+  - Bank-off: EM `0.008+-0.000`, recall `0.178+-0.000`, format failures
+    `377.0+-0.0`.
+  - text-summary: EM `0.012`, recall `0.078`, format failures `267/500`.
+  - BM25 top-2: EM `0.030`, recall `0.226`, format failures `265/500`.
+  - matched16: EM `0.068`, recall `0.180`, format failures `347/500`.
   - P6: EM `0.169+-0.018`, recall `0.258+-0.016`, format failures
     `165.8+-19.8`.
+  - P7 no-query-retrieval: EM `0.008`, recall `0.178`, format failures
+    `377/500`.
   - P7: EM `0.197+-0.020`, recall `0.254+-0.028`, format failures
     `121.4+-8.8`.
-- Missing numbers: all text-summary, BM25, and matched-budget results; a
-  consistently aggregated Bank-off dispersion row if the final table requires
-  repeated Bank-off statistics.
+- Missing numbers: none for the unified EventQA comparison package. Single-pass
+  rows must stay labeled as one-pass controls rather than repeated main rows.
 - Placement: main paper.
-- Ready now: no. The P6/P7/Bank-off block is reusable, but the explicit-memory
-  comparator rows are missing.
+- Ready now: yes. The unified package can directly render the final comparison
+  rows with repeat-count caveats.
 
 ## Table 2. P7 Versus P6
 
@@ -59,10 +64,9 @@ required; no numeric placeholder should be interpreted as a result.
 - Existing available numbers: five-repeat context-wise P6/P7 summaries and the
   Bank-off context breakdown; context 4 P7 has EM `0.006`, recall `0.228`, and
   format failures `93.8/100`.
-- Missing numbers: no new experiment is required, but a single unified export
-  must be built from the authoritative repeat artifacts.
+- Missing numbers: none; the unified context-wise export is complete.
 - Placement: main paper if space permits; full version in appendix.
-- Ready now: evidence-ready, packaging pending.
+- Ready now: packaged in the manuscript analysis table.
 
 ## Table 4. Format-Failure Analysis
 
@@ -88,14 +92,24 @@ required; no numeric placeholder should be interpreted as a result.
 - Planned columns: construction latency, query latency, end-to-end latency,
   peak GPU memory, Trigger calls, Weaver calls, output tokens, injected text
   tokens, and CPU bank-size estimate when available.
-- Existing available numbers: exploratory paired timing artifacts only. They
-  combine Bank-off and Bank-on execution and use a shared maximum peak-memory
-  value, so they are not valid per-method paper rows.
-- Missing numbers: all method-separable latency and peak-memory rows; explicit
-  baseline costs.
+- Existing method-separable numbers for the full five-context pass:
+  - Disabled: construction `0.000 s`, query `0.735+-0.207 s/question`,
+    end-to-end `367.448 s`, amortized `0.735 s/question`, max incremental peak
+    allocation `142.9 MiB`;
+  - P7: construction `78.454 s`, query `0.619+-0.175 s/question`, end-to-end
+    `387.999 s`, amortized `0.776 s/question`, max incremental peak allocation
+    `171.9 MiB`;
+  - P7/Disabled end-to-end ratio `1.056`, max incremental peak delta about
+    `29.0 MiB`.
+- Missing numbers: no additional numbers for the unified package. However,
+  same-model text-summary cost remains non-paper-facing because it was measured
+  under shared-GPU contention, and cross-method cost claims must respect that
+  caveat.
 - Placement: main paper if measurements become comparable; detailed accounting
   in appendix.
-- Ready now: no.
+- Ready now: yes with caveats. Disabled/P7/BM25/matched16/no-query can be
+  reported directly; text-summary should be labeled diagnostic-only in cost
+  views. Do not present the lower P7 query mean as a throughput claim.
 
 ## Table 6. Explicit-Memory And Budget Controls
 
@@ -105,12 +119,21 @@ required; no numeric placeholder should be interpreted as a result.
   16-token matched-budget text, P7 no-query-retrieval, and P7.
 - Planned columns: evidence available at query time, injected token count, bank
   capacity/budget, EM, recall, format failures, and cost fields where valid.
-- Existing available numbers: Bank-off and P7 only.
-- Missing numbers: text summary, BM25, matched-budget, and no-query-retrieval.
+- Existing available numbers:
+  - Bank-off: EM `0.008`, recall `0.178`, format failures `377/500`.
+  - text-summary: EM `0.012`, recall `0.078`, format failures `267/500`.
+  - BM25 top-2: EM `0.030`, recall `0.226`, format failures `265/500`.
+  - matched16: EM `0.068`, recall `0.180`, format failures `347/500`.
+  - P7 no-query-retrieval: EM `0.008`, recall `0.178`, format failures
+    `377/500`.
+  - P7: EM `0.197+-0.020`, recall `0.254+-0.028`, format failures
+    `121.4+-8.8`.
+- Missing numbers: none for the effectiveness control table. Cost cells must
+  carry the text-summary non-paper-facing caveat where shown.
 - Placement: main paper; may be merged into Table 1 if column width permits.
-- Ready now: no.
+- Ready now: yes.
 
-## Table 7. LoCoMo Diagnostic
+## Optional Table 7. LoCoMo Diagnostic
 
 - Purpose: document the limitation of latent-only memory for exact open-ended
   multi-session conversational fact recovery.
@@ -128,12 +151,16 @@ required; no numeric placeholder should be interpreted as a result.
     writes for every row.
 - Missing numbers: none for the current diagnostic claim. Existing inconsistent
   LoCoMo cost counters must be excluded.
-- Placement: appendix and a short limitations reference only.
-- Ready now: yes as negative diagnostic evidence, not as a positive result.
+- Placement: Appendix A with a short limitations reference.
+- Ready now: packaged as negative diagnostic evidence, not as a positive
+  result.
 
 ## Readiness Summary
 
-- Ready from existing evidence: P7 versus P6, context-wise results,
-  format-failure analysis, and LoCoMo diagnostic.
-- Partially ready: main EventQA effectiveness table.
-- Not ready: full baseline comparison and method-separable cost table.
+- Ready from existing evidence: main EventQA effectiveness, P7 versus P6,
+  explicit-memory controls, context-wise results, format-failure analysis, and
+  the optional LoCoMo diagnostic.
+- Conditionally ready: cost table, with text-summary cost restricted to
+  diagnostic/appendix use.
+- Packaging remaining: convert the unified package into final paper tables and
+  figure assets.

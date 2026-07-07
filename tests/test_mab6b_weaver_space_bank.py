@@ -806,6 +806,59 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
         self.assertEqual(lifecycle["query_write_count_delta"], 0)
         self.assertEqual(lifecycle["query_write_attempt_count_delta"], 1)
 
+    def test_eventqa_query_proxy_can_disable_query_retrieval_without_state_change(self):
+        eventqa = importlib.import_module(
+            "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"
+        )
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                threshold=0.005,
+                retrieve_threshold=0.005,
+                update_threshold=0.08,
+                top_k=1,
+                max_slots=16,
+                retrieve_policy="threshold_topk",
+                update_policy="thread_update",
+            )
+        )
+        bank.write_back(
+            torch.tensor([[1.0, 0.0]], dtype=torch.float32),
+            LatentMemoryRetrievalResult(
+                slots=[],
+                scores=(),
+                max_score=None,
+                argmax_index=None,
+                threshold_passed=False,
+                retrieved_indices=(),
+                retrieved_scores=(),
+                bank_step=0,
+                retrieval_step=0,
+            ),
+        )
+        lifecycle = {}
+        proxy = eventqa._QueryReadOnlyBank(
+            bank,
+            lifecycle,
+            freeze_retrieval_state=True,
+            disable_query_retrieval=True,
+        )
+        before = eventqa._bank_state_fingerprint(bank)
+        retrieval_step_before = bank._retrieval_step
+
+        proxy.begin_query()
+        result = proxy.retrieve_with_context(
+            torch.tensor([[[1.0, 0.0]]], dtype=torch.float32)
+        )
+        proxy.capture_post_query()
+
+        self.assertEqual(result.retrieved_indices, ())
+        self.assertEqual(len(result.slots), 0)
+        self.assertEqual(result.retrieval_step, retrieval_step_before)
+        self.assertEqual(bank._retrieval_step, retrieval_step_before)
+        self.assertEqual(eventqa._bank_state_fingerprint(bank), before)
+        self.assertFalse(lifecycle["bank_snapshot_changed_after_query"])
+
     def test_eventqa_bank_fingerprint_supports_bfloat16_slots(self):
         eventqa = importlib.import_module(
             "scripts.eval.mab6b_weaver_space_bank_eventqa_65536_n5"

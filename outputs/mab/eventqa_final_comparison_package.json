@@ -1,0 +1,275 @@
+{
+  "schema_version": "eventqa-final-table-package/v1",
+  "main_table": [
+    {
+      "method_id": "bank_off",
+      "display_name": "Disabled / compressed Bank-off",
+      "representation": "none",
+      "retrieval_form": "none",
+      "repeat_count": 5,
+      "em_mean": 0.008,
+      "em_std": 0.0,
+      "recall_mean": 0.178,
+      "recall_std": 0.0,
+      "format_failures_mean": 377.0,
+      "format_failures_std": 0.0,
+      "protocol_notes": "five-repeat Bank-off row reconstructed from frozen P7 paired artifacts"
+    },
+    {
+      "method_id": "text_summary",
+      "display_name": "Same-model text-summary memory",
+      "representation": "persistent summary text",
+      "retrieval_form": "full summary injection",
+      "repeat_count": 1,
+      "em_mean": 0.012,
+      "em_std": null,
+      "recall_mean": 0.078,
+      "recall_std": null,
+      "format_failures_mean": 267.0,
+      "format_failures_std": null,
+      "protocol_notes": "one deterministic full pass; negative same-model baseline"
+    },
+    {
+      "method_id": "bm25_top2",
+      "display_name": "BM25 top-2 retrieved text",
+      "representation": "explicit retrieved text",
+      "retrieval_form": "deterministic BM25 top-2",
+      "repeat_count": 1,
+      "em_mean": 0.03,
+      "em_std": null,
+      "recall_mean": 0.226,
+      "recall_std": null,
+      "format_failures_mean": 265.0,
+      "format_failures_std": null,
+      "protocol_notes": "one deterministic full pass"
+    },
+    {
+      "method_id": "matched16",
+      "display_name": "16-token matched-budget retrieved text",
+      "representation": "explicit retrieved text",
+      "retrieval_form": "deterministic 16-token matched injection",
+      "repeat_count": 1,
+      "em_mean": 0.068,
+      "em_std": null,
+      "recall_mean": 0.18,
+      "recall_std": null,
+      "format_failures_mean": 347.0,
+      "format_failures_std": null,
+      "protocol_notes": "one deterministic full pass; exact 16-token visible budget"
+    },
+    {
+      "method_id": "p6",
+      "display_name": "P6 non-strict",
+      "representation": "latent bank",
+      "retrieval_form": "query-time latent retrieval",
+      "repeat_count": 5,
+      "em_mean": 0.1688,
+      "em_std": 0.0177808886167143,
+      "recall_mean": 0.258,
+      "recall_std": 0.015899685531481446,
+      "format_failures_mean": 165.8,
+      "format_failures_std": 19.782820830205182,
+      "protocol_notes": "five-repeat lower-update-threshold comparator"
+    },
+    {
+      "method_id": "p7_no_query_retrieval",
+      "display_name": "P7 with query retrieval disabled",
+      "representation": "latent bank",
+      "retrieval_form": "construction only; retrieval disabled at QA",
+      "repeat_count": 1,
+      "em_mean": 0.008,
+      "em_std": null,
+      "recall_mean": 0.178,
+      "recall_std": null,
+      "format_failures_mean": 377.0,
+      "format_failures_std": null,
+      "protocol_notes": "one deterministic full pass; all query retrieval disabled"
+    },
+    {
+      "method_id": "p7",
+      "display_name": "Frozen P7 non-strict",
+      "representation": "latent bank",
+      "retrieval_form": "query-time latent retrieval",
+      "repeat_count": 5,
+      "em_mean": 0.1968,
+      "em_std": 0.02018316129846858,
+      "recall_mean": 0.2536,
+      "recall_std": 0.028436596139481955,
+      "format_failures_mean": 121.4,
+      "format_failures_std": 8.777243302996677,
+      "protocol_notes": "five-repeat main result"
+    }
+  ],
+  "explicit_controls": [
+    {
+      "method_id": "bank_off",
+      "display_name": "Disabled / compressed Bank-off",
+      "representation": "none",
+      "retrieval_form": "none",
+      "repeat_count": 5,
+      "em_mean": 0.008,
+      "em_std": 0.0,
+      "recall_mean": 0.178,
+      "recall_std": 0.0,
+      "format_failures_mean": 377.0,
+      "format_failures_std": 0.0,
+      "protocol_notes": "five-repeat Bank-off row reconstructed from frozen P7 paired artifacts"
+    },
+    {
+      "method_id": "text_summary",
+      "display_name": "Same-model text-summary memory",
+      "representation": "persistent summary text",
+      "retrieval_form": "full summary injection",
+      "repeat_count": 1,
+      "em_mean": 0.012,
+      "em_std": null,
+      "recall_mean": 0.078,
+      "recall_std": null,
+      "format_failures_mean": 267.0,
+      "format_failures_std": null,
+      "protocol_notes": "one deterministic full pass; negative same-model baseline"
+    },
+    {
+      "method_id": "bm25_top2",
+      "display_name": "BM25 top-2 retrieved text",
+      "representation": "explicit retrieved text",
+      "retrieval_form": "deterministic BM25 top-2",
+      "repeat_count": 1,
+      "em_mean": 0.03,
+      "em_std": null,
+      "recall_mean": 0.226,
+      "recall_std": null,
+      "format_failures_mean": 265.0,
+      "format_failures_std": null,
+      "protocol_notes": "one deterministic full pass"
+    },
+    {
+      "method_id": "matched16",
+      "display_name": "16-token matched-budget retrieved text",
+      "representation": "explicit retrieved text",
+      "retrieval_form": "deterministic 16-token matched injection",
+      "repeat_count": 1,
+      "em_mean": 0.068,
+      "em_std": null,
+      "recall_mean": 0.18,
+      "recall_std": null,
+      "format_failures_mean": 347.0,
+      "format_failures_std": null,
+      "protocol_notes": "one deterministic full pass; exact 16-token visible budget"
+    },
+    {
+      "method_id": "p7_no_query_retrieval",
+      "display_name": "P7 with query retrieval disabled",
+      "representation": "latent bank",
+      "retrieval_form": "construction only; retrieval disabled at QA",
+      "repeat_count": 1,
+      "em_mean": 0.008,
+      "em_std": null,
+      "recall_mean": 0.178,
+      "recall_std": null,
+      "format_failures_mean": 377.0,
+      "format_failures_std": null,
+      "protocol_notes": "one deterministic full pass; all query retrieval disabled"
+    },
+    {
+      "method_id": "p7",
+      "display_name": "Frozen P7 non-strict",
+      "representation": "latent bank",
+      "retrieval_form": "query-time latent retrieval",
+      "repeat_count": 5,
+      "em_mean": 0.1968,
+      "em_std": 0.02018316129846858,
+      "recall_mean": 0.2536,
+      "recall_std": 0.028436596139481955,
+      "format_failures_mean": 121.4,
+      "format_failures_std": 8.777243302996677,
+      "protocol_notes": "five-repeat main result"
+    }
+  ],
+  "cost_table": [
+    {
+      "method_id": "bank_off",
+      "display_name": "Disabled / compressed Bank-off",
+      "construction_seconds_total": 0.0,
+      "end_to_end_seconds_total": 367.448102097027,
+      "amortized_seconds_per_question": 0.734896204194054,
+      "incremental_peak_gpu_memory_bytes_max": 149836288,
+      "paper_facing_cost": true,
+      "cost_notes": "method-separable same-GPU serialized full pass"
+    },
+    {
+      "method_id": "text_summary",
+      "display_name": "Same-model text-summary memory",
+      "construction_seconds_total": 223.37076050788164,
+      "end_to_end_seconds_total": 691.3454239098355,
+      "amortized_seconds_per_question": 1.382690847819671,
+      "incremental_peak_gpu_memory_bytes_max": 209979904,
+      "paper_facing_cost": false,
+      "cost_notes": "shared-GPU-confounded; not paper-facing"
+    },
+    {
+      "method_id": "bm25_top2",
+      "display_name": "BM25 top-2 retrieved text",
+      "construction_seconds_total": 1.5662741530686617,
+      "end_to_end_seconds_total": 692.844649400562,
+      "amortized_seconds_per_question": 1.385689298801124,
+      "incremental_peak_gpu_memory_bytes_max": 3772054528,
+      "paper_facing_cost": true,
+      "cost_notes": "one deterministic full pass"
+    },
+    {
+      "method_id": "matched16",
+      "display_name": "16-token matched-budget retrieved text",
+      "construction_seconds_total": 83.16458140220493,
+      "end_to_end_seconds_total": 501.76075385324657,
+      "amortized_seconds_per_question": 1.0035215077064932,
+      "incremental_peak_gpu_memory_bytes_max": 179276800,
+      "paper_facing_cost": true,
+      "cost_notes": "one deterministic full pass"
+    },
+    {
+      "method_id": "p7_no_query_retrieval",
+      "display_name": "P7 with query retrieval disabled",
+      "construction_seconds_total": 71.80405759997666,
+      "end_to_end_seconds_total": 445.00378907378763,
+      "amortized_seconds_per_question": 0.8900075781475753,
+      "incremental_peak_gpu_memory_bytes_max": 149811712,
+      "paper_facing_cost": true,
+      "cost_notes": "one deterministic full pass"
+    },
+    {
+      "method_id": "p7",
+      "display_name": "Frozen P7 non-strict",
+      "construction_seconds_total": 78.45423443801701,
+      "end_to_end_seconds_total": 387.998997730203,
+      "amortized_seconds_per_question": 0.7759979954604059,
+      "incremental_peak_gpu_memory_bytes_max": 180270080,
+      "paper_facing_cost": true,
+      "cost_notes": "method-separable same-GPU serialized full pass"
+    }
+  ],
+  "claim_audit": {
+    "claims": {
+      "p7_vs_disabled": {
+        "supported": true,
+        "evidence": "P7 EM/recall 0.1968/0.2536 vs Disabled 0.0080/0.1780"
+      },
+      "p7_vs_p6": {
+        "supported": true,
+        "evidence": "P7-P6 deltas: EM +0.0280, recall -0.0044, format failures -44.4"
+      },
+      "p7_beats_explicit_controls": {
+        "supported": true,
+        "evidence": "P7 exceeds text-summary, BM25 top-2, matched16, and no-query-retrieval on both EM and recall."
+      },
+      "query_time_retrieval_is_necessary": {
+        "supported": true,
+        "evidence": "No-query-retrieval exactly matches Disabled effectiveness while preserving the constructed bank."
+      },
+      "p7_cost_superiority": {
+        "supported": false,
+        "evidence": "P7 adds measured overhead over Disabled, while explicit-text baselines use different cost profiles; no blanket cost-superiority claim is supported."
+      }
+    }
+  }
+}

@@ -20,7 +20,7 @@ We extend MemGen with a session-local latent memory bank. When the Weaver genera
 
 2. We design a session-local latent memory bank with explicit write, retrieval, update, replacement, and reset operations.
 
-3. We evaluate the proposed mechanism on multi-turn dialogue and long-context reasoning tasks, analyzing both task performance and internal memory behavior.
+3. We evaluate the proposed mechanism on long-context reasoning tasks, analyzing both task performance and internal memory behavior.
 
 # Research Questions
 

@@ -1,10 +1,305 @@
 # Experiment Log
 
+## EXP-20260707-002: EventQA P7 No-Query-Retrieval Full Pass
+
+- Date: 2026-07-07
+- Type: paper-facing component ablation; one full deterministic pass.
+- Scope: EventQA-65536 contexts 0-4, q0-99; five standalone processes with
+  identical frozen P7 bank construction and query-time retrieval disabled only
+  during QA.
+- Runner: `scripts/eval/eventqa_p7_no_query_retrieval.py`.
+- Aggregator: `scripts/eval/eventqa_p7_no_query_retrieval_aggregate.py`.
+- Aggregate:
+  - `outputs/mab/eventqa_p7_no_query_retrieval_full_aggregate.json`;
+  - `outputs/mab/eventqa_p7_no_query_retrieval_full_aggregate.md`.
+- Integrity: `500/500` unique questions; all five full artifacts validated
+  under the locked no-retrieval contract; every query had
+  `retrieved_indices=[]`, `retrieved_latent_count=0`, `query_write_count=0`,
+  and `bank_snapshot_changed_after_query=False`.
+- Result: EM `4/500 = 0.008`, EventQA recall `0.178`, format failures
+  `377/500`.
+- Per-context `(EM, recall, format failures)`:
+  - ctx0 `(0.000, 0.150, 83)`;
+  - ctx1 `(0.000, 0.250, 78)`;
+  - ctx2 `(0.000, 0.150, 66)`;
+  - ctx3 `(0.030, 0.150, 75)`;
+  - ctx4 `(0.010, 0.190, 75)`.
+- Cost: construction `71.804 s`, query `373.200 s`, end-to-end `445.004 s`,
+  amortized `0.890 s/question`, max incremental peak GPU allocation
+  `149.8 MiB`.
+- References:
+  - Disabled full: EM/recall `0.008/0.178`, format failures `377`, total
+    `367.448 s`, peak `142.9 MiB`;
+  - Frozen P7 standalone cost full: `0.200/0.240`, total `387.999 s`, peak
+    `171.9 MiB`;
+  - Frozen P7 primary five-repeat: EM `0.197+-0.020`, recall `0.254+-0.028`,
+    format failures `121.4+-8.8`.
+- Conclusion: disabling QA-time retrieval collapses P7 exactly to the Disabled
+  effectiveness row on EventQA. This is strong mechanism evidence that the
+  measured gain of frozen P7 depends on query-time retrieval rather than on
+  bank construction alone.
+- Next route: paper-facing inventory / table packaging, not another rerun of
+  this ablation.
+
+## EXP-20260707-001: EventQA P7 No-Query-Retrieval Smoke
+
+- Date: 2026-07-07
+- Type: auxiliary/dev component-ablation smoke; not a paper result.
+- Scope: EventQA-65536 context 0, q0-9, standalone process.
+- Method: identical frozen P7 construction under `frozen_context_bank`, then
+  disable query-time retrieval only during QA while keeping the same frozen
+  bank, same prompt/scorer, and query writes blocked.
+- Runner: `scripts/eval/eventqa_p7_no_query_retrieval.py`.
+- Artifact:
+  `outputs/mab/eventqa_p7_no_query_retrieval_smoke/20260707T010329Z-eventqa-p7-no-query-retrieval-ctx0-q0-9-smoke/smoke_artifact.json`.
+- Integrity: `10/10` valid; every query had `retrieved_indices=[]`,
+  `retrieved_latent_count=0`, `query_write_count=0`, and
+  `bank_snapshot_changed_after_query=False`.
+- Result: EM `0/10 = 0.00`, EventQA recall `0.20`, format failures `9/10`.
+- Cost: construction `14.704 s`, total `21.041 s`, incremental peak GPU
+  allocation about `127.9 MiB`.
+- Same-scope reference: frozen P7 cost smoke on the same `context0/q0-9`
+  protocol had EM/recall `0.40/0.40`, total `19.952 s`.
+- Conclusion: the smoke supports the mechanism claim that P7's answer quality
+  on this slice depends materially on query-time retrieval rather than only on
+  prior bank construction.
+- Next route: full five-context no-query-retrieval pass; not launched.
+
+## EXP-20260706-008: Same-Model Text-Summary Full Pass
+
+- Date: 2026-07-06
+- Type: paper comparator effectiveness pass; one full pass.
+- Scope: EventQA-65536 contexts 0-4, q0-99; for each context, one standalone
+  construction process followed by one standalone Bank-off query process
+  loading the exact frozen construction artifact.
+- Method: unchanged same-model rolling-summary prompt, maximum 128 Qwen
+  tokens, no question/gold in construction, no prompt repair or external
+  summarizer.
+- Runner pair: `scripts/eval/eventqa_text_summary_construction.py` and
+  `scripts/eval/eventqa_text_summary_query.py`.
+- Strict aggregator: `scripts/eval/eventqa_text_summary_aggregate.py`.
+- Aggregate:
+  - `outputs/mab/eventqa_text_summary_full_aggregate.json`;
+  - `outputs/mab/eventqa_text_summary_full_aggregate.md`.
+- Integrity: five contexts exactly once, `500/500` unique question identities,
+  exact construction-file byte hashes linked from queries, final-summary
+  hashes/token counts matched, all prompts within capacity.
+- Result: EM `6/500 = 0.012`, EventQA recall `0.078`, format failures
+  `267/500`.
+- Per-context `(summary tokens, prompt delta, EM, recall, format failures)`:
+  - ctx0 `(81, 85, 0.030, 0.060, 26)`;
+  - ctx1 `(58, 62, 0.030, 0.130, 75)`;
+  - ctx2 `(128, 132, 0.000, 0.070, 46)`;
+  - ctx3 `(8, 12, 0.000, 0.100, 92)`;
+  - ctx4 `(97, 101, 0.000, 0.030, 28)`.
+- Effectiveness references: Disabled `0.008/0.178`, BM25 top-2
+  `0.030/0.226`, Matched16 `0.068/0.180`, P7 five-repeat
+  `0.197+-0.020/0.254+-0.028` (EM/recall).
+- Diagnostic cost: construction `223.371 s`, query `467.975 s`, end-to-end
+  `691.345 s`; shared-GPU contention confounds timing and peak memory, so
+  these fields are not paper-facing cost evidence.
+- Conclusion: negative same-model text-summary baseline. Under the user's
+  accepted boundary, poor summaries reflect model capability under this
+  protocol and do not invalidate the method comparison or justify prompt
+  tuning after observing the result.
+- Next route: P7 no-query-retrieval ablation; not launched.
+
+## EXP-20260706-007: Frozen Same-Model Text-Summary Query Smoke
+
+- Date: 2026-07-06
+- Type: auxiliary/dev q0-9 effectiveness and wiring smoke.
+- Source: unchanged canonical 81-token context0 rolling summary from
+  EXP-20260706-006; no regeneration or prompt repair.
+- Artifact:
+  `outputs/mab/eventqa_text_summary_query_smoke/20260706T102214Z-eventqa-text-summary-query-ctx0-q0-9/query_artifact.json`.
+- Integrity: `10/10`, summary hash stable, rendered prompt delta `85`, bank off,
+  original EventQA query/parser/scorer.
+- Result: EM `0.10`, recall `0.10`, format failures `2/10`.
+- Cost diagnostic: construction `34.973 s`, query `10.870 s`, total
+  `45.843 s`, incremental query peak `179.0 MiB`; timing is confounded by
+  concurrent GPU 4 load and is not paper-facing.
+- Decision: GO to five-context same-model summary full pass under the user's
+  boundary that poor summary quality is a baseline capability result, not a
+  reason to suppress evaluation. The full pass is now complete as
+  EXP-20260706-008.
+
+## EXP-20260706-006: Same-Model Text-Summary Construction Smoke
+
+- Date: 2026-07-06
+- Type: construction-only protocol smoke; failed qualitative gate.
+- Scope: EventQA context0, all 17 source chunks, no QA calls.
+- Model: same frozen MemGen/Qwen2.5-1.5B checkpoint, direct deterministic
+  generation, `latent_memory_bank=None`, rolling summary cap 128 Qwen tokens.
+- Artifact:
+  `outputs/mab/eventqa_text_summary_construction_smoke/20260706T091043Z-eventqa-text-summary-construction-ctx0/construction_artifact.json`.
+- Structural result: `17/17` ordered updates; final 81 tokens; construction
+  `34.973 s`; max incremental peak `1814.2 MiB`; hash/budget/capacity checks
+  passed.
+- Failure mode: multilingual drift, repetition, prompt/meta leakage, one-token
+  degeneration, and severe recency overwrite. Final summary is not a credible
+  compact representation of the full context.
+- Initial qualitative NO-GO was superseded by the user's explicit decision to
+  preserve poor summary quality as same-model baseline behavior. The q0-9 and
+  full effectiveness passes were then run without prompt tuning or an external
+  summarizer; see EXP-20260706-007/008.
+
+## EXP-20260706-005: EventQA Strict Matched16 Full Pass
+
+- Date: 2026-07-06
+- Type: paper-facing matched-position explicit-text baseline; one full pass.
+- Scope: EventQA-65536 contexts 0-4, q0-99, five standalone processes on GPU 7.
+- Aggregate:
+  - `outputs/mab/eventqa_matched16_full_aggregate.json`;
+  - `outputs/mab/eventqa_matched16_full_aggregate.md`.
+- Integrity: `500/500` unique questions; source token counts `{16}`; rendered
+  prompt deltas `{16}`; no capacity, provenance, hash or finite-cost failure.
+- Boundary recovery: ctx3 q67/q80/q83 required joint constrained selection;
+  only q80 incurred nonzero score loss (`0.06669`). No other question changed
+  from its unconstrained rank-1/rank-1 window pair.
+- Result: EM `34/500 = 0.068`, recall `0.180`, format failures `347/500`.
+- Cost excluding model load/scoring: index `0.120 s`, retrieval/window search
+  `83.045 s`, generation `418.596 s`, total `501.761 s`, amortized
+  `1.004 s/question`, max incremental peak `171.0 MiB`.
+- References:
+  - Disabled: EM/recall `0.008/0.178`, total `367.448 s`, peak `142.9 MiB`;
+  - BM25 top-2 full text: `0.030/0.226`, `692.845 s`, `3597.3 MiB`;
+  - P7 standalone cost pass: `0.200/0.240`, `387.999 s`, `171.9 MiB`;
+  - P7 five-repeat primary: EM `0.197+-0.020`, recall `0.254+-0.028`, format
+    failures `121.4+-8.8`.
+- Interpretation: P7's result is not explained by merely adding 16 explicit
+  rendered positions. Matched16 improves EM but not recall versus Disabled and
+  is substantially below P7 on effectiveness and format reliability.
+- Next route was the text-summary baseline, now completed as EXP-20260706-008.
+
+## EXP-20260706-004: EventQA Strict 16-Token Matched-Position Smoke
+
+- Date: 2026-07-06
+- Type: auxiliary/dev exact-budget baseline smoke; not a paper result.
+- Scope: EventQA-65536 context 0, q0-9, bank off.
+- Method: unchanged BM25 top-2 chunks; from each chunk select one contiguous
+  8-Qwen-token source window by BM25-IDF-weighted query-term overlap, with
+  earliest source-token offset as the deterministic tie break.
+- Canonical artifact:
+  `outputs/mab/eventqa_matched16_smoke/20260706T035141Z-eventqa-matched16-ctx0-q0-9-smoke/smoke_artifact.json`.
+- Integrity: `10/10` valid; exactly `8+8=16` selected source token IDs and
+  exactly `16` rendered prompt token delta per question; no framing or source
+  ID text enters the model prompt; all provenance and capacity checks passed.
+- Result: EM `0.10`, recall `0.30`, format failures `7/10`, total `9.758 s`,
+  max incremental peak `128.5 MiB`.
+- Rejected diagnostic: `20260706T034900Z` used 16 source IDs but visible
+  framing/source hashes produced a 94-token rendered delta; it is not valid
+  matched-budget evidence.
+- Same-scope references: Disabled EM/recall `0.00/0.20`; complete BM25 top-2
+  `0.10/0.30`; P7 `0.40/0.40`.
+- Decision: GO for a separately launched five-context matched16 full pass; no
+  full pass was launched in this phase.
+
+## EXP-20260706-003: EventQA BM25 Top-2 Retrieved-Text Full Pass
+
+- Date: 2026-07-06
+- Type: paper-facing retrieved-text baseline; one full deterministic pass.
+- Scope: EventQA-65536 contexts 0-4, q0-99, five standalone processes
+  serialized on GPU 0, no latent memory bank.
+- Retrieval: standard-library BM25 (`k1=1.5`, `b=0.75`), top-2 exact source
+  chunks with stable source-index tie break.
+- Runner: `scripts/eval/eventqa_bm25_retrieved_text.py`.
+- Aggregator: `scripts/eval/eventqa_bm25_aggregate.py`.
+- Aggregate:
+  - `outputs/mab/eventqa_bm25_top2_full_aggregate.json`;
+  - `outputs/mab/eventqa_bm25_top2_full_aggregate.md`.
+- Integrity: `500/500` unique questions; all five artifacts and provenance
+  fields valid; maximum prompt `8797/32768` tokens; no overflow or truncation.
+- Result: EM `15/500 = 0.030`, EventQA recall `0.226`, format failures
+  `265/500`.
+- Cost excluding model load/scoring: index `0.107 s`, retrieval `1.459 s`,
+  generation `691.278 s`, total `692.845 s`, amortized `1.386 s/question`,
+  maximum incremental peak `3597.3 MiB`.
+- Same standalone one-pass references:
+  - Disabled: EM/recall `0.008/0.178`, total `367.448 s`, peak `142.9 MiB`;
+  - P7: EM/recall `0.200/0.240`, total `387.999 s`, peak `171.9 MiB`.
+- Decision: retain BM25 top-2 as the paper retrieved-text comparator. It is
+  stronger than Disabled but much weaker than P7 on EM, with `1.79x` P7 total
+  method time and about `20.9x` P7 incremental peak allocation.
+- Evidence boundary: one deterministic BM25 pass provides a point estimate,
+  not variance or significance. P7's paper-facing main result remains its
+  five-repeat aggregate.
+- Next route: 16-token matched-budget explicit-text baseline; not launched.
+
+## EXP-20260706-002: EventQA BM25 Top-2 Retrieved-Text Smoke
+
+- Date: 2026-07-06
+- Type: auxiliary/dev baseline wiring and cost smoke; not a paper result.
+- Scope: EventQA-65536 context 0, q0-9, standalone process, no latent bank.
+- Retrieval: deterministic BM25 (`k1=1.5`, `b=0.75`), top-2 exact source
+  chunks, stable chunk-index tie break.
+- Runner: `scripts/eval/eventqa_bm25_retrieved_text.py`.
+- Artifact:
+  `outputs/mab/eventqa_bm25_top2_smoke/20260706T025910Z-eventqa-bm25-top2-ctx0-q0-9-smoke/smoke_artifact.json`.
+- Integrity: `10/10` records valid; maximum rendered prompt `8627/32768`
+  tokens; no truncation or capacity failure.
+- Effectiveness: EM `1/10 = 0.10`, EventQA recall `0.30`, format failures
+  `2/10`.
+- Cost excluding model load and scoring: index construction `0.023 s`, total
+  retrieval `0.020 s`, generation `13.629 s`, method total `13.671 s`,
+  incremental peak GPU allocation `3555.6 MiB`.
+- Same-scope references: Disabled EM/recall `0.00/0.20`, total `7.169 s`; P7
+  EM/recall `0.40/0.40`, total `19.952 s` including `14.222 s` construction.
+- Decision: GO for a separate five-context BM25 full pass. The smoke validates
+  feasibility and comparator value only; it does not support a superiority or
+  statistical claim. No full BM25 run was launched in this phase.
+
+## EXP-20260706-001: Full Method-Separable EventQA Cost Pass
+
+- Date: 2026-07-06
+- Type: paper-facing cost measurement; one full serialized pass.
+- Scope: EventQA-65536 contexts 0-4, q0-99 per context, standalone Disabled and
+  frozen P7, ten independent processes on physical GPU 7.
+- Runner: `scripts/eval/eventqa_method_separable_cost.py`.
+- Aggregator: `scripts/eval/eventqa_cost_aggregate.py`.
+- Raw root: `outputs/mab/eventqa_method_separable_cost_full/`.
+- Aggregate:
+  - `outputs/mab/eventqa_method_separable_cost_full_aggregate.json`;
+  - `outputs/mab/eventqa_method_separable_cost_full_aggregate.md`.
+- Disabled: construction `0.000 s`, query `0.735+-0.207 s`, total
+  `367.448 s`, amortized `0.735 s/question`, incremental peak max `142.9 MiB`.
+- P7: construction `78.454 s`, query `0.619+-0.175 s`, total `387.999 s`,
+  amortized `0.776 s/question`, incremental peak max `171.9 MiB`.
+- Delta: total `+20.551 s`, ratio `1.056`, amortized `+0.041 s/question`,
+  incremental peak max `+29.0 MiB`.
+- Comparability verdict: comparable for this serialized same-GPU protocol;
+  model loading excluded, generation length and scorer contract fixed.
+- Invariants: all P7 query writes zero; all frozen-bank snapshots unchanged.
+- Interpretation boundary: this is one full cost pass, not a repeated-load,
+  throughput, or universal efficiency benchmark. Do not describe the lower P7
+  query mean as a method speedup.
+
+## EXP-20260705-001: Offline EventQA Paper Aggregation
+
+- Date: 2026-07-05
+- Type: no-inference artifact aggregation and schema validation.
+- Script: `scripts/eval/eventqa_paper_aggregator.py`.
+- Config: `configs/eval/eventqa_paper_aggregator.json`.
+- Outputs:
+  - `outputs/mab/eventqa_paper_aggregate.json`;
+  - `outputs/mab/eventqa_paper_aggregate.md`.
+- Inputs: five completed P6 runs and five completed frozen P7 runs; the
+  Bank-off row is reconstructed from the paired Bank-off fields in the same
+  five P7 artifacts.
+- Result: Bank-off, P6, and P7 values reproduce the authoritative five-repeat
+  summary at the reported precision.
+- Validation: required artifact files and question fields, frozen-context
+  protocol, read-only query phase, method config identity, question identity,
+  query-write isolation, and unchanged bank snapshot.
+- Cost boundary: method-separable latency and peak GPU memory remain missing
+  and are represented as null fields, not inferred from paired timings.
+- No model loading, inference, or GPU execution was performed.
+
 ## Current Paper-Facing Experiment Summary (2026-07-05)
 
-This section is the current paper-facing result index. Detailed historical
-experiment records below are preserved and should not be interpreted as
-expanding the current claim beyond `research_notes/PAPER_SCOPE.md`.
+This section is the current paper-facing result index for the long-horizon
+latent-memory-management outline. Detailed historical records below are
+preserved. EventQA defines the current positive evidence boundary, not the full
+paper motivation or method scope.
 
 ### EventQA-65536: Main Positive Evidence
 
@@ -25,7 +320,7 @@ expanding the current claim beyond `research_notes/PAPER_SCOPE.md`.
 - Interpretation: P7 supports the scoped claim of improved long-context event
   reasoning on EventQA, but gains are not uniform across contexts.
 
-### LoCoMo-QA: Diagnostic / Limitation Evidence
+### LoCoMo-QA: Optional Diagnostic / Limitation Evidence
 
 - Scope: session-level paired pilot, two conversations, 304 QA rows per mode.
 - Disabled EM: `0`.
@@ -38,9 +333,9 @@ expanding the current claim beyond `research_notes/PAPER_SCOPE.md`.
 - Query retrieval is active on every P7 row.
 - `retrieved_latent_count=16` on every P7 row.
 - `query_write_count=0` on every P7 row.
-- Interpretation: the protocol is mechanically correct, but there is no
-  positive multi-turn QA improvement. LoCoMo is limitation evidence about
-  latent-only exact conversational fact recovery.
+- Interpretation: the protocol is mechanically correct, but it provides no
+  positive exact-QA evidence. This result is optional limitation material and
+  is not required by the current long-context reasoning outline.
 
 ### Remaining Paper-Facing Runs
 

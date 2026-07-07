@@ -4,17 +4,17 @@ Status: planning scaffold, not manuscript prose.
 
 ## 1. Working Title
 
-**Session-Local Latent Memory Banks for Long-Context Reasoning in MemGen**
+**Inference-Time Latent Memory Management for Long-Horizon LLM Agents**
 
 ## 2. One-Sentence Claim
 
-We add a session-local latent memory bank to MemGen and show that it improves
-long-context event reasoning on EventQA-65536 without retraining the Trigger,
-Weaver, or Reasoner.
+We introduce inference-time latent memory management for long-horizon
+MemGen-style LLM agents through a session-local bank that stores, retrieves,
+updates, replaces, and reuses latent memories without component retraining.
 
-Claim boundary: this is an EventQA-scoped result under the local
-MemoryAgentBench frozen-bank contract. It is not a general long-context or
-multi-turn dialogue claim.
+Evidence boundary: the current positive performance result is EventQA-scoped
+under the local MemoryAgentBench frozen-bank contract. It does not yet establish
+benchmark-general improvement.
 
 ## 3. Abstract Skeleton
 
@@ -47,14 +47,14 @@ multi-turn dialogue claim.
 
 - State that the result is scoped to a closed-set next-event benchmark.
 - Flag severe context-specific failure, especially EventQA context 4.
-- Briefly state that LoCoMo diagnostic results do not show positive exact
-  conversational QA improvement.
+- Keep the abstract focused on nonuniform EventQA behavior; reserve optional
+  LoCoMo diagnostics for the limitation section or appendix.
 
 ### Abstract Writing Gate
 
 - A provisional abstract can be drafted from existing evidence.
-- Freeze final abstract emphasis only after explicit-text baselines and valid
-  method-separable cost results are available.
+- Freeze final abstract emphasis only after explicit-text baselines and their
+  method-separable cost rows are available; Disabled/P7 cost is complete.
 
 ## 4. Introduction Skeleton
 
@@ -81,25 +81,24 @@ multi-turn dialogue claim.
 ### What Is Evaluated
 
 - Main positive benchmark: EventQA-65536.
-- Main comparisons currently ready: compressed Bank-off, P6, and P7.
-- Pending controls: text summary, BM25 retrieved text, matched-budget text, and
-  no-query-retrieval.
-- LoCoMo appears only as diagnostic limitation evidence.
+- Main comparisons currently ready: compressed Bank-off, text-summary, BM25
+  retrieved text, matched-budget text, P6, P7 no-query-retrieval, and P7.
+- LoCoMo is optional diagnostic limitation evidence rather than a required
+  benchmark axis.
 
 ### Contributions
 
-1. A bounded, session-local Weaver-space latent memory abstraction for MemGen
-   inference.
-2. A read-only frozen-bank QA protocol with no Trigger, Weaver, or Reasoner
-   retraining.
-3. Five-repeat EventQA evidence for frozen P7 and a direct P6 comparison.
-4. Context, transition, format, and harmful-memory analyses that identify
-   where the method fails.
+1. An inference-time latent memory management mechanism for MemGen-style LLM
+   agents.
+2. A session-local latent memory bank with explicit write, retrieval, update,
+   replacement, and reset operations.
+3. Long-context reasoning evaluation covering task performance and internal
+   memory behavior.
 
 ### Introduction Overclaim Warning
 
-Do not use “general long-context memory,” “multi-turn improvement,” “agent
-memory,” or “outperforms RAG” as contribution language.
+Do not convert the long-horizon agent framing into unsupported benchmark-general
+performance or “outperforms RAG” claims.
 
 ## 5. Related Work Skeleton
 
@@ -109,7 +108,8 @@ memory,” or “outperforms RAG” as contribution language.
   recurrently reuse latent states.
 - Distinguish a session-local inference bank from retraining latent-memory
   components.
-- Citation work remains required before prose is finalized.
+- Verified citations cover recurrent, compressed, retrieved, and learned
+  latent-memory systems; available formal venue metadata is synchronized.
 
 ### Long-Context Reasoning
 
@@ -121,16 +121,17 @@ memory,” or “outperforms RAG” as contribution language.
 ### Retrieval-Augmented Memory
 
 - Contrast latent retrieval with explicit retrieved-text injection.
-- Do not claim an empirical advantage over RAG until the BM25 and
-  matched-budget rows are complete.
+- The BM25 and matched-budget rows are now complete, but claims must remain
+  scoped to this EventQA protocol and point-estimate repeat boundary.
 
-### Agent And Conversational Memory
+### Long-Horizon Agent Memory
 
-- Discuss session memory, episodic memory, summaries, and external stores.
-- Separate long-term dialogue-memory requirements from the current EventQA
-  evidence.
+- Discuss session memory, episodic memory, summaries, and external stores as
+  mechanisms for preserving historical information across agent steps.
+- Separate the general long-horizon memory problem from the current EventQA
+  evidence boundary.
 
-### Positioning Against LoCoMo-Style Dialogue Memory
+### Optional Positioning Against Exact Conversational Recall
 
 - LoCoMo requires open-ended recovery of exact people, dates, preferences, and
   cross-session relations from dialogue history.
@@ -139,8 +140,9 @@ memory,” or “outperforms RAG” as contribution language.
 
 ### Related Work Writing Gate
 
-The conceptual structure is ready; citations and precise closest-neighbor
-claims require a separate literature-verification pass.
+The conceptual structure, verified citations, and closest-neighbor boundary are
+now drafted in `paper/draft_v0.md`; only final venue-format and prose polish
+remain.
 
 ## 6. Method Skeleton
 
@@ -211,11 +213,12 @@ Keep local paths, helper names, and debug counters in the appendix.
 - Isolated final difference: `update_threshold=0.095` versus `0.10`.
 - Report five-repeat mean, population standard deviation, and context spread.
 
-### Missing Baselines
+### Completed Baselines
 
-Mark these explicitly as pending experiments, without numeric placeholders:
+The following comparisons are complete and appear in the manuscript:
 
-- method-separable Bank-off/P7 cost;
+- completed method-separable Bank-off/P7 cost (`1.056x` end-to-end ratio under
+  the full serialized protocol);
 - text-summary memory;
 - BM25 top-2 retrieved text;
 - 16-token matched-budget retrieved text;
@@ -266,8 +269,9 @@ Mark these explicitly as pending experiments, without numeric placeholders:
 - EventQA is a closed-set next-event task with visible candidate answers; it is
   not general long-context factual QA proof.
 - P7 is not uniformly effective across contexts.
-- LoCoMo does not support multi-turn dialogue improvement: Disabled and P7 EM
-  are both zero on the evaluated 304-question paired slice.
+- Optional LoCoMo evidence does not support an additional positive performance
+  claim: Disabled and P7 EM are both zero on the evaluated 304-question paired
+  slice.
 - Active latent retrieval does not guarantee exact conversational fact
   recovery.
 - Method-separable cost, text-summary, RAG, matched-budget, and

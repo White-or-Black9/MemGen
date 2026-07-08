@@ -1,5 +1,55 @@
 # 项目进展
 
+## FactConsolidation 32K/64K Follow-Up Status (2026-07-08)
+
+- Completed the bounded long-context follow-up on
+  `factconsolidation_sh_32k`, `factconsolidation_mh_32k`,
+  `factconsolidation_sh_64k`, and `factconsolidation_mh_64k`.
+- Canonical artifacts:
+  - `outputs/mab/factconsolidation_p7_full/20260708T070030Z-factconsolidation_sh_32k-paired-p7/`;
+  - `outputs/mab/factconsolidation_p7_full/20260708T070031Z-factconsolidation_mh_32k-paired-p7/`;
+  - `outputs/mab/factconsolidation_p7_full/20260708T070446Z-factconsolidation_sh_64k-paired-p7/`;
+  - `outputs/mab/factconsolidation_p7_full/20260708T070454Z-factconsolidation_mh_64k-paired-p7/`.
+- Protocol integrity held across all four subtasks:
+  - `disabled` created no bank;
+  - `p7` retrieval was active on every query;
+  - `p7_no_query_retrieval` suppressed query-time retrieval on every query;
+  - query writes stayed zero and frozen-bank snapshots stayed unchanged;
+  - reset slot count stayed `0` after each context.
+- Measured effectiveness remains weak and inconsistent:
+  - `sh_32k`: `0.030 -> 0.070` under `p7`;
+  - `mh_32k`: `0.010 -> 0.000`;
+  - `sh_64k`: `0.020 -> 0.030`;
+  - `mh_64k`: `0.000 -> 0.010`.
+- Current gate outcome: keep the long-context FactConsolidation runs as
+  internal supplementary evidence only. They do not justify changing the paper
+  main line or promoting FactConsolidation into the main table.
+
+## FactConsolidation 6K Full-Query Signal Status (2026-07-08)
+
+- Completed the bounded `1 context x 100 queries x 3 methods` signal check on
+  `factconsolidation_sh_6k` and `factconsolidation_mh_6k`.
+- Canonical artifacts:
+  - `outputs/mab/factconsolidation_p7_signal/20260708T032015Z-factconsolidation_sh_6k-paired-p7/`;
+  - `outputs/mab/factconsolidation_p7_signal/20260708T032355Z-factconsolidation_mh_6k-paired-p7/`.
+- Protocol integrity still holds at full-query scale:
+  - `disabled` created no bank;
+  - `p7` and `p7_no_query_retrieval` remained query-phase read-only;
+  - frozen-bank snapshots stayed unchanged per query;
+  - post-context reset slot count stayed `0`;
+  - no cross-context leakage was detected.
+- Measured effectiveness does not support promotion:
+  - SH substring-EM `disabled=0.020`, `p7=0.000`,
+    `p7_no_query_retrieval=0.020`;
+  - MH substring-EM `disabled=0.000`, `p7=0.000`,
+    `p7_no_query_retrieval=0.000`.
+- Current gate outcome: STOP for FactConsolidation scaling under the present
+  frozen-P7 setup. There is no positive signal strong enough to justify 32k/64k
+  expansion or paper-table insertion.
+- Paper consequence: none. The EventQA manuscript path remains intact and is
+  still the default completion route if no stronger additive benchmark evidence
+  appears later.
+
 ## FactConsolidation 6K SH/MH Smoke Status (2026-07-08)
 
 - Completed the first bounded FactConsolidation smoke on real local

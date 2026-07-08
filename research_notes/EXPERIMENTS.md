@@ -1,5 +1,101 @@
 # Experiment Log
 
+## EXP-20260708-003: FactConsolidation 32K/64K Long-Context Follow-Up
+
+- Date: 2026-07-08
+- Type: bounded long-context follow-up after the null 6K gate; internal-only
+  additive evidence, not a paper result.
+- Scope:
+  - `factconsolidation_sh_32k`
+  - `factconsolidation_mh_32k`
+  - `factconsolidation_sh_64k`
+  - `factconsolidation_mh_64k`
+  - one matched context per subtask, all `100` queries, paired methods
+    `disabled`, `p7`, `p7_no_query_retrieval`.
+- Runner: `scripts/eval/factconsolidation_p7.py`.
+- Matrix: `configs/eval/factconsolidation_p7.json`.
+- Artifacts:
+  - `outputs/mab/factconsolidation_p7_full/20260708T070030Z-factconsolidation_sh_32k-paired-p7/`;
+  - `outputs/mab/factconsolidation_p7_full/20260708T070031Z-factconsolidation_mh_32k-paired-p7/`;
+  - `outputs/mab/factconsolidation_p7_full/20260708T070446Z-factconsolidation_sh_64k-paired-p7/`;
+  - `outputs/mab/factconsolidation_p7_full/20260708T070454Z-factconsolidation_mh_64k-paired-p7/`.
+- Integrity:
+  - all four subtasks completed `100 queries x 3 methods = 300` scored records;
+  - `disabled` created no bank;
+  - `p7` and `p7_no_query_retrieval` kept `query_write_count=0`,
+    unchanged pre/post query bank snapshots, reset slot count `0`, and no
+    cross-context leakage on every query;
+  - `p7` retrieval was active on `100/100` queries for every long-context
+    subtask, while `p7_no_query_retrieval` stayed at `0/100`;
+  - construction counts matched chunk counts:
+    - 32k subtasks: `9` writes / `9` final slots / `9` turns;
+    - 64k subtasks: `17` writes / `16` final slots / `17` turns.
+- Result:
+  - `factconsolidation_sh_32k`: substring-EM
+    `disabled=3/100=0.030`, `p7=7/100=0.070`,
+    `p7_no_query_retrieval=3/100=0.030`;
+  - `factconsolidation_mh_32k`: substring-EM
+    `disabled=1/100=0.010`, `p7=0/100=0.000`,
+    `p7_no_query_retrieval=1/100=0.010`;
+  - `factconsolidation_sh_64k`: substring-EM
+    `disabled=2/100=0.020`, `p7=3/100=0.030`,
+    `p7_no_query_retrieval=2/100=0.020`;
+  - `factconsolidation_mh_64k`: substring-EM
+    `disabled=0/100=0.000`, `p7=1/100=0.010`,
+    `p7_no_query_retrieval=0/100=0.000`.
+- Interpretation:
+  - long-context runs confirm that the bank is genuinely active under P7 even
+    when effectiveness remains weak;
+  - `sh_32k` shows the clearest positive slice, but the pattern is not stable
+    across SH/MH or 32k/64k;
+  - the current evidence remains too weak and inconsistent for main-table
+    promotion.
+- Decision: retain these 32k/64k runs as internal supplementary evidence only.
+  Do not modify `paper/` and do not alter the EventQA-first manuscript route.
+
+## EXP-20260708-002: FactConsolidation 6K SH/MH Full-Query Signal Check
+
+- Date: 2026-07-08
+- Type: bounded effectiveness check; not a paper result unless later promoted.
+- Scope: local MemoryAgentBench Conflict Resolution
+  `factconsolidation_sh_6k` and `factconsolidation_mh_6k`, the single matched
+  context of each subtask, all `100` queries, and three paired methods:
+  `disabled`, `p7`, `p7_no_query_retrieval`.
+- Runner: `scripts/eval/factconsolidation_p7.py`.
+- Matrix: `configs/eval/factconsolidation_p7.json`.
+- Artifacts:
+  - `outputs/mab/factconsolidation_p7_signal/20260708T032015Z-factconsolidation_sh_6k-paired-p7/`;
+  - `outputs/mab/factconsolidation_p7_signal/20260708T032355Z-factconsolidation_mh_6k-paired-p7/`.
+- Integrity:
+  - both subtasks completed full paired runs with
+    `100 queries x 3 methods = 300` scored records each;
+  - `disabled` never created a bank;
+  - `p7` and `p7_no_query_retrieval` kept `query_write_count=0`,
+    `bank_snapshot_changed_after_query=False`, `post_reset_slot_count=0`,
+    and no cross-context leakage on every query;
+  - `p7` and `p7_no_query_retrieval` both retained the expected construction
+    parity: `construction_bank_write_count=2`,
+    `construction_final_slot_count=2`, `construction_turn_count=2`.
+- Result:
+  - `factconsolidation_sh_6k` substring-EM:
+    `disabled=2/100=0.020`, `p7=0/100=0.000`,
+    `p7_no_query_retrieval=2/100=0.020`;
+  - `factconsolidation_mh_6k` substring-EM:
+    `disabled=0/100=0.000`, `p7=0/100=0.000`,
+    `p7_no_query_retrieval=0/100=0.000`.
+- Interpretation:
+  - this run gives no positive signal for FactConsolidation under the current
+    frozen P7 protocol;
+  - SH shows a small regression of `p7` against both `disabled` and
+    `p7_no_query_retrieval`;
+  - MH is uniformly zero, so retrieval utility is not demonstrated;
+  - the current record schema does not expose per-query retrieved slot counts,
+    so this run is sufficient for effectiveness gating but not for a fine
+    retrieval-usage analysis.
+- Decision: stop short of 32k/64k promotion for now. No `paper/` update is
+  justified from this result, and the EventQA paper path remains the default
+  completion route.
+
 ## EXP-20260708-001: FactConsolidation 6K SH/MH Paired Smoke
 
 - Date: 2026-07-08

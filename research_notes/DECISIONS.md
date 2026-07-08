@@ -85,6 +85,8 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0078 | 2026-07-05 | superseded | Scope the current paper to EventQA-65536 long-context event reasoning |
 | DEC-0079 | 2026-07-05 | accepted | Use the reviewed outline for the long-horizon LLM-agent paper framing |
 | DEC-0080 | 2026-07-07 | accepted | Park the consolidated draft before skeptical review and preserve the scoped claim boundary |
+| DEC-0081 | 2026-07-08 | accepted | Keep FactConsolidation additive only and stop scaling after the null 6K signal check |
+| DEC-0082 | 2026-07-08 | accepted | Retain the 32K/64K FactConsolidation follow-up as internal supplementary evidence only |
 
 ## Decision Template
 
@@ -103,6 +105,74 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Superseded by:
 
 ## Standing Decisions
+
+### DEC-0082: Retain the 32K/64K FactConsolidation Follow-Up as Internal Supplementary Evidence Only
+
+- Date: 2026-07-08
+- Status: accepted
+- Context:
+  - After the null 6K signal gate, a bounded long-context follow-up was run on
+    SH/MH 32k and 64k to test whether larger contexts reveal a stronger
+    retrieval benefit.
+  - The protocol stayed clean and P7 retrieval was active on every query.
+  - The results remained weak and unstable:
+    - `sh_32k`: `0.030 -> 0.070`;
+    - `mh_32k`: `0.010 -> 0.000`;
+    - `sh_64k`: `0.020 -> 0.030`;
+    - `mh_64k`: `0.000 -> 0.010`.
+- Decision:
+  - Preserve the 32k/64k runs as internal supplementary evidence only.
+  - Do not promote FactConsolidation into the manuscript main table or revise
+    the EventQA-first paper framing based on these runs.
+  - Stop the current FactConsolidation expansion at this point.
+- Rationale:
+  - Although P7 is active and mildly positive on some SH slices, the pattern is
+    too small and too inconsistent across SH/MH and 32k/64k to support a paper
+    claim.
+  - The EventQA package remains the only robust positive evidence line for the
+    current draft.
+- Consequences:
+  - The EventQA manuscript path remains unchanged.
+  - FactConsolidation can be cited later only as optional internal support,
+    negative evidence, or motivation for future mechanism analysis.
+  - No further FactConsolidation scaling or paper integration is implied by the
+    current evidence.
+- Related experiments: EXP-20260708-002, EXP-20260708-003.
+
+### DEC-0081: Keep FactConsolidation Additive Only After the Null 6K Signal Check
+
+- Date: 2026-07-08
+- Status: accepted
+- Context:
+  - The bounded paired smoke established that the FactConsolidation runner is
+    protocol-clean at 6k SH/MH scale.
+  - The first full-query signal check on the same two 6k subtasks completed
+    without invariance failures, but showed no effectiveness gain:
+    `factconsolidation_sh_6k` gave substring-EM
+    `disabled=0.020`, `p7=0.000`, `p7_no_query_retrieval=0.020`; and
+    `factconsolidation_mh_6k` gave `0.000` for all three methods.
+  - The current paper already has an independently usable EventQA evidence
+    package and must remain valid if additive benchmark expansion fails.
+- Decision:
+  - Do not promote FactConsolidation into the paper main table on the basis of
+    the current 6k evidence.
+  - Do not scale this benchmark to 32k/64k as the default next step under the
+    present frozen-P7 configuration.
+  - Keep FactConsolidation as optional additive evidence only, reopenable later
+    if a materially different mechanism, metric, or protocol is justified.
+- Rationale:
+  - A null or slightly negative 6k result does not justify spending more GPU
+    budget on larger-context repeats under the same setup.
+  - Preserving EventQA as the primary positive evidence path avoids making the
+    manuscript dependent on an additive benchmark that currently does not
+    support the claim.
+- Consequences:
+  - The default path returns to the EventQA-based manuscript package.
+  - FactConsolidation remains documented as tested infrastructure plus null
+    evidence, not as a promoted benchmark result.
+  - Any future reopening should first specify what changes relative to the
+    current frozen-P7 protocol.
+- Related experiments: EXP-20260708-001, EXP-20260708-002.
 
 ### DEC-0080: Park the Consolidated Draft Before Skeptical Review
 

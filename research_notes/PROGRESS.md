@@ -1,5 +1,33 @@
 # 项目进展
 
+## FactConsolidation 6K SH/MH Smoke Status (2026-07-08)
+
+- Completed the first bounded FactConsolidation smoke on real local
+  Conflict Resolution data using the new paired frozen-P7 runner:
+  `factconsolidation_sh_6k` and `factconsolidation_mh_6k`, one matched context
+  each, q0-4 only, three methods per subtask.
+- Canonical artifacts:
+  - `outputs/mab/factconsolidation_p7_smoke/20260708T030506Z-factconsolidation_sh_6k-paired-p7/`;
+  - `outputs/mab/factconsolidation_p7_smoke/20260708T030535Z-factconsolidation_mh_6k-paired-p7/`.
+- Protocol integrity passed on both subtasks:
+  - `disabled` created no bank;
+  - `p7` and `p7_no_query_retrieval` kept `query_write_count=0`;
+  - frozen-bank snapshots were unchanged across every query;
+  - post-context reset slot count was always `0`;
+  - no cross-context leakage was detected;
+  - runtime config matched the locked matrix exactly.
+- Construction parity also passed:
+  `p7` and `p7_no_query_retrieval` both produced write count `2`, final slot
+  count `2`, and construction turn count `2` on SH and MH.
+- Effectiveness on this tiny q0-4 smoke slice is uniformly `0/5` substring-EM
+  for all three methods on both subtasks. This is treated as non-informative
+  for benchmark claims and does not affect the existing EventQA paper path.
+- Current gate outcome: GO for pipeline validity. The FactConsolidation
+  integration is runnable and invariant-clean at 6k SH/MH scale.
+- Stop-point meaning: the current EventQA paper remains unchanged and
+  independently usable whether later FactConsolidation evidence is positive,
+  null, or rejected.
+
 ## Paper Draft Consolidation Checkpoint (2026-07-07)
 
 - Completed the outline-aligned manuscript draft:

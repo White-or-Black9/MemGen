@@ -1,5 +1,47 @@
 # Experiment Log
 
+## EXP-20260708-001: FactConsolidation 6K SH/MH Paired Smoke
+
+- Date: 2026-07-08
+- Type: benchmark-integration smoke; pipeline validity only, not a paper result.
+- Scope: local MemoryAgentBench Conflict Resolution
+  `factconsolidation_sh_6k` and `factconsolidation_mh_6k`, one matched context
+  each, q0-4 only, three methods per subtask: `disabled`, `p7`,
+  `p7_no_query_retrieval`.
+- Runner: `scripts/eval/factconsolidation_p7.py`.
+- Matrix: `configs/eval/factconsolidation_p7.json`.
+- Artifacts:
+  - `outputs/mab/factconsolidation_p7_smoke/20260708T030506Z-factconsolidation_sh_6k-paired-p7/`;
+  - `outputs/mab/factconsolidation_p7_smoke/20260708T030535Z-factconsolidation_mh_6k-paired-p7/`.
+- Integrity:
+  - both artifacts validated under the paired runner contract;
+  - each subtask completed `15` scored records =
+    `1 context x 5 queries x 3 methods`;
+  - `disabled` never created a bank;
+  - for `p7` and `p7_no_query_retrieval`, every query had
+    `query_write_count=0`,
+    `bank_snapshot_changed_after_query=False`,
+    `post_reset_slot_count=0`, and no cross-context leakage;
+  - matrix-aligned runtime config held exactly:
+    `retrieve_threshold=0.05`, `update_threshold=0.10`, `max_slots=16`,
+    `top_k=2`, `decay_alpha=0.05`, `storage_space=weaver`,
+    `query_phase=read_only`;
+  - construction parity held between `p7` and `p7_no_query_retrieval` on both
+    subtasks: write count `2`, final slot count `2`, construction turn count
+    `2`.
+- Result:
+  - `factconsolidation_sh_6k`: substring-EM hits
+    `disabled=0/5`, `p7=0/5`, `p7_no_query_retrieval=0/5`;
+  - `factconsolidation_mh_6k`: substring-EM hits
+    `disabled=0/5`, `p7=0/5`, `p7_no_query_retrieval=0/5`.
+- Interpretation: this smoke is a protocol GO, not an effectiveness signal.
+  The important outcome is that the current frozen-P7 FactConsolidation runner
+  correctly executes ordered construction, frozen-bank per-query reuse,
+  query-phase read-only isolation, exact reset, and no-query-retrieval
+  construction parity on real SH/MH data.
+- Decision: GO to the next bounded stage of FactConsolidation evidence
+  preparation. No `paper/` edit is justified from this smoke alone.
+
 ## EXP-20260707-002: EventQA P7 No-Query-Retrieval Full Pass
 
 - Date: 2026-07-07

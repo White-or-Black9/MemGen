@@ -13,6 +13,29 @@ controlled benchmark campaign that evaluates four distinct claims:
 The campaign includes benchmark integration, smoke validation, full experiment
 execution, aggregation, statistical analysis, and paper-table updates.
 
+This campaign is a post-draft extension, not a prerequisite for completing the
+existing paper. The validated EventQA manuscript package remains independently
+submittable throughout the campaign.
+
+## 1.1 Existing Paper Baseline
+
+The pre-campaign paper baseline is the current EventQA-centered manuscript and
+its canonical evidence package:
+
+- `paper/draft_v0.md` is a complete scoped draft;
+- EventQA-65536 is the sole required positive benchmark;
+- the main effectiveness table already contains Disabled, explicit-text
+  controls, P6, P7 without query retrieval, and frozen P7;
+- the cost table and EventQA analysis package are already complete under their
+  stated caveats;
+- LoCoMo remains limitation-only evidence;
+- the supported claim is limited to closed-set long-context event reasoning
+  under the frozen EventQA protocol.
+
+The benchmark campaign must not weaken, invalidate, or delay this baseline.
+Failure to obtain a positive FactConsolidation or DetectiveQA result leaves the
+existing EventQA paper scope and conclusions unchanged.
+
 ## 2. Fixed Method and Safety Boundary
 
 The campaign evaluates the current frozen P7 method without modifying its model
@@ -34,6 +57,34 @@ or training behavior:
 Benchmark adapters, prompts, parsers, scorers, configs, and aggregators remain
 outside the training path. Any proposed method change discovered during the
 campaign is recorded as future work rather than introduced into P7.
+
+## 2.1 Non-Regression and Rollback Contract
+
+Before benchmark implementation begins, the campaign records a paper baseline
+checkpoint containing:
+
+- the accepted manuscript commit and current paper working-tree state;
+- hashes of the canonical EventQA aggregate and table-source artifacts;
+- the frozen P7 configuration and evaluator versions;
+- the current main-table and claim-boundary text.
+
+All new benchmark code, artifacts, and draft revisions remain separable from
+that checkpoint. New benchmark results are integrated through a dedicated
+paper-update commit only after the unified-analysis gate passes.
+
+The following outcomes do not modify the existing EventQA main paper:
+
+- adapter or metric validation failure;
+- insufficient independent FactConsolidation evaluation units;
+- P7 failing to improve over Disabled;
+- unstable or contradictory results across repeats;
+- invalid comparison caused by context capacity, prompt, or scorer mismatch;
+- DetectiveQA producing only negative stress evidence;
+- BABILong not being activated or completing with a negative result.
+
+In these cases, the new work is retained as internal diagnostics, a clearly
+labeled appendix result, or excluded from the manuscript. Existing EventQA
+tables, abstract values, contributions, and conclusion are not rewritten.
 
 ## 3. Benchmark Roles
 
@@ -67,6 +118,10 @@ FactConsolidation enters the main table only if the final evaluation has enough
 independent units for a defensible aggregate. If the released/local data expose
 too few independent contexts, it becomes a mechanism/ablation table instead of
 being presented as broad performance evidence.
+
+If it fails both the statistical-scope gate and the mechanism-evidence gate, it
+is omitted from the paper and the EventQA-only draft remains the submission
+candidate.
 
 ### 3.3 DetectiveQA: Stress Test
 
@@ -144,8 +199,13 @@ Audit current branch state, P7 settings, existing EventQA artifacts, official
 benchmark configs, dataset counts, metrics, and protected files. Produce a
 row-level target matrix before implementation.
 
+Also freeze the pre-campaign paper baseline described in Section 2.1. Record
+which files and table rows belong to the accepted EventQA manuscript so later
+benchmark work cannot silently replace them.
+
 Exit gate: every planned row has a benchmark split, method, metric, repeat
-count, artifact schema, and paper destination.
+count, artifact schema, and paper destination, and the EventQA-only paper can be
+reconstructed without any campaign artifact.
 
 ### Phase 1: FactConsolidation Adapter and Smoke
 
@@ -221,6 +281,16 @@ Update the manuscript only after Phase 7 passes:
 No benchmark is promoted from appendix to the main table solely because its
 runner completed.
 
+Phase 8 has two valid outcomes:
+
+1. **Extension accepted:** FactConsolidation passes the evidence gates and is
+   added through a dedicated, reviewable paper commit.
+2. **Fallback retained:** new evidence is weak, invalid, or out of scope; the
+   EventQA-only draft and its existing tables remain the final paper package.
+
+The fallback outcome is a successful campaign conclusion, not an incomplete
+paper.
+
 ## 7. Decision Rules
 
 - A smoke success proves pipeline validity, not method effectiveness.
@@ -232,6 +302,12 @@ runner completed.
 - Negative or zero results are retained when the protocol is valid.
 - Any model or training change requires a separate design and cannot be folded
   into this campaign.
+- New benchmark evidence must be additive. It cannot retroactively redefine
+  the EventQA protocol, rerank the frozen P7 configuration, or make the existing
+  paper conditional on a new positive result.
+- A negative result may be reported as a limitation only when its protocol is
+  valid and the result materially clarifies the method boundary. Otherwise it
+  remains internal.
 
 ## 8. Deliverables
 
@@ -244,6 +320,10 @@ The completed campaign produces:
 5. a final benchmark decision matrix;
 6. updated main, ablation, stress, and appendix tables;
 7. revised manuscript claims and limitations tied to validated evidence.
+
+If no new benchmark passes the promotion gate, deliverables 1--5 remain useful
+campaign artifacts, while deliverables 6--7 are replaced by a no-change paper
+decision that preserves the existing EventQA manuscript.
 
 ## 9. Execution Order
 

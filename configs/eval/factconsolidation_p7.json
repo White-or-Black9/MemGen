@@ -1,0 +1,31 @@
+{
+  "schema_version": "factconsolidation-p7-matrix/v1",
+  "split": "Conflict_Resolution",
+  "subtasks": [
+    "factconsolidation_sh_6k",
+    "factconsolidation_mh_6k",
+    "factconsolidation_sh_32k",
+    "factconsolidation_mh_32k",
+    "factconsolidation_sh_64k",
+    "factconsolidation_mh_64k"
+  ],
+  "smoke_subtasks": [
+    "factconsolidation_sh_6k",
+    "factconsolidation_mh_6k"
+  ],
+  "methods": [
+    "disabled",
+    "p7",
+    "p7_no_query_retrieval"
+  ],
+  "p7": {
+    "retrieve_threshold": 0.05,
+    "update_threshold": 0.10,
+    "max_slots": 16,
+    "top_k": 2,
+    "decay_alpha": 0.05,
+    "storage_space": "weaver",
+    "query_phase": "read_only"
+  },
+  "primary_metric": "substring_exact_match"
+}

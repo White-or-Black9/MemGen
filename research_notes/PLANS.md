@@ -32,6 +32,34 @@
   2. resolve review-blocking manuscript or evidence issues;
   3. convert to the selected venue template only after the review gate.
 
+### Additive memory benchmark campaign: FactConsolidation matrix freeze (2026-07-08)
+
+- Scope is additive to the frozen EventQA paper package and does not change the
+  current paper fallback rule.
+- Dataset audit artifact:
+  `outputs/mab/factconsolidation_dataset_audit.json`.
+- Accepted evaluation matrix is frozen in
+  `configs/eval/factconsolidation_p7.json`.
+- Real audited scale for the six selected subtasks:
+  - `factconsolidation_sh_6k`: 1 matched context, 100 queries, 2 chunks,
+    `~6.4k` context tokens, `~6.5k` memorization-prompt tokens.
+  - `factconsolidation_mh_6k`: 1 matched context, 100 queries, 2 chunks,
+    `~6.4k` context tokens, `~6.5k` memorization-prompt tokens.
+  - `factconsolidation_sh_32k`: 1 matched context, 100 queries, 9 chunks,
+    `~34.6k` context tokens, `~35.1k` memorization-prompt tokens.
+  - `factconsolidation_mh_32k`: 1 matched context, 100 queries, 9 chunks,
+    `~34.6k` context tokens, `~35.1k` memorization-prompt tokens.
+  - `factconsolidation_sh_64k`: 1 matched context, 100 queries, 17 chunks,
+    `~70.0k` context tokens, `~70.8k` memorization-prompt tokens.
+  - `factconsolidation_mh_64k`: 1 matched context, 100 queries, 17 chunks,
+    `~70.0k` context tokens, `~70.8k` memorization-prompt tokens.
+- Execution order remains bounded:
+  1. implement adapter and paired runner;
+  2. smoke only on 6k SH/MH;
+  3. promote 32k/64k only if smoke is valid and useful.
+- `262k` subtasks are intentionally excluded from this campaign until the
+  smaller matrix proves usable.
+
 ### Historical planning snapshot below
 
 - Accepted formal results: Phase 0-7.

@@ -428,7 +428,10 @@ class MemGenGenerationMixin(GenerationMixin):
         current_position_ids: torch.Tensor,
         current_input_ids: torch.Tensor,
         do_sample: bool,
-        temperature: float
+        temperature: float,
+        *,
+        forced_token_ids: torch.Tensor | None = None,
+        allowed_token_ids: torch.Tensor | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         将 reasoner 生成的下一个 token 追加到当前序列中。
@@ -441,7 +444,27 @@ class MemGenGenerationMixin(GenerationMixin):
         B = current_inputs_embeds.size(0)
 
         next_token_logits = reasoner_outputs.logits[:, -1]
-        next_token_ids = self._get_next_token(next_token_logits, do_sample=do_sample, temperature=temperature)
+        if forced_token_ids is not None:
+            next_token_ids = forced_token_ids.to(
+                device=next_token_logits.device, dtype=torch.long,
+            ).view(-1, 1)
+        elif allowed_token_ids is not None:
+            allowed_token_ids = allowed_token_ids.to(
+                device=next_token_logits.device, dtype=torch.long,
+            )
+            constrained_logits = next_token_logits.index_select(1, allowed_token_ids)
+            selected = self._get_next_token(
+                constrained_logits,
+                do_sample=do_sample,
+                temperature=temperature,
+            )
+            next_token_ids = allowed_token_ids[selected.view(-1)].view(-1, 1)
+        else:
+            next_token_ids = self._get_next_token(
+                next_token_logits,
+                do_sample=do_sample,
+                temperature=temperature,
+            )
 
         # 更新 input_ids
         current_input_ids = torch.cat([current_input_ids, next_token_ids], dim=1)

@@ -28,6 +28,47 @@ from memgen.utils import (
 )
 
 
+def build_constrained_choice_spec(tokenizer) -> dict[str, object]:
+    """Build a token-level grammar for exactly ``The correct answer is (X)``."""
+    choices = ("A", "B", "C", "D")
+    sequences = {
+        choice: tokenizer.encode(
+            f"The correct answer is ({choice})", add_special_tokens=False,
+        )
+        for choice in choices
+    }
+    first = sequences[choices[0]]
+    prefix_length = 0
+    while (
+        prefix_length < min(len(sequence) for sequence in sequences.values())
+        and len({sequence[prefix_length] for sequence in sequences.values()}) == 1
+    ):
+        prefix_length += 1
+    suffix_length = 0
+    while (
+        suffix_length < min(len(sequence) - prefix_length for sequence in sequences.values())
+        and len({sequence[-1 - suffix_length] for sequence in sequences.values()}) == 1
+    ):
+        suffix_length += 1
+    middle = {
+        choice: sequence[prefix_length:len(sequence) - suffix_length]
+        for choice, sequence in sequences.items()
+    }
+    if any(len(tokens) != 1 for tokens in middle.values()):
+        raise ValueError("choice grammar requires one token per A/B/C/D option")
+    prefix = first[:prefix_length]
+    suffix = first[len(first) - suffix_length:]
+    for choice, tokens in middle.items():
+        rendered = tokenizer.decode(prefix + tokens + suffix, skip_special_tokens=False)
+        if rendered != f"The correct answer is ({choice})":
+            raise ValueError("choice grammar tokenization does not round-trip")
+    return {
+        "prefix_token_ids": prefix,
+        "choice_token_ids": [middle[choice][0] for choice in choices],
+        "suffix_token_ids": suffix,
+    }
+
+
 class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin):
     """
     ================================================================
@@ -445,6 +486,21 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
         pad_token_id = tokenizer.pad_token_id
         eos_token_id = tokenizer.eos_token_id
         prompt_len = input_ids.size(1)
+        constrained_choice = bool(
+            getattr(generation_config, "constrained_choice", False)
+        )
+        choice_spec = build_constrained_choice_spec(tokenizer) if constrained_choice else None
+        if choice_spec is not None:
+            constrained_length = (
+                len(choice_spec["prefix_token_ids"])
+                + 1
+                + len(choice_spec["suffix_token_ids"])
+                + 1
+            )
+            if max_new_tokens < constrained_length:
+                raise ValueError(
+                    "max_new_tokens is too small for constrained choice generation"
+                )
 
         inputs_embeds = reasoner.get_input_embeddings()(input_ids)
         B, _, hidden_size = inputs_embeds.shape
@@ -478,6 +534,7 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
             "retrieved_latents_enter_reasoner": False,
             "query_write_count": 0,
             "query_write_attempt_count": 0,
+            "constrained_choice": constrained_choice,
         }
 
         # 初始化生成循环
@@ -763,7 +820,7 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                 current_cache = None  # 注入后 KV cache 失效，需重建
 
             # Step 3: 检查是否达到最大增强次数，如果是则一次生成剩余 token
-            if (sentence_augment_count >= max_augment_num).all():
+            if choice_spec is None and (sentence_augment_count >= max_augment_num).all():
                 generation_config_continue = GenerationConfig(
                     do_sample=generation_config.weaver_do_sample,
                     pad_token_id=pad_token_id,
@@ -796,6 +853,28 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                 past_key_values=current_cache
             )
 
+            forced_token_ids = None
+            allowed_token_ids = None
+            if choice_spec is not None:
+                prefix_ids = choice_spec["prefix_token_ids"]
+                suffix_ids = choice_spec["suffix_token_ids"]
+                if i < len(prefix_ids):
+                    forced_token_ids = torch.full(
+                        (B,), prefix_ids[i], device=device, dtype=torch.long,
+                    )
+                elif i == len(prefix_ids):
+                    allowed_token_ids = torch.tensor(
+                        choice_spec["choice_token_ids"], device=device, dtype=torch.long,
+                    )
+                elif i < len(prefix_ids) + 1 + len(suffix_ids):
+                    suffix_index = i - len(prefix_ids) - 1
+                    forced_token_ids = torch.full(
+                        (B,), suffix_ids[suffix_index], device=device, dtype=torch.long,
+                    )
+                else:
+                    forced_token_ids = torch.full(
+                        (B,), eos_token_id, device=device, dtype=torch.long,
+                    )
             current_inputs_embeds, current_attention_mask, current_position_ids, current_input_ids = self._append_one_step(
                 outputs,
                 current_inputs_embeds,
@@ -803,7 +882,9 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                 current_position_ids,
                 current_input_ids,
                 do_sample=generation_config.weaver_do_sample,
-                temperature=generation_config.temperature
+                temperature=generation_config.temperature,
+                forced_token_ids=forced_token_ids,
+                allowed_token_ids=allowed_token_ids,
             )
             current_cache = outputs.past_key_values
 

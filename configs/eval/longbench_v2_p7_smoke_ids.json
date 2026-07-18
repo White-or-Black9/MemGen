@@ -1,0 +1,247 @@
+{
+  "schema_version": 1,
+  "name": "longbench_v2_p7_smoke",
+  "dataset": "zai-org/LongBench-v2",
+  "dataset_alias_requested": "THUDM/LongBench-v2",
+  "revision": "2b48e494f2c7a2f0af81aae178e05c7e1dde0fe9",
+  "selection_seed": "longbench-v2-p7-20260712",
+  "selection_rule": "rendered_chat_token_count <= 262144, then round-robin across length x difficulty strata within each target domain using stable SHA-256 ordering",
+  "rendered_chat_token_cap": 262144,
+  "count": 18,
+  "domain_counts": {
+    "Long Structured Data Understanding": 6,
+    "Long-dialogue History Understanding": 6,
+    "Multi-Document QA": 6
+  },
+  "length_counts": {
+    "long": 2,
+    "medium": 10,
+    "short": 6
+  },
+  "difficulty_counts": {
+    "easy": 9,
+    "hard": 9
+  },
+  "capacity_counts": {
+    "over_capacity": 13,
+    "window_fit": 5
+  },
+  "items": [
+    {
+      "_id": "66ed2c87821e116aacb1f149",
+      "domain": "Long Structured Data Understanding",
+      "sub_domain": "Table QA",
+      "difficulty": "easy",
+      "length": "short",
+      "answer": "A",
+      "context_word_count": 8301,
+      "context_token_count": 18887,
+      "rendered_chat_token_count": 19118,
+      "capacity_class": "window_fit"
+    },
+    {
+      "_id": "66f41108821e116aacb30c41",
+      "domain": "Multi-Document QA",
+      "sub_domain": "Financial",
+      "difficulty": "easy",
+      "length": "medium",
+      "answer": "D",
+      "context_word_count": 114496,
+      "context_token_count": 177806,
+      "rendered_chat_token_count": 177935,
+      "capacity_class": "over_capacity"
+    },
+    {
+      "_id": "66f41348821e116aacb30c89",
+      "domain": "Multi-Document QA",
+      "sub_domain": "Legal",
+      "difficulty": "hard",
+      "length": "short",
+      "answer": "D",
+      "context_word_count": 8751,
+      "context_token_count": 12238,
+      "rendered_chat_token_count": 12441,
+      "capacity_class": "window_fit"
+    },
+    {
+      "_id": "66f590fa821e116aacb33f35",
+      "domain": "Multi-Document QA",
+      "sub_domain": "Academic",
+      "difficulty": "hard",
+      "length": "medium",
+      "answer": "C",
+      "context_word_count": 33643,
+      "context_token_count": 70117,
+      "rendered_chat_token_count": 70288,
+      "capacity_class": "over_capacity"
+    },
+    {
+      "_id": "66f659a8bb02136c067c1d68",
+      "domain": "Long Structured Data Understanding",
+      "sub_domain": "Table QA",
+      "difficulty": "hard",
+      "length": "medium",
+      "answer": "A",
+      "context_word_count": 34439,
+      "context_token_count": 211922,
+      "rendered_chat_token_count": 212043,
+      "capacity_class": "over_capacity"
+    },
+    {
+      "_id": "66f96115bb02136c067c541c",
+      "domain": "Multi-Document QA",
+      "sub_domain": "Legal",
+      "difficulty": "easy",
+      "length": "short",
+      "answer": "D",
+      "context_word_count": 14947,
+      "context_token_count": 22053,
+      "rendered_chat_token_count": 22544,
+      "capacity_class": "window_fit"
+    },
+    {
+      "_id": "66fa0d88bb02136c067c5a8a",
+      "domain": "Multi-Document QA",
+      "sub_domain": "Financial",
+      "difficulty": "hard",
+      "length": "long",
+      "answer": "C",
+      "context_word_count": 132097,
+      "context_token_count": 214108,
+      "rendered_chat_token_count": 214635,
+      "capacity_class": "over_capacity"
+    },
+    {
+      "_id": "66fb6527bb02136c067c7b4f",
+      "domain": "Multi-Document QA",
+      "sub_domain": "Legal",
+      "difficulty": "easy",
+      "length": "long",
+      "answer": "B",
+      "context_word_count": 131841,
+      "context_token_count": 198018,
+      "rendered_chat_token_count": 198230,
+      "capacity_class": "over_capacity"
+    },
+    {
+      "_id": "67062a63bb02136c067cf5ac",
+      "domain": "Long Structured Data Understanding",
+      "sub_domain": "Table QA",
+      "difficulty": "hard",
+      "length": "short",
+      "answer": "C",
+      "context_word_count": 17471,
+      "context_token_count": 58339,
+      "rendered_chat_token_count": 58579,
+      "capacity_class": "over_capacity"
+    },
+    {
+      "_id": "6719ef50bb02136c067d4911",
+      "domain": "Long-dialogue History Understanding",
+      "sub_domain": "Dialogue history QA",
+      "difficulty": "easy",
+      "length": "medium",
+      "answer": "C",
+      "context_word_count": 79530,
+      "context_token_count": 118848,
+      "rendered_chat_token_count": 119011,
+      "capacity_class": "over_capacity"
+    },
+    {
+      "_id": "671a4444bb02136c067d4a40",
+      "domain": "Long-dialogue History Understanding",
+      "sub_domain": "Dialogue history QA",
+      "difficulty": "hard",
+      "length": "medium",
+      "answer": "B",
+      "context_word_count": 76229,
+      "context_token_count": 117684,
+      "rendered_chat_token_count": 117793,
+      "capacity_class": "over_capacity"
+    },
+    {
+      "_id": "671b08c8bb02136c067d4e19",
+      "domain": "Long-dialogue History Understanding",
+      "sub_domain": "Agent history QA",
+      "difficulty": "easy",
+      "length": "short",
+      "answer": "C",
+      "context_word_count": 8677,
+      "context_token_count": 25834,
+      "rendered_chat_token_count": 25942,
+      "capacity_class": "window_fit"
+    },
+    {
+      "_id": "671b2822bb02136c067d5020",
+      "domain": "Long-dialogue History Understanding",
+      "sub_domain": "Dialogue history QA",
+      "difficulty": "hard",
+      "length": "medium",
+      "answer": "D",
+      "context_word_count": 76648,
+      "context_token_count": 119868,
+      "rendered_chat_token_count": 119987,
+      "capacity_class": "over_capacity"
+    },
+    {
+      "_id": "671b2e2dbb02136c067d515b",
+      "domain": "Long-dialogue History Understanding",
+      "sub_domain": "Dialogue history QA",
+      "difficulty": "easy",
+      "length": "medium",
+      "answer": "C",
+      "context_word_count": 80451,
+      "context_token_count": 120562,
+      "rendered_chat_token_count": 120690,
+      "capacity_class": "over_capacity"
+    },
+    {
+      "_id": "671b3fa1bb02136c067d5353",
+      "domain": "Long-dialogue History Understanding",
+      "sub_domain": "Agent history QA",
+      "difficulty": "hard",
+      "length": "short",
+      "answer": "C",
+      "context_word_count": 13941,
+      "context_token_count": 30486,
+      "rendered_chat_token_count": 30609,
+      "capacity_class": "window_fit"
+    },
+    {
+      "_id": "6724938fbb02136c067d7657",
+      "domain": "Long Structured Data Understanding",
+      "sub_domain": "Knowledge graph reasoning",
+      "difficulty": "easy",
+      "length": "medium",
+      "answer": "A",
+      "context_word_count": 52759,
+      "context_token_count": 178849,
+      "rendered_chat_token_count": 178999,
+      "capacity_class": "over_capacity"
+    },
+    {
+      "_id": "6724c4aabb02136c067d78a6",
+      "domain": "Long Structured Data Understanding",
+      "sub_domain": "Knowledge graph reasoning",
+      "difficulty": "hard",
+      "length": "medium",
+      "answer": "B",
+      "context_word_count": 42435,
+      "context_token_count": 143857,
+      "rendered_chat_token_count": 144002,
+      "capacity_class": "over_capacity"
+    },
+    {
+      "_id": "6728586bbb02136c067d8f4f",
+      "domain": "Long Structured Data Understanding",
+      "sub_domain": "Knowledge graph reasoning",
+      "difficulty": "easy",
+      "length": "medium",
+      "answer": "C",
+      "context_word_count": 66854,
+      "context_token_count": 220293,
+      "rendered_chat_token_count": 220427,
+      "capacity_class": "over_capacity"
+    }
+  ]
+}

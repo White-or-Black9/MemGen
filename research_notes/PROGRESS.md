@@ -1,5 +1,291 @@
 # 项目进展
 
+## Benchmark Expansion Paused; EventQA Supplementary Planning Reopened (2026-07-18)
+
+- By the current user direction, do not open BABILong, MemBench, InfiniteBench,
+  LongBench v1, or any other new benchmark route.
+- The frozen EventQA P7 result remains the sole positive paper anchor; the
+  LongBench v2 outcome below is a separate negative diagnostic and does not
+  modify the main result or paper claim boundary.
+- Next work is read-only EventQA supplementary-evidence inventory followed by
+  pre-registration of one focused follow-up. No EventQA GPU run has been
+  launched in this phase, and execution requires separate approval.
+
+## LongBench v2 v3 Paired Comparison Closed (2026-07-18)
+
+- Completed and merged the approved three-method comparison. The merged
+  artifact is contract-valid for `60` items and `131` records.
+- All methods share v3 constrained answer decoding; all outputs are valid,
+  P7 retrieval is positive on `60/60`, no-query retrieval is zero, and query
+  writes / snapshot changes are absent.
+- P7 and no-query both score `17/60 = 0.2833`; paired P7 wins/losses/ties are
+  `5/5/50` with exact two-sided sign-test `p=1.0`.
+- Disabled reaches `1/11` on the valid window-fit subset; this small subset
+  does not supply a broader full-context comparison.
+- Result: LongBench v2 is protocol-clean but negative for current frozen-P7
+  query-time retrieval. Do not scale it, tune it, or promote it into paper
+  evidence; EventQA remains the only positive paper anchor.
+
+## LongBench v2 v3 Comparison-Protocol Freeze (2026-07-18)
+
+- Completed the approved protocol audit before launching the first paired
+  effectiveness comparison.
+- Frozen comparison scope: the existing 60-item manifest, dataset revision,
+  base model/checkpoint, seed `42`, 8,192-token construction budget,
+  12-token response cap, and frozen P7 bank settings.
+- `constrained_choice_v3` preserves the original v1 query text but constrains
+  every query branch to `The correct answer is (A|B|C|D)`.
+- Repaired two comparability defects:
+  - shared P7/P7-no-query construction now explicitly disables the query-only
+    answer constraint;
+  - P7, P7-no-query, and valid window-fit Disabled queries must all record
+    active constrained decoding under v3, or the runner fails.
+- Verification: focused no-model suite passes `28/28`; launch-script syntax
+  and `git diff --check` pass.
+- Result boundary: the valid P7-only v3 run is `17/60` strict and `0/60`
+  invalid outputs, but remains a decoding diagnostic until the paired
+  P7/P7-no-query and window-fit Disabled controls complete.
+- Historical next gate: the fixed 60-item P7/P7-no-query comparison and
+  matching 11-item window-fit Disabled comparator subsequently completed; see
+  the paired-comparison closeout above.
+
+## LongBench v2 60-Item Bounded Parallel Recovery Status (2026-07-13, Historical)
+
+- The original single-worker run stopped after two completed items when the
+  third item's 30,299-token full-context Disabled path exhausted GPU memory.
+- Preserved partial artifact:
+  `outputs/longbench_v2/bounded_60/20260712T064151Z-longbench-v2-p7-smoke/records.partial.jsonl`
+  with five records from the first two items.
+- Scope:
+  - `60` items from `configs/eval/longbench_v2_p7_bounded_ids.json`;
+  - `49` over-capacity and `11` window-fit items;
+  - P7 and P7-no-query on all items;
+  - full-context Disabled only on the `11` valid window-fit items;
+  - no BM25 or matched-budget controls in this run.
+- Cost inventory: about `7.17M` source context tokens and approximately `904`
+  construction chunks at the 8,192-token budget.
+- Recovery implementation:
+  - runner supports method shards plus manifest-index slices;
+  - `P7 + P7-no-query` remain paired and share one frozen construction;
+  - the 60 items are split into `[0:20]`, `[20:40]`, and `[40:60]` P7 shards;
+  - full-context Disabled is a separate `[0:60]` method shard and applies only
+    to the 11 valid window-fit items;
+  - the focused LongBench v2 contract suite passes `24/24` tests.
+- Runtime handles:
+  - detached scheduler: `longbench_v2_parallel_scheduler`;
+  - scheduler log:
+    `runtime_logs/longbench_v2_bounded_parallel_20260713/scheduler.log`;
+  - worker logs and exit codes use the same state directory;
+  - shard outputs: `outputs/longbench_v2/bounded_60_shards/`.
+- Resource gates:
+  - each P7 shard requires at least 20,000 MiB free and at most 20% GPU
+    utilization at launch;
+  - Disabled requires at least 35,840 MiB free and at most 20% utilization;
+  - one campaign worker per GPU.
+- Historical startup snapshot: all four shards initially waited because no GPU
+  met its launch gate. This recovery state was later superseded by the completed
+  v3 paired comparison recorded above; no scheduler remains active.
+
+## LongBench v2 Phase 2 Smoke Launch Status (2026-07-12, Historical)
+
+- Implemented the model-facing frozen three-method runner in
+  `scripts/eval/longbench_v2_p7.py` and added focused runner tests.
+- Full LongBench v2 contract suite passes `21/21` tests.
+- A real one-item GPU preflight passed:
+  - construction writes were nonzero;
+  - P7 query retrieval selected one slot / eight latent vectors;
+  - P7-no-query retrieval stayed zero;
+  - query writes stayed zero, snapshots stayed unchanged, and reset returned
+    the bank to zero slots.
+- Launched the frozen 18-item smoke on GPU 7 in detached session
+  `longbench_v2_phase2_smoke`.
+- Runtime handles:
+  - log: `runtime_logs/longbench_v2_phase2_smoke.log`;
+  - output root: `outputs/longbench_v2/smoke/`;
+  - worker PID at startup: `634338`.
+- Historical startup snapshot: item `1/18` completed and three partial method
+  records were written. The smoke later completed and was followed by the
+  closed v3 paired comparison; Phase 2 is no longer active.
+
+## LongBench v2 Phase 1 Adapter/Scorer Contract Status (2026-07-12)
+
+- Completed Phase 1 without loading MemGen models or using GPU inference.
+- Added deterministic dataset, prompt, manifest, chunking, scorer, and
+  comparison-lifecycle contracts in:
+  - `scripts/eval/longbench_v2_adapter.py`;
+  - `scripts/eval/longbench_v2_scorer.py`;
+  - `scripts/eval/longbench_v2_contract.py`.
+- Added focused unit coverage in three matching test modules; `15/15` tests
+  pass and all modules compile in the `memgen` environment.
+- Official-data no-model fixture passed:
+  - exact extraction of all `18` frozen smoke rows;
+  - synthetic gold-format scorer accuracy `1.0`, invalid outputs `0`;
+  - real Qwen-tokenized 8,192-token chunking produced three chunks with exact
+    source reconstruction and maximum chunk length `8,189`.
+- Durable report:
+  `outputs/longbench_v2/phase1_contract_report.md`.
+- Gate outcome: Phase 1 PASS. Phase 2 model-facing integration and GPU smoke
+  remain unapproved.
+
+## LongBench v2 Phase 0 Dataset Audit Status (2026-07-12)
+
+- Completed the approved Phase 0 dataset audit without model inference or GPU
+  execution.
+- Froze the official Hugging Face snapshot after the historical
+  `THUDM/LongBench-v2` ID resolved to canonical `zai-org/LongBench-v2`:
+  revision `2b48e494f2c7a2f0af81aae178e05c7e1dde0fe9`, Apache-2.0.
+- Validated all `503` rows: unique IDs, exact schema, non-empty required
+  fields, and deterministic `A/B/C/D` answers all pass with zero schema errors.
+- Audited the `197` rows in the three selected domains using the frozen Qwen
+  tokenizer and official zero-shot prompt wrapped in Qwen ChatML:
+  - rendered median `82,607` tokens;
+  - rendered range `10,171` to `3,225,644` tokens;
+  - only `45/197` fit the current `32,768`-token Reasoner gate.
+- Added a first-trial cost gate of `262,144` rendered tokens. This leaves `169`
+  eligible rows and defers `28` extreme-cost rows.
+- Frozen manifests:
+  - smoke: `18` rows, six per domain;
+  - bounded: `60` rows, with `24` multi-document, `18` long-dialogue, and `18`
+    structured-data rows.
+- Canonical artifacts:
+  - `outputs/longbench_v2/dataset_audit.json`;
+  - `outputs/longbench_v2/dataset_audit.md`;
+  - `configs/eval/longbench_v2_p7_smoke_ids.json`;
+  - `configs/eval/longbench_v2_p7_bounded_ids.json`.
+- Gate outcome: Phase 0 PASS. Phase 1 adapter/scorer implementation remains
+  unapproved and must not include GPU inference.
+
+## RULER-QA2 Frozen-Bank Trial Closure Status (2026-07-10)
+
+- Completed a bounded `RULER-QA2` benchmark trial under the adapted
+  EventQA-style frozen-bank protocol with the current frozen-P7 settings.
+- Local integration and audit artifacts now exist:
+  - prepared payload:
+    `outputs/mab/ruler_qa2_prepare_smoke.json`;
+  - disabled query-only over-capacity failure artifact:
+    `outputs/mab/ruler_qa2_disabled_query_only_smoke.json`;
+  - one-query adapted smoke:
+    `outputs/mab/ruler_qa2_p7_eventqa_style_smoke_q1.json`;
+  - full `100`-query adapted run:
+    `outputs/mab/ruler_qa2_p7_full/20260710T080318Z_ruler_qa2_p7_eventqa_style_full.json`.
+- Protocol / runtime findings:
+  - local `ruler_qa2_421K` provides one context with `106` memorization turns
+    and `100` queries;
+  - original full-history `disabled` reconstruction is invalid for the current
+    `32,768`-token Reasoner capacity and fails cleanly with rendered-history
+    overflow;
+  - the adapted frozen-bank path is runnable and keeps query-phase read-only
+    invariants.
+- Measured full-run result under adapted `p7`:
+  - accuracy `8/100 = 0.08`;
+  - construction final slot count `16`;
+  - query-time retrieval positive queries `0/100`;
+  - retrieved latent total `0`;
+  - query writes `0`;
+  - unchanged frozen-bank snapshots `100/100`;
+  - non-ASCII / format-drifted predictions `97/100`.
+- Main interpretation:
+  - this is not a benchmark-harness ambiguity;
+  - construction writes occur, but query retrieval never produces a selected
+    slot under the current frozen-P7 settings;
+  - the run therefore does not supply positive memory-utility evidence for the
+    paper route.
+- Current gate outcome:
+  drop `RULER-QA2` for the present paper cycle.
+  Preserve the artifacts only as an internal negative feasibility record.
+- Paper consequence:
+  none. EventQA remains the positive anchor; DetectiveQA stays appendix-only
+  negative evidence; FactConsolidation remains dropped.
+
+## DetectiveQA Aligned Rerun Status (2026-07-10)
+
+- Completed the aligned DetectiveQA multi-query full rerun at:
+  `outputs/mab/detectiveqa_p7_multiquery_full_aligned/20260710T004704Z-detectiveqa-current-p7-n10/`.
+- Aligned summary:
+  - `disabled=10/71=0.1408`;
+  - `p7=9/71=0.1268`;
+  - `p7_no_query_retrieval=10/71=0.1408`.
+- Immediate consequence:
+  - after removing the query-generation mismatch, the old
+    `p7_no_query_retrieval > disabled` gap disappears;
+  - `p7` no longer shows a positive effect on DetectiveQA.
+- Aligned `p7` error analysis:
+  - `62/71` queries are wrong;
+  - `9` are clean regression cases where both aligned baselines are correct but
+    `p7` is wrong;
+  - the dominant `p7` failure modes are prompt/example echo, language drift
+    into unrelated Chinese templates, malformed structured output, and wrong
+    option substitution under active retrieval.
+- Paper consequence:
+  - DetectiveQA should no longer be framed as positive supplementary evidence;
+  - keep it only as appendix-only negative diagnostic / failure-analysis
+    evidence;
+  - EventQA remains the sole positive anchor for the paper route.
+
+## DetectiveQA Disabled Alignment Status (2026-07-10)
+
+- Completed a bounded comparator diagnosis on the DetectiveQA supplementary
+  runner after finding that `p7_no_query_retrieval` was stably above
+  `disabled`.
+- Root finding result:
+  - the historical DetectiveQA `disabled` path still used the older compressed
+    baseline `max_response_length=10`;
+  - `p7` and `p7_no_query_retrieval` were using the EventQA query wrapper with
+    `generation_max_length=40`;
+  - the historical `disabled` vs `p7_no_query_retrieval` comparison was
+    therefore confounded by query-generation mismatch.
+- Local fix:
+  - aligned the DetectiveQA runner so the `disabled` query path now uses the
+    same query response-length contract as the bank-enabled query path;
+  - kept the fix local to `scripts/eval/detectiveqa_p7_n10.py`;
+  - added a unit-test guard for the temporary disabled-query alignment helper.
+- Minimal evidence check:
+  - on a four-query spot-check of previously exposed failures, aligned
+    `disabled` matched the stored `p7_no_query_retrieval` output on `3/4`
+    cases, confirming that the old gap was dominated by comparator mismatch.
+- Paper consequence:
+  - old DetectiveQA `p7_no_query_retrieval > disabled` wording must not be
+    interpreted as construction-only utility;
+  - EventQA remains the main paper anchor;
+  - any future DetectiveQA appendix rerun should use the aligned runner.
+
+## DetectiveQA Supplementary Benchmark Closure Status (2026-07-09)
+
+- Completed three bounded DetectiveQA evidence layers under the current
+  frozen-P7 route:
+  - single-query full audit:
+    `outputs/mab/detectiveqa_p7_full/20260708T104614Z-detectiveqa-current-p7-n10/`;
+  - extractor-aware single-query rerun:
+    `outputs/mab/detectiveqa_p7_full_rerun_extractor/20260708T113356Z-detectiveqa-current-p7-n10/`;
+  - multi-query full expansion:
+    `outputs/mab/detectiveqa_p7_multiquery_full/20260708T121051Z-detectiveqa-current-p7-n10/`.
+- Protocol integrity held across all three layers:
+  - `disabled` created no bank;
+  - `p7` and `p7_no_query_retrieval` kept
+    `query_write_count=0`,
+    `query_read_only_enforced=True`,
+    unchanged frozen-bank snapshots,
+    successful post-context reset, and no cross-context leakage;
+  - the multi-query protocol successfully reused one frozen bank per context
+    across all `71` queries.
+- Measured effectiveness is positive but limited:
+  - single-query full:
+    `disabled=0/10`, `p7=1/10`, `p7_no_query_retrieval=0/10`;
+  - extractor-aware rerun:
+    `disabled=0/10`, `p7=5/10`, `p7_no_query_retrieval=1/10`;
+  - multi-query full:
+    `disabled=1/71=0.0141`,
+    `p7=13/71=0.1831`,
+    `p7_no_query_retrieval=10/71=0.1408`,
+    with query-level `p7` vs `p7_no_query_retrieval`
+    `win/loss/tie = 11/8/52`.
+- Current gate outcome:
+  keep DetectiveQA as appendix / supplementary / stress-test evidence only.
+  The signal is not stable enough to promote into the manuscript main table.
+- Paper consequence:
+  none. The EventQA package remains the current positive evidence anchor, and
+  FactConsolidation remains dropped under the current frozen-P7 setup.
+
 ## FactConsolidation 32K/64K Follow-Up Status (2026-07-08)
 
 - Completed the bounded long-context follow-up on

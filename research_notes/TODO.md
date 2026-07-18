@@ -13,20 +13,38 @@
 
 ## Current Next Step（当前下一步）
 
-- [ ] Resolve TriviaQA infrastructure readiness before formal TriviaQA eval.
-- [ ] Verify / acquire local TriviaQA MemGen checkpoint.
-- [ ] Verify / acquire `mandarjoshi/trivia_qa` cache.
-- [ ] Verify / acquire `Solaris99/AgentBank` `triviaqa` cache.
-- [ ] Verify retrieval endpoint / index readiness for
-  `http://127.0.0.1:8001/retrieve`.
-- [ ] Confirm the structured answer output path through
-  `scripts.eval.r4_triviaqa_dynamic_harness`.
-- [ ] After all above are ready, run disabled-memory one-sample TriviaQA
-  structured smoke.
-- [ ] Only after disabled-memory TriviaQA smoke is stable, consider
-  enabled-memory TriviaQA.
-- [ ] Keep Version B blocked until the target-task disabled baseline path is
-  stable and explicitly approved.
+- [x] Complete LongBench v2 Phase 0 official-dataset audit and freeze the
+  18-row smoke / 60-row bounded sample manifests.
+- [x] Complete LongBench v2 Phase 1 adapter, deterministic scorer, lifecycle
+  contracts, unit tests, and official-data no-model fixture.
+- [x] Complete the LongBench v2 frozen 18-item three-method GPU smoke.
+- [x] Complete and audit the approved LongBench v2 60-item bounded evaluation.
+  The valid v3 merged artifact records P7/no-query `17/60` each, with paired
+  wins/losses/ties `5/5/50` and exact sign-test `p=1.0`; the route is closed.
+- [ ] Perform a read-only EventQA supplementary-evidence inventory, then
+  pre-register exactly one focused follow-up experiment. GPU execution needs
+  separate approval and must not overwrite the frozen P7 main result.
+- [ ] (Paused by DEC-0089) Do not start BABILong, MemBench, InfiniteBench, or
+  LongBench v1 through the former fallback gates.
+- [ ] If the paper line is reopened, start with an independent skeptical
+  review of the current EventQA-centered manuscript package.
+- [ ] Keep DetectiveQA as appendix / supplementary / stress-test evidence
+  only; do not promote it into the manuscript main table without a new
+  explicit decision.
+- [ ] If DetectiveQA is reopened later, use only the aligned runner; do not
+  reuse the historical `disabled` vs `p7_no_query_retrieval` interpretation
+  without an aligned rerun.
+- [ ] If DetectiveQA is mentioned in the paper, describe it only as aligned
+  negative diagnostic / failure-analysis evidence unless a new positive rerun
+  explicitly changes that status.
+- [ ] Keep FactConsolidation dropped under the current frozen-P7 setup unless
+  a new benchmark question explicitly reopens it.
+- [ ] Keep `RULER-QA2` dropped after the adapted frozen-bank negative trial;
+  do not reopen it unless a new benchmark-policy decision explicitly requests
+  a fresh audit.
+- [ ] Do not launch new benchmark runs while DEC-0089 is active. EventQA
+  supplementary execution, if selected after the evidence inventory, also
+  requires an explicit execution-phase approval.
 
 ---
 
@@ -94,25 +112,25 @@ The items below are retained for provenance. They are no longer active blockers.
 - [ ] 测量模型质量（quality）、延迟（latency）和内存开销（memory overhead）。
 - [ ] 开展鲁棒性分析（robustness）和失败案例分析（failure analysis）。
 - [ ] 整理形成可直接用于论文的实验证据（paper-ready evidence）。
-- [ ] 这些后续任务必须等待 TriviaQA disabled-memory structured smoke 稳定；
-  当前不能直接推进为 formal experiment。
+- [ ] 这些后续任务当前不是自动执行项；只有在论文线或 benchmark
+  policy 被明确重开后，才进入新的 formal experiment 设计。
 
 ---
 
 # 当前进行中（Active）
 
-- TriviaQA infrastructure readiness only.
-- No active model-code implementation.
-- No active Version B work.
+- No benchmark scheduler or GPU experiment is active under this note update.
+- The active planning task is EventQA supplementary-evidence inventory only;
+  it is read-only until one pre-registered follow-up receives approval.
 
 ---
 
 # 阻塞项（Blocked）
 
-- Formal TriviaQA evaluation is blocked by missing or uncertain assets:
-  local TriviaQA MemGen checkpoint, `mandarjoshi/trivia_qa` cache,
-  `Solaris99/AgentBank` cache, retrieval endpoint / index readiness, and
-  structured answer output path readiness.
+- New benchmark expansion is paused by DEC-0089.
+- EventQA supplementary execution is blocked until the evidence inventory
+  identifies one focused question and the execution phase is explicitly
+  approved.
 - Version B is blocked until the disabled-memory target-task path is stable and
   explicitly approved.
 
@@ -120,4 +138,8 @@ The items below are retained for provenance. They are no longer active blockers.
 
 # 已完成（Done）
 
+- [x] Synchronized the additive-benchmark closure across
+  `research_notes/EXPERIMENTS.md`, `research_notes/DECISIONS.md`,
+  `research_notes/PROGRESS.md`, `research_notes/PLANS.md`, and
+  `research_notes/TODO.md`.
 - [x] 初始化长期研究笔记（long-term research notes）和提示词模板（prompt templates）。

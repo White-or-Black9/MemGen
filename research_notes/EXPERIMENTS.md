@@ -1,5 +1,418 @@
 # Experiment Log
 
+## EXP-20260718-002: Benchmark-Campaign Closeout and EventQA Supplementary Refocus
+
+- Date: 2026-07-18
+- Type: documentation-only scope decision; no model inference, GPU execution,
+  data download, or new benchmark implementation.
+- Recent validated result: the LongBench v2 v3 comparison in
+  `EXP-20260718-001` is format-clean and mechanically active, but P7 and
+  P7-no-query tie at `17/60` with `5/5/50` paired wins/losses/ties.
+- Decision: retain LongBench v2 as negative retrieval diagnostic evidence;
+  pause all new benchmark candidates and focus future work on EventQA
+  supplementary experiments.
+- EventQA boundary: the frozen P7 main result remains unchanged. The next
+  phase is a read-only evidence-gap inventory and pre-registration of one
+  focused follow-up; no new EventQA experiment is claimed or launched here.
+- Status: completed documentation update; follow-up execution is pending
+  separate approval.
+
+## EXP-20260718-001: LongBench v2 v3 Paired Comparison
+
+- Date: 2026-07-18
+- Type: frozen 60-item paired effectiveness comparison after the answer-format
+  protocol repair.
+- Methods: P7 and P7-no-query on all 60 items with shared construction; full
+  context Disabled on the 11 valid window-fit items only.
+- Protocol: fixed manifest / model / checkpoint / seed `42` / 8,192-token
+  construction budget / 12-token cap; all query branches use
+  `constrained_choice_v3` while construction remains unconstrained.
+- Execution: three P7/no-query 20-item GPU shards plus one Disabled shard;
+  every worker exited `0`.
+- Merged artifact:
+  `outputs/longbench_v2/constrained_choice_v3_comparison_merged/20260718T035900Z/artifact.json`.
+- Integrity: `60` items, `131` records, valid complete comparison contract;
+  P7 retrieval-positive `60/60`, no-query retrieval `0/60`, query writes `0`,
+  unchanged snapshots, and invalid outputs `0` for every method.
+- Result: P7 `17/60 = 0.2833`; no-query `17/60 = 0.2833`; paired P7
+  wins/losses/ties `5/5/50`, exact two-sided sign-test `p=1.0`. Window-fit
+  Disabled is `1/11 = 0.0909`; P7 versus Disabled wins/losses/ties are `2/1/8`.
+- Interpretation: query-time retrieval is mechanically active but provides no
+  net effectiveness evidence on this fixed LongBench v2 subset. This is a
+  negative diagnostic, not a positive paper result.
+- Status: completed; current LongBench v2 expansion closed without tuning or
+  additional explicit-memory controls.
+
+## EXP-20260714-003: LongBench v2 P7 Constrained-Choice Decoding
+
+- Date: 2026-07-14
+- Type: auxiliary P7-only decoding-protocol ablation; not a replacement for
+  the frozen three-method protocol.
+- Parent finding: `strict_format_v2` reduced invalid output but introduced a
+  strong A-template anchor, so its strict-score increase did not reflect a
+  reliable answer-quality improvement.
+- Fixed: the frozen 60-item manifest, model checkpoint, seed, chunk budget,
+  generation cap, bank configuration, scorer, and the original v1 query text.
+- Changed: decoder output is constrained to the exact grammar
+  `The correct answer is (X)`, with only the `X` position scored among
+  `A/B/C/D`; it then emits `)` and EOS. The v1 query prompt is retained to
+  keep the retrieval query text unchanged and avoid a literal A example.
+- Scope: P7 only. This is intentionally a decoding-interface test, so it does
+  not yet support a three-method effectiveness claim.
+- Acceptance signal: zero invalid outputs, no A anchor relative to gold-label
+  distribution, preserved P7 retrieval/lifecycle invariants, and relaxed
+  accuracy comparison against the v1 P7 60-item result.
+- First attempt: infrastructure exit code `0`, but the original
+  `reasoner.generate()` fast path bypassed the per-token constraint. Its
+  predictions are exactly identical to v1 and are invalid as a constrained
+  decoding result.
+- Repair: disable that fast path only while the constraint is active, scope the
+  constraint to the query generation rather than construction, and fail fast
+  if query diagnostics do not report an active constraint.
+- Runtime: repaired one-item preflight followed by the complete 60-item
+  P7-only run on the same worker if the preflight exits successfully.
+- Valid retry (2026-07-18): preflight and full 60-item run both exited `0`;
+  artifact:
+  `outputs/longbench_v2/constrained_choice_v3_p7_only/full60/20260718T002933Z-longbench-v2-p7only-00-60/artifact.json`.
+  All `60/60` query records report active constrained decoding, zero query
+  writes, unchanged frozen-bank snapshots, and zero invalid outputs. Strict
+  and relaxed option accuracy are both `17/60 = 0.2833`.
+- Interpretation: this validates the answer-format protocol, not P7
+  effectiveness. The run contains P7 only; the 2026-07-14 preflight/full60
+  artifacts remain invalid because their fast path bypassed the constraint.
+- Follow-on protocol audit (2026-07-18): before rerunning paired comparisons,
+  the shared-construction path was repaired so construction always runs with
+  constrained decoding disabled; constrained decoding now must be recorded as
+  active for P7, P7-no-query, and Disabled when `constrained_choice_v3` is
+  selected. Focused no-model LongBench tests pass `28/28`.
+- Status: completed and superseded by `EXP-20260718-001`, which supplies the
+  paired effectiveness comparison under this repaired protocol.
+
+## EXP-20260713-002: LongBench v2 P7 Strict-Format Prompt Ablation
+
+- Date: 2026-07-13
+- Type: auxiliary P7-only prompt ablation; not a replacement for the frozen
+  three-method protocol.
+- Question: can an explicit one-line `A/B/C/D` output instruction reduce the
+  high strict-format failure rate observed in the bounded P7 run?
+- Fixed: frozen 60-item manifest, model checkpoint, seed, chunk budget,
+  generation cap, bank configuration, scorer, and P7 construction/query path.
+- Changed: only the P7 query prompt receives `strict_format_v2`, which repeats
+  the required one-line template and forbids explanations, translation,
+  punctuation, and extra text.
+- Scope: P7 only. Disabled and no-query are intentionally not rerun in this
+  auxiliary test; consequently it cannot establish a new method comparison.
+- Acceptance signal: compare strict accuracy, relaxed diagnostic accuracy, and
+  invalid-output count against the completed frozen-P7 v1 60-item result.
+- Runtime: one-item preflight followed by the complete 60-item P7-only run on
+  the same GPU worker if the preflight exits successfully.
+- Status: completed diagnostic and superseded by the constrained-choice v3
+  protocol. The prompt-only result is not used for effectiveness claims.
+
+## EXP-20260713-001: LongBench v2 Bounded Parallel Recovery
+
+- Date: 2026-07-13
+- Type: approved bounded evaluation recovery; active infrastructure run, not
+  yet a result.
+- Incident:
+  - the original 60-item single-worker run completed two items;
+  - item three (`66eefe85821e116aacb228dc`) failed in the valid window-fit
+    Disabled path at 30,299 rendered tokens;
+  - CUDA attempted an additional 8.58 GiB with only 7.31 GiB free;
+  - five completed records remain in the original partial JSONL.
+- Recovery contract:
+  - three disjoint 20-item shards run `p7` and
+    `p7_no_query_retrieval` together, preserving shared construction;
+  - one separate method shard runs Disabled on the 11 valid window-fit rows;
+  - method-shard artifacts explicitly report `pending_method_shard_merge`
+    rather than claiming a complete comparison contract.
+- Runtime:
+  - scheduler: `tmux: longbench_v2_parallel_scheduler`;
+  - scheduler / worker state:
+    `runtime_logs/longbench_v2_bounded_parallel_20260713/`;
+  - output root: `outputs/longbench_v2/bounded_60_shards/`;
+  - initial state: waiting, because no GPU met a launch gate.
+- Resource policy:
+  - P7: at least 20,000 MiB free and no more than 20% utilization;
+  - Disabled: at least 35,840 MiB free and no more than 20% utilization;
+  - maximum useful concurrency is four workers, one per eligible GPU.
+- Validation: focused LongBench v2 suite passes `24/24`; shell syntax and
+  whitespace checks pass.
+- Status: completed historically and superseded by the v3 paired comparison in
+  `EXP-20260718-001`; its initial scheduler/recovery details are retained only
+  for provenance.
+
+## EXP-20260710-003: RULER-QA2 Adapted Frozen-Bank Trial and Closure
+
+- Date: 2026-07-10
+- Type: bounded additive-benchmark feasibility trial; negative mechanism
+  outcome; not a paper result.
+- Scope:
+  - local MemoryAgentBench `ruler_qa2_421K`;
+  - one available local context;
+  - adapted EventQA-style frozen-bank protocol for current frozen P7;
+  - one-query smoke plus full `100`-query `p7` run;
+  - disabled full-history path audited separately for comparator validity.
+- Local runner / tests:
+  - runner: `scripts/eval/ruler_qa2_p7.py`;
+  - aggregator helper: `scripts/eval/ruler_qa2_aggregate.py`;
+  - tests:
+    `tests/test_ruler_qa2_p7.py`,
+    `tests/test_ruler_qa2_aggregate.py`,
+    `tests/test_mab2_mab_bridge.py`.
+- Artifacts:
+  - prepared payload:
+    `outputs/mab/ruler_qa2_prepare_smoke.json`;
+  - disabled query-only over-capacity failure artifact:
+    `outputs/mab/ruler_qa2_disabled_query_only_smoke.json`;
+  - adapted one-query smoke:
+    `outputs/mab/ruler_qa2_p7_eventqa_style_smoke_q1.json`;
+  - adapted full run:
+    `outputs/mab/ruler_qa2_p7_full/20260710T080318Z_ruler_qa2_p7_eventqa_style_full.json`.
+- Dataset / comparator audit:
+  - local `ruler_qa2_421K` availability is `1` context;
+  - the prepared payload contains `106` memorization turns and `100` queries;
+  - the original full-history `disabled` reconstruction is invalid for the
+    current checkpoint because rendered history exceeds the `32,768`-token
+    capacity before answer generation.
+- Adapted `p7` full-run integrity:
+  - construction completes and final slot count reaches `16`;
+  - query writes remain `0`;
+  - frozen-bank snapshots remain unchanged on every query;
+  - no cross-query mutation is observed in the preserved bank.
+- Result:
+  - `p7` accuracy `8/100 = 0.08`;
+  - query-time retrieval positive queries `0/100`;
+  - total retrieved latents `0`;
+  - non-ASCII / prompt-drifted outputs `97/100`.
+- Interpretation:
+  - this trial is runnable but mechanism-negative under the current frozen-P7
+    configuration;
+  - the problem is not a missing bank construction phase;
+  - instead, query-time retrieval never selects any slot, so the run does not
+    provide evidence that the latent memory bank helps on `RULER-QA2`.
+- Decision:
+  - stop the `RULER-QA2` route for the present paper cycle;
+  - do not promote it into appendix tables or the manuscript benchmark set;
+  - keep the artifacts only as internal negative feasibility evidence.
+- Related decision: `DEC-0086`.
+
+## EXP-20260710-002: DetectiveQA Aligned Multi-Query Full Rerun and Error Analysis
+
+- Date: 2026-07-10
+- Type: supplementary comparator-corrected rerun plus failure analysis.
+- Scope:
+  - aligned `scripts/eval/detectiveqa_p7_n10.py`;
+  - full DetectiveQA multi-query protocol;
+  - `10` contexts, `71` queries, three methods:
+    `disabled`, `p7`, `p7_no_query_retrieval`.
+- Artifacts:
+  - `outputs/mab/detectiveqa_p7_multiquery_full_aligned/20260710T004704Z-detectiveqa-current-p7-n10/`.
+- Contract change relative to the historical run:
+  - only the DetectiveQA `disabled` query response-length contract was aligned
+    to the bank-on query path;
+  - bank semantics, scorer, dataset, and method set stayed unchanged.
+- Result:
+  - `disabled=10/71=0.1408`;
+  - `p7=9/71=0.1268`;
+  - `p7_no_query_retrieval=10/71=0.1408`.
+- Main interpretation:
+  - the earlier `p7_no_query_retrieval > disabled` gap disappears completely
+    after alignment, confirming that the historical gap was dominated by
+    comparator mismatch;
+  - under the aligned comparator, `p7` no longer shows positive evidence on
+    DetectiveQA.
+- Error analysis:
+  - aligned `p7` is wrong on `62/71` queries;
+  - bucket summary:
+    - `9` regression cases where both `disabled` and
+      `p7_no_query_retrieval` are correct but `p7` is wrong;
+    - `53` cases where all three methods are wrong, indicating high intrinsic
+      task difficulty for the current model/protocol;
+    - `0` cases where only `disabled` is correct and
+      `p7_no_query_retrieval` is wrong.
+  - dominant `p7` failure patterns:
+    - prompt / example echo;
+    - language drift into unrelated Chinese death-question templates;
+    - malformed structured output;
+    - direct wrong-option substitution under active retrieval.
+- Decision:
+  - treat aligned DetectiveQA as negative appendix-only diagnostic evidence;
+  - do not use DetectiveQA as positive supplementary support for the current
+    paper claim.
+
+## EXP-20260710-001: DetectiveQA Disabled-vs-No-Query Alignment Diagnosis
+
+- Date: 2026-07-10
+- Type: supplementary failure-analysis / comparator-validation diagnostic.
+- Scope:
+  - current `scripts/eval/detectiveqa_p7_n10.py`;
+  - the historical DetectiveQA supplementary comparison between `disabled` and
+    `p7_no_query_retrieval`;
+  - one local code alignment plus a bounded four-query GPU spot-check.
+- Motivation:
+  - `p7_no_query_retrieval` was stably above `disabled` in the historical
+    multi-query supplementary runs, which was inconsistent with the intended
+    ablation interpretation.
+- Diagnosis:
+  - the DetectiveQA `disabled` path was still using
+    `max_response_length=10` through the older compressed-runner config path;
+  - `p7` and `p7_no_query_retrieval` were using the EventQA query wrapper with
+    `generation_max_length=40`;
+  - most `disabled` misses that `p7_no_query_retrieval` fixed were template
+    truncation / prompt-residue outputs rather than semantically different
+    answers.
+- Intervention:
+  - align the DetectiveQA runner locally so the `disabled` query path
+    temporarily uses the same query response-length contract as the bank-on
+    query path;
+  - keep the alignment local to `detectiveqa_p7_n10.py` rather than changing
+    lower-level shared baseline utilities.
+- Verification:
+  - added a regression test that locks the disabled-query response-length
+    alignment helper and its temporary override behavior;
+  - bounded four-query GPU spot-check on previously exposed failure cases:
+    - `conflict-resolution-cd66eabd2f070a38`, q4 and q5;
+    - `conflict-resolution-fd17dce2ad7d5e3e`, q4 and q8.
+- Result:
+  - after aligning `disabled` to `generation_max_length=40`, `3/4` inspected
+    failure cases flipped from incorrect to correct and matched the stored
+    `p7_no_query_retrieval` outputs;
+  - the remaining `1/4` case stayed incorrect under aligned `disabled`, so the
+    old gap is not proven to be entirely length-only, but the dominant effect
+    is now clearly comparator mismatch.
+- Interpretation:
+  - the historical DetectiveQA `disabled` vs `p7_no_query_retrieval`
+    comparison was not apples-to-apples;
+  - the earlier `p7_no_query_retrieval > disabled` gap cannot be used as
+    evidence of construction-only memory utility;
+  - future DetectiveQA comparison should use the aligned runner before any
+    appendix/table interpretation is reopened.
+
+## EXP-20260709-003: DetectiveQA Multi-Query Full Pass
+
+- Date: 2026-07-09
+- Type: supplementary appendix / stress-test expansion; not a main-table paper
+  result.
+- Scope:
+  - local MemoryAgentBench `detective_qa`;
+  - all `10` available contexts;
+  - all available queries per context under the new per-context frozen-bank
+    multi-query protocol;
+  - total `71` queries and three paired methods:
+    `disabled`, `p7`, `p7_no_query_retrieval`.
+- Runner: `scripts/eval/detectiveqa_p7_n10.py`.
+- Artifacts:
+  - `outputs/mab/detectiveqa_p7_multiquery_full/20260708T121051Z-detectiveqa-current-p7-n10/`.
+- Integrity:
+  - completed `71 queries x 3 methods = 213` scored records;
+  - multi-query protocol held:
+    one bank construction per context, then sequential frozen-bank reuse across
+    all queries in that context;
+  - `disabled` created no bank;
+  - `p7` and `p7_no_query_retrieval` kept `query_write_count=0`,
+    `query_read_only_enforced=True`,
+    `bank_snapshot_changed_after_query=False`,
+    `bank_reset_after_context=True`, and no cross-context leakage on every
+    query;
+  - all `query_id` ranges were covered and aligned across the three methods.
+- Result:
+  - query-level exact match:
+    `disabled=1/71=0.0141`,
+    `p7=13/71=0.1831`,
+    `p7_no_query_retrieval=10/71=0.1408`;
+  - query-level comparison between `p7` and `p7_no_query_retrieval`:
+    `win/loss/tie = 11/8/52`;
+  - context-level `any-correct` counts:
+    `disabled=1/10`, `p7=4/10`, `p7_no_query_retrieval=6/10`.
+- Interpretation:
+  - protocol and invariant cleanliness are strong; the multi-query expansion is
+    a valid frozen-bank evaluation surface;
+  - `p7` is clearly stronger than `disabled` on total exact-match count;
+  - query-time retrieval shows a weak positive signal over
+    `p7_no_query_retrieval`, but the effect is not stable enough to support a
+    main-table claim;
+  - DetectiveQA remains noisy and better suited to appendix / mechanism /
+    stress-test use than to the main paper argument.
+- Decision:
+  - keep DetectiveQA multi-query as supplementary evidence only;
+  - do not alter the EventQA-centered manuscript main line.
+
+## EXP-20260709-002: DetectiveQA Extractor-Aware Full Rerun
+
+- Date: 2026-07-09
+- Type: supplementary evaluation-contract repair; not a new method result.
+- Scope:
+  - local MemoryAgentBench `detective_qa`;
+  - the original single-query-per-context full run repeated on the same `10`
+    contexts after adding a DetectiveQA-specific answer extractor to the local
+    bridge scorer.
+- Runner: `scripts/eval/detectiveqa_p7_n10.py`.
+- Scoring bridge: `scripts/eval/mab2_mab_bridge.py`.
+- Artifacts:
+  - `outputs/mab/detectiveqa_p7_full_rerun_extractor/20260708T113356Z-detectiveqa-current-p7-n10/`.
+- Integrity:
+  - completed `10 contexts x 3 methods = 30` scored records;
+  - protocol invariants remained clean:
+    `query_write_count=0`, unchanged frozen-bank snapshots, successful reset,
+    and no cross-context leakage;
+  - retrieval counts and bank activity matched the pre-rerun single-query run,
+    so the difference is attributable to scoring/extraction rather than to bank
+    behavior drift.
+- Result:
+  - `disabled_exact_match = 0.0`;
+  - `p7_exact_match = 0.5` (`5/10`);
+  - `p7_no_query_retrieval_exact_match = 0.1` (`1/10`);
+  - versus the earlier single-query full run, `p7` improved from `1/10` to
+    `5/10` and `p7_no_query_retrieval` from `0/10` to `1/10`.
+- Interpretation:
+  - the original DetectiveQA single-query result understated true performance
+    because official generic parsing missed several answer-bearing outputs;
+  - after extractor repair, `p7` still clearly beats `disabled`, while the
+    retrieval contribution over `p7_no_query_retrieval` remains positive but
+    modest.
+- Decision:
+  - preserve this rerun as the corrected single-query DetectiveQA reference;
+  - still treat DetectiveQA as supplementary only, not as a main-table line.
+
+## EXP-20260709-001: DetectiveQA Single-Query Full Pass Audit
+
+- Date: 2026-07-09
+- Type: supplementary benchmark audit of an existing runner lineage; not a
+  main-table paper result.
+- Scope:
+  - local MemoryAgentBench `detective_qa`;
+  - `10` contexts;
+  - one query per context under the single-query frozen-bank protocol;
+  - three paired methods:
+    `disabled`, `p7`, `p7_no_query_retrieval`.
+- Runner: `scripts/eval/detectiveqa_p7_n10.py`.
+- Artifacts:
+  - `outputs/mab/detectiveqa_p7_full/20260708T104614Z-detectiveqa-current-p7-n10/`.
+- Integrity:
+  - completed `10 contexts x 3 methods = 30` scored records;
+  - `disabled` created no bank;
+  - `p7` and `p7_no_query_retrieval` kept query-phase read-only invariants:
+    `query_write_count=0`,
+    `query_read_only_enforced=True`,
+    `bank_snapshot_changed_after_query=False`,
+    `bank_reset_after_context=True`,
+    and no cross-context leakage.
+- Result:
+  - `disabled_exact_match = 0.0`;
+  - `p7_exact_match = 0.1` (`1/10`);
+  - `p7_no_query_retrieval_exact_match = 0.0`;
+  - `p7` vs `p7_no_query_retrieval`: `win/loss/tie = 1/0/9`.
+- Interpretation:
+  - even before extractor repair, `p7` already showed a small positive signal
+    over `disabled` and `p7_no_query_retrieval`;
+  - however, the benchmark was dominated by output-format drift and therefore
+    was not paper-ready in this form.
+- Decision:
+  - keep this run as the pre-repair DetectiveQA reference point only;
+  - use it to motivate the extractor-aware rerun and the later multi-query
+    expansion, not as a standalone paper result.
+
 ## EXP-20260708-003: FactConsolidation 32K/64K Long-Context Follow-Up
 
 - Date: 2026-07-08

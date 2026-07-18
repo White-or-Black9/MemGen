@@ -87,6 +87,13 @@ IDs and append superseding decisions rather than silently rewriting history.
 | DEC-0080 | 2026-07-07 | accepted | Park the consolidated draft before skeptical review and preserve the scoped claim boundary |
 | DEC-0081 | 2026-07-08 | accepted | Keep FactConsolidation additive only and stop scaling after the null 6K signal check |
 | DEC-0082 | 2026-07-08 | accepted | Retain the 32K/64K FactConsolidation follow-up as internal supplementary evidence only |
+| DEC-0083 | 2026-07-09 | accepted | Keep DetectiveQA supplementary-only after the multi-query expansion and preserve the EventQA-centered paper fallback |
+| DEC-0084 | 2026-07-10 | accepted | Treat pre-alignment DetectiveQA `disabled` vs `p7_no_query_retrieval` as confounded by query-generation mismatch and align the runner locally before further interpretation |
+| DEC-0085 | 2026-07-10 | accepted | Demote aligned DetectiveQA to negative appendix-only diagnostic evidence |
+| DEC-0086 | 2026-07-10 | accepted | Drop RULER-QA2 after the adapted frozen-bank trial and preserve it only as internal negative feasibility evidence |
+| DEC-0087 | 2026-07-12 | accepted | Reopen benchmark planning only and select a stratified LongBench v2 subset as the next gated candidate |
+| DEC-0088 | 2026-07-18 | accepted | Retain LongBench v2 only as a protocol-clean negative retrieval diagnostic and stop the current expansion |
+| DEC-0089 | 2026-07-18 | accepted | Pause new benchmark expansion and reopen EventQA supplementary-experiment planning only |
 
 ## Decision Template
 
@@ -105,6 +112,270 @@ IDs and append superseding decisions rather than silently rewriting history.
 - Superseded by:
 
 ## Standing Decisions
+
+### DEC-0089: Pause Benchmark Expansion and Reopen EventQA Supplementary Planning
+
+- Date: 2026-07-18
+- Status: accepted
+- Context:
+  - EventQA is the current sole positive paper anchor under the frozen P7
+    configuration.
+  - The completed LongBench v2 v3 comparison is protocol-clean but has no net
+    P7 versus no-query effect (`5/5/50` paired wins/losses/ties).
+  - Other candidate benchmark routes are not needed to answer the immediate
+    evidence gaps in the EventQA-centered paper package.
+- Decision:
+  - pause BABILong, MemBench, InfiniteBench, LongBench v1, and all other new
+    benchmark routes;
+  - focus only on EventQA supplementary evidence;
+  - begin with a read-only evidence-gap inventory and pre-register exactly one
+    focused follow-up before any GPU launch;
+  - keep the frozen EventQA P7 main result unchanged and distinguish any new
+    supplementary result from that main result.
+- Rationale:
+  - A further external benchmark campaign would add cost and protocol surface
+    without resolving the current EventQA mechanism and robustness questions.
+  - The LongBench closeout already supplies a clean negative boundary for
+    query-time retrieval outside EventQA.
+- Consequences:
+  - No benchmark data download, runner implementation, or inference is
+    authorized by this decision.
+  - EventQA execution remains separately gated after pre-registration.
+  - The current paper claim boundary is unchanged.
+- Verification required:
+  - record the selected EventQA question, fixed configuration, comparator,
+    metric, acceptance criterion, and stopping rule before execution.
+- Related experiments: EXP-20260718-001, EXP-20260718-002
+- Supersedes: none
+- Superseded by: none
+
+### DEC-0088: Retain LongBench v2 as a Negative Retrieval Diagnostic
+
+- Date: 2026-07-18
+- Status: accepted
+- Context:
+  - The fixed 60-item LongBench v2 manifest completed with a shared v3
+    constrained-choice protocol across P7, P7-no-query, and valid window-fit
+    Disabled queries.
+  - The merged artifact is:
+    `outputs/longbench_v2/constrained_choice_v3_comparison_merged/20260718T035900Z/artifact.json`.
+  - Its contract is valid for all `60` items / `131` records: P7 retrieval is
+    positive on `60/60` items, no-query retrieval is zero, query writes are
+    zero, and all outputs are strict-format valid.
+  - P7 and P7-no-query both score `17/60 = 0.2833`; paired P7 outcomes are
+    `5` wins, `5` losses, and `50` ties (two-sided exact sign-test `p=1.0`).
+- Decision:
+  - retain this result as protocol-clean negative evidence about query-time
+    retrieval under frozen P7;
+  - do not run BM25, matched-text controls, seed expansion, or a larger
+    LongBench v2 manifest under the current method;
+  - do not promote LongBench v2 into a positive paper table or claim.
+- Rationale:
+  - The primary mechanism comparison is aligned and format-clean, yet shows
+    no net accuracy effect from query-time latent retrieval.
+  - The 11-item window-fit comparison is also too small to support an
+    alternative full-context claim (`P7` wins/losses/ties `2/1/8`).
+- Consequences:
+  - EventQA remains the only positive paper anchor.
+  - LongBench v2 may appear only in an appendix-style limitation or internal
+    diagnostic discussion, with its constrained decoding protocol stated.
+- Supersedes: none
+- Superseded by: none
+
+### DEC-0087: Reopen Benchmark Planning With LongBench v2 First
+
+- Date: 2026-07-12
+- Status: accepted
+- Context:
+  - EventQA remains the sole positive paper anchor.
+  - FactConsolidation, aligned DetectiveQA, and RULER-QA2 did not provide a
+    second positive benchmark.
+  - A fresh candidate audit compared MemBench, LongBench v2, LongBench v1,
+    BABILong, InfiniteBench, and newer agent-memory benchmarks.
+- Decision:
+  - reopen benchmark planning, but not implementation or GPU execution;
+  - select a stratified LongBench v2 subset as the next candidate;
+  - use BABILong, MemBench audit, InfiniteBench, and selective LongBench v1 as
+    ordered fallbacks;
+  - require a separate approval for each execution phase.
+- Rationale:
+  - LongBench v2 has realistic long contexts, a uniform deterministic
+    four-choice scorer, and a smaller adapter surface than MemBench;
+  - it can test long-context generalization without requiring an LLM judge;
+  - the gated smoke can detect a repeat of RULER's zero-retrieval failure before
+    a larger run.
+- Consequences:
+  - no current paper claim changes;
+  - no P7 settings may be tuned against the new benchmark;
+  - Phase 0 is a dataset audit only and must stop for review before code work.
+- Verification required:
+  - follow `research_notes/plans/p7_longbench_v2_benchmark_plan.md`;
+  - preserve fixed IDs, deterministic scoring, comparator validity, and bank
+    lifecycle invariants.
+- Supersedes: none
+- Superseded by: none
+
+### DEC-0085: Demote Aligned DetectiveQA to Negative Appendix-Only Diagnostic Evidence
+
+- Date: 2026-07-10
+- Status: accepted
+- Context:
+  - After the local runner alignment, the aligned DetectiveQA multi-query full
+    rerun completed at:
+    `outputs/mab/detectiveqa_p7_multiquery_full_aligned/20260710T004704Z-detectiveqa-current-p7-n10/`.
+  - Aligned summary:
+    `disabled=10/71=0.1408`,
+    `p7=9/71=0.1268`,
+    `p7_no_query_retrieval=10/71=0.1408`.
+  - This aligned rerun confirms that the earlier
+    `p7_no_query_retrieval > disabled` gap was dominated by comparator mismatch.
+  - Error analysis of aligned `p7` shows `62/71` wrong, including `9`
+    regression cases where both `disabled` and `p7_no_query_retrieval` are
+    correct but `p7` is wrong.
+  - The dominant aligned `p7` failure patterns are prompt/example echo,
+    language drift into unrelated Chinese question templates, malformed
+    structured output, and direct wrong-option substitution under active
+    retrieval.
+- Decision:
+  - Do not use DetectiveQA as positive supplementary evidence for the current
+    paper.
+  - Keep aligned DetectiveQA only as appendix-only negative diagnostic /
+    failure-analysis evidence.
+  - Do not claim retrieval utility on DetectiveQA under the current frozen-P7
+    setup.
+- Alternatives considered:
+  - Keep DetectiveQA as weak positive appendix evidence after alignment.
+  - Reopen more DetectiveQA reruns or tuning before changing the paper
+    interpretation.
+- Rationale:
+  - After removing the comparator confound, `p7` no longer beats the aligned
+    baselines.
+  - The remaining `p7` regressions are qualitatively consistent with harmful
+    retrieval rather than with stable memory utility.
+- Consequences:
+  - EventQA remains the only positive evidence anchor for the current paper
+    route.
+  - DetectiveQA can still be cited as a cautionary appendix case showing that
+    latent retrieval may destabilize generation on some long-range reasoning
+    tasks.
+- Verification required:
+  - Preserve the aligned rerun artifact and the aligned-error-analysis summary
+    in the experiment log.
+- Related experiments:
+  - EXP-20260710-002
+  - EXP-20260710-001
+  - EXP-20260709-003
+- Supersedes: none
+- Superseded by: none
+
+### DEC-0084: Treat Pre-Alignment DetectiveQA `disabled` vs `p7_no_query_retrieval` as Confounded
+
+- Date: 2026-07-10
+- Status: accepted
+- Context:
+  - Post-hoc analysis of the DetectiveQA multi-query supplementary runs showed
+    that `p7_no_query_retrieval` was stably better than `disabled`, which
+    initially looked inconsistent with the intended ablation meaning.
+  - Direct read-only diagnosis found that the DetectiveQA `disabled` branch was
+    still using the old compressed-runner `max_response_length=10` contract,
+    while `p7` / `p7_no_query_retrieval` were executing through the EventQA
+    query wrapper with `generation_max_length=40`.
+  - A bounded four-query normalized-disabled diagnostic showed that after
+    aligning the disabled query generation length to `40`, three of four
+    representative `disabled` failures became correct and matched the stored
+    `p7_no_query_retrieval` outputs.
+- Decision:
+  - Do not interpret the historical DetectiveQA
+    `p7_no_query_retrieval > disabled` gap as evidence of construction-only
+    memory utility.
+  - Treat the historical `disabled` vs `p7_no_query_retrieval` comparison as
+    confounded by branch-level query generation mismatch.
+  - Align the DetectiveQA runner locally so `disabled` uses the same query
+    response-length contract as the bank-enabled query path before any future
+    DetectiveQA comparison is interpreted.
+- Alternatives considered:
+  - Keep the old comparison and describe the gap as likely construction value.
+  - Leave the code unchanged and only document the mismatch in prose.
+  - Broaden the fix to shared lower-level TriviaQA / MAB config utilities.
+- Rationale:
+  - The direct normalized-disabled check provides concrete evidence that most of
+    the apparent `p7_no_query_retrieval` advantage came from a shorter disabled
+    generation budget rather than from the intended ablation factor.
+  - A local runner-only alignment fixes the comparison with minimal risk to
+    historical baseline contracts elsewhere in the repository.
+- Consequences:
+  - Existing DetectiveQA supplementary artifacts remain useful for
+    `p7 > disabled` directional evidence and protocol cleanliness, but the old
+    `disabled` vs `p7_no_query_retrieval` interpretation is no longer valid.
+  - Any future DetectiveQA stability or appendix rerun should use the aligned
+    runner.
+- Verification required:
+  - Keep the new unit test that locks disabled query response-length alignment.
+  - Keep the normalized-disabled spot-check result visible in the experiment log.
+- Related experiments:
+  - EXP-20260710-001
+  - EXP-20260709-003
+  - EXP-20260709-002
+  - EXP-20260709-001
+- Supersedes: none
+- Superseded by: none
+
+### DEC-0083: Keep DetectiveQA Supplementary-Only After the Multi-Query Expansion
+
+- Date: 2026-07-09
+- Status: accepted
+- Context:
+  - The corrected single-query DetectiveQA rerun and the new multi-query
+    frozen-bank expansion both completed with clean protocol integrity.
+  - Multi-query DetectiveQA now covers all `10` local contexts and `71` total
+    queries under one-construction-per-context frozen-bank reuse.
+  - Results are positive but limited:
+    - single-query corrected rerun:
+      `disabled=0/10`, `p7=5/10`, `p7_no_query_retrieval=1/10`;
+    - multi-query full:
+      `disabled=1/71`, `p7=13/71`, `p7_no_query_retrieval=10/71`;
+      `p7` vs `p7_no_query_retrieval` `win/loss/tie = 11/8/52`.
+  - FactConsolidation has already been stopped under the current frozen-P7
+    setup after weak and inconsistent results.
+  - The paper already has an independently usable EventQA-centered evidence
+    package and draft checkpoint.
+- Decision:
+  - Keep DetectiveQA as appendix-only supplementary evidence.
+  - Do not promote DetectiveQA into the manuscript main experiment table.
+  - Preserve FactConsolidation as dropped under the current frozen-P7 route.
+  - Preserve EventQA as the current positive evidence anchor and manuscript
+    fallback path.
+- Alternatives considered:
+  - Promote DetectiveQA into the main table after the extractor repair.
+  - Replace EventQA-centered routing with a broader multi-benchmark package.
+  - Reopen FactConsolidation despite the null/weak evidence.
+- Rationale:
+  - DetectiveQA now shows genuine memory-bank activity and a weak retrieval
+    advantage, but the signal is noisy and not stable enough to carry the
+    primary paper claim.
+  - EventQA remains the only robust, already-packaged positive evidence line.
+  - Re-centering the paper on weaker additive benchmarks would broaden claims
+    without strengthening proof.
+- Consequences:
+  - DetectiveQA can be cited later only as supplementary appendix, stress-test,
+    or mechanism evidence.
+  - No main-table row or main-claim wording should depend on DetectiveQA.
+  - The next paper-facing action is documentation / review routing rather than
+    another additive benchmark expansion.
+- Verification required:
+  - Preserve the canonical artifact paths for the three DetectiveQA layers:
+    single-query full, extractor rerun, and multi-query full.
+  - Keep the EventQA-centered outline and draft boundary unchanged.
+- Related experiments:
+  - EXP-20260709-001
+  - EXP-20260709-002
+  - EXP-20260709-003
+  - EXP-20260708-001
+  - EXP-20260708-002
+  - EXP-20260708-003
+  - EXP-20260707-002
+- Supersedes: none
+- Superseded by: none
 
 ### DEC-0082: Retain the 32K/64K FactConsolidation Follow-Up as Internal Supplementary Evidence Only
 
@@ -2287,3 +2558,36 @@ resolved or superseded by later R4 and MAB work.
     earlier failed/intermediate runs
   - if more Version B work is approved, start with failure analysis rather than
     another threshold or capacity sweep
+
+### DEC-0086: Drop RULER-QA2 After the Adapted Frozen-Bank Trial
+
+- Date: 2026-07-10
+- Status: accepted
+- Context:
+  - a bounded `RULER-QA2` trial was run under an adapted EventQA-style
+    frozen-bank protocol using the current frozen-P7 settings;
+  - the adapted path is executable and invariant-clean;
+  - the local full `p7` run on the only available context reached
+    `8/100 = 0.08` accuracy with final slot count `16`, but
+    `retrieved_latent_count = 0` on all `100` queries;
+  - the original full-history `disabled` comparator is over-capacity invalid
+    for the present `32,768`-token checkpoint.
+- Decision:
+  - drop `RULER-QA2` for the current paper cycle;
+  - do not promote it into the manuscript main table or appendix benchmark
+    package;
+  - preserve the artifacts only as internal negative feasibility evidence.
+- Rationale:
+  - the benchmark no longer has protocol ambiguity after the adapted runner was
+    validated;
+  - the negative outcome is mechanism-level, not just harness-level:
+    construction writes occur but query retrieval never selects a slot;
+  - continued reruns would add cost without improving the paper's evidence
+    boundary.
+- Consequences:
+  - EventQA remains the sole positive paper anchor;
+  - DetectiveQA remains appendix-only negative diagnostic evidence;
+  - FactConsolidation remains dropped;
+  - any future non-EventQA benchmark expansion requires an explicit reopen
+    decision and should start from a fresh benchmark-choice audit rather than
+    resuming `RULER-QA2`.

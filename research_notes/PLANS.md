@@ -2,7 +2,7 @@
 
 ## Current Planning State（当前计划状态）
 
-> Updated 2026-07-07. Historical R4 and pre-MAB planning below is retained for
+> Updated 2026-07-12. Historical R4 and pre-MAB planning below is retained for
 > provenance; its claims that Version B is unimplemented or the next active
 > step are superseded by this section.
 
@@ -25,40 +25,76 @@
 - The EventQA comparison, explicit-memory controls, no-query-retrieval
   ablation, method-separable cost package, tables, method figures, LoCoMo
   limitation appendix, and bibliography are complete for the current draft.
-- Current state is `park_and_continue_later`: do not launch more EventQA runs
-  or start skeptical review unless the paper line is explicitly reopened.
+- Current state is `EventQA_supplementary_planning`: do not open new benchmark
+  routes. First perform a read-only EventQA evidence-gap inventory and
+  pre-register one focused follow-up; no EventQA GPU run is authorized until a
+  separate execution decision.
+- LongBench v2 follow-up is closed under the current frozen-P7 method: its
+  protocol-clean 60-item paired comparison has no query-retrieval effect
+  (`5/5/50` P7 wins/losses/ties versus no-query). Do not expand it, tune P7 on
+  it, or use it as positive paper evidence.
+- By DEC-0089, BABILong, MemBench, InfiniteBench, LongBench v1, and other new
+  benchmark candidates are paused while the project focuses on EventQA
+  supplementary evidence.
 - Reopen sequence:
   1. independent skeptical review;
   2. resolve review-blocking manuscript or evidence issues;
   3. convert to the selected venue template only after the review gate.
 
-### Additive memory benchmark campaign: FactConsolidation matrix freeze (2026-07-08)
+### Additive memory benchmark campaign closure (2026-07-09)
 
-- Scope is additive to the frozen EventQA paper package and does not change the
-  current paper fallback rule.
-- Dataset audit artifact:
-  `outputs/mab/factconsolidation_dataset_audit.json`.
-- Accepted evaluation matrix is frozen in
-  `configs/eval/factconsolidation_p7.json`.
-- Real audited scale for the six selected subtasks:
-  - `factconsolidation_sh_6k`: 1 matched context, 100 queries, 2 chunks,
-    `~6.4k` context tokens, `~6.5k` memorization-prompt tokens.
-  - `factconsolidation_mh_6k`: 1 matched context, 100 queries, 2 chunks,
-    `~6.4k` context tokens, `~6.5k` memorization-prompt tokens.
-  - `factconsolidation_sh_32k`: 1 matched context, 100 queries, 9 chunks,
-    `~34.6k` context tokens, `~35.1k` memorization-prompt tokens.
-  - `factconsolidation_mh_32k`: 1 matched context, 100 queries, 9 chunks,
-    `~34.6k` context tokens, `~35.1k` memorization-prompt tokens.
-  - `factconsolidation_sh_64k`: 1 matched context, 100 queries, 17 chunks,
-    `~70.0k` context tokens, `~70.8k` memorization-prompt tokens.
-  - `factconsolidation_mh_64k`: 1 matched context, 100 queries, 17 chunks,
-    `~70.0k` context tokens, `~70.8k` memorization-prompt tokens.
-- Execution order remains bounded:
-  1. implement adapter and paired runner;
-  2. smoke only on 6k SH/MH;
-  3. promote 32k/64k only if smoke is valid and useful.
-- `262k` subtasks are intentionally excluded from this campaign until the
-  smaller matrix proves usable.
+- Scope remains additive to the frozen EventQA paper package and does not
+  change the current paper fallback rule.
+- FactConsolidation route is closed under the present frozen-P7 protocol:
+  weak and inconsistent 6k/32k/64k results do not justify main-table
+  promotion or further scaling.
+- DetectiveQA route is also closed for the current paper cycle:
+  - single-query full, extractor-aware rerun, and multi-query full are
+    complete;
+  - the pre-alignment runs had clean bank-lifecycle invariants and appeared to
+    show `p7 > disabled`, but that effectiveness comparison is historical only;
+  - the historical `disabled` vs `p7_no_query_retrieval` comparison was later
+    found to be confounded by a query-generation mismatch
+    (`disabled=10` vs bank-on `40` response-length contract);
+  - the aligned multi-query full rerun removes that confound and yields
+    `disabled=10/71`, `p7=9/71`, `p7_no_query_retrieval=10/71`;
+  - use DetectiveQA only as appendix-only negative diagnostic /
+    failure-analysis evidence, not as positive supplementary evidence.
+- Consequence:
+  the additive benchmark campaign is complete for this paper cycle.
+  It does not reopen EventQA runs, does not broaden the paper claim, and does
+  not replace the EventQA-centered fallback route.
+- Historical note on the brief benchmark-policy reopen:
+  - a bounded `RULER-QA2` exploratory trial was executed on 2026-07-10 under
+    an adapted frozen-bank protocol;
+  - the route is now re-closed because the full adapted `p7` run is
+    mechanism-negative (`retrieved_latent_count=0` on all `100` queries) even
+    though the runner itself is executable;
+  - future benchmark expansion, if reopened again, should begin with a fresh
+    benchmark-choice audit rather than assuming `RULER-QA2` remains the next
+    candidate.
+> Historical route, superseded by DEC-0088 and DEC-0089: the LongBench v2
+> recovery below completed as a v3 paired comparison and no longer has an
+> active scheduler, merge gate, or expansion path.
+
+- Current route after benchmark closure:
+  1. benchmark planning was explicitly reopened on 2026-07-12;
+  2. use `research_notes/plans/p7_longbench_v2_benchmark_plan.md` as the active
+     benchmark-planning authority;
+  3. LongBench v2 Phase 0 dataset audit completed with frozen 18-row smoke and
+     60-row bounded manifests;
+  4. Phase 1 adapter/scorer and no-model lifecycle contracts completed with
+     `15/15` tests passing;
+  5. the frozen 18-item smoke completed with mechanically valid retrieval but
+     weak effectiveness;
+  6. the user explicitly approved the frozen 60-item bounded evaluation; its
+     original single-worker run stopped after two items on a full-context
+     Disabled OOM;
+  7. recovery subsequently completed and merged under the v3 constrained-choice
+     protocol; P7 and no-query tie `17/60`, so the candidate is closed;
+  8. do not add explicit-memory controls or further benchmark expansion;
+  9. focus only on read-only EventQA supplementary-evidence inventory before
+     any new paper-facing or GPU work.
 
 ### Historical planning snapshot below
 

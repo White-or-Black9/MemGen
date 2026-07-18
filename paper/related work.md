@@ -70,7 +70,7 @@ with an explicit read-write memory [@modarressi2024memllm]. MemGPT manages
 multiple memory tiers as virtual context for long-running interactions
 [@packer2023memgpt]. In our EventQA evaluation, same-model summaries, BM25
 retrieval, and a matched-token-budget condition test whether readable memory or
-additional query-time text explains the observed effect. 
+additional query-time text explains the observed effect.
 
 Long-horizon memory benchmarks also impose different evidence contracts.
 LongMemEval tests sustained conversational memory, including temporal
@@ -78,4 +78,4 @@ reasoning, knowledge updates, and abstention [@wu2024longmemeval]. LoCoMo
 evaluates question answering, summarization, and dialogue generation over long
 conversations [@maharana2024locomo]. MemoryAgentBench instead evaluates several
 memory competencies through incremental interactions and includes EventQA as
-an accurate-retrieval task [@hu2026evaluating]. 
+an accurate-retrieval task [@hu2026evaluating].

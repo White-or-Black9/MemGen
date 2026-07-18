@@ -318,4 +318,3 @@ for t = 1, ..., T:
     else:
         y_t ← Reasoner(H_t)
 ```
-

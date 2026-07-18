@@ -1172,6 +1172,7 @@ def _eventqa_manager_factory(
     context_id: str | None = None,
     query_id=None,
     generation_max_length: int = GENERATION_MAX_LENGTH,
+    constrained_choice: bool = False,
     recorded_bank_config: dict | None = None,
 ):
     def factory(
@@ -1205,6 +1206,7 @@ def _eventqa_manager_factory(
                     is_validation=is_validation,
                 )
                 self.generation_config.max_new_tokens = generation_max_length
+                self.generation_config.constrained_choice = constrained_choice
 
             def _create_session_memory_bank(self, actual_batch_size):
                 from interactions.multiturn_interaction import (
@@ -1332,6 +1334,7 @@ def _run_eventqa_model(
         generation_max_length=int(
             getattr(args, "generation_max_length", GENERATION_MAX_LENGTH)
         ),
+        constrained_choice=bool(getattr(args, "constrained_choice", False)),
         recorded_bank_config=recorded_bank_config,
     )
     try:

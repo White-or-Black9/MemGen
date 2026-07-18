@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import re
 import sys
 import time
 from pathlib import Path
@@ -18,6 +19,59 @@ def _load_mab_modules(repo):
     from utils.templates import get_template
 
     return chunk_text_into_sentences, post_process, get_template
+
+
+_DETECTIVEQA_JSON_ANSWER = re.compile(r'"answer"\s*:\s*"([^"]+)"', re.IGNORECASE)
+_DETECTIVEQA_BOXED_ANSWER = re.compile(r'【\s*([^】]+?)\s*】')
+_DETECTIVEQA_OPTION_ANSWER = re.compile(
+    r'\b([A-D])\.\s*([^\n\r\}\]"]+)',
+    re.IGNORECASE,
+)
+
+
+def context_prefix_for_sub_dataset(sub_dataset):
+    lowered = (sub_dataset or "").lower()
+    if lowered.startswith("factconsolidation"):
+        return "conflict-resolution"
+    if lowered.startswith("ruler_") or lowered.startswith("eventqa") or lowered.startswith("longmemeval"):
+        return "accurate-retrieval"
+    if lowered == "detective_qa" or lowered.startswith("infbench"):
+        return "long-range-understanding"
+    if lowered.startswith("icl_") or lowered.startswith("recsys_"):
+        return "test-time-learning"
+    return "memory-agentbench"
+
+
+def extract_detectiveqa_answer(output_text):
+    if not output_text:
+        return None
+    match = _DETECTIVEQA_JSON_ANSWER.search(output_text)
+    if match:
+        return match.group(1).strip()
+    match = _DETECTIVEQA_BOXED_ANSWER.search(output_text)
+    if match:
+        return match.group(1).strip()
+    matches = _DETECTIVEQA_OPTION_ANSWER.findall(output_text)
+    if matches:
+        letter, answer_text = matches[-1]
+        return f"{letter.upper()}. {answer_text.strip()}"
+    return None
+
+
+def build_detectiveqa_queries(row, *, sub_dataset, get_template):
+    query_template = get_template(sub_dataset, "query", "Long_context_agent")
+    queries = []
+    for query_id, (question, answers) in enumerate(zip(row["questions"], row["answers"])):
+        gold_answers = answers if isinstance(answers, list) else [answers]
+        queries.append(
+            {
+                "query_id": query_id,
+                "question": question,
+                "query_prompt": query_template.format(question=question),
+                "gold_answers": gold_answers,
+            }
+        )
+    return queries
 
 
 def resolve_timestamp(pinned_timestamp=None):
@@ -68,12 +122,16 @@ def prepare(args):
         memorize_template.format(context=chunk, time_stamp=timestamp)
         for chunk in chunks
     ]
-    question = row["questions"][0]
-    query_template = get_template(args.sub_dataset, "query", "Long_context_agent")
-    query_prompt = query_template.format(question=question)
-    answers = row["answers"][0]
-    gold_answers = answers if isinstance(answers, list) else [answers]
+    queries = build_detectiveqa_queries(
+        row,
+        sub_dataset=args.sub_dataset,
+        get_template=get_template,
+    )
+    question = queries[0]["question"]
+    query_prompt = queries[0]["query_prompt"]
+    gold_answers = list(queries[0]["gold_answers"])
     context_sha = hashlib.sha256(row["context"].encode("utf-8")).hexdigest()
+    context_prefix = context_prefix_for_sub_dataset(args.sub_dataset)
     _json_write(
         args.output,
         {
@@ -81,11 +139,14 @@ def prepare(args):
             "total_rows": len(rows),
             "matched_rows": matched_count,
             "match_index": resolved_match_index,
-            "context_id": f"conflict-resolution-{context_sha[:16]}",
+            "context_id": f"{context_prefix}-{context_sha[:16]}",
             "query_id": 0,
             "chunks": chunks,
             "chunk_token_lengths": chunk_token_lengths,
             "memorization_prompts": prompts,
+            "questions": list(row["questions"]),
+            "queries": queries,
+            "question_count": len(queries),
             "query_prompt": query_prompt,
             "gold_answers": gold_answers,
             "template": "factconsolidation/long_context_agent",
@@ -96,11 +157,30 @@ def prepare(args):
 def score(args):
     _, post_process, _ = _load_mab_modules(args.mab_repo)
     request = json.loads(Path(args.input).read_text(encoding="utf-8"))
+    output = {"output": request["prediction"]}
+    dataset_config = request["dataset_config"]
     metrics, additional = post_process(
-        {"output": request["prediction"]},
+        output,
         request["gold_answers"],
-        request["dataset_config"],
+        dataset_config,
     )
+    if dataset_config.get("sub_dataset") == "detective_qa":
+        _, mab_post_process, _ = _load_mab_modules(args.mab_repo)
+        parsed_prediction = extract_detectiveqa_answer(request["prediction"])
+        if parsed_prediction:
+            detective_metrics, _ = mab_post_process(
+                {"output": parsed_prediction},
+                request["gold_answers"],
+                dataset_config,
+            )
+            metrics = {
+                metric_name: max(metric_value, detective_metrics[metric_name])
+                for metric_name, metric_value in metrics.items()
+            }
+            additional = {
+                **additional,
+                "parsed_output_detectiveqa": parsed_prediction,
+            }
     _json_write(args.output, {"metrics": metrics, "additional": additional})
 
 

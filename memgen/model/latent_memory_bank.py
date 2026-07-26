@@ -361,6 +361,7 @@ class LatentMemoryBank:
         *,
         device: Optional[Union[str, torch.device]] = None,
         dtype: Optional[torch.dtype] = None,
+        top_k_override: Optional[int] = None,
     ) -> List[LatentMemorySlot]:
         """检索相关记忆（legacy 兼容接口）。
 
@@ -371,6 +372,7 @@ class LatentMemoryBank:
             query_or_hidden_states,
             device=device,
             dtype=dtype,
+            top_k_override=top_k_override,
         ).slots
 
     def retrieve_with_context(
@@ -379,6 +381,7 @@ class LatentMemoryBank:
         *,
         device: Optional[Union[str, torch.device]] = None,
         dtype: Optional[torch.dtype] = None,
+        top_k_override: Optional[int] = None,
     ) -> LatentMemoryRetrievalResult:
         """检索相关记忆，返回完整的结构化检索结果（包含 all scores、max、argmax 等）。
 
@@ -398,6 +401,9 @@ class LatentMemoryBank:
         返回：
             LatentMemoryRetrievalResult：包含 slots、全部 scores、max_score 等完整信息
         """
+        if top_k_override is not None and top_k_override <= 0:
+            raise ValueError("top_k_override must be greater than zero")
+
         # --- disabled 或空 bank：直接返回空 ---
         # disabled 路径不递增 retrieval_step（零开销），但 enabled 空 bank 仍然递增，
         # 以保证后续写入的 slot 获得一致的时间基准（age 不会负值）。
@@ -488,6 +494,10 @@ class LatentMemoryBank:
         # --- top-k 截断 ---
         if self.config.retrieve_policy in {"topk", "threshold_topk"}:
             selected_slots = selected_slots[: self.config.top_k]
+        # A query-only caller may request a stricter cap without mutating the
+        # frozen bank configuration used during construction.
+        if top_k_override is not None:
+            selected_slots = selected_slots[:top_k_override]
 
         # --- 构造输出 slot（detached clone）并更新访问统计 ---
         # 只有最终进入 selected_slots 的 slot 会更新 last_retrieved_step。

@@ -645,6 +645,10 @@ def _install_eventqa_bank_trace(
                 ),
             )
         result = original_retrieve(*args, **kwargs)
+        if query_phase_active:
+            lifecycle["query_retrieval_invocation_count"] = (
+                lifecycle.get("query_retrieval_invocation_count", 0) + 1
+            )
         trace["last_retrieval"] = {
             "scores": list(result.scores),
             "max_score": (
@@ -1003,7 +1007,17 @@ def _git(*args: str) -> str:
 
 def _mab_env() -> dict:
     env = dict(os.environ)
-    env.update({"HF_HUB_OFFLINE": "1", "HF_DATASETS_OFFLINE": "1"})
+    # MemoryAgentBench calls nltk.download('punkt') unconditionally while
+    # preparing EventQA chunks.  Point it at the already-installed local
+    # tokenizer data so a transient remote NLTK index cannot alter or abort an
+    # otherwise offline/frozen evaluation.
+    env.update(
+        {
+            "HF_HUB_OFFLINE": "1",
+            "HF_DATASETS_OFFLINE": "1",
+            "NLTK_DATA": "/home/baishilong/nltk_data",
+        }
+    )
     return env
 
 
@@ -1164,6 +1178,9 @@ def _eventqa_manager_factory(
     external_bank=None,
     preserve_bank: bool = False,
     disable_query_retrieval: bool = False,
+    query_retrieved_memory_conditioning: bool = True,
+    query_latent_usage: str = "weaver_integrated",
+    query_conditioning_model=None,
     construction_only: bool = False,
     capture_bank_tensor_snapshot: bool = False,
     trace_score_decomposition: bool = False,
@@ -1267,6 +1284,29 @@ def _eventqa_manager_factory(
                     if proxy is not None:
                         proxy.begin_query()
                         lifecycle["query_phase_active"] = True
+                        # Construction always uses P7's full conditioning path.
+                        # At the query boundary only, this switch retains the
+                        # real bank retrieval but controls whether its output is
+                        # concatenated into Weaver's native input sequence.
+                        if query_conditioning_model is not None:
+                            query_conditioning_model.config.query_retrieved_memory_conditioning = bool(
+                                query_retrieved_memory_conditioning
+                            )
+                            # ``no_retrieval`` is implemented by the read-only
+                            # bank proxy above, which returns the native empty
+                            # retrieval result.  The model itself must retain
+                            # its standard Weaver path so it consumes that empty
+                            # result rather than treating the enum as a request
+                            # to bypass retrieval internally.
+                            query_conditioning_model.config.query_latent_usage = (
+                                "weaver_integrated"
+                                if query_latent_usage == "no_retrieval"
+                                else query_latent_usage
+                            )
+                        lifecycle["query_retrieved_memory_conditioning"] = bool(
+                            query_retrieved_memory_conditioning
+                        )
+                        lifecycle["query_latent_usage"] = query_latent_usage
                         if capture_bank_tensor_snapshot:
                             lifecycle["pre_query_bank_tensor_snapshot"] = (
                                 _bank_tensor_snapshot(
@@ -1302,6 +1342,8 @@ def _run_eventqa_model(
     external_bank=None,
     preserve_bank: bool = False,
     disable_query_retrieval: bool = False,
+    query_retrieved_memory_conditioning: bool = True,
+    query_latent_usage: str = "weaver_integrated",
     construction_only: bool = False,
     recorded_bank_config: dict | None = None,
     score_trace_state: dict | None = None,
@@ -1310,7 +1352,40 @@ def _run_eventqa_model(
         raise RuntimeError("EventQA bank-on runtime config is required")
     if bank_mode == "on" and recorded_bank_config is None:
         raise RuntimeError("EventQA bank-on recorded config is required")
+    # Backward-compatible normalization for established callers.  New runners
+    # pass the enum explicitly; legacy no-query and no-conditioning callers
+    # are mapped to the same unambiguous runtime mode.
+    if query_latent_usage == "weaver_integrated" and disable_query_retrieval:
+        query_latent_usage = "no_retrieval"
+    elif (
+        query_latent_usage == "weaver_integrated"
+        and not query_retrieved_memory_conditioning
+    ):
+        query_latent_usage = "retrieve_but_do_not_condition"
+    if query_latent_usage not in {
+        "weaver_integrated",
+        "retrieve_but_do_not_condition",
+        "direct_top1",
+        "no_retrieval",
+    }:
+        raise ValueError(f"unsupported query_latent_usage={query_latent_usage!r}")
+    if disable_query_retrieval != (query_latent_usage == "no_retrieval"):
+        raise ValueError(
+            "disable_query_retrieval and query_latent_usage disagree; use "
+            "no_retrieval only with the disabled retrieval proxy"
+        )
+    if query_latent_usage == "direct_top1" and not query_retrieved_memory_conditioning:
+        raise ValueError("direct_top1 cannot be combined with conditioning=false")
     original_factory = base._manager_class
+    previous_query_conditioning = bool(
+        getattr(model.config, "query_retrieved_memory_conditioning", True)
+    )
+    previous_query_latent_usage = getattr(
+        model.config, "query_latent_usage", "weaver_integrated"
+    )
+    # Do not let an earlier query-only ablation leak into construction.
+    model.config.query_retrieved_memory_conditioning = True
+    model.config.query_latent_usage = "weaver_integrated"
     capture = {}
     base._manager_class = _eventqa_manager_factory(
         original_factory,
@@ -1318,6 +1393,9 @@ def _run_eventqa_model(
         external_bank=external_bank,
         preserve_bank=preserve_bank,
         disable_query_retrieval=disable_query_retrieval,
+        query_retrieved_memory_conditioning=query_retrieved_memory_conditioning,
+        query_latent_usage=query_latent_usage,
+        query_conditioning_model=model,
         construction_only=construction_only,
         capture_bank_tensor_snapshot=bool(
             getattr(args, "trace_score_decomposition", False)
@@ -1387,6 +1465,8 @@ def _run_eventqa_model(
                 result["_retained_bank"] = capture["bank"]
     finally:
         base._manager_class = original_factory
+        model.config.query_retrieved_memory_conditioning = previous_query_conditioning
+        model.config.query_latent_usage = previous_query_latent_usage
         restore_bank_trace = capture.get("restore_bank_trace")
         if restore_bank_trace is not None:
             restore_bank_trace()
@@ -1395,6 +1475,13 @@ def _run_eventqa_model(
     result["eventqa_protocol"] = args.eventqa_protocol
     result["effective_generation_max_length"] = int(
         getattr(args, "generation_max_length", GENERATION_MAX_LENGTH)
+    )
+    result["query_retrieved_memory_conditioning"] = bool(
+        query_retrieved_memory_conditioning
+    )
+    result["query_latent_usage"] = query_latent_usage
+    result["query_retrieval_invocation_count"] = int(
+        lifecycle.get("query_retrieval_invocation_count", 0)
     )
     result["rendered_query_messages"] = lifecycle["rendered_query_messages"]
     result["rendered_query_prompt"] = lifecycle["rendered_query_prompt"]
@@ -1933,6 +2020,7 @@ def _build_manifest(
         ),
         "full_history_policy": "over_capacity_invalid",
         "retrieved_memory_to_weaver": True,
+        "query_retrieved_memory_conditioning": True,
         "memory_bank_storage_space": "weaver",
         "research_note": str(RESEARCH_NOTE_PATH),
         "research_note_write_enabled": not getattr(

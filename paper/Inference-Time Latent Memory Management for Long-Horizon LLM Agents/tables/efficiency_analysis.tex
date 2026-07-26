@@ -1,0 +1,16 @@
+\begin{table*}[t]
+\centering
+\begin{tabular}{lrrr}
+\toprule
+Method & End-to-end (s) & Seconds/question & Peak incremental GPU memory \\
+\midrule
+Bank-off & 367.448 & 0.735 & 143 MiB \\
+Rolling text summary & 606.213 & 1.212 & 1.79 GiB \\
+BM25 top-2 retrieved text & 692.845 & 1.386 & 3.51 GiB \\
+Matched-budget retrieved text & 501.761 & 1.004 & 171 MiB \\
+Latent memory manager & 387.999 & 0.776 & 172 MiB \\
+\bottomrule
+\end{tabular}
+\caption{Table 4 | Method-separable EventQA inference cost. Measurements use serialized same-GPU complete passes and exclude model loading. The rolling-summary run completed after a clear occupancy preflight before each context.}
+\label{tab:efficiency-analysis}
+\end{table*}

@@ -1,0 +1,31 @@
+\section{Results}
+\label{sec:results}
+
+\subsection{Main Results}
+
+Table~\ref{tab:main-eventqa-results} compares the latent memory manager with the matched Bank-off baseline. Across five repeated runs, the latent memory manager increases EM from $0.008$ to $0.197\pm0.020$ and recall from $0.178$ to $0.254\pm0.028$. It also reduces format failures from $377.0$ to $121.4\pm8.8$. These results establish that a frozen, context-local latent bank improves event reasoning relative to the same compressed query path without persistent memory.
+
+\input{tables/main_eventqa_results}
+
+\subsection{Explicit-Memory Comparisons}
+
+We next compare the latent memory manager with explicit textual memory. All three controls remain below the latent memory manager on both EM and recall. BM25 top-2 achieves recall of 0.226 but EM of only 0.030, while the 16-token matched-budget condition reaches EM of 0.068. Thus, the observed gain is not reproduced by supplying a small amount of retrieved text at question time.
+
+\input{tables/explicit_memory_comparisons}
+
+\subsection{Ablation Results}
+\label{sec:ablation-results}
+
+We test whether the bank must be retrieved at question time. The ablation keeps the same context-construction procedure, bank capacity, update policy, and frozen-bank protocol as the latent memory manager. It disables retrieval for every question while preserving the constructed bank.
+
+Without query-time retrieval, EM falls to 0.008, recall to 0.178, and format failures rise to 377, exactly matching the Bank-off effectiveness values. The latent memory manager therefore requires query-time latent reuse; construction of a bank alone does not produce the observed EventQA improvement. Additional ablation results will be reported in this subsection.
+
+\input{tables/query_time_retrieval_ablation}
+
+\subsection{Efficiency Analysis}
+
+We measure Bank-off and the latent memory manager in separate serialized processes on the same GPU over all five contexts and 500 questions, excluding model loading. The latent memory manager requires 387.999 seconds end-to-end, or 0.776 seconds per question, compared with 367.448 seconds and 0.735 seconds per question for Bank-off. This corresponds to a 5.6% end-to-end overhead, including 78.454 seconds of context-bank construction. Its peak incremental GPU allocation is approximately 29 MiB higher than Bank-off.
+
+The rolling-summary baseline requires 606.213 seconds (1.212 seconds per question), including 189.328 seconds of summary construction, with a peak incremental GPU allocation of approximately 1.79 GiB. BM25 and matched-budget controls require 692.845 seconds (1.386 seconds per question) and 501.761 seconds (1.004 seconds per question), respectively; their peak incremental GPU allocations are approximately 3.51 GiB and 171 MiB. These measurements show that the latent memory manager remains close to the matched no-bank cost while exceeding the completed explicit-memory controls on EventQA. They do not establish universal latency or memory superiority across models, hardware, or retrieval systems.
+
+\input{tables/efficiency_analysis}

@@ -172,6 +172,41 @@ class R4TriviaQADynamicHarnessTest(unittest.TestCase):
                 ]
             )
 
+    def test_p7_configured_uses_eventqa_frozen_bank_parameters(self):
+        parser = harness.build_arg_parser()
+        args = parser.parse_args(
+            [
+                "--cfg-path",
+                "configs/latent_memory/triviaqa.yaml",
+                "--checkpoint-path",
+                "/tmp/checkpoint",
+                "--output-dir",
+                "/tmp/output",
+                "--memory-mode",
+                "p7_configured",
+            ]
+        )
+
+        harness.validate_args(args)
+        self.assertEqual(
+            harness.build_memory_bank_config(args),
+            {
+                "enabled": True,
+                "batch_size": 1,
+                "max_slots": 16,
+                "top_k": 1,
+                "threshold": 0.005,
+                "retrieve_threshold": 0.005,
+                "update_threshold": 0.08,
+                "decay_alpha": 0.05,
+                "pool_last_n": 64,
+                "retrieve_policy": "threshold_topk",
+                "update_policy": "thread_update",
+                "storage_device": "cpu",
+                "debug": True,
+            },
+        )
+
     def test_load_sample_uses_preloaded_dataset(self):
         dataset = [
             {

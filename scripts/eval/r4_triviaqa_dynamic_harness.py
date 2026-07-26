@@ -13,6 +13,21 @@ PHASE = "R4-1D"
 DEFAULT_RETRIEVAL_ENDPOINT = "http://127.0.0.1:8001/retrieve"
 DEFAULT_RETRIEVAL_TOPK = 3
 CANNOT_FIND_PAGES = "Cannot find corresponding pages."
+P7_MEMORY_BANK_CONFIG = {
+    "enabled": True,
+    "batch_size": 1,
+    "max_slots": 16,
+    "top_k": 1,
+    "threshold": 0.005,
+    "retrieve_threshold": 0.005,
+    "update_threshold": 0.08,
+    "decay_alpha": 0.05,
+    "pool_last_n": 64,
+    "retrieve_policy": "threshold_topk",
+    "update_policy": "thread_update",
+    "storage_device": "cpu",
+    "debug": True,
+}
 
 
 @dataclass(frozen=True)
@@ -122,7 +137,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument(
         "--memory-mode",
-        choices=("disabled", "version_a_aligned"),
+        choices=("disabled", "version_a_aligned", "p7_configured"),
         default="disabled",
     )
     parser.add_argument("--require-retrieval-ok", action="store_true")
@@ -156,7 +171,7 @@ def validate_args(args: argparse.Namespace) -> None:
         raise ValueError("memory_top_k must be positive")
     if args.memory_threshold < 0:
         raise ValueError("memory_threshold must be non-negative")
-    if args.memory_mode not in {"disabled", "version_a_aligned"}:
+    if args.memory_mode not in {"disabled", "version_a_aligned", "p7_configured"}:
         raise ValueError(f"Unsupported memory_mode: {args.memory_mode}")
 
 
@@ -201,19 +216,24 @@ def build_memory_bank_config(args: argparse.Namespace) -> Dict[str, Any]:
             "storage_device": "cpu",
             "debug": True,
         }
+    if args.memory_mode == "p7_configured":
+        return dict(P7_MEMORY_BANK_CONFIG)
     raise ValueError(f"Unsupported memory_mode: {args.memory_mode}")
 
 
 def build_run_metadata(args: argparse.Namespace) -> RunMetadata:
-    memory_enabled = args.memory_mode == "version_a_aligned"
+    memory_config = build_memory_bank_config(args)
+    memory_enabled = bool(memory_config["enabled"])
     return RunMetadata(
         batch_size=args.batch_size,
         memory_mode=args.memory_mode,
         memory_enabled=memory_enabled,
         checkpoint_path=str(args.checkpoint_path),
         config_overrides=build_config_overrides(args),
-        memory_threshold=(float(args.memory_threshold) if memory_enabled else None),
-        memory_top_k=(int(args.memory_top_k) if memory_enabled else None),
+        memory_threshold=(
+            float(memory_config["threshold"]) if memory_enabled else None
+        ),
+        memory_top_k=(int(memory_config["top_k"]) if memory_enabled else None),
         temperature=args.temperature,
         max_response_length=args.max_response_length,
         seed=args.seed,
@@ -643,8 +663,8 @@ def main() -> int:
         "sample_index": args.sample_index,
         "sample_count": args.sample_count,
         "memory_mode": args.memory_mode,
-        "memory_threshold": args.memory_threshold,
-        "memory_top_k": args.memory_top_k,
+        "memory_bank_config": build_memory_bank_config(args),
+        "checkpoint_path": args.checkpoint_path,
         "require_retrieval_ok": args.require_retrieval_ok,
         "retrieval_endpoint": args.retrieval_endpoint,
         "retrieval_topk": args.retrieval_topk,

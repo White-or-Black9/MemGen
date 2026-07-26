@@ -126,6 +126,25 @@ class TextSummaryAggregateTest(unittest.TestCase):
         self.assertEqual(result["cost"]["query_latency_seconds"], 250.0)
         self.assertTrue(result["cost"]["confounded_by_shared_gpu"])
 
+    def test_accepts_controlled_single_gpu_cost_evidence(self):
+        evidence = {
+            "schema_version": "eventqa-text-summary-controlled-cost/v1",
+            "gpu_index": 5,
+            "context_indices": [0, 1, 2, 3, 4],
+            "serialized_single_gpu": True,
+            "all_preflight_clear": True,
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            construction_paths, query_paths = self.write_pairs(Path(tmpdir))
+            result = aggregate_pairs(
+                construction_paths,
+                query_paths,
+                controlled_cost_evidence=evidence,
+            )
+        self.assertFalse(result["cost"]["confounded_by_shared_gpu"])
+        self.assertTrue(result["cost"]["paper_facing"])
+        self.assertEqual(result["cost"]["controlled_cost_evidence"], evidence)
+
     def test_rejects_exact_construction_byte_hash_mismatch(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             construction_paths, query_paths = self.write_pairs(Path(tmpdir))

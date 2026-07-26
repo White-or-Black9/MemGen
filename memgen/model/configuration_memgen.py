@@ -12,6 +12,8 @@ class MemGenConfig(PretrainedConfig):
         prompt_latents_len: int = 0,
         inference_latents_len: int = 0,
         retrieved_memory_to_weaver: bool = False,
+        query_retrieved_memory_conditioning: bool = True,
+        query_latent_usage: str = "weaver_integrated",
         memory_bank_storage_space: str = "reasoner",
         # trigger configs
         trigger_active: bool = False,
@@ -27,6 +29,11 @@ class MemGenConfig(PretrainedConfig):
         self.prompt_latents_len = prompt_latents_len
         self.inference_latents_len = inference_latents_len
         self.retrieved_memory_to_weaver = retrieved_memory_to_weaver
+        # This controls only whether an already-computed query-time retrieval is
+        # concatenated into Weaver's input.  The EventQA runner flips it only
+        # after construction has completed; retrieval itself remains enabled.
+        self.query_retrieved_memory_conditioning = query_retrieved_memory_conditioning
+        self.query_latent_usage = query_latent_usage
         self.memory_bank_storage_space = memory_bank_storage_space
 
         # trigger configs

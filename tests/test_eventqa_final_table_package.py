@@ -97,9 +97,30 @@ class EventQAFinalTablePackageTest(unittest.TestCase):
                 "end_to_end_latency_seconds": 691.345,
                 "end_to_end_amortized_seconds_per_question": 1.383,
                 "query_incremental_peak_gpu_memory_bytes_max": 210000000,
+                "construction_incremental_peak_gpu_memory_bytes_max": 1920000000,
                 "paper_facing": False,
                 "confounded_by_shared_gpu": True,
+                "caveat": "shared-GPU diagnostic cost only",
             },
+        }
+        repeated_controls = {
+            "schema_version": "eventqa-explicit-controls-repeat-aggregate/v1",
+            "methods": [
+                {
+                    "method_id": method_id,
+                    "repeat_count": 5,
+                    "metrics": {
+                        "em": {"mean": em, "std": 0.0},
+                        "recall": {"mean": recall, "std": 0.0},
+                        "format_failures": {"mean": failures, "std": 0.0},
+                    },
+                }
+                for method_id, em, recall, failures in (
+                    ("text_summary", 0.012, 0.078, 267.0),
+                    ("bm25_top2", 0.03, 0.226, 265.0),
+                    ("matched16", 0.068, 0.18, 347.0),
+                )
+            ],
         }
         no_query = {
             "effectiveness": {
@@ -122,12 +143,14 @@ class EventQAFinalTablePackageTest(unittest.TestCase):
             bm25_aggregate=bm25,
             matched16_aggregate=matched16,
             text_summary_aggregate=text_summary,
+            explicit_controls_repeat_aggregate=repeated_controls,
             no_query_aggregate=no_query,
         )
 
         self.assertEqual(len(result["main_table"]), 7)
         self.assertEqual(result["main_table"][0]["method_id"], "bank_off")
         self.assertEqual(result["main_table"][-1]["method_id"], "p7")
+        self.assertEqual(result["main_table"][1]["repeat_count"], 5)
         self.assertEqual(result["explicit_controls"][-1]["method_id"], "p7")
         self.assertEqual(result["cost_table"][0]["method_id"], "bank_off")
         self.assertFalse(result["cost_table"][1]["paper_facing_cost"])
@@ -145,6 +168,7 @@ class EventQAFinalTablePackageTest(unittest.TestCase):
                 bm25_aggregate={"effectiveness": {}, "cost": {}},
                 matched16_aggregate={"effectiveness": {}, "cost": {}},
                 text_summary_aggregate={"effectiveness": {}, "cost": {}},
+                explicit_controls_repeat_aggregate={"schema_version": "eventqa-explicit-controls-repeat-aggregate/v1", "methods": []},
                 no_query_aggregate={"effectiveness": {}, "cost": {}, "invariants": {}},
             )
 

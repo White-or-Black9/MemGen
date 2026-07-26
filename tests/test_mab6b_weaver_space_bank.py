@@ -1380,6 +1380,158 @@ class MAB6BWeaverSpaceBankTest(unittest.TestCase):
         self.assertTrue(debug["weaver_conditioned_on_retrieved_memory"])
         self.assertEqual(debug["weaver_conditioning_token_count"], 1)
 
+    def test_query_conditioning_ablation_retrieves_but_uses_native_empty_weaver_input(self):
+        retrieved_memory = torch.tensor([[107.0, 108.0]], dtype=torch.float32)
+
+        def run(conditioning: bool):
+            model = build_fake_memgen()
+            model.config.retrieved_memory_to_weaver = True
+            model.config.memory_bank_storage_space = "weaver"
+            model.config.query_retrieved_memory_conditioning = conditioning
+            bank = FakeMemoryBank(retrieved_memory)
+            MemGenModel.generate(
+                model,
+                input_ids=torch.tensor([[1]], dtype=torch.long),
+                attention_mask=torch.ones((1, 1), dtype=torch.long),
+                generation_config=_generation_config(),
+                latent_memory_bank=bank,
+            )
+            return model, bank, model._last_generation_debug
+
+        full_model, full_bank, full_debug = run(True)
+        ablation_model, ablation_bank, ablation_debug = run(False)
+
+        self.assertEqual(len(full_bank.retrieve_calls), 1)
+        self.assertEqual(len(ablation_bank.retrieve_calls), 1)
+        self.assertTrue(torch.equal(
+            full_bank.retrieve_calls[0]["query"], ablation_bank.retrieve_calls[0]["query"]
+        ))
+        self.assertEqual(full_debug["retrieved_slot_count"], 1)
+        self.assertEqual(ablation_debug["retrieved_slot_count"], 1)
+        self.assertEqual(full_debug["retrieved_latent_count"], 1)
+        self.assertEqual(ablation_debug["retrieved_latent_count"], 1)
+        self.assertEqual(full_model.weaver.prompt_inputs[0].shape[1], 2)
+        # The ablation does not create a zero-valued pseudo-memory token: it
+        # preserves the project's native no-retrieval Weaver sequence length.
+        self.assertEqual(ablation_model.weaver.prompt_inputs[0].shape[1], 1)
+        self.assertTrue(torch.equal(
+            ablation_model.weaver.prompt_inputs[0], torch.tensor([[[101.0, 102.0]]])
+        ))
+        self.assertTrue(full_debug["weaver_conditioned_on_retrieved_memory"])
+        self.assertFalse(ablation_debug["weaver_conditioned_on_retrieved_memory"])
+        self.assertEqual(full_debug["conditioned_latent_count"], 1)
+        self.assertEqual(ablation_debug["conditioned_slot_count"], 0)
+        self.assertEqual(ablation_debug["conditioned_latent_count"], 0)
+        self.assertFalse(ablation_debug["empty_retrieval_before_ablation"])
+        self.assertEqual(len(full_model.reasoner.recorded_inputs), 1)
+        self.assertEqual(len(ablation_model.reasoner.recorded_inputs), 1)
+
+    def test_query_conditioning_ablation_changes_mock_weaver_dataflow_only(self):
+        retrieved_memory = torch.tensor([[107.0, 108.0]], dtype=torch.float32)
+
+        def run(conditioning: bool):
+            model = build_fake_memgen()
+            model.config.retrieved_memory_to_weaver = True
+            model.config.memory_bank_storage_space = "weaver"
+            model.config.query_retrieved_memory_conditioning = conditioning
+            bank = FakeMemoryBank(retrieved_memory)
+
+            def mock_prompt(inputs_embeds, attention_mask, position_ids):
+                value = 9.0 if inputs_embeds.size(1) > 1 else 3.0
+                hidden = torch.full(
+                    (1, 2, 2), value, dtype=inputs_embeds.dtype, device=inputs_embeds.device
+                )
+                return hidden, torch.ones((1, 2), dtype=attention_mask.dtype), None
+
+            model.weaver.augment_prompt = mock_prompt
+            MemGenModel.generate(
+                model,
+                input_ids=torch.tensor([[1]], dtype=torch.long),
+                attention_mask=torch.ones((1, 1), dtype=torch.long),
+                generation_config=_generation_config(),
+                latent_memory_bank=bank,
+            )
+            return model, bank
+
+        full_model, full_bank = run(True)
+        ablation_model, ablation_bank = run(False)
+
+        self.assertEqual(len(full_bank.retrieve_calls), len(ablation_bank.retrieve_calls))
+        self.assertEqual(len(full_model.reasoner.recorded_inputs), 1)
+        self.assertEqual(len(ablation_model.reasoner.recorded_inputs), 1)
+        self.assertFalse(torch.equal(
+            full_model.reasoner.recorded_inputs[0],
+            ablation_model.reasoner.recorded_inputs[0],
+        ))
+
+    def test_query_conditioning_default_is_enabled(self):
+        self.assertTrue(MemGenConfig().query_retrieved_memory_conditioning)
+
+    def test_direct_top1_bypasses_weaver_and_injects_only_mapped_top1(self):
+        model = build_fake_memgen()
+        model.config.retrieved_memory_to_weaver = True
+        model.config.memory_bank_storage_space = "weaver"
+        model.config.query_latent_usage = "direct_top1"
+        retrieved_memory = torch.tensor(
+            [[107.0, 108.0], [109.0, 110.0]], dtype=torch.float32
+        )
+        bank = FakeMemoryBank(retrieved_memory)
+
+        MemGenModel.generate(
+            model,
+            input_ids=torch.tensor([[1]], dtype=torch.long),
+            attention_mask=torch.ones((1, 1), dtype=torch.long),
+            generation_config=_generation_config(),
+            latent_memory_bank=bank,
+        )
+
+        debug = model._last_generation_debug
+        expected_reasoner_input = torch.tensor(
+            [[[1.0, 2.0], [117.0, 118.0], [119.0, 120.0]]]
+        )
+        self.assertEqual(bank.retrieve_calls[0]["top_k_override"], 1)
+        self.assertEqual(len(model.weaver.prompt_inputs), 0)
+        self.assertEqual(len(model.weaver.inference_inputs), 0)
+        self.assertTrue(torch.equal(model.reasoner.recorded_inputs[0], expected_reasoner_input))
+        self.assertEqual(debug["query_latent_usage"], "direct_top1")
+        self.assertEqual(debug["retrieved_slot_count"], 1)
+        self.assertEqual(debug["retrieved_latent_count"], 2)
+        self.assertEqual(debug["reasoner_injected_latent_count"], 2)
+        self.assertEqual(debug["reasoner_injected_latent_shape"], [1, 2, 2])
+        self.assertEqual(debug["reasoner_injected_latent_space"], "reasoner")
+        self.assertTrue(debug["direct_injection_applied"])
+        self.assertEqual(debug["query_weaver_invoke_count"], 0)
+        self.assertFalse(debug["weaver_output_generated"])
+        self.assertFalse(debug["weaver_output_consumed"])
+        self.assertEqual(len(bank.write_calls), 0)
+
+    def test_direct_top1_empty_retrieval_does_not_inject_or_call_weaver(self):
+        class EmptyBank(FakeMemoryBank):
+            def retrieve(self, *args, **kwargs):
+                super().retrieve(*args, **kwargs)
+                return []
+
+        model = build_fake_memgen()
+        model.config.retrieved_memory_to_weaver = True
+        model.config.memory_bank_storage_space = "weaver"
+        model.config.query_latent_usage = "direct_top1"
+        bank = EmptyBank(torch.tensor([[107.0, 108.0]], dtype=torch.float32))
+
+        MemGenModel.generate(
+            model,
+            input_ids=torch.tensor([[1]], dtype=torch.long),
+            attention_mask=torch.ones((1, 1), dtype=torch.long),
+            generation_config=_generation_config(),
+            latent_memory_bank=bank,
+        )
+
+        debug = model._last_generation_debug
+        self.assertEqual(len(model.weaver.prompt_inputs), 0)
+        self.assertEqual(debug["reasoner_injected_latent_count"], 0)
+        self.assertFalse(debug["direct_injection_applied"])
+        self.assertTrue(debug["empty_retrieval_before_ablation"])
+        self.assertEqual(model.reasoner.recorded_inputs[0].shape[1], 1)
+
     def test_mab6b_injects_only_fused_reasoner_space_latent(self):
         model = build_fake_memgen()
         model.config.retrieved_memory_to_weaver = True

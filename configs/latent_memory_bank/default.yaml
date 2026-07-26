@@ -6,6 +6,16 @@ latent_memory_bank:
   # ---------- 基本开关 ----------
   enabled: false          # 是否启用；false 时 write/retrieve 均为 no-op
 
+  # ---------- Query-time Weaver conditioning ----------
+  # Kept on by default.  The EventQA ablation may set this to false only after
+  # construction: retrieval is still executed, but its latents are withheld
+  # from Weaver using the native empty-retrieval path.
+  query_retrieved_memory_conditioning: true
+  # Full P7 is weaver_integrated. Query-only ablations may use direct_top1 or
+  # retrieve_but_do_not_condition; no_retrieval is represented by the EventQA
+  # read-only proxy so it never silently bypasses construction retrieval.
+  query_latent_usage: weaver_integrated
+
   # ---------- 容量与检索 ----------
   batch_size: 1           # 当前仅支持 1（Phase 4 约束）
   max_slots: 8            # 最大槽位容量

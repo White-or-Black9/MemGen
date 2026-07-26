@@ -1,0 +1,1 @@
+7, NVIDIA RTX A6000, 2 MiB, 49140 MiB, 0 %

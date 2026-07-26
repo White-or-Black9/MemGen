@@ -110,6 +110,8 @@ def _build_manifest(
 def _load_model(args):
     model, capacity = _BASE_LOAD_MODEL(args)
     model.config.retrieved_memory_to_weaver = True
+    model.config.query_retrieved_memory_conditioning = True
+    model.config.query_latent_usage = "weaver_integrated"
     model.config.memory_bank_storage_space = "weaver"
     return model, capacity
 

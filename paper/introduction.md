@@ -1,4 +1,4 @@
-Introduction
+## Introduction
 
 Large language model (LLM)-based agents are evolving from single-turn text generators into interactive systems that can reason, use tools, maintain memory, and make decisions over extended interactions. A common abstraction decomposes their capabilities into reasoning or planning, memory, and tool use. Reasoning supports problem decomposition and decision making, memory preserves prior observations, task states, and experiences, and tool use connects the agent to external environments, APIs, databases, and other functional modules [@zhao2023llm_agent_survey; @wang2024survey_autonomous_agents; @zhang2024survey_memory_llm_agents].
 

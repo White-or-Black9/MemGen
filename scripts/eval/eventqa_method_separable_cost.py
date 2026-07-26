@@ -73,6 +73,7 @@ def build_cost_summary(
     query_invariants: list[dict[str, Any]],
     command: list[str],
     measurement_scope: str = "smoke",
+    measurement_mode: str = "standalone_process",
 ) -> dict[str, Any]:
     if method not in {"disabled", "p7"}:
         raise CostContractError(f"unsupported standalone method: {method}")
@@ -116,7 +117,7 @@ def build_cost_summary(
 
     summary = {
         "schema_version": SCHEMA_VERSION,
-        "measurement_mode": "standalone_process",
+        "measurement_mode": measurement_mode,
         "run_id": run_id,
         "method": method,
         "scope": {
@@ -153,8 +154,11 @@ def build_cost_summary(
 def validate_cost_summary(summary: dict[str, Any]) -> None:
     if summary.get("schema_version") != SCHEMA_VERSION:
         raise CostContractError("unexpected cost schema version")
-    if summary.get("measurement_mode") != "standalone_process":
-        raise CostContractError("cost measurement must use a standalone process")
+    if summary.get("measurement_mode") not in {
+        "standalone_process",
+        "continuous_process_context_segment",
+    }:
+        raise CostContractError("unsupported cost measurement mode")
     scope = summary.get("scope", {})
     measurement_scope = scope.get("measurement_scope", "smoke")
     expected = expected_question_indices(
@@ -186,6 +190,12 @@ def build_parser():
     parser.add_argument("--method", required=True, choices=("disabled", "p7"))
     parser.add_argument(
         "--measurement-scope", choices=("smoke", "full"), default="smoke"
+    )
+    parser.add_argument(
+        "--measurement-mode",
+        choices=("standalone_process", "continuous_process_context_segment"),
+        default="standalone_process",
+        help="Execution contract for this context artifact.",
     )
     parser.set_defaults(
         output_root=DEFAULT_OUTPUT_ROOT,
@@ -403,6 +413,7 @@ def main(argv: list[str] | None = None) -> int:
             query_invariants=query_invariants,
             command=command,
             measurement_scope=args.measurement_scope,
+            measurement_mode=args.measurement_mode,
         )
         summary["effectiveness"] = {
             "substring_exact_match": statistics.fmean(

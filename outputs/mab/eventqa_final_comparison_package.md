@@ -5,11 +5,11 @@
 | Method | Repeats | EM | Recall | Format failures | Notes |
 |---|---:|---:|---:|---:|---|
 | Disabled / compressed Bank-off | 5 | 0.008±0.000 | 0.178±0.000 | 377.0±0.0 | five-repeat Bank-off row reconstructed from frozen P7 paired artifacts |
-| Same-model text-summary memory | 1 | 0.012 | 0.078 | 267.0 | one deterministic full pass; negative same-model baseline |
-| BM25 top-2 retrieved text | 1 | 0.030 | 0.226 | 265.0 | one deterministic full pass |
-| 16-token matched-budget retrieved text | 1 | 0.068 | 0.180 | 347.0 | one deterministic full pass; exact 16-token visible budget |
+| Same-model text-summary memory | 5 | 0.012±0.000 | 0.078±0.000 | 267.0±0.0 | five complete process-level passes (seed=42); negative same-model baseline |
+| BM25 top-2 retrieved text | 5 | 0.030±0.000 | 0.226±0.000 | 265.0±0.0 | five complete process-level passes (seed=42) |
+| 16-token matched-budget retrieved text | 5 | 0.068±0.000 | 0.180±0.000 | 347.0±0.0 | five complete process-level passes (seed=42); exact 16-token visible budget |
 | P6 non-strict | 5 | 0.169±0.018 | 0.258±0.016 | 165.8±19.8 | five-repeat lower-update-threshold comparator |
-| P7 with query retrieval disabled | 1 | 0.008 | 0.178 | 377.0 | one deterministic full pass; all query retrieval disabled |
+| P7 with query retrieval disabled | 1 | 0.008 | 0.178 | 377.0 | one complete pass; all query retrieval disabled |
 | Frozen P7 non-strict | 5 | 0.197±0.020 | 0.254±0.028 | 121.4±8.8 | five-repeat main result |
 
 ## Cost Table
@@ -17,10 +17,10 @@
 | Method | End-to-end s | s/question | Peak GPU bytes | Paper-facing | Notes |
 |---|---:|---:|---:|:---:|---|
 | Disabled / compressed Bank-off | 367.448 | 0.735 | 149836288 | yes | method-separable same-GPU serialized full pass |
-| Same-model text-summary memory | 691.345 | 1.383 | 209979904 | no | shared-GPU-confounded; not paper-facing |
-| BM25 top-2 retrieved text | 692.845 | 1.386 | 3772054528 | yes | one deterministic full pass |
-| 16-token matched-budget retrieved text | 501.761 | 1.004 | 179276800 | yes | one deterministic full pass |
-| P7 with query retrieval disabled | 445.004 | 0.890 | 149811712 | yes | one deterministic full pass |
+| Same-model text-summary memory | 606.213 | 1.212 | 1921807360 | yes | Measured in serialized single-GPU processes after clear per-context occupancy preflights. |
+| BM25 top-2 retrieved text | 692.845 | 1.386 | 3772054528 | yes | one complete pass |
+| 16-token matched-budget retrieved text | 501.761 | 1.004 | 179276800 | yes | one complete pass |
+| P7 with query retrieval disabled | 445.004 | 0.890 | 149811712 | yes | one complete pass |
 | Frozen P7 non-strict | 387.999 | 0.776 | 180270080 | yes | method-separable same-GPU serialized full pass |
 
 ## Claim Audit

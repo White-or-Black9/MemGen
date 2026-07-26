@@ -1,0 +1,84 @@
+{
+  "schema_version": "eventqa-paper-reproduction-index/v1",
+  "paper_sources": [
+    "paper/experiment.md",
+    "paper/result.md"
+  ],
+  "shared": {
+    "runner": "eval/exp/common/eventqa_base.py",
+    "config": "eval/exp/common/triviaqa.yaml",
+    "scope": "EventQA: 5 contexts x 100 questions"
+  },
+  "experiments": [
+    {
+      "id": "p7",
+      "paper_sections": ["4.1", "5.1", "5.4"],
+      "runner": "eval/exp/p7/mab6b_weaver_space_bank_eventqa_65536_n5.py",
+      "effect_evidence": "outputs/mab/p7/five_repeat_summary.json",
+      "raw_effect_runs": "outputs/mab/p7/repeat_{1..5}",
+      "controlled_cost_evidence": "outputs/mab/p7/controlled_cost_20260721T024259Z",
+      "cost_runner": "eval/exp/p7/run_controlled_cost.sh",
+      "aggregation": "Historical five-repeat summary is present; no dedicated tracked P7 repeat-aggregation script was found."
+    },
+    {
+      "id": "recent_text",
+      "paper_sections": ["4.2", "5.1", "5.4"],
+      "runner": "eval/exp/recent_text/eventqa_memgen_recent_window.py",
+      "aggregator": "eval/exp/recent_text/aggregate.py",
+      "effect_evidence": "outputs/mab/recent_text/effect_first_pass_aggregate.json",
+      "raw_effect_runs": "outputs/mab/recent_text/effect_first_pass and outputs/mab/recent_text/effect_repeats",
+      "controlled_cost_evidence": "outputs/mab/recent_text/controlled_cost_20260721T013449Z",
+      "cost_runner": "eval/exp/recent_text/run_controlled_cost.sh"
+    },
+    {
+      "id": "rolling_summary",
+      "paper_sections": ["4.2", "5.2", "5.4"],
+      "runners": ["eval/exp/rolling_summary/construction.py", "eval/exp/rolling_summary/query.py"],
+      "aggregator": "eval/exp/rolling_summary/aggregate.py",
+      "effect_evidence": "outputs/mab/rolling_summary/five_repeat_summary.json",
+      "raw_effect_runs": "outputs/mab/rolling_summary/effect_repeats",
+      "controlled_cost_evidence": "outputs/mab/rolling_summary/controlled_cost_20260719T031438Z"
+    },
+    {
+      "id": "bm25_top2",
+      "paper_sections": ["4.2", "5.2", "5.4"],
+      "runner": "eval/exp/bm25_top2/eventqa_bm25_retrieved_text.py",
+      "aggregator": "eval/exp/bm25_top2/aggregate.py",
+      "effect_evidence": "outputs/mab/bm25_top2/effect_first_pass_aggregate.json",
+      "raw_effect_runs": "outputs/mab/bm25_top2/effect_first_pass and outputs/mab/bm25_top2/effect_repeats"
+    },
+    {
+      "id": "matched16",
+      "paper_sections": ["4.2", "5.2", "5.4"],
+      "runner": "eval/exp/matched16/eventqa_matched16_retrieved_text.py",
+      "aggregator": "eval/exp/matched16/aggregate.py",
+      "effect_evidence": "outputs/mab/matched16/effect_first_pass_aggregate.json",
+      "raw_effect_runs": "outputs/mab/matched16/effect_first_pass and outputs/mab/matched16/effect_repeats"
+    },
+    {
+      "id": "no_query_retrieval",
+      "paper_sections": ["4.3", "5.3"],
+      "runner": "eval/exp/no_query_retrieval/eventqa_p7_no_query_retrieval.py",
+      "aggregator": "eval/exp/no_query_retrieval/aggregate.py",
+      "effect_evidence": "outputs/mab/no_query_retrieval/effect_aggregate.json",
+      "raw_effect_runs": "outputs/mab/no_query_retrieval/effect_full_pass"
+    },
+    {
+      "id": "no_retrieved_memory_conditioning",
+      "paper_sections": [],
+      "runner": "eval/exp/no_retrieved_memory_conditioning/eventqa_p7_no_retrieved_memory_conditioning.py",
+      "effect_evidence": null,
+      "raw_effect_runs": "outputs/mab/no_retrieved_memory_conditioning/",
+      "status": "implementation and validation pending EventQA execution"
+    },
+    {
+      "id": "direct_top1",
+      "paper_sections": [],
+      "runner": "eval/exp/direct_top1/eventqa_p7_direct_top1.py",
+      "effect_evidence": null,
+      "raw_effect_runs": "outputs/mab/direct_top1/",
+      "status": "implementation and validation pending EventQA execution"
+    }
+  ],
+  "layout_policy": "eval/exp contains copied paper-facing entrypoint scripts and configs. outputs/mab/<experiment> contains symbolic links to canonical artifacts; do not delete targets through those links."
+}

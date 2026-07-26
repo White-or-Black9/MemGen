@@ -221,11 +221,14 @@ class FakeMemoryBank:
         self.retrieve_calls = []
         self.write_calls = []
 
-    def retrieve(self, query_or_hidden_states, *, device=None, dtype=None):
+    def retrieve(
+        self, query_or_hidden_states, *, device=None, dtype=None, top_k_override=None
+    ):
         self.retrieve_calls.append({
             "query": query_or_hidden_states.detach().clone(),
             "device": device,
             "dtype": dtype,
+            "top_k_override": top_k_override,
         })
         return [
             LatentMemorySlot(
@@ -253,11 +256,13 @@ class FakeThreadUpdateMemoryBank:
         *,
         device=None,
         dtype=None,
+        top_k_override=None,
     ):
         self.retrieve_calls.append({
             "query": query_or_hidden_states.detach().clone(),
             "device": device,
             "dtype": dtype,
+            "top_k_override": top_k_override,
         })
         return self.retrieval_result
 
@@ -302,6 +307,8 @@ def build_fake_memgen(embedding_dtype=torch.float32):
         current_input_ids,
         do_sample=False,
         temperature=0.0,
+        forced_token_ids=None,
+        allowed_token_ids=None,
     ):
         """假单步推理：追加一个 EOS token embedding 表示生成结束。"""
         next_embed = torch.zeros(

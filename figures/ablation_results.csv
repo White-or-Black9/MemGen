@@ -1,0 +1,13 @@
+panel,metric,method,value,std
+a,Exact Match,No retrieval,0.008,0.000
+a,Exact Match,No conditioning,0.008,0.000
+a,Exact Match,Direct injection,0.047,0.008
+a,Exact Match,Ours,0.188,0.047
+b,Recall,No retrieval,0.178,0.000
+b,Recall,No conditioning,0.178,0.000
+b,Recall,Direct injection,0.186,0.009
+b,Recall,Ours,0.231,0.042
+c,Format failures,No retrieval,377.0,0.0
+c,Format failures,No conditioning,377.0,0.0
+c,Format failures,Direct injection,354.6,21.3
+c,Format failures,Ours,118.6,19.1

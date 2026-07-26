@@ -355,6 +355,35 @@ class LatentMemoryBankTest(unittest.TestCase):
         )
         self.assertTrue(result.threshold_passed)
 
+    def test_query_top_k_override_preserves_threshold_and_selects_rank_one(self):
+        bank = LatentMemoryBank(
+            LatentMemoryBankConfig(
+                enabled=True,
+                top_k=2,
+                threshold=0.5,
+                retrieve_threshold=0.5,
+                retrieve_policy="threshold_topk",
+            )
+        )
+        for memory in (
+            torch.tensor([[1.0, 0.0]]),
+            torch.tensor([[0.9, 0.1]]),
+            torch.tensor([[0.0, 1.0]]),
+        ):
+            bank.write(memory)
+        result = bank.retrieve_with_context(
+            torch.tensor([1.0, 0.0]), top_k_override=1
+        )
+        self.assertEqual(result.retrieved_indices, (0,))
+        self.assertEqual(len(result.slots), 1)
+        self.assertGreaterEqual(result.retrieved_scores[0], 0.5)
+
+        missed = bank.retrieve_with_context(
+            torch.tensor([-1.0, 0.0]), top_k_override=1
+        )
+        self.assertEqual(missed.retrieved_indices, ())
+        self.assertEqual(len(missed.slots), 0)
+
     def test_split_thresholds_default_none_preserves_shared_threshold_behavior(self):
         """显式 None 的 retrieve/update threshold 行为与 legacy shared threshold 一致。"""
         legacy_config = LatentMemoryBankConfig(

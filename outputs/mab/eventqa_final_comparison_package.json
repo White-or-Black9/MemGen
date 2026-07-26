@@ -20,42 +20,42 @@
       "display_name": "Same-model text-summary memory",
       "representation": "persistent summary text",
       "retrieval_form": "full summary injection",
-      "repeat_count": 1,
+      "repeat_count": 5,
       "em_mean": 0.012,
-      "em_std": null,
+      "em_std": 0.0,
       "recall_mean": 0.078,
-      "recall_std": null,
+      "recall_std": 0.0,
       "format_failures_mean": 267.0,
-      "format_failures_std": null,
-      "protocol_notes": "one deterministic full pass; negative same-model baseline"
+      "format_failures_std": 0.0,
+      "protocol_notes": "five complete process-level passes (seed=42); negative same-model baseline"
     },
     {
       "method_id": "bm25_top2",
       "display_name": "BM25 top-2 retrieved text",
       "representation": "explicit retrieved text",
       "retrieval_form": "deterministic BM25 top-2",
-      "repeat_count": 1,
+      "repeat_count": 5,
       "em_mean": 0.03,
-      "em_std": null,
-      "recall_mean": 0.226,
-      "recall_std": null,
+      "em_std": 0.0,
+      "recall_mean": 0.22600000000000003,
+      "recall_std": 0.0,
       "format_failures_mean": 265.0,
-      "format_failures_std": null,
-      "protocol_notes": "one deterministic full pass"
+      "format_failures_std": 0.0,
+      "protocol_notes": "five complete process-level passes (seed=42)"
     },
     {
       "method_id": "matched16",
       "display_name": "16-token matched-budget retrieved text",
       "representation": "explicit retrieved text",
       "retrieval_form": "deterministic 16-token matched injection",
-      "repeat_count": 1,
+      "repeat_count": 5,
       "em_mean": 0.068,
-      "em_std": null,
+      "em_std": 0.0,
       "recall_mean": 0.18,
-      "recall_std": null,
+      "recall_std": 0.0,
       "format_failures_mean": 347.0,
-      "format_failures_std": null,
-      "protocol_notes": "one deterministic full pass; exact 16-token visible budget"
+      "format_failures_std": 0.0,
+      "protocol_notes": "five complete process-level passes (seed=42); exact 16-token visible budget"
     },
     {
       "method_id": "p6",
@@ -83,7 +83,7 @@
       "recall_std": null,
       "format_failures_mean": 377.0,
       "format_failures_std": null,
-      "protocol_notes": "one deterministic full pass; all query retrieval disabled"
+      "protocol_notes": "one complete pass; all query retrieval disabled"
     },
     {
       "method_id": "p7",
@@ -120,42 +120,42 @@
       "display_name": "Same-model text-summary memory",
       "representation": "persistent summary text",
       "retrieval_form": "full summary injection",
-      "repeat_count": 1,
+      "repeat_count": 5,
       "em_mean": 0.012,
-      "em_std": null,
+      "em_std": 0.0,
       "recall_mean": 0.078,
-      "recall_std": null,
+      "recall_std": 0.0,
       "format_failures_mean": 267.0,
-      "format_failures_std": null,
-      "protocol_notes": "one deterministic full pass; negative same-model baseline"
+      "format_failures_std": 0.0,
+      "protocol_notes": "five complete process-level passes (seed=42); negative same-model baseline"
     },
     {
       "method_id": "bm25_top2",
       "display_name": "BM25 top-2 retrieved text",
       "representation": "explicit retrieved text",
       "retrieval_form": "deterministic BM25 top-2",
-      "repeat_count": 1,
+      "repeat_count": 5,
       "em_mean": 0.03,
-      "em_std": null,
-      "recall_mean": 0.226,
-      "recall_std": null,
+      "em_std": 0.0,
+      "recall_mean": 0.22600000000000003,
+      "recall_std": 0.0,
       "format_failures_mean": 265.0,
-      "format_failures_std": null,
-      "protocol_notes": "one deterministic full pass"
+      "format_failures_std": 0.0,
+      "protocol_notes": "five complete process-level passes (seed=42)"
     },
     {
       "method_id": "matched16",
       "display_name": "16-token matched-budget retrieved text",
       "representation": "explicit retrieved text",
       "retrieval_form": "deterministic 16-token matched injection",
-      "repeat_count": 1,
+      "repeat_count": 5,
       "em_mean": 0.068,
-      "em_std": null,
+      "em_std": 0.0,
       "recall_mean": 0.18,
-      "recall_std": null,
+      "recall_std": 0.0,
       "format_failures_mean": 347.0,
-      "format_failures_std": null,
-      "protocol_notes": "one deterministic full pass; exact 16-token visible budget"
+      "format_failures_std": 0.0,
+      "protocol_notes": "five complete process-level passes (seed=42); exact 16-token visible budget"
     },
     {
       "method_id": "p7_no_query_retrieval",
@@ -169,7 +169,7 @@
       "recall_std": null,
       "format_failures_mean": 377.0,
       "format_failures_std": null,
-      "protocol_notes": "one deterministic full pass; all query retrieval disabled"
+      "protocol_notes": "one complete pass; all query retrieval disabled"
     },
     {
       "method_id": "p7",
@@ -200,12 +200,12 @@
     {
       "method_id": "text_summary",
       "display_name": "Same-model text-summary memory",
-      "construction_seconds_total": 223.37076050788164,
-      "end_to_end_seconds_total": 691.3454239098355,
-      "amortized_seconds_per_question": 1.382690847819671,
-      "incremental_peak_gpu_memory_bytes_max": 209979904,
-      "paper_facing_cost": false,
-      "cost_notes": "shared-GPU-confounded; not paper-facing"
+      "construction_seconds_total": 189.32825407013297,
+      "end_to_end_seconds_total": 606.2128292638808,
+      "amortized_seconds_per_question": 1.2124256585277617,
+      "incremental_peak_gpu_memory_bytes_max": 1921807360,
+      "paper_facing_cost": true,
+      "cost_notes": "Measured in serialized single-GPU processes after clear per-context occupancy preflights."
     },
     {
       "method_id": "bm25_top2",
@@ -215,7 +215,7 @@
       "amortized_seconds_per_question": 1.385689298801124,
       "incremental_peak_gpu_memory_bytes_max": 3772054528,
       "paper_facing_cost": true,
-      "cost_notes": "one deterministic full pass"
+      "cost_notes": "one complete pass"
     },
     {
       "method_id": "matched16",
@@ -225,7 +225,7 @@
       "amortized_seconds_per_question": 1.0035215077064932,
       "incremental_peak_gpu_memory_bytes_max": 179276800,
       "paper_facing_cost": true,
-      "cost_notes": "one deterministic full pass"
+      "cost_notes": "one complete pass"
     },
     {
       "method_id": "p7_no_query_retrieval",
@@ -235,7 +235,7 @@
       "amortized_seconds_per_question": 0.8900075781475753,
       "incremental_peak_gpu_memory_bytes_max": 149811712,
       "paper_facing_cost": true,
-      "cost_notes": "one deterministic full pass"
+      "cost_notes": "one complete pass"
     },
     {
       "method_id": "p7",

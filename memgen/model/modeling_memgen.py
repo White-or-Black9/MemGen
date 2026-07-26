@@ -515,6 +515,18 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
             "retrieved_memory_to_weaver": bool(
                 getattr(getattr(self, "config", None), "retrieved_memory_to_weaver", False)
             ),
+            "query_retrieved_memory_conditioning": bool(
+                getattr(
+                    getattr(self, "config", None),
+                    "query_retrieved_memory_conditioning",
+                    True,
+                )
+            ),
+            "query_latent_usage": getattr(
+                getattr(self, "config", None),
+                "query_latent_usage",
+                "weaver_integrated",
+            ),
             "memory_bank_storage_space": getattr(
                 getattr(self, "config", None),
                 "memory_bank_storage_space",
@@ -529,6 +541,20 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
             "retrieved_latents_enter_weaver": False,
             "weaver_conditioned_on_retrieved_memory": False,
             "weaver_conditioning_token_count": 0,
+            "retrieved_slot_count": 0,
+            "retrieved_latent_count": 0,
+            "conditioned_slot_count": 0,
+            "conditioned_latent_count": 0,
+            "empty_retrieval_before_ablation": True,
+            "retrieval_requested_top_k": None,
+            "retrieval_effective_top_k": None,
+            "reasoner_injected_latent_count": 0,
+            "reasoner_injected_latent_shape": None,
+            "reasoner_injected_latent_space": None,
+            "direct_injection_applied": False,
+            "query_weaver_invoke_count": 0,
+            "weaver_output_generated": False,
+            "weaver_output_consumed": False,
             "fused_latent_generated": False,
             "raw_retrieved_latents_enter_reasoner": False,
             "retrieved_latents_enter_reasoner": False,
@@ -593,6 +619,33 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                         False,
                     )
                 )
+                query_retrieved_memory_conditioning = bool(
+                    getattr(
+                        getattr(self, "config", None),
+                        "query_retrieved_memory_conditioning",
+                        True,
+                    )
+                )
+                query_latent_usage = getattr(
+                    getattr(self, "config", None),
+                    "query_latent_usage",
+                    "weaver_integrated",
+                )
+                if query_latent_usage not in {
+                    "weaver_integrated",
+                    "retrieve_but_do_not_condition",
+                    "direct_top1",
+                    "no_retrieval",
+                }:
+                    raise ValueError(f"unsupported query_latent_usage={query_latent_usage!r}")
+                if query_latent_usage == "retrieve_but_do_not_condition":
+                    query_retrieved_memory_conditioning = False
+                direct_top1 = query_latent_usage == "direct_top1"
+                if query_latent_usage == "no_retrieval":
+                    raise ValueError(
+                        "query_latent_usage='no_retrieval' must be implemented by the "
+                        "read-only bank proxy, not by bypassing model retrieval"
+                    )
                 memory_bank_storage_space = getattr(
                     getattr(self, "config", None),
                     "memory_bank_storage_space",
@@ -608,6 +661,14 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                         "memory_bank_storage_space='weaver' requires retrieved_memory_to_weaver=True"
                     )
                 generation_debug["memory_bank_storage_space"] = memory_bank_storage_space
+                generation_debug["query_latent_usage"] = query_latent_usage
+                generation_debug["retrieval_requested_top_k"] = (
+                    1
+                    if direct_top1
+                    else getattr(
+                        getattr(latent_memory_bank, "config", None), "top_k", None
+                    )
+                ) if latent_memory_bank is not None else None
 
                 retrieval_query_embeds = candidate_inputs_embeds
                 retrieval_query_space = "reasoner"
@@ -624,6 +685,7 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                         retrieval_query_embeds.detach(),
                         device=device,
                         dtype=current_inputs_embeds.dtype,
+                        top_k_override=1 if direct_top1 else None,
                     )
 
                 retrieved_slots = None
@@ -642,59 +704,86 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                             retrieval_query_embeds.detach(),
                             device=device,
                             dtype=current_inputs_embeds.dtype,
+                            top_k_override=1 if direct_top1 else None,
                         )
                     if retrieved_slots:
                         retrieved_memory = torch.cat(
                             [slot.memory for slot in retrieved_slots], dim=0
                         ).unsqueeze(0)
+                        generation_debug["retrieved_slot_count"] = len(retrieved_slots)
+                        generation_debug["retrieval_effective_top_k"] = len(retrieved_slots)
+                        generation_debug["retrieved_latent_count"] = int(
+                            retrieved_memory.size(1)
+                        )
+                        generation_debug["empty_retrieval_before_ablation"] = False
                         retrieved_attention_mask = torch.ones(
                             (1, retrieved_memory.size(1)),
                             device=device,
                             dtype=current_attention_mask.dtype,
                         )
                         if use_weaver_space_bank:
-                            weaver_inputs_embeds = torch.cat(
-                                [current_weaver_inputs_embeds, retrieved_memory], dim=1
-                            )
                             generation_debug["retrieved_memory_space"] = "weaver"
                             generation_debug["retrieved_weaver_latents_from_bank"] = True
                         else:
-                            weaver_reasoner_inputs_embeds = torch.cat(
-                                [candidate_inputs_embeds, retrieved_memory], dim=1
-                            )
                             generation_debug["retrieved_memory_space"] = "reasoner"
                             generation_debug[
                                 "retrieved_memory_projected_to_weaver"
                             ] = True
-                        weaver_attention_mask = torch.cat(
-                            [candidate_attention_mask, retrieved_attention_mask], dim=1
-                        )
-                        weaver_position_ids = self._generate_position_ids(
-                            weaver_attention_mask
-                        )
-                        generation_debug["retrieved_latents_enter_weaver"] = True
-                        generation_debug[
-                            "weaver_conditioned_on_retrieved_memory"
-                        ] = True
-                        generation_debug["weaver_conditioning_token_count"] = int(
-                            retrieved_memory.size(1)
-                        )
+                        if query_retrieved_memory_conditioning and use_weaver_space_bank:
+                            weaver_inputs_embeds = torch.cat(
+                                [current_weaver_inputs_embeds, retrieved_memory], dim=1
+                            )
+                        elif query_retrieved_memory_conditioning:
+                            weaver_reasoner_inputs_embeds = torch.cat(
+                                [candidate_inputs_embeds, retrieved_memory], dim=1
+                            )
+                        if query_retrieved_memory_conditioning:
+                            weaver_attention_mask = torch.cat(
+                                [candidate_attention_mask, retrieved_attention_mask], dim=1
+                            )
+                            weaver_position_ids = self._generate_position_ids(
+                                weaver_attention_mask
+                            )
+                            generation_debug["retrieved_latents_enter_weaver"] = True
+                            generation_debug[
+                                "weaver_conditioned_on_retrieved_memory"
+                            ] = True
+                            generation_debug["weaver_conditioning_token_count"] = int(
+                                retrieved_memory.size(1)
+                            )
+                            generation_debug["conditioned_slot_count"] = len(
+                                retrieved_slots
+                            )
+                            generation_debug["conditioned_latent_count"] = int(
+                                retrieved_memory.size(1)
+                            )
 
-                # 映射到 weaver 空间，生成 latent memory
-                if weaver_inputs_embeds is None:
-                    weaver_inputs_embeds = self.reasoner_to_weaver(
-                        weaver_reasoner_inputs_embeds
-                    )
-                if i == 0:
-                    weaver_hidden_states, attn_mask, _ = weaver.augment_prompt(
-                        weaver_inputs_embeds, weaver_attention_mask, weaver_position_ids
-                    )
+                # The direct-top1 ablation deliberately bypasses query-time
+                # Weaver generation.  It still used the Weaver-space query
+                # above for exactly the normal bank similarity computation.
+                if direct_top1:
+                    weaver_hidden_states = None
+                    attn_mask = None
+                    latent_inputs_embeds = None
                 else:
-                    weaver_hidden_states, attn_mask, _ = weaver.augment_inference(
-                        weaver_inputs_embeds, weaver_attention_mask, weaver_position_ids
-                    )
-                # 将 Weaver 输出映射回 reasoner 空间
-                latent_inputs_embeds = self.weaver_to_reasoner(weaver_hidden_states)
+                    # 映射到 weaver 空间，生成 latent memory
+                    if weaver_inputs_embeds is None:
+                        weaver_inputs_embeds = self.reasoner_to_weaver(
+                            weaver_reasoner_inputs_embeds
+                        )
+                    if i == 0:
+                        weaver_hidden_states, attn_mask, _ = weaver.augment_prompt(
+                            weaver_inputs_embeds, weaver_attention_mask, weaver_position_ids
+                        )
+                    elif not direct_top1:
+                        weaver_hidden_states, attn_mask, _ = weaver.augment_inference(
+                            weaver_inputs_embeds, weaver_attention_mask, weaver_position_ids
+                        )
+                    generation_debug["query_weaver_invoke_count"] += 1
+                    generation_debug["weaver_output_generated"] = True
+                    # 将 Weaver 输出映射回 reasoner 空间
+                    latent_inputs_embeds = self.weaver_to_reasoner(weaver_hidden_states)
+                    generation_debug["weaver_output_consumed"] = True
                 # ═══ Phase 5: 根据 bank 是否启用，分支处理 latent 注入 ═══
                 if latent_memory_bank is None:
                     # ----- 原始禁用路径（完全不变）-----
@@ -713,7 +802,40 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                 else:
                     # ----- Memory bank 启用路径 -----
                     # 步骤：检索旧记忆 → [旧记忆] + [新 latent] 拼接注入 → 写入新 latent
-                    if use_thread_update:
+                    if direct_top1:
+                        # Bank slots are Weaver-space in P7.  Reuse the
+                        # existing trained compatibility projection only; do
+                        # not run Weaver or concatenate a hybrid latent path.
+                        if not use_weaver_space_bank:
+                            raise ValueError(
+                                "direct_top1 requires a Weaver-space memory bank"
+                            )
+                        if retrieved_slots:
+                            direct_reasoner_latents = self.weaver_to_reasoner(
+                                retrieved_memory
+                            )
+                            direct_attention_mask = torch.ones(
+                                (1, direct_reasoner_latents.size(1)),
+                                device=device,
+                                dtype=current_attention_mask.dtype,
+                            )
+                            candidate_inputs_embeds = torch.cat(
+                                [candidate_inputs_embeds, direct_reasoner_latents], dim=1
+                            )
+                            candidate_attention_mask = torch.cat(
+                                [candidate_attention_mask, direct_attention_mask], dim=1
+                            )
+                            generation_debug["reasoner_injected_latent_count"] = int(
+                                direct_reasoner_latents.size(1)
+                            )
+                            generation_debug["reasoner_injected_latent_shape"] = list(
+                                direct_reasoner_latents.shape
+                            )
+                            generation_debug["reasoner_injected_latent_space"] = "reasoner"
+                            generation_debug["direct_injection_applied"] = True
+                            generation_debug["retrieved_latents_enter_reasoner"] = True
+                        pad_len = candidate_inputs_embeds.size(1) - current_inputs_embeds.size(1)
+                    elif use_thread_update:
                         # thread_update 策略：复用 Weaver 生成前已完成的检索结果
                         if retrieved_slots is None:
                             retrieved_slots = retrieval_result.slots
@@ -725,7 +847,7 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                             device=device,
                             dtype=current_inputs_embeds.dtype,
                         )
-                    if retrieved_slots:
+                    if not direct_top1 and retrieved_slots:
                         if retrieved_memory is None:
                             retrieved_memory = torch.cat(
                                 [slot.memory for slot in retrieved_slots], dim=0
@@ -768,7 +890,7 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                             generation_debug[
                                 "retrieved_latents_enter_reasoner"
                             ] = True
-                    else:
+                    elif not direct_top1:
                         # bank 为空或无匹配：行为和原始路径相同，只拼新 latent
                         candidate_inputs_embeds = torch.cat(
                             [candidate_inputs_embeds, latent_inputs_embeds], dim=1
@@ -776,23 +898,24 @@ class MemGenModel(PreTrainedModel, MemGenLoraSwitchMixin, MemGenGenerationMixin)
                         candidate_attention_mask = torch.cat(
                             [candidate_attention_mask, attn_mask], dim=1
                         )
-                    # 将新生成的 reasoner-space latent 写入 bank
-                    if use_weaver_space_bank:
-                        bank_write_latents = weaver_hidden_states
-                        generation_debug["stored_latent_space"] = "weaver"
-                        generation_debug["stored_weaver_latents_in_bank"] = True
-                    else:
-                        bank_write_latents = latent_inputs_embeds
-                        generation_debug["stored_latent_space"] = "reasoner"
-                    if use_thread_update:
-                        latent_memory_bank.write_back(
-                            bank_write_latents.detach(),
-                            retrieval_result,
-                        )
-                    else:
-                        latent_memory_bank.write(bank_write_latents.detach())
-                    # pad_len：增强后比原始序列多出的长度，用于后续未增强样本的左填充对齐
-                    pad_len = candidate_inputs_embeds.size(1) - current_inputs_embeds.size(1)
+                    if not direct_top1:
+                        # 将新生成的 reasoner-space latent 写入 bank
+                        if use_weaver_space_bank:
+                            bank_write_latents = weaver_hidden_states
+                            generation_debug["stored_latent_space"] = "weaver"
+                            generation_debug["stored_weaver_latents_in_bank"] = True
+                        else:
+                            bank_write_latents = latent_inputs_embeds
+                            generation_debug["stored_latent_space"] = "reasoner"
+                        if use_thread_update:
+                            latent_memory_bank.write_back(
+                                bank_write_latents.detach(),
+                                retrieval_result,
+                            )
+                        else:
+                            latent_memory_bank.write(bank_write_latents.detach())
+                        # pad_len：增强后比原始序列多出的长度，用于后续未增强样本的左填充对齐
+                        pad_len = candidate_inputs_embeds.size(1) - current_inputs_embeds.size(1)
 
                 # 合并增强和未增强的序列
                 new_len = candidate_inputs_embeds.size(1)

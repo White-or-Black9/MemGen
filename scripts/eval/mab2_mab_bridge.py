@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 import re
 import sys
 import time
@@ -14,6 +15,26 @@ def _json_write(path, value):
 
 
 def _load_mab_modules(repo):
+    # MemoryAgentBench's EventQA chunker calls nltk.download('punkt') even
+    # when local tokenizers are already installed.  Make that call strictly
+    # local so a flaky remote NLTK index cannot change a frozen evaluation.
+    import nltk
+
+    nltk_data = os.environ.get("NLTK_DATA", "/home/baishilong/nltk_data")
+    if nltk_data not in nltk.data.path:
+        nltk.data.path.insert(0, nltk_data)
+
+    def local_punkt_download(package, *args, **kwargs):
+        if package != "punkt":
+            return nltk_download(package, *args, **kwargs)
+        try:
+            nltk.data.find("tokenizers/punkt_tab")
+        except LookupError:
+            nltk.data.find("tokenizers/punkt")
+        return True
+
+    nltk_download = nltk.download
+    nltk.download = local_punkt_download
     sys.path.insert(0, str(Path(repo).resolve()))
     from utils.eval_other_utils import chunk_text_into_sentences, post_process
     from utils.templates import get_template

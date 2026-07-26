@@ -38,6 +38,17 @@ def _method_by_id(paper_aggregate: dict[str, Any], method_id: str) -> dict[str, 
     raise FinalTablePackageError(f"missing method in paper aggregate: {method_id}")
 
 
+def _repeat_method(repeat_aggregate: dict[str, Any], method_id: str) -> dict[str, Any]:
+    if repeat_aggregate.get("schema_version") != "eventqa-explicit-controls-repeat-aggregate/v1":
+        raise FinalTablePackageError("unexpected explicit-controls repeat aggregate schema")
+    for method in repeat_aggregate.get("methods", []):
+        if method.get("method_id") == method_id:
+            if method.get("repeat_count") != 5:
+                raise FinalTablePackageError(f"{method_id} repeat aggregate must contain five passes")
+            return method
+    raise FinalTablePackageError(f"missing method in explicit-controls repeat aggregate: {method_id}")
+
+
 def _main_row(
     *,
     method_id: str,
@@ -76,11 +87,15 @@ def build_package(
     bm25_aggregate: dict[str, Any],
     matched16_aggregate: dict[str, Any],
     text_summary_aggregate: dict[str, Any],
+    explicit_controls_repeat_aggregate: dict[str, Any],
     no_query_aggregate: dict[str, Any],
 ) -> dict[str, Any]:
     bank_off = _method_by_id(paper_aggregate, "bank_off")
     p6 = _method_by_id(paper_aggregate, "p6")
     p7 = _method_by_id(paper_aggregate, "p7")
+    text_summary_repeat = _repeat_method(explicit_controls_repeat_aggregate, "text_summary")
+    bm25_repeat = _repeat_method(explicit_controls_repeat_aggregate, "bm25_top2")
+    matched16_repeat = _repeat_method(explicit_controls_repeat_aggregate, "matched16")
 
     disabled_cost = cost_aggregate.get("methods", {}).get("disabled")
     p7_cost = cost_aggregate.get("methods", {}).get("p7")
@@ -112,42 +127,42 @@ def build_package(
             display_name="Same-model text-summary memory",
             representation="persistent summary text",
             retrieval_form="full summary injection",
-            repeat_count=1,
-            em_mean=float(text_summary_aggregate["effectiveness"]["substring_exact_match"]),
-            em_std=None,
-            recall_mean=float(text_summary_aggregate["effectiveness"]["eventqa_recall"]),
-            recall_std=None,
-            format_failures=float(text_summary_aggregate["effectiveness"]["format_failure_count"]),
-            format_std=None,
-            protocol_notes="one deterministic full pass; negative same-model baseline",
+            repeat_count=int(text_summary_repeat["repeat_count"]),
+            em_mean=float(text_summary_repeat["metrics"]["em"]["mean"]),
+            em_std=float(text_summary_repeat["metrics"]["em"]["std"]),
+            recall_mean=float(text_summary_repeat["metrics"]["recall"]["mean"]),
+            recall_std=float(text_summary_repeat["metrics"]["recall"]["std"]),
+            format_failures=float(text_summary_repeat["metrics"]["format_failures"]["mean"]),
+            format_std=float(text_summary_repeat["metrics"]["format_failures"]["std"]),
+            protocol_notes="five complete process-level passes (seed=42); negative same-model baseline",
         ),
         _main_row(
             method_id="bm25_top2",
             display_name="BM25 top-2 retrieved text",
             representation="explicit retrieved text",
             retrieval_form="deterministic BM25 top-2",
-            repeat_count=1,
-            em_mean=float(bm25_aggregate["effectiveness"]["substring_exact_match"]),
-            em_std=None,
-            recall_mean=float(bm25_aggregate["effectiveness"]["eventqa_recall"]),
-            recall_std=None,
-            format_failures=float(bm25_aggregate["effectiveness"]["format_failure_count"]),
-            format_std=None,
-            protocol_notes="one deterministic full pass",
+            repeat_count=int(bm25_repeat["repeat_count"]),
+            em_mean=float(bm25_repeat["metrics"]["em"]["mean"]),
+            em_std=float(bm25_repeat["metrics"]["em"]["std"]),
+            recall_mean=float(bm25_repeat["metrics"]["recall"]["mean"]),
+            recall_std=float(bm25_repeat["metrics"]["recall"]["std"]),
+            format_failures=float(bm25_repeat["metrics"]["format_failures"]["mean"]),
+            format_std=float(bm25_repeat["metrics"]["format_failures"]["std"]),
+            protocol_notes="five complete process-level passes (seed=42)",
         ),
         _main_row(
             method_id="matched16",
             display_name="16-token matched-budget retrieved text",
             representation="explicit retrieved text",
             retrieval_form="deterministic 16-token matched injection",
-            repeat_count=1,
-            em_mean=float(matched16_aggregate["effectiveness"]["substring_exact_match"]),
-            em_std=None,
-            recall_mean=float(matched16_aggregate["effectiveness"]["eventqa_recall"]),
-            recall_std=None,
-            format_failures=float(matched16_aggregate["effectiveness"]["format_failure_count"]),
-            format_std=None,
-            protocol_notes="one deterministic full pass; exact 16-token visible budget",
+            repeat_count=int(matched16_repeat["repeat_count"]),
+            em_mean=float(matched16_repeat["metrics"]["em"]["mean"]),
+            em_std=float(matched16_repeat["metrics"]["em"]["std"]),
+            recall_mean=float(matched16_repeat["metrics"]["recall"]["mean"]),
+            recall_std=float(matched16_repeat["metrics"]["recall"]["std"]),
+            format_failures=float(matched16_repeat["metrics"]["format_failures"]["mean"]),
+            format_std=float(matched16_repeat["metrics"]["format_failures"]["std"]),
+            protocol_notes="five complete process-level passes (seed=42); exact 16-token visible budget",
         ),
         _main_row(
             method_id="p6",
@@ -175,7 +190,7 @@ def build_package(
             recall_std=None,
             format_failures=float(no_query_aggregate["effectiveness"]["format_failure_count"]),
             format_std=None,
-            protocol_notes="one deterministic full pass; all query retrieval disabled",
+            protocol_notes="one complete pass; all query retrieval disabled",
         ),
         _main_row(
             method_id="p7",
@@ -216,9 +231,12 @@ def build_package(
             "construction_seconds_total": float(_require(text_summary_cost, "construction_latency_seconds", context="text_summary cost")),
             "end_to_end_seconds_total": float(_require(text_summary_cost, "end_to_end_latency_seconds", context="text_summary cost")),
             "amortized_seconds_per_question": float(_require(text_summary_cost, "end_to_end_amortized_seconds_per_question", context="text_summary cost")),
-            "incremental_peak_gpu_memory_bytes_max": int(_require(text_summary_cost, "query_incremental_peak_gpu_memory_bytes_max", context="text_summary cost")),
-            "paper_facing_cost": False,
-            "cost_notes": "shared-GPU-confounded; not paper-facing",
+            "incremental_peak_gpu_memory_bytes_max": max(
+                int(_require(text_summary_cost, "construction_incremental_peak_gpu_memory_bytes_max", context="text_summary construction cost")),
+                int(_require(text_summary_cost, "query_incremental_peak_gpu_memory_bytes_max", context="text_summary query cost")),
+            ),
+            "paper_facing_cost": bool(_require(text_summary_cost, "paper_facing", context="text_summary cost")),
+            "cost_notes": str(_require(text_summary_cost, "caveat", context="text_summary cost")),
         },
         {
             "method_id": "bm25_top2",
@@ -228,7 +246,7 @@ def build_package(
             "amortized_seconds_per_question": float(_require(bm25_cost, "amortized_seconds_per_question", context="bm25 cost")),
             "incremental_peak_gpu_memory_bytes_max": int(_require(bm25_cost, "incremental_peak_gpu_memory_bytes_max", context="bm25 cost")),
             "paper_facing_cost": True,
-            "cost_notes": "one deterministic full pass",
+            "cost_notes": "one complete pass",
         },
         {
             "method_id": "matched16",
@@ -238,7 +256,7 @@ def build_package(
             "amortized_seconds_per_question": float(_require(matched16_cost, "amortized_seconds_per_question", context="matched16 cost")),
             "incremental_peak_gpu_memory_bytes_max": int(_require(matched16_cost, "incremental_peak_gpu_memory_bytes_max", context="matched16 cost")),
             "paper_facing_cost": True,
-            "cost_notes": "one deterministic full pass",
+            "cost_notes": "one complete pass",
         },
         {
             "method_id": "p7_no_query_retrieval",
@@ -248,7 +266,7 @@ def build_package(
             "amortized_seconds_per_question": float(_require(no_query_cost, "end_to_end_amortized_seconds_per_question", context="no_query cost")),
             "incremental_peak_gpu_memory_bytes_max": int(_require(no_query_cost, "incremental_peak_gpu_memory_bytes_max", context="no_query cost")),
             "paper_facing_cost": True,
-            "cost_notes": "one deterministic full pass",
+            "cost_notes": "one complete pass",
         },
         {
             "method_id": "p7",
@@ -353,6 +371,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--bm25-aggregate", default="outputs/mab/eventqa_bm25_top2_full_aggregate.json")
     parser.add_argument("--matched16-aggregate", default="outputs/mab/eventqa_matched16_full_aggregate.json")
     parser.add_argument("--text-summary-aggregate", default="outputs/mab/eventqa_text_summary_full_aggregate.json")
+    parser.add_argument(
+        "--explicit-controls-repeat-aggregate",
+        default="outputs/mab/eventqa_explicit_controls_repeat_aggregate.json",
+    )
     parser.add_argument("--no-query-aggregate", default="outputs/mab/eventqa_p7_no_query_retrieval_full_aggregate.json")
     parser.add_argument("--output-json", default="outputs/mab/eventqa_final_comparison_package.json")
     parser.add_argument("--output-md", default="outputs/mab/eventqa_final_comparison_package.md")
@@ -364,6 +386,7 @@ def main(argv: list[str] | None = None) -> int:
         bm25_aggregate=_load(args.bm25_aggregate),
         matched16_aggregate=_load(args.matched16_aggregate),
         text_summary_aggregate=_load(args.text_summary_aggregate),
+        explicit_controls_repeat_aggregate=_load(args.explicit_controls_repeat_aggregate),
         no_query_aggregate=_load(args.no_query_aggregate),
     )
     Path(args.output_json).write_text(

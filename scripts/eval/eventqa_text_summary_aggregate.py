@@ -45,7 +45,10 @@ def _load(path: Path) -> tuple[dict[str, Any], bytes]:
 
 
 def aggregate_pairs(
-    construction_paths: list[Path], query_paths: list[Path]
+    construction_paths: list[Path],
+    query_paths: list[Path],
+    *,
+    controlled_cost_evidence: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if len(construction_paths) != 5 or len(query_paths) != 5:
         raise TextSummaryAggregateError("full aggregate requires contexts 0-4 exactly once")
@@ -141,6 +144,30 @@ def aggregate_pairs(
 
     construction_total = sum(row["construction_latency_seconds"] for row in per_context)
     query_total = sum(row["query_latency_seconds"] for row in per_context)
+    if controlled_cost_evidence is None:
+        cost_status = {
+            "confounded_by_shared_gpu": True,
+            "paper_facing": False,
+            "caveat": "Full-pass timing and peak-memory measurements were collected under shared-GPU contention and are not paper-facing cost evidence.",
+        }
+    else:
+        if controlled_cost_evidence.get("schema_version") != "eventqa-text-summary-controlled-cost/v1":
+            raise TextSummaryAggregateError("unexpected controlled-cost evidence schema")
+        if controlled_cost_evidence.get("context_indices") != EXPECTED_CONTEXTS:
+            raise TextSummaryAggregateError("controlled-cost evidence must cover contexts 0-4")
+        if controlled_cost_evidence.get("serialized_single_gpu") is not True:
+            raise TextSummaryAggregateError("controlled-cost evidence must declare serialized single-GPU execution")
+        if controlled_cost_evidence.get("all_preflight_clear") is not True:
+            raise TextSummaryAggregateError("controlled-cost evidence preflight is not clear")
+        gpu_index = controlled_cost_evidence.get("gpu_index")
+        if not isinstance(gpu_index, int) or gpu_index < 0:
+            raise TextSummaryAggregateError("controlled-cost evidence requires a nonnegative gpu_index")
+        cost_status = {
+            "confounded_by_shared_gpu": False,
+            "paper_facing": True,
+            "caveat": "Measured in serialized single-GPU processes after clear per-context occupancy preflights.",
+            "controlled_cost_evidence": controlled_cost_evidence,
+        }
     return {
         "schema_version": SCHEMA_VERSION,
         "scope": {
@@ -179,9 +206,7 @@ def aggregate_pairs(
             "query_incremental_peak_gpu_memory_bytes_max": max(
                 row["query_incremental_peak_gpu_memory_bytes"] for row in per_context
             ),
-            "confounded_by_shared_gpu": True,
-            "paper_facing": False,
-            "caveat": "Full-pass timing and peak-memory measurements were collected under shared-GPU contention and are not paper-facing cost evidence.",
+            **cost_status,
         },
         "capacity": {
             "context_capacity": records[0]["context_capacity"],
@@ -209,7 +234,7 @@ def _markdown(summary: dict[str, Any]) -> str:
         f"- Construction total: {cost['construction_latency_seconds']:.3f} s",
         f"- Query total: {cost['query_latency_seconds']:.3f} s",
         f"- End-to-end total: {cost['end_to_end_latency_seconds']:.3f} s",
-        "- Cost status: confounded by shared-GPU contention; not paper-facing.",
+        f"- Cost status: {cost['caveat']}",
         "",
         "| Context | Summary tokens | Prompt delta(s) | EM | Recall | Format failures | E2E seconds |",
         "|---:|---:|:---|---:|---:|---:|---:|",
@@ -234,10 +259,20 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--output-md", default="outputs/mab/eventqa_text_summary_full_aggregate.md"
     )
+    parser.add_argument(
+        "--controlled-cost-evidence",
+        help="JSON attestation for a serialized single-GPU cost run with clear occupancy preflights.",
+    )
     args = parser.parse_args(argv)
+    controlled_cost_evidence = None
+    if args.controlled_cost_evidence:
+        controlled_cost_evidence = json.loads(
+            Path(args.controlled_cost_evidence).read_text(encoding="utf-8")
+        )
     summary = aggregate_pairs(
         [Path(path) for path in args.construction],
         [Path(path) for path in args.query],
+        controlled_cost_evidence=controlled_cost_evidence,
     )
     output_json = Path(args.output_json)
     output_md = Path(args.output_md)

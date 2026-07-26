@@ -152,8 +152,8 @@ Do not combine effectiveness and cost if the latter remains method-inseparable.
 - No-gold versus parser-sensitive failures.
 - Context-4 fixed routing and harmful tuple attribution.
 - Explicit-text versus latent evidence using the completed control package.
-- Cost and memory analysis using the separable instrumentation package and the
-  text-summary caveat.
+- Cost and memory analysis using the separable instrumentation package,
+  including the controlled rolling-summary cost measurement.
 
 ## 10. Limitation Section Plan
 
@@ -164,8 +164,9 @@ Do not combine effectiveness and cost if the latter remains method-inseparable.
 - LoCoMo has no positive exact QA result despite active retrieval.
 - Latent-only evidence is difficult to decode into exact dates, people,
   preferences, and cross-session relations.
-- Text-summary cost is diagnostic-only because it was measured under shared-GPU
-  contention.
+- Explicit-memory controls now have five complete process-level passes at the
+  fixed base seed. Their controlled rolling-summary cost measurement is
+  paper-facing but protocol-specific; shared-GPU repeat timing is excluded.
 
 ## 11. Appendix Plan
 
@@ -208,8 +209,8 @@ No new EventQA experiment is currently required for the main comparison package.
 The required packaging and writing are complete:
 
 1. EventQA main/evidence tables are rendered in the draft.
-2. Paper-facing cost rows are fixed in Table 2; text-summary cost remains
-   excluded because of shared-GPU contention.
+2. Paper-facing cost rows include the controlled text-summary rerun, with clear
+   per-context GPU occupancy preflights.
 3. The claim audit is reflected in the abstract, results, limitations, and
    conclusion.
 

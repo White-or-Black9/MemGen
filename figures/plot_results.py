@@ -12,19 +12,21 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent
 DATA = HERE / "results_data.csv"
-METHODS = ["Recent-text", "Rolling summary", "BM25 top-2", "Matched-16", "Ours"]
+METHODS_OVERALL = ["Recent-text", "Rolling summary", "BM25 top-2", "Dense E5 top-2", "Matched-16", "Ours"]
+METHODS_EFFICIENCY = ["Recent-text", "Rolling summary", "BM25 top-2", "Dense E5 top-2", "Matched-16", "Ours"]
 COLORS = {
     "Recent-text": "#34495E",
     "Rolling summary": "#B3B7BD",
     "BM25 top-2": "#898F98",
+    "Dense E5 top-2": "#A6ABB3",
     "Matched-16": "#D0D3D8",
     "Ours": "#7B5AA6",
 }
 
 
 mpl.rcParams.update({
-    "font.family": "sans-serif",
-    "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],
+    "font.family": "serif",
+    "font.serif": ["Times New Roman", "Times", "Nimbus Roman"],
     "font.size": 7.6,
     "axes.labelsize": 7.6,
     "xtick.labelsize": 6.9,
@@ -43,13 +45,13 @@ def load_rows() -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
-def values(rows: list[dict[str, str]], figure: str, panel: str, metric: str) -> dict[str, tuple[float, float | None]]:
+def values(rows: list[dict[str, str]], figure: str, panel: str, metric: str, methods: list[str]) -> dict[str, tuple[float, float | None]]:
     selected = [r for r in rows if r["figure"] == figure and r["panel"] == panel and r["metric"] == metric]
     out = {}
     for r in selected:
         std = float(r["std"]) if r["std"].strip() else None
         out[r["method"]] = (float(r["value"]), std)
-    if set(out) != set(METHODS):
+    if set(out) != set(methods):
         raise ValueError(f"Incomplete values for Figure {figure}, panel {panel}, metric {metric}")
     return out
 
@@ -83,13 +85,13 @@ def figure2(rows: list[dict[str, str]]) -> None:
         ("b", "Recall", "Recall ↑", (0, 0.30), ".3f"),
         ("c", "Format failures", "Format Failures ↓", (0, 410), ".1f"),
     ]
-    fig, axes = plt.subplots(1, 3, figsize=(7.25, 2.55), sharey=True, constrained_layout=True)
-    y = np.arange(len(METHODS))
+    fig, axes = plt.subplots(1, 3, figsize=(7.25, 2.75), sharey=True, constrained_layout=True)
+    y = np.arange(len(METHODS_OVERALL))
     for ax, (letter, metric, title, xlim, formatter) in zip(axes, specs):
-        metric_values = values(rows, "2", letter, metric)
-        means = [metric_values[m][0] for m in METHODS]
-        bars = ax.barh(y, means, height=0.62, color=[COLORS[m] for m in METHODS], edgecolor="none", zorder=2)
-        for idx, method in enumerate(METHODS):
+        metric_values = values(rows, "2", letter, metric, METHODS_OVERALL)
+        means = [metric_values[m][0] for m in METHODS_OVERALL]
+        bars = ax.barh(y, means, height=0.62, color=[COLORS[m] for m in METHODS_OVERALL], edgecolor="none", zorder=2)
+        for idx, method in enumerate(METHODS_OVERALL):
             mean, std = metric_values[method]
             if std and std > 0:
                 ax.errorbar(mean, idx, xerr=std, fmt="none", ecolor="#303945", elinewidth=0.8,
@@ -98,7 +100,7 @@ def figure2(rows: list[dict[str, str]]) -> None:
             label_x = mean + (std if std and std > 0 else 0) + offset
             ax.text(label_x, idx, format(mean, formatter), va="center", ha="left", fontsize=6.7, color="#253247")
         ax.set_xlim(*xlim)
-        ax.set_yticks(y, METHODS)
+        ax.set_yticks(y, METHODS_OVERALL)
         ax.invert_yaxis()
         style_axis(ax)
         panel_label(ax, f"({letter})", title)
@@ -110,20 +112,21 @@ def figure2(rows: list[dict[str, str]]) -> None:
 
 
 def figure3(rows: list[dict[str, str]]) -> None:
-    seconds = values(rows, "3", "a", "Seconds per question")
-    em = values(rows, "3", "a", "Exact Match")
-    memory = values(rows, "3", "b", "Peak incremental GPU memory (GiB)")
-    fig, axes = plt.subplots(1, 2, figsize=(7.25, 2.65), constrained_layout=True, gridspec_kw={"width_ratios": [1.05, 1]})
+    seconds = values(rows, "3", "a", "Seconds per question", METHODS_EFFICIENCY)
+    em = values(rows, "3", "a", "Exact Match", METHODS_EFFICIENCY)
+    memory = values(rows, "3", "b", "Peak incremental GPU memory (GiB)", METHODS_EFFICIENCY)
+    fig, axes = plt.subplots(1, 2, figsize=(7.25, 2.85), constrained_layout=True, gridspec_kw={"width_ratios": [1.05, 1]})
 
     ax = axes[0]
     label_offsets = {
         "Recent-text": (-6, 6, "right"),
-        "Rolling summary": (6, 7, "left"),
-        "BM25 top-2": (6, 5, "left"),
+        "Rolling summary": (6, 6, "left"),
+        "BM25 top-2": (-6, 7, "right"),
+        "Dense E5 top-2": (6, 10, "left"),
         "Matched-16": (6, 4, "left"),
         "Ours": (6, 5, "left"),
     }
-    for method in METHODS:
+    for method in METHODS_EFFICIENCY:
         x, y = seconds[method][0], em[method][0]
         size = 45 if method == "Ours" else 28
         edge = "#4E2B70" if method == "Ours" else "#FFFFFF"
@@ -145,15 +148,15 @@ def figure3(rows: list[dict[str, str]]) -> None:
     panel_label(ax, "(a)", "Exact Match vs. Seconds per Question")
 
     ax = axes[1]
-    y = np.arange(len(METHODS))
-    means = [memory[m][0] for m in METHODS]
-    ax.barh(y, means, height=0.62, color=[COLORS[m] for m in METHODS], edgecolor="none", zorder=2)
-    for idx, method in enumerate(METHODS):
+    y = np.arange(len(METHODS_EFFICIENCY))
+    means = [memory[m][0] for m in METHODS_EFFICIENCY]
+    ax.barh(y, means, height=0.62, color=[COLORS[m] for m in METHODS_EFFICIENCY], edgecolor="none", zorder=2)
+    for idx, method in enumerate(METHODS_EFFICIENCY):
         value = memory[method][0]
         ax.text(value * 1.14, idx, f"{value:.3f}", va="center", ha="left", fontsize=6.8, color="#253247")
     ax.set_xscale("log")
     ax.set_xlim(0.1, 20)
-    ax.set_yticks(y, METHODS)
+    ax.set_yticks(y, METHODS_EFFICIENCY)
     ax.invert_yaxis()
     ax.set_xlabel("Peak incremental GPU memory (GiB) ↓")
     ax.xaxis.set_major_locator(mpl.ticker.LogLocator(base=10, subs=(1.0, 2.0, 5.0)))

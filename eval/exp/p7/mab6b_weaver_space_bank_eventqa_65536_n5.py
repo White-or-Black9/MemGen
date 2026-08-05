@@ -95,6 +95,7 @@ BANK_CONFIG_FIELDS = (
     "pool_last_n",
     "retrieve_policy",
     "update_policy",
+    "construction_write_policy",
     "storage_device",
     "debug",
     "retrieve_threshold",
@@ -505,6 +506,9 @@ def _eventqa_bank_config(args) -> dict:
             ),
             "retrieve_policy": DEFAULT_RETRIEVE_POLICY,
             "update_policy": DEFAULT_UPDATE_POLICY,
+            "construction_write_policy": str(
+                getattr(args, "construction_write_policy", "full_thread_update")
+            ),
         }
     )
     return config
@@ -789,6 +793,15 @@ def _compact_bank_summary(summary: dict) -> dict:
         "true_insert_count": int(action_counts.get("insert", 0)),
         "true_matched_replace_count": int(summary.get("matched_replace_count", 0)),
         "true_capacity_evict_count": int(summary.get("capacity_evict_count", 0)),
+        "dropped_matched_overwrite_count": int(
+            summary.get("dropped_matched_overwrite_count", 0)
+        ),
+        "dropped_new_thread_append_count": int(
+            summary.get("dropped_new_thread_append_count", 0)
+        ),
+        "dropped_capacity_eviction_count": int(
+            summary.get("dropped_capacity_eviction_count", 0)
+        ),
         "true_replace_old_slot_count": int(
             action_counts.get("replace_oldest", 0)
             + action_counts.get("replace_old_slot", 0)
@@ -798,7 +811,12 @@ def _compact_bank_summary(summary: dict) -> dict:
 
 
 class _QueryReadOnlyBank:
-    """Delegate construction writes and block all writes after query begins."""
+    """Delegate a context bank and block writes after query begins by default.
+
+    ``allow_query_bank_mutation`` is only for the explicitly labelled
+    query-mutable diagnostic. The default preserves the frozen EventQA
+    protocol: query writes are blocked and retrieval metadata is restored.
+    """
 
     def __init__(
         self,
@@ -808,12 +826,14 @@ class _QueryReadOnlyBank:
         freeze_retrieval_state: bool = False,
         disable_query_retrieval: bool = False,
         preserve_on_reset: bool = False,
+        allow_query_bank_mutation: bool = False,
     ):
         self.bank = bank
         self.lifecycle = lifecycle
         self.freeze_retrieval_state = freeze_retrieval_state
         self.disable_query_retrieval = disable_query_retrieval
         self.preserve_on_reset = preserve_on_reset
+        self.allow_query_bank_mutation = allow_query_bank_mutation
         self.read_only = False
         self.write_attempt_count = 0
         self._query_attempt_count_start = 0
@@ -883,7 +903,8 @@ class _QueryReadOnlyBank:
             self.bank
         )
         self._query_attempt_count_start = self.write_attempt_count
-        self.read_only = True
+        self.lifecycle["query_bank_mutation_allowed"] = self.allow_query_bank_mutation
+        self.read_only = not self.allow_query_bank_mutation
 
     def capture_post_query(self) -> dict:
         if self._query_snapshot_finalized:
@@ -895,13 +916,16 @@ class _QueryReadOnlyBank:
         attempt_delta = self.write_attempt_count - self._query_attempt_count_start
         self.lifecycle["query_write_count_delta"] = write_delta
         self.lifecycle["query_write_attempt_count_delta"] = attempt_delta
-        self.lifecycle["query_read_only_enforced"] = write_delta == 0
+        self.lifecycle["query_read_only_enforced"] = (
+            not self.allow_query_bank_mutation and write_delta == 0
+        )
+        self.lifecycle["query_mutation_observed"] = bool(write_delta != 0)
         post_fingerprint = _bank_state_fingerprint(self.bank)
         self.lifecycle["post_query_bank_fingerprint"] = post_fingerprint
         self.lifecycle["bank_snapshot_changed_after_query"] = (
             post_fingerprint != self.lifecycle["pre_query_bank_fingerprint"]
         )
-        if write_delta != 0:
+        if write_delta != 0 and not self.allow_query_bank_mutation:
             raise RuntimeError(
                 f"EventQA query wrote to the real bank: write_count delta={write_delta}"
             )
@@ -937,12 +961,25 @@ def _query_memory_diagnostics(
             "query_write_attempt_count_delta"
         ],
         "query_read_only_enforced": lifecycle["query_read_only_enforced"],
+        "query_mutation_observed": lifecycle.get("query_mutation_observed", False),
+        "query_bank_mutation_allowed": lifecycle.get(
+            "query_bank_mutation_allowed", False
+        ),
         "bank_snapshot_changed_after_query": lifecycle.get(
             "bank_snapshot_changed_after_query", False
         ),
         "true_insert_count": post_summary["true_insert_count"],
         "true_matched_replace_count": post_summary["true_matched_replace_count"],
         "true_capacity_evict_count": post_summary["true_capacity_evict_count"],
+        "dropped_matched_overwrite_count": post_summary[
+            "dropped_matched_overwrite_count"
+        ],
+        "dropped_new_thread_append_count": post_summary[
+            "dropped_new_thread_append_count"
+        ],
+        "dropped_capacity_eviction_count": post_summary[
+            "dropped_capacity_eviction_count"
+        ],
         "true_replace_old_slot_count": post_summary[
             "true_replace_old_slot_count"
         ],
@@ -1164,6 +1201,7 @@ def _eventqa_manager_factory(
     external_bank=None,
     preserve_bank: bool = False,
     disable_query_retrieval: bool = False,
+    allow_query_bank_mutation: bool = False,
     construction_only: bool = False,
     capture_bank_tensor_snapshot: bool = False,
     trace_score_decomposition: bool = False,
@@ -1249,9 +1287,10 @@ def _eventqa_manager_factory(
                 proxy = _QueryReadOnlyBank(
                     bank,
                     lifecycle,
-                    freeze_retrieval_state=True,
+                    freeze_retrieval_state=not allow_query_bank_mutation,
                     disable_query_retrieval=disable_query_retrieval,
                     preserve_on_reset=preserve_bank,
+                    allow_query_bank_mutation=allow_query_bank_mutation,
                 )
                 lifecycle["query_bank_proxy"] = proxy
                 lifecycle["eventqa_query_bank_proxy"] = proxy
@@ -1302,6 +1341,7 @@ def _run_eventqa_model(
     external_bank=None,
     preserve_bank: bool = False,
     disable_query_retrieval: bool = False,
+    allow_query_bank_mutation: bool = False,
     construction_only: bool = False,
     recorded_bank_config: dict | None = None,
     score_trace_state: dict | None = None,
@@ -1318,6 +1358,7 @@ def _run_eventqa_model(
         external_bank=external_bank,
         preserve_bank=preserve_bank,
         disable_query_retrieval=disable_query_retrieval,
+        allow_query_bank_mutation=allow_query_bank_mutation,
         construction_only=construction_only,
         capture_bank_tensor_snapshot=bool(
             getattr(args, "trace_score_decomposition", False)
@@ -1385,6 +1426,13 @@ def _run_eventqa_model(
             }
             if preserve_bank:
                 result["_retained_bank"] = capture["bank"]
+        if bank_mode == "on" and not construction_only:
+            # Frozen mode normally reaches this through proxy.debug_summary().
+            # Mutable mode must capture explicitly because its proxy remains
+            # writable through the end of generation.
+            proxy = capture["lifecycle"].get("eventqa_query_bank_proxy")
+            if proxy is not None:
+                proxy.capture_post_query()
     finally:
         base._manager_class = original_factory
         restore_bank_trace = capture.get("restore_bank_trace")
@@ -1393,6 +1441,7 @@ def _run_eventqa_model(
 
     lifecycle = capture["lifecycle"]
     result["eventqa_protocol"] = args.eventqa_protocol
+    result["query_bank_mutation_allowed"] = allow_query_bank_mutation
     result["effective_generation_max_length"] = int(
         getattr(args, "generation_max_length", GENERATION_MAX_LENGTH)
     )
@@ -1429,7 +1478,10 @@ def _run_eventqa_model(
                     retrieve_threshold=float(bank_config["retrieve_threshold"]),
                 )
             )
-            if not result["query_read_only_enforced"]:
+            if (
+                not allow_query_bank_mutation
+                and not result["query_read_only_enforced"]
+            ):
                 raise RuntimeError("EventQA query read-only assertion failed")
         result["bank_preserved_for_context_queries"] = preserve_bank
         result["cross_context_leakage_detected"] = False
@@ -1525,6 +1577,9 @@ def _build_question_row(
         "question": payload["question"],
         "gold_answers": payload["gold_answers"],
         "eventqa_protocol": bank_on_result["eventqa_protocol"],
+        "query_bank_mutation_allowed": bool(
+            bank_on_result.get("query_bank_mutation_allowed", False)
+        ),
         "bank_off_mode": "compressed_bridge_no_persistent_bank",
         "bank_off_is_official_long_context_baseline": False,
         "effective_generation_max_length": bank_on_result[
@@ -1619,6 +1674,9 @@ def _build_question_row(
             "query_write_attempt_count_delta"
         ],
         "query_read_only_enforced": bank_on_result["query_read_only_enforced"],
+        "query_mutation_observed": bank_on_result.get(
+            "query_mutation_observed", False
+        ),
         "bank_snapshot_changed_after_query": bank_on_result[
             "bank_snapshot_changed_after_query"
         ],
@@ -1635,6 +1693,15 @@ def _build_question_row(
         ],
         "true_capacity_evict_count": bank_on_result[
             "true_capacity_evict_count"
+        ],
+        "dropped_matched_overwrite_count": bank_on_result[
+            "dropped_matched_overwrite_count"
+        ],
+        "dropped_new_thread_append_count": bank_on_result[
+            "dropped_new_thread_append_count"
+        ],
+        "dropped_capacity_eviction_count": bank_on_result[
+            "dropped_capacity_eviction_count"
         ],
         "true_replace_old_slot_count": bank_on_result[
             "true_replace_old_slot_count"
@@ -1716,6 +1783,15 @@ def _aggregate_question_rows(rows: list[dict]) -> dict:
         "true_capacity_evict_counts": [
             row["true_capacity_evict_count"] for row in valid
         ],
+        "dropped_matched_overwrite_counts": [
+            row["dropped_matched_overwrite_count"] for row in valid
+        ],
+        "dropped_new_thread_append_counts": [
+            row["dropped_new_thread_append_count"] for row in valid
+        ],
+        "dropped_capacity_eviction_counts": [
+            row["dropped_capacity_eviction_count"] for row in valid
+        ],
         "true_replace_old_slot_counts": [
             row["true_replace_old_slot_count"] for row in valid
         ],
@@ -1780,6 +1856,7 @@ def _build_context_summary(
     eventqa_protocol: str = "independent_episode",
     cleanup_slot_count: int | None = None,
     construction_result: dict | None = None,
+    query_bank_mutation_allowed: bool = False,
 ) -> dict:
     aggregate = _aggregate_question_rows(question_rows)
     valid = [row for row in question_rows if not row.get("error_or_stop_reason")]
@@ -1788,6 +1865,7 @@ def _build_context_summary(
             "context_index": context_payload["context_index"],
             "context_id": context_payload["context_id"],
             "eventqa_protocol": eventqa_protocol,
+            "query_bank_mutation_allowed": query_bank_mutation_allowed,
             "question_count": aggregate["num_questions_attempted"],
             "question_count_available": context_payload["question_count"],
             "chunk_count": len(context_payload["chunks"]),
@@ -1812,6 +1890,9 @@ def _build_context_summary(
                 "context_memorization_count": len(memorization_rows),
                 "bank_instance_ids_by_query": bank_ids,
                 "same_frozen_bank_reused_across_queries": bool(bank_ids)
+                and len(set(bank_ids)) == 1
+                and not query_bank_mutation_allowed,
+                "same_bank_instance_reused_across_queries": bool(bank_ids)
                 and len(set(bank_ids)) == 1,
                 "all_query_write_deltas_zero": all(
                     row["query_write_count_delta"] == 0 for row in valid
@@ -1836,6 +1917,21 @@ def _build_context_summary(
                 ),
                 "true_capacity_evict_count": (
                     memorization_rows[0]["true_capacity_evict_count"]
+                    if memorization_rows
+                    else None
+                ),
+                "dropped_matched_overwrite_count": (
+                    memorization_rows[0].get("dropped_matched_overwrite_count", 0)
+                    if memorization_rows
+                    else None
+                ),
+                "dropped_new_thread_append_count": (
+                    memorization_rows[0].get("dropped_new_thread_append_count", 0)
+                    if memorization_rows
+                    else None
+                ),
+                "dropped_capacity_eviction_count": (
+                    memorization_rows[0].get("dropped_capacity_eviction_count", 0)
                     if memorization_rows
                     else None
                 ),
@@ -1924,7 +2020,17 @@ def _build_manifest(
             )
         ),
         "query_mode": protocol,
-        "query_phase": "read-only",
+        "query_phase": (
+            "mutable-sequential"
+            if getattr(args, "allow_query_bank_mutation", False)
+            else "read-only"
+        ),
+        "query_bank_mutation_allowed": bool(
+            getattr(args, "allow_query_bank_mutation", False)
+        ),
+        "frozen_snapshot_restored_per_question": not bool(
+            getattr(args, "allow_query_bank_mutation", False)
+        ),
         "bank_off_mode": "compressed_bridge_no_persistent_bank",
         "bank_off_is_official_long_context_baseline": False,
         "bank_off_contract": (
@@ -2059,6 +2165,17 @@ def build_parser():
     parser.add_argument("--top-k", type=int, default=DEFAULT_TOP_K)
     parser.add_argument("--decay-alpha", type=float, default=DEFAULT_DECAY_ALPHA)
     parser.add_argument(
+        "--construction-write-policy",
+        choices=(
+            "full_thread_update",
+            "drop_matched_overwrite",
+            "drop_new_thread_append",
+            "drop_capacity_eviction",
+        ),
+        default="full_thread_update",
+        help="Construction-only thread_update branch policy; query behavior is unchanged.",
+    )
+    parser.add_argument(
         "--generation-max-length", type=int, default=GENERATION_MAX_LENGTH
     )
     parser.add_argument(
@@ -2074,11 +2191,27 @@ def build_parser():
     parser.add_argument("--trace-score-decomposition", action="store_true")
     parser.add_argument("--save-frozen-bank", action="store_true")
     parser.add_argument("--bank-transition-diagnostics", action="store_true")
+    parser.add_argument(
+        "--allow-query-bank-mutation",
+        action="store_true",
+        help=(
+            "Diagnostic only: permit query-time retrieval metadata and "
+            "thread_update writes to mutate the shared context bank."
+        ),
+    )
     return parser
 
 
 def main() -> int:
     args = build_parser().parse_args()
+    if (
+        args.allow_query_bank_mutation
+        and args.eventqa_protocol != "frozen_context_bank"
+    ):
+        raise ValueError(
+            "--allow-query-bank-mutation requires --eventqa-protocol "
+            "frozen_context_bank so one constructed bank is shared across queries"
+        )
     started_at = _utc_now()
     run_timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     run_id = f"{run_timestamp}-{RUN_PREFIX}"
@@ -2230,6 +2363,7 @@ def main() -> int:
                             runtime_bank_config,
                             external_bank=frozen_bank,
                             preserve_bank=frozen_protocol,
+                            allow_query_bank_mutation=args.allow_query_bank_mutation,
                             recorded_bank_config=manifest,
                             score_trace_state=score_trace_state,
                         )
@@ -2324,6 +2458,7 @@ def main() -> int:
                     eventqa_protocol=args.eventqa_protocol,
                     cleanup_slot_count=cleanup_slot_count,
                     construction_result=construction_result,
+                    query_bank_mutation_allowed=args.allow_query_bank_mutation,
                 )
             )
             if diagnostics_enabled:

@@ -66,6 +66,14 @@ import torch.nn.functional as F
 # --- 类型别名：策略与存储选项 ---
 # 更新策略：写入时如何管理槽位
 UpdatePolicy = Literal["append", "replace", "replace_oldest", "thread_update"]
+# Construction-only branch controls for the thread_update policy.  The default
+# reproduces the original matched-replace / append / eviction behavior.
+ConstructionWritePolicy = Literal[
+    "full_thread_update",
+    "drop_matched_overwrite",
+    "drop_new_thread_append",
+    "drop_capacity_eviction",
+]
 # 检索策略：如何从 bank 中筛选相关记忆
 RetrievePolicy = Literal["threshold", "topk", "threshold_topk"]
 # 存储设备：cpu = 强制 CPU 存储, same = 保持原设备
@@ -97,6 +105,7 @@ class LatentMemoryBankConfig:
     # ---------- 策略选择 ----------
     update_policy: UpdatePolicy = "replace_oldest"    # 写入更新策略
     retrieve_policy: RetrievePolicy = "threshold_topk" # 检索过滤策略
+    construction_write_policy: ConstructionWritePolicy = "full_thread_update"
 
     # ---------- 存储 ----------
     storage_device: StorageDevice = "cpu"  # slot tensor 的存储设备
@@ -141,6 +150,17 @@ class LatentMemoryBankConfig:
         }:
             raise ValueError(
                 "retrieve_policy must be threshold, topk, or threshold_topk"
+            )
+        if self.construction_write_policy not in {
+            "full_thread_update",
+            "drop_matched_overwrite",
+            "drop_new_thread_append",
+            "drop_capacity_eviction",
+        }:
+            raise ValueError(
+                "construction_write_policy must be full_thread_update, "
+                "drop_matched_overwrite, drop_new_thread_append, or "
+                "drop_capacity_eviction"
             )
         if self.storage_device not in {"cpu", "same"}:
             raise ValueError("storage_device must be cpu or same")
@@ -279,6 +299,9 @@ class LatentMemoryBank:
         self._thread_insert_count = 0       # 新线程插入次数
         self._matched_replace_count = 0     # 匹配线程替换次数
         self._capacity_evict_count = 0      # 因容量满而淘汰 slot 的次数
+        self._dropped_matched_overwrite_count = 0
+        self._dropped_new_thread_append_count = 0
+        self._dropped_capacity_eviction_count = 0
         self._last_write_back: Optional[Dict[str, Any]] = None
         self._write_back_trace: List[Dict[str, Any]] = []
 
@@ -325,6 +348,9 @@ class LatentMemoryBank:
         self._thread_insert_count = 0
         self._matched_replace_count = 0
         self._capacity_evict_count = 0
+        self._dropped_matched_overwrite_count = 0
+        self._dropped_new_thread_append_count = 0
+        self._dropped_capacity_eviction_count = 0
         self._last_write_back = None
         self._write_back_trace = []
 
@@ -708,6 +734,60 @@ class LatentMemoryBank:
                 "retrieval_result.argmax_index is invalid for matched replacement"
             )
 
+        # Construction-policy ablations remove exactly one thread_update branch.
+        # The empty-bank bootstrap is always retained, so the bank remains a
+        # valid construction object for subsequent retrieval and query phases.
+        policy = self.config.construction_write_policy
+        drop_action = None
+        drop_reason = None
+        if self._slots and matched and policy == "drop_matched_overwrite":
+            self._dropped_matched_overwrite_count += 1
+            drop_action = "drop_matched_overwrite"
+            drop_reason = "matched_thread_ablation"
+        elif self._slots and not matched and policy == "drop_new_thread_append":
+            self._dropped_new_thread_append_count += 1
+            drop_action = "drop_new_thread_append"
+            drop_reason = "new_thread_ablation"
+        elif (
+            self._slots
+            and not matched
+            and len(self._slots) >= self.config.max_slots
+            and policy == "drop_capacity_eviction"
+        ):
+            self._dropped_capacity_eviction_count += 1
+            drop_action = "drop_capacity_eviction"
+            drop_reason = "full_bank_ablation"
+
+        if drop_action is not None:
+            self._rejected_write_count += 1
+            event = {
+                "matched_slot_index": matched_index,
+                "max_score": retrieval_result.max_score,
+                "threshold_passed": retrieve_threshold_passed,
+                "retrieve_threshold_passed": retrieve_threshold_passed,
+                "update_threshold_passed": update_threshold_passed,
+                "effective_retrieve_threshold": effective_retrieve_threshold,
+                "effective_update_threshold": effective_update_threshold,
+                "retrieved_indices": list(retrieval_result.retrieved_indices),
+                "retrieved_scores": list(retrieval_result.retrieved_scores),
+                "write_action": drop_action,
+                "replaced_slot_index": None,
+                "replaced_slot_score": None,
+                "evicted_slot_index": None,
+                "evicted_slot_last_retrieved_age": None,
+                "eviction_basis": None,
+                "update_reason": drop_reason,
+                "inserted_new_thread": False,
+                "dropped_write": True,
+                "retrieval_bank_step": retrieval_result.bank_step,
+                "retrieval_step": retrieval_result.retrieval_step,
+            }
+            self._last_update_action = drop_action
+            self._update_action_trace.append(drop_action)
+            self._last_write_back = deepcopy(event)
+            self._write_back_trace.append(deepcopy(event))
+            return False
+
         normalized = self._normalize_memory_tensor(memory, "memory")
         # 使用 retrieval_result.retrieval_step 而非 self._retrieval_step：
         # 如果在 retrieve_with_context() 和 write_back() 之间发生了另一次检索，
@@ -803,6 +883,7 @@ class LatentMemoryBank:
             "eviction_basis": eviction_basis,
             "update_reason": update_reason,
             "inserted_new_thread": inserted_new_thread,
+            "dropped_write": False,
             "retrieval_bank_step": retrieval_result.bank_step,  # 用于检测 stale write_back
             "retrieval_step": retrieval_result.retrieval_step,  # 触发本次 write_back 的 retrieval turn
         }
@@ -849,6 +930,9 @@ class LatentMemoryBank:
             "thread_insert_count": self._thread_insert_count,
             "matched_replace_count": self._matched_replace_count,
             "capacity_evict_count": self._capacity_evict_count,
+            "dropped_matched_overwrite_count": self._dropped_matched_overwrite_count,
+            "dropped_new_thread_append_count": self._dropped_new_thread_append_count,
+            "dropped_capacity_eviction_count": self._dropped_capacity_eviction_count,
             "write_action_counts": write_action_counts,
             "update_reason_counts": update_reason_counts,
             "last_write_back": deepcopy(self._last_write_back),

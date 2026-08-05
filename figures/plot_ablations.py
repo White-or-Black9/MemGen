@@ -12,18 +12,18 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent
 DATA = HERE / "ablation_results.csv"
-METHODS = ["No retrieval", "No conditioning", "Direct injection", "Ours"]
+METHODS = ["No conditioning", "Direct injection", "No temporal decay (α=0)", "Ours"]
 COLORS = {
-    "No retrieval": "#D0D3D8",
     "No conditioning": "#E0E2E5",
     "Direct injection": "#63788D",
+    "No temporal decay (α=0)": "#C9CDD3",
     "Ours": "#7B5AA6",
 }
 
 
 mpl.rcParams.update({
-    "font.family": "sans-serif",
-    "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],
+    "font.family": "serif",
+    "font.serif": ["Times New Roman", "Times", "Nimbus Roman"],
     "font.size": 7.6,
     "axes.labelsize": 7.6,
     "xtick.labelsize": 6.9,
@@ -66,7 +66,7 @@ def style_axis(ax: plt.Axes) -> None:
 
 def add_panel_heading(ax: plt.Axes, letter: str, heading: str) -> None:
     ax.text(0.0, 1.045, f"({letter})", transform=ax.transAxes, ha="left", va="bottom", fontsize=8.5, fontweight="bold")
-    ax.text(0.115, 1.045, heading, transform=ax.transAxes, ha="left", va="bottom", fontsize=8.5)
+    ax.text(0.14, 1.045, heading, transform=ax.transAxes, ha="left", va="bottom", fontsize=8.5)
 
 
 def draw_bar(ax: plt.Axes, y: int, value: float, method: str) -> None:

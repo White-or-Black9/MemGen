@@ -795,6 +795,48 @@ class LatentMemoryBankTest(unittest.TestCase):
         self.assertEqual(event["update_reason"], "matched_thread")
         self.assertEqual(summary["matched_replace_count"], 1)
 
+    def test_construction_write_policy_ablations_drop_only_target_branch(self):
+        """Each construction-policy ablation leaves the other branches intact."""
+        def make_bank(policy, max_slots=2):
+            return LatentMemoryBank(
+                LatentMemoryBankConfig(
+                    enabled=True,
+                    max_slots=max_slots,
+                    threshold=0.5,
+                    retrieve_policy="threshold_topk",
+                    update_policy="thread_update",
+                    construction_write_policy=policy,
+                    decay_alpha=0.0,
+                )
+            )
+
+        seed = torch.tensor([[1.0, 0.0]])
+        novel = torch.tensor([[0.0, 1.0]])
+
+        matched = make_bank("drop_matched_overwrite")
+        self.assertTrue(matched.write_back(seed, matched.retrieve_with_context(seed)))
+        self.assertFalse(matched.write_back(seed * 2, matched.retrieve_with_context(seed)))
+        matched_summary = matched.debug_summary()
+        self.assertEqual(matched_summary["matched_replace_count"], 0)
+        self.assertEqual(matched_summary["dropped_matched_overwrite_count"], 1)
+        self.assertEqual(matched_summary["slot_count"], 1)
+
+        no_append = make_bank("drop_new_thread_append")
+        self.assertTrue(no_append.write_back(seed, no_append.retrieve_with_context(seed)))
+        self.assertFalse(no_append.write_back(novel, no_append.retrieve_with_context(novel)))
+        append_summary = no_append.debug_summary()
+        self.assertEqual(append_summary["thread_insert_count"], 1)
+        self.assertEqual(append_summary["dropped_new_thread_append_count"], 1)
+        self.assertEqual(append_summary["slot_count"], 1)
+
+        no_evict = make_bank("drop_capacity_eviction", max_slots=1)
+        self.assertTrue(no_evict.write_back(seed, no_evict.retrieve_with_context(seed)))
+        self.assertFalse(no_evict.write_back(novel, no_evict.retrieve_with_context(novel)))
+        eviction_summary = no_evict.debug_summary()
+        self.assertEqual(eviction_summary["capacity_evict_count"], 0)
+        self.assertEqual(eviction_summary["dropped_capacity_eviction_count"], 1)
+        self.assertEqual(eviction_summary["slot_count"], 1)
+
     def test_thread_update_debug_fields_complete_with_split_thresholds(self):
         """split thresholds 的 debug event 包含有效阈值与动作统计。"""
         bank = self._split_threshold_bank(max_slots=2, retrieve_threshold=0.03, update_threshold=0.05)

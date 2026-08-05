@@ -8,7 +8,7 @@ For the latent-memory condition, the memory bank is constructed while processing
 
 We use the default EventQA-style query prompt and the unchanged local benchmark scoring path.  In particular, we do not rewrite prompts, repair parser outputs, normalize answers against candidates, or apply output post-processing.  We report exact-match accuracy (EM), answer recall, and the number of format failures produced by the official parser.
 
-Unless otherwise stated, the latent manager uses a maximum bank capacity of 16 slots, retrieval threshold $0.05$, update threshold $0.10$, retrieval top-$k=2$, temporal decay $0.05$, and 40 newly generated tokens per answer.  Bank construction and query-time retrieval operate in the Weaver latent space, while the persistent bank is stored on CPU. The latent manager and the rolling-summary, BM25, and matched-budget controls are each evaluated over five complete process-level passes with the fixed base seed and per-context reseeding. The MemGen recent-text baseline is also evaluated over five complete process-level passes with base seeds 42, 142, 242, 342, and 442 and per-context reseeding. 
+Unless otherwise stated, the latent manager uses a maximum bank capacity of 16 slots, retrieval threshold $0.05$, update threshold $0.10$, retrieval top-$k=2$, temporal decay $0.05$, and 40 newly generated tokens per answer.  Bank construction and query-time retrieval operate in the Weaver latent space, while the persistent bank is stored on CPU. The latent manager and the rolling-summary, BM25, dense-E5, and matched-budget controls are each evaluated over five complete process-level passes with aligned base seeds 42, 142, 242, 342, and 442 and per-context reseeding. The MemGen recent-text baseline is also evaluated over five complete process-level passes with the same base seeds and per-context reseeding.
 
 For the efficiency analysis, every reported method is timed in a separate serialized run on the same GPU, each covering all 500 questions.  We exclude model-loading time and report end-to-end wall-clock time, amortized time per question, and peak GPU-memory allocation.  
 
@@ -39,6 +39,18 @@ prepended to the unchanged EventQA query prompt. The same generator answers
 the resulting prompt with its latent bank disabled. This baseline provides a
 standard sparse-retrieval reference with access to explicit source text.
 
+**Dense E5 retrieval.** To test whether the sparse ranker is the limiting
+factor, we construct an index only over the current EventQA context using the
+frozen local E5-base-v2 encoder. Each 4,096-token parent chunk is partitioned
+into non-overlapping 500-E5-token windows. The official EventQA question,
+including its candidate events, is encoded as the query; each parent chunk is
+scored by the maximum cosine similarity of its windows, and the two
+highest-scoring distinct parent chunks are selected. Their full text is
+prepended using the same retrieved-passage template as BM25, and the same
+generator answers with its latent bank disabled. This comparison changes the
+retrieval ranker while retaining the source scope, top-$k$, text injection,
+generation, and scoring protocol of the full-text BM25 control.
+
 **Matched-16 BM25 retrieval.** To control the visible-text budget, this variant
 uses the same top-two BM25 chunks but selects one query-overlap-scored
 eight-token window from each. The two windows are injected only when their
@@ -52,7 +64,7 @@ All explicit-memory controls use the same base model, questions, default EventQA
 
 ### 4.3 Ablation Study
 
-We isolate three query-time roles of the latent bank while keeping the context-bank construction procedure and configuration, bank capacity, update policy, and frozen-bank evaluation protocol unchanged.
+We isolate three query-time roles of the latent bank and the temporal weighting in its retrieval score. Unless the temporal-decay coefficient itself is varied, all ablations keep the context-bank construction procedure and configuration, bank capacity, update policy, and frozen-bank evaluation protocol unchanged.
 
 **No-query-retrieval.** This ablation disables every query-time bank retrieval
 operation while preserving the constructed bank. The query-time Weaver is still invoked from the current Reasoner state, but it receives no retrieved historical latent support. This variant distinguishes the existence of a constructed bank from its actual use during answer generation.
@@ -66,3 +78,11 @@ only from the current Reasoner state. This comparison tests whether the gain dep
 It tests whether direct reuse of the most relevant historical latent can
 substitute for integration with the current Reasoner state. Outcomes are
 reported in Section 5.3.
+
+**No temporal decay.** This ablation sets the temporal-decay coefficient to
+$\alpha=0$, so retrieval scores use cosine similarity without the
+last-retrieved inactivity factor. It otherwise preserves the formal P7
+configuration, including 16 slots, top-$k=2$, retrieval threshold $0.05$,
+update threshold $0.10$, and the frozen-bank protocol. Because the same score
+is used during both context-bank construction and question answering, this is
+an end-to-end ablation of temporal weighting rather than a query-only change.

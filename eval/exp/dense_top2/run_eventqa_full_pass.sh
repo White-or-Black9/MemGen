@@ -8,6 +8,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 python_bin="${PYTHON_BIN:-/home/baishilong/miniconda3/envs/memgen/bin/python}"
 output_root="${1:-outputs/mab/eventqa_dense_top2_full_pass}"
+base_seed="${2:-42}"
 cd "$repo_root"
 
 for context_index in 0 1 2 3 4; do
@@ -17,6 +18,8 @@ for context_index in 0 1 2 3 4; do
     --question-limit 100 \
     --embedding-device cpu \
     --embedding-batch-size 16 \
+    --seed "$base_seed" \
+    --reseed-per-context \
     --output-root "$output_root"
 done
 

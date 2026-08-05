@@ -324,7 +324,17 @@ def main(argv: list[str] | None = None) -> int:
             manifest.update({"schema_version": SCHEMA_VERSION, "measurement_mode": "standalone_process", "measurement_scope": args.measurement_scope,
                              "exact_command": [sys.executable, str(Path(__file__).resolve()), *(argv or sys.argv[1:])], "context_id": context["context_id"],
                              "chunk_hashes": [_sha256(chunk) for chunk in context["chunks"]], "context_capacity": capacity,
-                             "dense": artifact["dense"], "cost": artifact["cost"], "finished_at": datetime.now(timezone.utc).isoformat()})
+                             "dense": artifact["dense"], "cost": artifact["cost"],
+                             "baseline_contract": {"baseline_id": "eventqa_dense_e5_top2_full_parent_text",
+                                                   "runtime_bank_mode": "off",
+                                                   "persistent_latent_bank_enabled": False,
+                                                   "source_context_scope": "current_context_only",
+                                                   "retrieval_query": "official_eventqa_question_including_candidates",
+                                                   "retrieval_unit": "4096-token_parent_chunk",
+                                                   "parent_score": "max_cosine_over_500_e5_token_windows",
+                                                   "injection": "two_full_parent_chunks_before_unchanged_eventqa_query",
+                                                   "scoring": "unchanged_local_eventqa_official_path"},
+                             "finished_at": datetime.now(timezone.utc).isoformat()})
             _write_json(output_dir / "manifest.json", manifest)
         finally:
             del model

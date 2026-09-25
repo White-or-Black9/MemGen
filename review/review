@@ -1,0 +1,151 @@
+#### **study is framed around long-horizon agents and tool use, but limited experiments performed.**
+
+Emergency Reviewby Senior Program Committee Bf5j06 Sept 2026, 01:48 (modified: 25 Sept 2026, 05:32)Program Chairs, Area Chairs, Senior Program Committee, Authors, Program Committee Submitted[Revisions](https://openreview.net/revisions?id=GSeXrqVOmz)
+
+**Paper Summary:**
+
+The paper extends MemGen with a session-local bank that stores Weaver-generated latent memories during context processing and retrieves up to two of them at query time to condition the frozen Weaver before it produces the latent memory for the Reasoner. No parameters are trained. On EventQA from MemoryAgentBench with a Qwen2.5-1.5B MemGen checkpoint, the method reaches 0.188 EM versus 0.034 for a recent-text baseline and at most 0.068 for four textual memory controls, with fewer format failures and low inference cost.
+
+**Strengths:**
+
+1. The paper addresses a gap in MemGen, where generated latent memories are discarded after one use, and adds a complete store, retrieve, refresh, evict and reset cycle without training. Routing retrieved memories through the Weaver instead of into the Reasoner is a sound design choice and is supported by the direct-injection ablation.
+2. The bank is frozen and restored before every question, the benchmark parser and scorer are unchanged, and a mutable-bank diagnostic justifies the frozen design.
+3. The same-model textual controls, including a 16-token matched control, provide useful evidence that the gain is not explained solely by more context, a stronger ranker, or a textual summary. The supplement adds sweeps over capacity, retrieval depth, both thresholds and the new-thread policy, and the efficiency numbers include construction cost.
+
+**Weaknesses:**
+
+1. The EM gains come mostly from fewer parser failures rather than from recalling more correct events. Recall, which checks whether the gold event appears in the raw output, rises only from 0.178 to 0.231, while EM rises from 0.008 to 0.188 and format failures fall from 377 to 119 out of 500. Dense E5 and the no-decay ablation have higher recall but lower EM than the full method and both produce more unparsable outputs. By my calculation from Figure 2, EM over parsed outputs only is about 0.25 for the full method and 0.22 for Matched-16. The paper does not report accuracy over parsed outputs and does not report the chance level for guessing among the candidates.
+2. There is no evidence that retrieval selects relevant memories. At threshold 0.10 no memory is retrieved, so all retrieval scores are below 0.10 and the default 0.05 threshold is near zero. Queries are pooled Reasoner hidden states and keys are pooled Weaver latents, two different spaces, with no check that their cosine tracks relevance. At these values the decay term can determine the ranking on its own, so the method may simply be selecting the two most recently written slots, and no random or last-two retrieval control is given.
+3. The Weaver is frozen and was trained on H\_t only, yet the paper writes Weaver(H\_t, R\_t) without stating how R\_t enters, and it does not address the distribution shift of feeding latents to a Weaver that was not trained on them. The Weaver emits 8 latent tokens, but the Matched-16 control states that the Reasoner consumes 16, and whether the Trigger always fires at query time is not stated.
+4. There is one 1.5B checkpoint, one benchmark subset, and no external reference point such as a published EventQA number, plain Qwen2.5-1.5B-Instruct with the same text retrieval, or another latent-memory method. Seed standard deviations are 0.047 EM for the default configuration and up to 0.060 in the sweeps, so temporal decay at 0.163 versus 0.188, capacity 16 versus 24 and the update-threshold sweep all fall within one standard deviation, and no significance test is given. The source of this variance is not explained, since decoding is greedy and the no-bank runs have zero variance. The study is framed around long-horizon agents and tool use, but nothing agentic is tested.
+
+**Justification of Recommendation:**
+
+Please see the weakness section. Almost all anre important concerns.
+
+**Specific Points of Feedback for Rebuttal:**
+
+1. How much of the EM gain remains once format failures are removed, measured as EM over parsed outputs and compared with the chance rate of guessing among the EventQA candidates? Given that 16 slots of 8 latent tokens outperform a 128-token text summary of the same context by a wide margin, is the gain due to the content of the stored memories or to a change in the input that the frozen Weaver and Reasoner receive?
+2. Since no memory passes a 0.10 threshold, how often are the retrieved slots simply the two most recently written ones, and how does the full method compare with retrieving two random slots or the two last-written slots? How is R\_t fed to the frozen Weaver, which was trained without retrieved inputs, and how many latent tokens does the Reasoner receive at query time?
+
+Also ses weakness section earlier.
+
+**Rating:** 4: Ok but not good enough - rejection
+
+**Confidence:** 4: The reviewer is confident but not absolutely certain that the evaluation is correct
+
+#### **Rejection suggested: insufficient novelty and incomplete experimental evaluation**
+
+Official Reviewby Program Committee e1hR27 Aug 2026, 13:01 (modified: 25 Sept 2026, 05:32)Program Chairs, Area Chairs, Senior Program Committee, Program Committee e1hR, Authors, Program Committee Submitted[Revisions](https://openreview.net/revisions?id=tCPm3tVtod)
+
+**Paper Summary:**
+
+Targeting the problem that generative latent memories produced by MemGen are discarded after inference and cannot be reused across reasoning steps, as well as the high‑token overhead of conventional explicit textual memory for long‑horizon LLM agents, this paper designs an inference‑time session‑local bounded latent‑memory bank **without fine‑tuning model parameters**. The bank supports storage, joint retrieval combining semantic similarity and temporal decay, memory‑thread updating, and capacity‑aware eviction for latent memories output by the Weaver. Instead of directly reusing retrieved historical latent memories, the proposed approach feeds them into the Weaver to fuse with current reasoning states for regenerating new latent memories, which are then consumed by the Reasoner. Evaluated on the EventQA task from MemoryAgentBench, this method achieves higher exact match and recall, reduces parser‑format failures, and delivers improved GPU‑memory usage and inference latency compared with multiple explicit‑memory baselines. Ablation studies verify that Weaver‑mediated latent‑memory regeneration is critical for performance gains. Nevertheless, this work has several limitations: evaluations are conducted only on a single task with one model checkpoint; fair comparisons against mainstream latent‑memory architectures are absent; the implementation is tightly coupled to MemGen components; and performance degradation occurs under dynamic read‑write memory‑bank settings.
+
+**Strengths:**
+
+1. The mechanism is fully realized at inference time and requires no model fine‑tuning. As a plug‑in extension for MemGen, it leaves original model weights untouched and incurs low deployment cost.
+2. The authors observe poor performance from directly reusing historical latent representations and propose a "retrieval‑Weaver‑regeneration" paradigm, whose necessity is thoroughly validated via ablation experiments. The scoring metric combines semantic similarity and temporal decay, and the eviction policy aligns intuitively with memory activity patterns.
+3. Multiple baselines are adopted including truncated context, rolling summary, BM25 retrieval, dense E5 retrieval, and fixed‑token‑budget retrieval. The setup disentangles "input text volume" from "representation modality", demonstrating that performance improvements do not stem from feeding additional textual context.
+
+**Weaknesses:**
+
+1. **Limited theoretical novelty**: Semantic‑similarity‑based retrieval, temporal‑decay weighting, and LRU‑style eviction are well‑established prior techniques. This work mainly adapts existing memory‑management logic to the MemGen pipeline without proposing fundamentally new memory algorithms. The underlying mechanism explaining why Weaver‑guided fusion works remains unexplored; analysis stays at the level of empirical observation.
+2. **Missing key experiments leading to incomplete argumentation**: Only explicit‑memory baselines are included. Comparisons with competing latent‑memory methods are missing, making it impossible to demonstrate competitiveness relative to other latent‑memory architectures.
+3. **Insufficient generalization of evaluation**: Experiments are limited to the single EventQA event‑QA task using the Qwen2.5‑1.5B+MemGen stack. Representative long‑horizon LLM‑agent scenarios such as multi‑turn dialogue and tool‑based planning are not tested, nor are diverse model backbones.
+4. **Critical drawbacks for real‑world agent deployment**: The primary evaluation adopts a "frozen read‑only after construction" memory‑bank protocol. Supplementary results show performance drops under dynamic read‑write conditions simulating real‑time agent interaction, yet root‑cause analysis and mitigation strategies are not provided.
+5. **Low generalizability**: The whole mechanism heavily relies on the Weaver module of MemGen and cannot be directly ported to vanilla LLMs or alternative agent‑memory frameworks. Decoupling strategies and paths for generalized adaptation are not discussed.
+6. **Ignored black‑box risks of latent memory**: Practical engineering risks stemming from non‑interpretable latent representations (lack of traceability and error‑correction capability) are entirely omitted, despite being central pain points for real‑world agent deployment.
+
+**Minors:**
+
+1. For Figure 4 (efficiency plot), explicitly mark that the horizontal axis uses a logarithmic scale.
+2. Report timing statistics for CPU‑side overhead (vector retrieval, data copying). Explicitly state the boundary conditions of efficiency results and clarify in the main text that observed gains do not generalize across all hardware and batch‑size configurations.
+3. Revise related‑work sections: restructure discussions on latent‑memory research with clear subsections; add survey papers covering agent memory; clearly distinguish three lines of work: "cached hidden‑state memory", "trainable latent memory", and "MemGen‑style generative latent memory".
+4. Address deployment risks: add a subsection discussing interpretability and hallucination‑tracing challenges introduced by black‑box latent memory, analyzing practical limitations and promising future directions.
+5. Explicitly discuss the limitations and applicability scope of the proposed method.
+
+**Justification of Recommendation:**
+
+This work introduces a session‑local bounded latent‑memory bank as a plug‑in for MemGen, requiring no model fine‑tuning. It achieves promising results on EventQA against explicit‑memory baselines, with valid ablations confirming the importance of Weaver‑mediated memory regeneration.
+
+However, critical issues block acceptance. First, theoretical novelty is limited: core components such as similarity retrieval, temporal‑decay scoring and LRU‑like eviction are existing techniques. This work mainly adapts prior memory logic to the MemGen pipeline and provides no mechanistic explanation for why Weaver‑based fusion works. Second, experiments are incomplete. There are no fair comparisons against competing latent‑memory architectures, and evaluations are restricted to only one task and one model, lacking tests on typical agent scenarios. Third, the method has practical deployment concerns. It relies on an artificial frozen read‑only memory setting; performance drops under realistic dynamic read‑write conditions without diagnosis or fixes. The design is tightly coupled to MemGen’s Weaver module, and black‑box risks of latent memory are not discussed.
+
+**Specific Points of Feedback for Rebuttal:**
+
+see weaknesses
+
+**Rating:** 4: Ok but not good enough - rejection
+
+**Confidence:** 4: The reviewer is confident but not absolutely certain that the evaluation is correct
+
+#### **AI Review**
+
+AI Reviewby AI Reviewer ()27 Jul 2026, 19:59 (modified: 25 Sept 2026, 05:32)Program Chairs, AI Reviewer, Area Chairs, Senior Program Committee, Authors, Program Committee Submitted[Revisions](https://openreview.net/revisions?id=hD8xCDWz57)
+
+**Review:**
+
+**Title:** Inference-Time Latent Memory Management for Long-Horizon LLM Agents
+
+**Synopsis of the paper**\
+The paper adds a bounded, session-local memory bank to MemGen so that dynamically generated latent memories can persist beyond their immediate use. Stored memories are retrieved to condition the Weaver, which regenerates a query-specific latent representation for the Reasoner without parameter updates. EventQA experiments compare this mechanism with recent-text, summarization, and textual-retrieval controls, alongside query-time ablations and efficiency measurements.
+
+**Summary of Review**\
+The paper isolates a concrete problem in generated latent memory: lifecycle management after a representation has been produced. Its most distinctive contribution is Weaver-mediated regeneration from retrieved memories, rather than latent storage itself. The experiments show higher mean exact match and fewer parser failures than the evaluated controls, but they do not isolate improved long-horizon evidence use from answer-selection and formatting effects. The contribution is also narrower in light of omitted memory-management precedents and absent comparisons with cited latent-memory systems. Low absolute performance, limited evaluation scope, and underspecified inference details further constrain the conclusions.
+
+**Strengths**
+
+- The ablation design directly tests the paper’s principal integration choice. Figure 3 compares Weaver conditioning with both discarded retrieval results and direct latent injection, producing large differences in exact match and format failures; this demonstrates that the choice of latent-memory integration materially changes system behavior.
+- The evaluation protocol controls cross-question contamination. The Experimental Setup states that the bank is constructed during context processing, frozen before question answering, and restored from the same snapshot for every question, which is important for interpreting performance as reuse of context-derived memory rather than accumulation of answer-time information.
+- The reported metrics expose distinct aspects of system behavior. Figures 2–3 jointly report exact match, raw-output answer recall, and parser failures, making visible that retrieving or mentioning the gold event is distinct from producing an exactly scorable answer.
+
+**Weaknesses**
+
+- The main results do not isolate better long-horizon evidence use from answer-selection and formatting effects. The Evaluation Metrics section defines recall as whether the gold event appears in raw output; in Figure 2, Dense E5 has higher recall than the proposed method,  versus , while the proposed method has much higher exact match,  versus , and far fewer format failures,  versus . Thus, the evidence establishes better exact-answer production under the benchmark parser, but not that the gain arises from retrieving or retaining relevant historical information more effectively; parse-conditional accuracy and retrieval/selection/format error decomposition are needed.
+- The memory-management novelty is positioned without two relevant precedents. EM-LLM provides training-free online episodic storage with similarity-based and temporally contiguous retrieval, while Memoria develops explicit retention, retrieval, and forgetting mechanisms (Fountas et al., 2025; Park & Bak, 2024); neither work is cited anywhere in the paper. These methods do not subsume Weaver-mediated regeneration, but they narrow the lifecycle-management novelty and make that regeneration interface the more clearly differentiated contribution.
+- The empirical evaluation does not establish performance relative to persistent latent-memory systems. The Recurrent and Retrieved Latent State section cites MEMORYLLM as maintaining a self-updatable latent pool and M+ as adding trained retrieval, but Figures 2–3 compare only textual controls and internal ablations (Wang et al., 2024; Wang et al., 2025). The results therefore do not determine how the proposed inference-only mechanism compares with the latent-memory approaches identified as its closest architectural context.
+- The headline performance remains low and lacks a reference ceiling. Figure 2 reports  exact match and a mean of  format failures among  questions, using one checkpoint and the same five EventQA contexts across seeded passes; no chance level, gold-evidence oracle, or long-context upper bound is reported. Consequently, the relative gain cannot be placed against attainable performance, and the experiments provide limited evidence for the broader long-horizon-agent framing.
+- The contribution of temporal decay is neither statistically nor operationally established. Figure 3 shows an exact-match margin of only  over no decay, smaller than the no-decay run standard deviation of , while no decay has higher recall; additionally, the method equations update  after retrieval, whereas the Experimental Setup calls query-time evaluation read-only without specifying whether this metadata and the global counter are restored between questions. These facts leave both the reliability and precise meaning of the decay ablation unresolved.
+- The central frozen-Weaver operation is insufficiently specified in the main text. The equation  does not state how a variable-size retrieved set is ordered, concatenated, masked, or otherwise supplied to the unchanged Weaver, nor why Reasoner-derived queries and Weaver-space keys are directly cosine-comparable. Because this interface defines both the proposed mechanism and the direct-injection ablation, its tensor-level construction is necessary for technical assessment.
+
+**Suggestions for Improvement**
+
+- Performance as a function of evidence age would test the long-horizon premise more directly. Stratifying questions by source position, retrieval distance, slot refresh, and eviction history would show whether improvements concentrate on information that recent-text conditioning can no longer retain.
+- An amortization analysis would make the efficiency result applicable beyond the fixed EventQA protocol. Figure 4 averages construction costs over  questions per context and reports incremental GPU allocation while latent slots reside on CPU; varying the number of questions and separating construction, query, CPU-storage, and total GPU costs would expose the break-even regime.
+- The exposition would be clearer if the two-phase workflow preceded the memory equations. A short EventQA example followed by context-time construction, bank freezing, independent query-time retrieval, and reset would define “session-local” concretely and make the experimental protocol easier to follow.
+
+**Additional Details and Minor Issues**
+
+- The abstract contains the typo “rretrieves.”
+- The Method section alternates between  and , and between  and  for stored memories.
+- The retrieval candidate set contains memories, whereas the bank is formally defined as a set of triples.
+- Because  is assigned on insertion and refresh, “last-access count” is more accurate than “last-retrieval count.”
+- The abstract’s “matched no-bank path” is ambiguous because the body defines both recent-text and Matched-16 no-bank conditions.
+- The Matched-16 description should report how often its exact-token rendering requirement rejects a run.
+
+**References**
+
+- Fountas, Z., Benfeghoul, M. A., Oomerjee, A., Christopoulou, F., Lampouras, G., Bou Ammar, H., & Wang, J. (2025). Human-inspired episodic memory for infinite context LLMs. *International Conference on Learning Representations*.
+- Park, S., & Bak, J. (2024). Memoria: Resolving fateful forgetting problem through human-inspired memory architecture. *Proceedings of the 41st International Conference on Machine Learning, 235*, 39587–39615.
+- Wang, Y., Gao, Y., Chen, X., Jiang, H., Li, S., Yang, J., Yin, Q., Li, Z., Li, X., Yin, B., Shang, J., & McAuley, J. (2024). MEMORYLLM: Towards self-updatable large language models. *Proceedings of the 41st International Conference on Machine Learning, 235*, 50453–50466.
+- Wang, Y., Krotov, D., Hu, Y., Gao, Y., Zhou, W., McAuley, J., Gutfreund, D., Feris, R., & He, Z. (2025). M+: Extending MemoryLLM with scalable long-term memory. *Proceedings of the 42nd International Conference on Machine Learning, 267*, 63308–63323.
+
+[About OpenReview](https://openreview.net/about)
+
+[Contact](https://openreview.net/contact)
+
+[FAQ](https://docs.openreview.net/getting-started/frequently-asked-questions)
+
+[Hosting a Venue](https://openreview.net/group?id=OpenReview.net/Support)
+
+[Sponsors](https://openreview.net/sponsors)
+
+[Terms of Use](https://openreview.net/legal/terms) / [Privacy Policy](https://openreview.net/legal/privacy)
+
+[All Venues](https://openreview.net/venues)
+
+[**Donate**](https://openreview.net/donate)
+
+[News](https://openreview.net/group?id=OpenReview.net/News\&referrer=\[Homepage]\(/\))
+
+[OpenReview](https://openreview.net/about) is a long-term project to advance science through improved peer review with legal nonprofit status. We gratefully acknowledge the support of the [OpenReview Sponsors](https://openreview.net/sponsors). © 2026 OpenReview

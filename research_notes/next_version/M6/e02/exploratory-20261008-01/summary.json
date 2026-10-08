@@ -1,0 +1,269 @@
+{
+  "adjudicated_validated_spans": 19,
+  "adjudication_frozen_sha256": "e0a2a349ff6addbbfd07bffdc57a5a48ca0ffcb3e857566ae277f62a4b6ec6db",
+  "current_slot_count": 400,
+  "denominator_all_questions": 10,
+  "direct_pair_question_count": 6,
+  "eligible_question_count": 6,
+  "formal_E02_gate": "NOT_PASSED",
+  "human_independent_rater_count_verified": 0,
+  "independent_context_upper_bound": 5,
+  "inter_rater_agreement": null,
+  "latent_retention": "UNKNOWN",
+  "new_gpu_runs": 0,
+  "original_validated_spans": 18,
+  "per_sample": [
+    {
+      "direct_pair_counts": [
+        15,
+        15,
+        15,
+        15,
+        15
+      ],
+      "eligible": true,
+      "required_source_chunks": [
+        2
+      ],
+      "sample_id": "E02P-c0-01",
+      "seeds_with_direct_pair": [
+        42,
+        142,
+        242,
+        342,
+        442
+      ],
+      "seeds_with_potential_pair": [
+        42,
+        142,
+        242,
+        342,
+        442
+      ],
+      "status": "supported"
+    },
+    {
+      "direct_pair_counts": [
+        15,
+        15,
+        15,
+        15,
+        15
+      ],
+      "eligible": true,
+      "required_source_chunks": [
+        7
+      ],
+      "sample_id": "E02P-c0-02",
+      "seeds_with_direct_pair": [
+        42,
+        142,
+        242,
+        342,
+        442
+      ],
+      "seeds_with_potential_pair": [
+        42,
+        142,
+        242,
+        342,
+        442
+      ],
+      "status": "supported"
+    },
+    {
+      "direct_pair_counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "eligible": false,
+      "required_source_chunks": [
+        10
+      ],
+      "sample_id": "E02P-c1-01",
+      "seeds_with_direct_pair": [],
+      "seeds_with_potential_pair": [],
+      "status": "conflict"
+    },
+    {
+      "direct_pair_counts": [
+        15,
+        15,
+        15,
+        15,
+        15
+      ],
+      "eligible": true,
+      "required_source_chunks": [
+        13
+      ],
+      "sample_id": "E02P-c1-02",
+      "seeds_with_direct_pair": [
+        42,
+        142,
+        242,
+        342,
+        442
+      ],
+      "seeds_with_potential_pair": [
+        42,
+        142,
+        242,
+        342,
+        442
+      ],
+      "status": "supported"
+    },
+    {
+      "direct_pair_counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "eligible": false,
+      "required_source_chunks": [
+        2
+      ],
+      "sample_id": "E02P-c2-01",
+      "seeds_with_direct_pair": [],
+      "seeds_with_potential_pair": [],
+      "status": "ambiguous"
+    },
+    {
+      "direct_pair_counts": [
+        15,
+        15,
+        15,
+        15,
+        15
+      ],
+      "eligible": true,
+      "required_source_chunks": [
+        5
+      ],
+      "sample_id": "E02P-c2-02",
+      "seeds_with_direct_pair": [
+        42,
+        142,
+        242,
+        342,
+        442
+      ],
+      "seeds_with_potential_pair": [
+        42,
+        142,
+        242,
+        342,
+        442
+      ],
+      "status": "supported"
+    },
+    {
+      "direct_pair_counts": [
+        15,
+        15,
+        15,
+        15,
+        15
+      ],
+      "eligible": true,
+      "required_source_chunks": [
+        11
+      ],
+      "sample_id": "E02P-c3-01",
+      "seeds_with_direct_pair": [
+        42,
+        142,
+        242,
+        342,
+        442
+      ],
+      "seeds_with_potential_pair": [
+        42,
+        142,
+        242,
+        342,
+        442
+      ],
+      "status": "supported"
+    },
+    {
+      "direct_pair_counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "eligible": false,
+      "required_source_chunks": [
+        0
+      ],
+      "sample_id": "E02P-c3-02",
+      "seeds_with_direct_pair": [],
+      "seeds_with_potential_pair": [],
+      "status": "ambiguous"
+    },
+    {
+      "direct_pair_counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "eligible": false,
+      "required_source_chunks": [],
+      "sample_id": "E02P-c4-01",
+      "seeds_with_direct_pair": [],
+      "seeds_with_potential_pair": [],
+      "status": "not_locatable"
+    },
+    {
+      "direct_pair_counts": [
+        15,
+        15,
+        15,
+        15,
+        15
+      ],
+      "eligible": true,
+      "required_source_chunks": [
+        3
+      ],
+      "sample_id": "E02P-c4-02",
+      "seeds_with_direct_pair": [
+        42,
+        142,
+        242,
+        342,
+        442
+      ],
+      "seeds_with_potential_pair": [
+        42,
+        142,
+        242,
+        342,
+        442
+      ],
+      "status": "supported"
+    }
+  ],
+  "potential_pair_question_count": 6,
+  "sample_count": 10,
+  "semantic_negative_slots_defined": false,
+  "source_chunk_count": 85,
+  "status": "EXPLORATORY_SOURCE_MAPPING_ONLY",
+  "status_counts": {
+    "ambiguous": 2,
+    "conflict": 1,
+    "not_locatable": 1,
+    "supported": 6
+  },
+  "user_verbal_review": true
+}

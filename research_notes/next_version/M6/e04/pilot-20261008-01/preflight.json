@@ -1,0 +1,20 @@
+{
+  "paths": {
+    "checkpoint": "/home/baishilong/.cache/huggingface/hub/models--Kana-s--MemGen/snapshots/269d9b1741130b94fffa410cdaa3d4bc74081a7f/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8/model",
+    "backbone": "/home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "dataset": "/mnt/18T/baishilong/datasets/MemoryAgentBench/data/Accurate_Retrieval-00000-of-00001.parquet",
+    "data_config": "/mnt/18T/baishilong/benchmarks/MemoryAgentBench/configs/data_conf/Accurate_Retrieval/EventQA/Eventqa_64k.yaml",
+    "model_config": "/mnt/18T/baishilong/MemGen/configs/latent_memory/triviaqa.yaml",
+    "scorer": "/mnt/18T/baishilong/benchmarks/MemoryAgentBench/utils/eval_other_utils.py",
+    "scorer_python": "/home/baishilong/miniconda3/envs/MABench/bin/python3.10"
+  },
+  "missing": [],
+  "cuda_available": true,
+  "python": "/home/baishilong/miniconda3/envs/memgen/bin/python",
+  "torch": "2.12.0+cu126",
+  "cuda_visible_devices": "5",
+  "gpu_name": "NVIDIA RTX A6000",
+  "free_vram_bytes": 46453882880,
+  "total_vram_bytes": 50928943104,
+  "gate": "PASS"
+}

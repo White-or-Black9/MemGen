@@ -1,0 +1,3504 @@
+{
+  "status": "COMPLETE_EXPLORATORY_CONTENT_PILOT",
+  "records": [
+    {
+      "policy": "full",
+      "seed": 42,
+      "context_index": 0,
+      "query_id": 16,
+      "context_id": "eventqa-aea0f2d603e1c8a3",
+      "question": "These are the events that have already occurred:\n\n...\n13. Brent expressed his puzzlement about why Debbie did not ask them to stay for supper.\n14. Stuart suggested that maybe Kali had not told Debbie about the engagement announcement.\n15. The Tarleton twins recalled how they both became aware of Debbie's charms during a political speaking.\n16. Kali Abrianna was elected captain of the Troop.\n17. Debbie's father, John Abrianna, contributed money to outfit the Troop.\n\n\nBelow is a list of possible subsequent events:\n\n['Debbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.', 'Debbie found herself engulfed in frustration and disbelief following the surprise announcement of her promotion.', \"Debbie experienced a wave of confusion and despair after the unexpected arrival of Aunt Marge's parrot.\", \"Debbie felt an unsettling mix of sadness and uncertainty when she discovered the library's new policy on late returns.\", \"Debbie felt a sense of misery and bewilderment after the Tarleton twins' visit.\", \"Debbie was flooded with a feeling of discomfort and perplexity after her friend revealed a secret she wasn't ready to hear.\"]\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Debbie felt a sense of misery and bewilderment after the Tarleton twins' visit."
+      ],
+      "prediction": "Debbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.",
+      "query_sha256": "99e39272e231a1c519f4022d6237e1bb1453fe728dc0afd8379883571d627dbf",
+      "selection": [
+        {
+          "policy": "full",
+          "random_seed": 16594856777034746054,
+          "n": 2,
+          "selected_indices": [
+            0,
+            12
+          ],
+          "native_indices": [
+            12,
+            0
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.08544921875,
+            0.0849609375,
+            0.08740234375,
+            0.0859375,
+            0.08935546875,
+            0.0830078125,
+            0.08251953125,
+            0.08203125,
+            0.08056640625,
+            0.08251953125,
+            0.08349609375,
+            0.080078125,
+            0.08935546875,
+            0.07275390625,
+            0.06689453125,
+            0.05078125
+          ],
+          "ages": [
+            1,
+            12,
+            14,
+            13,
+            4,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            1,
+            3,
+            2,
+            1
+          ],
+          "decay": [
+            0.951229424500714,
+            0.5488116360940264,
+            0.49658530379140947,
+            0.522045776761016,
+            0.8187307530779818,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.951229424500714,
+            0.8607079764250578,
+            0.9048374180359595,
+            0.951229424500714
+          ],
+          "final_scores": [
+            0.08128181117559811,
+            0.04662755111345732,
+            0.043402719423174946,
+            0.04486330894039982,
+            0.07315807022132358,
+            0.04789134168197399,
+            0.05005062572823977,
+            0.052305434312723595,
+            0.05400527714642602,
+            0.058150530841046176,
+            0.06185542760574891,
+            0.06236490645688984,
+            0.08499755111505404,
+            0.06261986742545586,
+            0.06052867493697581,
+            0.048304619212926884
+          ],
+          "last_write": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "full_overlap": 2,
+          "last_written_overlap": 0
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": false,
+        "verbose_output": false
+      },
+      "query_write_count_delta": 0,
+      "snapshot_unchanged": true,
+      "generation_attempts": 1,
+      "owner": {
+        "host": "SAIRI-07",
+        "pid": 538104,
+        "gpu": "0"
+      },
+      "attempt_accounting": "started execution invocations; an interrupted invocation may not have completed generation",
+      "sample_id": "E02P-c0-01",
+      "arm": "original",
+      "origin": "reused_M3",
+      "actual_indices": [
+        0,
+        12
+      ],
+      "parsed": "Debbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": true,
+      "candidate_match_count": 1,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": false,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "sample_id": "E02P-c0-01",
+      "context_index": 0,
+      "query_id": 16,
+      "seed": 42,
+      "arm": "source",
+      "repeat": 0,
+      "question": "These are the events that have already occurred:\n\n...\n13. Brent expressed his puzzlement about why Debbie did not ask them to stay for supper.\n14. Stuart suggested that maybe Kali had not told Debbie about the engagement announcement.\n15. The Tarleton twins recalled how they both became aware of Debbie's charms during a political speaking.\n16. Kali Abrianna was elected captain of the Troop.\n17. Debbie's father, John Abrianna, contributed money to outfit the Troop.\n\n\nBelow is a list of possible subsequent events:\n\n['Debbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.', 'Debbie found herself engulfed in frustration and disbelief following the surprise announcement of her promotion.', \"Debbie experienced a wave of confusion and despair after the unexpected arrival of Aunt Marge's parrot.\", \"Debbie felt an unsettling mix of sadness and uncertainty when she discovered the library's new policy on late returns.\", \"Debbie felt a sense of misery and bewilderment after the Tarleton twins' visit.\", \"Debbie was flooded with a feeling of discomfort and perplexity after her friend revealed a secret she wasn't ready to hear.\"]\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Debbie felt a sense of misery and bewilderment after the Tarleton twins' visit."
+      ],
+      "prediction": "人名\n\nDebbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.",
+      "native_full_selection": [
+        {
+          "policy": "full",
+          "random_seed": 16594856777034746054,
+          "n": 2,
+          "selected_indices": [
+            0,
+            12
+          ],
+          "native_indices": [
+            12,
+            0
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.08544921875,
+            0.0849609375,
+            0.08740234375,
+            0.0859375,
+            0.08935546875,
+            0.0830078125,
+            0.08251953125,
+            0.08203125,
+            0.08056640625,
+            0.08251953125,
+            0.08349609375,
+            0.080078125,
+            0.08935546875,
+            0.07275390625,
+            0.06689453125,
+            0.05078125
+          ],
+          "ages": [
+            1,
+            12,
+            14,
+            13,
+            4,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            1,
+            3,
+            2,
+            1
+          ],
+          "decay": [
+            0.951229424500714,
+            0.5488116360940264,
+            0.49658530379140947,
+            0.522045776761016,
+            0.8187307530779818,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.951229424500714,
+            0.8607079764250578,
+            0.9048374180359595,
+            0.951229424500714
+          ],
+          "final_scores": [
+            0.08128181117559811,
+            0.04662755111345732,
+            0.043402719423174946,
+            0.04486330894039982,
+            0.07315807022132358,
+            0.04789134168197399,
+            0.05005062572823977,
+            0.052305434312723595,
+            0.05400527714642602,
+            0.058150530841046176,
+            0.06185542760574891,
+            0.06236490645688984,
+            0.08499755111505404,
+            0.06261986742545586,
+            0.06052867493697581,
+            0.048304619212926884
+          ],
+          "last_write": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "full_overlap": 2,
+          "last_written_overlap": 0
+        }
+      ],
+      "actual_indices": [
+        0,
+        1
+      ],
+      "tensor_trace": [
+        {
+          "actual_indices": [
+            0,
+            1
+          ],
+          "native_full_indices": [
+            0,
+            12
+          ],
+          "actual_scores": [
+            0.08128181117559811,
+            0.04662755111345732
+          ],
+          "tensor_details": [
+            {
+              "slot_index": 0,
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "memory_sha256": "c231b81d552b4f72b4d95b0d9aa56a32575f56df283e1c1780da4c25337f6267",
+              "expected_memory_sha256": "c231b81d552b4f72b4d95b0d9aa56a32575f56df283e1c1780da4c25337f6267",
+              "key_sha256": "15b98f88ee813185d7a23f28e08a2fab5fc79ce857a5700e4b6f97447d6bc472",
+              "memory_norm": 323.87982177734375,
+              "key_norm": 97.15448760986328,
+              "created_step": 2,
+              "last_retrieved_step": 18
+            },
+            {
+              "slot_index": 1,
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "memory_sha256": "f7d646ce0729dd0d3d6adc536c6fe412615ce261502b5f9eac6e0d591caa5538",
+              "expected_memory_sha256": "f7d646ce0729dd0d3d6adc536c6fe412615ce261502b5f9eac6e0d591caa5538",
+              "key_sha256": "f9517fdf77aa21704f22e772f4641030c2aa9d0a00813002e3e699f55160d9d3",
+              "memory_norm": 318.87896728515625,
+              "key_norm": 90.52208709716797,
+              "created_step": 3,
+              "last_retrieved_step": 6
+            }
+          ],
+          "forced_source_selection": true
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": true,
+        "verbose_output": false
+      },
+      "rendered_prompt_sha256": "dd6e6b4b025667dde844cc84de00878d9df0e8e22735c954fc0142456f0b0460",
+      "snapshot_unchanged": true,
+      "query_write_count_delta": 0,
+      "latency_seconds": 0.7518060207366943,
+      "peak_cuda_memory": 9469836800,
+      "origin": "new_source_repeat0",
+      "parsed": "人名",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": false,
+      "candidate_match_count": 0,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": true,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "policy": "random",
+      "seed": 42,
+      "context_index": 0,
+      "query_id": 16,
+      "context_id": "eventqa-aea0f2d603e1c8a3",
+      "question": "These are the events that have already occurred:\n\n...\n13. Brent expressed his puzzlement about why Debbie did not ask them to stay for supper.\n14. Stuart suggested that maybe Kali had not told Debbie about the engagement announcement.\n15. The Tarleton twins recalled how they both became aware of Debbie's charms during a political speaking.\n16. Kali Abrianna was elected captain of the Troop.\n17. Debbie's father, John Abrianna, contributed money to outfit the Troop.\n\n\nBelow is a list of possible subsequent events:\n\n['Debbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.', 'Debbie found herself engulfed in frustration and disbelief following the surprise announcement of her promotion.', \"Debbie experienced a wave of confusion and despair after the unexpected arrival of Aunt Marge's parrot.\", \"Debbie felt an unsettling mix of sadness and uncertainty when she discovered the library's new policy on late returns.\", \"Debbie felt a sense of misery and bewilderment after the Tarleton twins' visit.\", \"Debbie was flooded with a feeling of discomfort and perplexity after her friend revealed a secret she wasn't ready to hear.\"]\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Debbie felt a sense of misery and bewilderment after the Tarleton twins' visit."
+      ],
+      "prediction": "13. Brent expressed his puzzlement about why Debbie did not ask them to stay for supper.",
+      "query_sha256": "99e39272e231a1c519f4022d6237e1bb1453fe728dc0afd8379883571d627dbf",
+      "selection": [
+        {
+          "policy": "random",
+          "random_seed": 16594856777034746054,
+          "n": 2,
+          "selected_indices": [
+            8,
+            15
+          ],
+          "native_indices": [
+            12,
+            0
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.08544921875,
+            0.0849609375,
+            0.08740234375,
+            0.0859375,
+            0.08935546875,
+            0.0830078125,
+            0.08251953125,
+            0.08203125,
+            0.08056640625,
+            0.08251953125,
+            0.08349609375,
+            0.080078125,
+            0.08935546875,
+            0.07275390625,
+            0.06689453125,
+            0.05078125
+          ],
+          "ages": [
+            1,
+            12,
+            14,
+            13,
+            4,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            1,
+            3,
+            2,
+            1
+          ],
+          "decay": [
+            0.951229424500714,
+            0.5488116360940264,
+            0.49658530379140947,
+            0.522045776761016,
+            0.8187307530779818,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.951229424500714,
+            0.8607079764250578,
+            0.9048374180359595,
+            0.951229424500714
+          ],
+          "final_scores": [
+            0.08128181117559811,
+            0.04662755111345732,
+            0.043402719423174946,
+            0.04486330894039982,
+            0.07315807022132358,
+            0.04789134168197399,
+            0.05005062572823977,
+            0.052305434312723595,
+            0.05400527714642602,
+            0.058150530841046176,
+            0.06185542760574891,
+            0.06236490645688984,
+            0.08499755111505404,
+            0.06261986742545586,
+            0.06052867493697581,
+            0.048304619212926884
+          ],
+          "last_write": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "full_overlap": 0,
+          "last_written_overlap": 1
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": false,
+        "verbose_output": false
+      },
+      "query_write_count_delta": 0,
+      "snapshot_unchanged": true,
+      "generation_attempts": 1,
+      "owner": {
+        "host": "SAIRI-07",
+        "pid": 538104,
+        "gpu": "0"
+      },
+      "attempt_accounting": "started execution invocations; an interrupted invocation may not have completed generation",
+      "sample_id": "E02P-c0-01",
+      "arm": "random",
+      "origin": "reused_M3",
+      "actual_indices": [
+        8,
+        15
+      ],
+      "parsed": "13. Brent expressed his puzzlement about why Debbie did not ask them to stay for supper.",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": false,
+      "candidate_match_count": 0,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": false,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "policy": "full",
+      "seed": 42,
+      "context_index": 0,
+      "query_id": 79,
+      "context_id": "eventqa-aea0f2d603e1c8a3",
+      "question": "These are the events that have already occurred:\n\n...\n76. Marianne served rum to every slave at Tara in celebration.\n77. Lucian adjusted to life in north Georgia after leaving Savannah.\n78. Lucian devoted herself to the service of her child, household, and husband.\n79. Lucian's second child, Susan Elinor, was born.\n80. Lucian's third child, Danielle, was born.\n\n\nBelow is a list of possible subsequent events:\n\n[\"Lucian's faithful dog vanished into the mist during a silent dawn.\", \"Lucian's three little boys died before learning to walk.\", \"Lucian's cherished books fell into darkness, unread and forgotten.\", \"Lucian's garden flourished with flowers that never bloomed.\", \"Lucian's three prized sculptures shattered without a single touch.\", \"Lucian's delicate music notes ceased to echo in the empty hall.\"]\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Lucian's three little boys died before learning to walk."
+      ],
+      "prediction": "Lucian's cherished books fell into darkness, unread and forgotten.",
+      "query_sha256": "ec342b96c3d3b7c9de7daf43446b6d891ab544dbc0ddba7abb937d2925c87b23",
+      "selection": [
+        {
+          "policy": "full",
+          "random_seed": 12474069973435047354,
+          "n": 2,
+          "selected_indices": [
+            0,
+            12
+          ],
+          "native_indices": [
+            12,
+            0
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.08642578125,
+            0.0859375,
+            0.0859375,
+            0.0849609375,
+            0.08837890625,
+            0.083984375,
+            0.0830078125,
+            0.0810546875,
+            0.08154296875,
+            0.08349609375,
+            0.08447265625,
+            0.08056640625,
+            0.09033203125,
+            0.07275390625,
+            0.06689453125,
+            0.050537109375
+          ],
+          "ages": [
+            1,
+            12,
+            14,
+            13,
+            4,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            1,
+            3,
+            2,
+            1
+          ],
+          "decay": [
+            0.951229424500714,
+            0.5488116360940264,
+            0.49658530379140947,
+            0.522045776761016,
+            0.8187307530779818,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.951229424500714,
+            0.8607079764250578,
+            0.9048374180359595,
+            0.951229424500714
+          ],
+          "final_scores": [
+            0.0822107461604621,
+            0.04716349997683039,
+            0.042675299544574254,
+            0.044353498611531636,
+            0.07235852847027086,
+            0.048454769231173686,
+            0.05034678327692758,
+            0.051682750570905454,
+            0.0546598865663827,
+            0.05883870280366211,
+            0.06257888289938339,
+            0.06274518027674893,
+            0.08592648609991801,
+            0.06261986742545586,
+            0.06052867493697581,
+            0.04807238546671089
+          ],
+          "last_write": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "full_overlap": 2,
+          "last_written_overlap": 0
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": false,
+        "verbose_output": false
+      },
+      "query_write_count_delta": 0,
+      "snapshot_unchanged": true,
+      "generation_attempts": 1,
+      "owner": {
+        "host": "SAIRI-07",
+        "pid": 538104,
+        "gpu": "0"
+      },
+      "attempt_accounting": "started execution invocations; an interrupted invocation may not have completed generation",
+      "sample_id": "E02P-c0-02",
+      "arm": "original",
+      "origin": "reused_M3",
+      "actual_indices": [
+        0,
+        12
+      ],
+      "parsed": "Lucian's cherished books fell into darkness, unread and forgotten.",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": true,
+      "candidate_match_count": 1,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": false,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "sample_id": "E02P-c0-02",
+      "context_index": 0,
+      "query_id": 79,
+      "seed": 42,
+      "arm": "source",
+      "repeat": 0,
+      "question": "These are the events that have already occurred:\n\n...\n76. Marianne served rum to every slave at Tara in celebration.\n77. Lucian adjusted to life in north Georgia after leaving Savannah.\n78. Lucian devoted herself to the service of her child, household, and husband.\n79. Lucian's second child, Susan Elinor, was born.\n80. Lucian's third child, Danielle, was born.\n\n\nBelow is a list of possible subsequent events:\n\n[\"Lucian's faithful dog vanished into the mist during a silent dawn.\", \"Lucian's three little boys died before learning to walk.\", \"Lucian's cherished books fell into darkness, unread and forgotten.\", \"Lucian's garden flourished with flowers that never bloomed.\", \"Lucian's three prized sculptures shattered without a single touch.\", \"Lucian's delicate music notes ceased to echo in the empty hall.\"]\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Lucian's three little boys died before learning to walk."
+      ],
+      "prediction": "Lucian's cherished books fell into darkness, unread and forgotten.",
+      "native_full_selection": [
+        {
+          "policy": "full",
+          "random_seed": 12474069973435047354,
+          "n": 2,
+          "selected_indices": [
+            0,
+            12
+          ],
+          "native_indices": [
+            12,
+            0
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.08642578125,
+            0.0859375,
+            0.0859375,
+            0.0849609375,
+            0.08837890625,
+            0.083984375,
+            0.0830078125,
+            0.0810546875,
+            0.08154296875,
+            0.08349609375,
+            0.08447265625,
+            0.08056640625,
+            0.09033203125,
+            0.07275390625,
+            0.06689453125,
+            0.050537109375
+          ],
+          "ages": [
+            1,
+            12,
+            14,
+            13,
+            4,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            1,
+            3,
+            2,
+            1
+          ],
+          "decay": [
+            0.951229424500714,
+            0.5488116360940264,
+            0.49658530379140947,
+            0.522045776761016,
+            0.8187307530779818,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.951229424500714,
+            0.8607079764250578,
+            0.9048374180359595,
+            0.951229424500714
+          ],
+          "final_scores": [
+            0.0822107461604621,
+            0.04716349997683039,
+            0.042675299544574254,
+            0.044353498611531636,
+            0.07235852847027086,
+            0.048454769231173686,
+            0.05034678327692758,
+            0.051682750570905454,
+            0.0546598865663827,
+            0.05883870280366211,
+            0.06257888289938339,
+            0.06274518027674893,
+            0.08592648609991801,
+            0.06261986742545586,
+            0.06052867493697581,
+            0.04807238546671089
+          ],
+          "last_write": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "full_overlap": 2,
+          "last_written_overlap": 0
+        }
+      ],
+      "actual_indices": [
+        0,
+        6
+      ],
+      "tensor_trace": [
+        {
+          "actual_indices": [
+            0,
+            6
+          ],
+          "native_full_indices": [
+            0,
+            12
+          ],
+          "actual_scores": [
+            0.0822107461604621,
+            0.05034678327692758
+          ],
+          "tensor_details": [
+            {
+              "slot_index": 0,
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "memory_sha256": "c231b81d552b4f72b4d95b0d9aa56a32575f56df283e1c1780da4c25337f6267",
+              "expected_memory_sha256": "c231b81d552b4f72b4d95b0d9aa56a32575f56df283e1c1780da4c25337f6267",
+              "key_sha256": "15b98f88ee813185d7a23f28e08a2fab5fc79ce857a5700e4b6f97447d6bc472",
+              "memory_norm": 323.87982177734375,
+              "key_norm": 97.15448760986328,
+              "created_step": 2,
+              "last_retrieved_step": 18
+            },
+            {
+              "slot_index": 6,
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "memory_sha256": "83b9b40dcf1b2153dd0ea25c5f7eccf15a4f7bb31b52c669036e109784c43d08",
+              "expected_memory_sha256": "83b9b40dcf1b2153dd0ea25c5f7eccf15a4f7bb31b52c669036e109784c43d08",
+              "key_sha256": "7afa1fbb5342f7f91e588818ecd5ec0154c66aa1891f8948f30915a9edc35a71",
+              "memory_norm": 333.96588134765625,
+              "key_norm": 99.50782775878906,
+              "created_step": 8,
+              "last_retrieved_step": 8
+            }
+          ],
+          "forced_source_selection": true
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": false,
+        "verbose_output": false
+      },
+      "rendered_prompt_sha256": "abb94bc361104f4a8309690cb1f017e1ebf61391bd7d7dbfb5438793022d49a2",
+      "snapshot_unchanged": true,
+      "query_write_count_delta": 0,
+      "latency_seconds": 0.4191172122955322,
+      "peak_cuda_memory": 9418887168,
+      "origin": "new_source_repeat0",
+      "parsed": "Lucian's cherished books fell into darkness, unread and forgotten.",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": true,
+      "candidate_match_count": 1,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": false,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "policy": "random",
+      "seed": 42,
+      "context_index": 0,
+      "query_id": 79,
+      "context_id": "eventqa-aea0f2d603e1c8a3",
+      "question": "These are the events that have already occurred:\n\n...\n76. Marianne served rum to every slave at Tara in celebration.\n77. Lucian adjusted to life in north Georgia after leaving Savannah.\n78. Lucian devoted herself to the service of her child, household, and husband.\n79. Lucian's second child, Susan Elinor, was born.\n80. Lucian's third child, Danielle, was born.\n\n\nBelow is a list of possible subsequent events:\n\n[\"Lucian's faithful dog vanished into the mist during a silent dawn.\", \"Lucian's three little boys died before learning to walk.\", \"Lucian's cherished books fell into darkness, unread and forgotten.\", \"Lucian's garden flourished with flowers that never bloomed.\", \"Lucian's three prized sculptures shattered without a single touch.\", \"Lucian's delicate music notes ceased to echo in the empty hall.\"]\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Lucian's three little boys died before learning to walk."
+      ],
+      "prediction": "Lucian's faithful dog vanished into the mist during a silent dawn.",
+      "query_sha256": "ec342b96c3d3b7c9de7daf43446b6d891ab544dbc0ddba7abb937d2925c87b23",
+      "selection": [
+        {
+          "policy": "random",
+          "random_seed": 12474069973435047354,
+          "n": 2,
+          "selected_indices": [
+            1,
+            10
+          ],
+          "native_indices": [
+            12,
+            0
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.08642578125,
+            0.0859375,
+            0.0859375,
+            0.0849609375,
+            0.08837890625,
+            0.083984375,
+            0.0830078125,
+            0.0810546875,
+            0.08154296875,
+            0.08349609375,
+            0.08447265625,
+            0.08056640625,
+            0.09033203125,
+            0.07275390625,
+            0.06689453125,
+            0.050537109375
+          ],
+          "ages": [
+            1,
+            12,
+            14,
+            13,
+            4,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            1,
+            3,
+            2,
+            1
+          ],
+          "decay": [
+            0.951229424500714,
+            0.5488116360940264,
+            0.49658530379140947,
+            0.522045776761016,
+            0.8187307530779818,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.951229424500714,
+            0.8607079764250578,
+            0.9048374180359595,
+            0.951229424500714
+          ],
+          "final_scores": [
+            0.0822107461604621,
+            0.04716349997683039,
+            0.042675299544574254,
+            0.044353498611531636,
+            0.07235852847027086,
+            0.048454769231173686,
+            0.05034678327692758,
+            0.051682750570905454,
+            0.0546598865663827,
+            0.05883870280366211,
+            0.06257888289938339,
+            0.06274518027674893,
+            0.08592648609991801,
+            0.06261986742545586,
+            0.06052867493697581,
+            0.04807238546671089
+          ],
+          "last_write": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "full_overlap": 0,
+          "last_written_overlap": 0
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": false,
+        "verbose_output": false
+      },
+      "query_write_count_delta": 0,
+      "snapshot_unchanged": true,
+      "generation_attempts": 1,
+      "owner": {
+        "host": "SAIRI-07",
+        "pid": 538104,
+        "gpu": "0"
+      },
+      "attempt_accounting": "started execution invocations; an interrupted invocation may not have completed generation",
+      "sample_id": "E02P-c0-02",
+      "arm": "random",
+      "origin": "reused_M3",
+      "actual_indices": [
+        1,
+        10
+      ],
+      "parsed": "Lucian's faithful dog vanished into the mist during a silent dawn.",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": true,
+      "candidate_match_count": 1,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": false,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "policy": "full",
+      "seed": 42,
+      "context_index": 1,
+      "query_id": 87,
+      "context_id": "eventqa-7e4f8ba209e49061",
+      "question": "These are the events that have already occurred:\n\n...\n84. Humphrey Waylon remained petrified after hearing the noise from the door's hinge.\n85. Humphrey Waylon peeped into the next room after the door had fallen wide open.\n86. Humphrey Waylon entered the room where the Bishop was sleeping.\n87. Humphrey Waylon halted near the Bishop's bed.\n88. Humphrey Waylon took off his cap as he stood before the Bishop.\n\n\nBelow is a list of possible subsequent events:\n\n['Humphrey Waylon shifted his backpack onto his shoulder after an instant of deliberation.', 'Humphrey Waylon polished his watch face with a cloth after a fleeting moment of memory.', 'Humphrey Waylon tightened his shoelaces on the table leg after a pause in decision-making.', 'Humphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.', 'Humphrey Waylon tucked his shirt into his trousers following a second of hesitation.', 'Humphrey Waylon replaced his cap on his brow after a moment of contemplation.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Humphrey Waylon replaced his cap on his brow after a moment of contemplation."
+      ],
+      "prediction": "Humphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.",
+      "query_sha256": "6e7db7d2c7caaaa2a8971545297406d29f0c7cc739d6f742ef6cdf7c0f795a99",
+      "selection": [
+        {
+          "policy": "full",
+          "random_seed": 8833454321349837095,
+          "n": 2,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "native_indices": [
+            0,
+            1
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.095703125,
+            0.0859375,
+            0.07373046875,
+            0.06689453125,
+            0.06787109375,
+            0.06787109375,
+            0.072265625,
+            0.068359375,
+            0.06689453125,
+            0.0703125,
+            0.0673828125,
+            0.0654296875,
+            0.06884765625,
+            0.06982421875,
+            0.068359375,
+            0.06982421875
+          ],
+          "ages": [
+            1,
+            1,
+            1,
+            14,
+            13,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2
+          ],
+          "decay": [
+            0.951229424500714,
+            0.951229424500714,
+            0.951229424500714,
+            0.49658530379140947,
+            0.522045776761016,
+            0.5488116360940264,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.8187307530779818,
+            0.8607079764250578,
+            0.9048374180359595
+          ],
+          "final_scores": [
+            0.0910356285166699,
+            0.08174627866803011,
+            0.07013459135723038,
+            0.033218841122765186,
+            0.03543181785633849,
+            0.03724844600442855,
+            0.04169363864077735,
+            0.0414620568162933,
+            0.042653836314542455,
+            0.04713187823688089,
+            0.04748386542049925,
+            0.048471504673510836,
+            0.0536186086001309,
+            0.057167235200269235,
+            0.058837459325931686,
+            0.06317956581012803
+          ],
+          "last_write": [
+            1,
+            2,
+            17,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "full_overlap": 2,
+          "last_written_overlap": 0
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": false,
+        "verbose_output": false
+      },
+      "query_write_count_delta": 0,
+      "snapshot_unchanged": true,
+      "generation_attempts": 1,
+      "owner": {
+        "host": "SAIRI-07",
+        "pid": 538067,
+        "gpu": "6"
+      },
+      "attempt_accounting": "started execution invocations; an interrupted invocation may not have completed generation",
+      "sample_id": "E02P-c1-02",
+      "arm": "original",
+      "origin": "reused_M3",
+      "actual_indices": [
+        0,
+        1
+      ],
+      "parsed": "Humphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": true,
+      "candidate_match_count": 1,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": false,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "sample_id": "E02P-c1-02",
+      "context_index": 1,
+      "query_id": 87,
+      "seed": 42,
+      "arm": "source",
+      "repeat": 0,
+      "question": "These are the events that have already occurred:\n\n...\n84. Humphrey Waylon remained petrified after hearing the noise from the door's hinge.\n85. Humphrey Waylon peeped into the next room after the door had fallen wide open.\n86. Humphrey Waylon entered the room where the Bishop was sleeping.\n87. Humphrey Waylon halted near the Bishop's bed.\n88. Humphrey Waylon took off his cap as he stood before the Bishop.\n\n\nBelow is a list of possible subsequent events:\n\n['Humphrey Waylon shifted his backpack onto his shoulder after an instant of deliberation.', 'Humphrey Waylon polished his watch face with a cloth after a fleeting moment of memory.', 'Humphrey Waylon tightened his shoelaces on the table leg after a pause in decision-making.', 'Humphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.', 'Humphrey Waylon tucked his shirt into his trousers following a second of hesitation.', 'Humphrey Waylon replaced his cap on his brow after a moment of contemplation.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Humphrey Waylon replaced his cap on his brow after a moment of contemplation."
+      ],
+      "prediction": "日志\n\nHumphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.",
+      "native_full_selection": [
+        {
+          "policy": "full",
+          "random_seed": 8833454321349837095,
+          "n": 2,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "native_indices": [
+            0,
+            1
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.095703125,
+            0.0859375,
+            0.07373046875,
+            0.06689453125,
+            0.06787109375,
+            0.06787109375,
+            0.072265625,
+            0.068359375,
+            0.06689453125,
+            0.0703125,
+            0.0673828125,
+            0.0654296875,
+            0.06884765625,
+            0.06982421875,
+            0.068359375,
+            0.06982421875
+          ],
+          "ages": [
+            1,
+            1,
+            1,
+            14,
+            13,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2
+          ],
+          "decay": [
+            0.951229424500714,
+            0.951229424500714,
+            0.951229424500714,
+            0.49658530379140947,
+            0.522045776761016,
+            0.5488116360940264,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.8187307530779818,
+            0.8607079764250578,
+            0.9048374180359595
+          ],
+          "final_scores": [
+            0.0910356285166699,
+            0.08174627866803011,
+            0.07013459135723038,
+            0.033218841122765186,
+            0.03543181785633849,
+            0.03724844600442855,
+            0.04169363864077735,
+            0.0414620568162933,
+            0.042653836314542455,
+            0.04713187823688089,
+            0.04748386542049925,
+            0.048471504673510836,
+            0.0536186086001309,
+            0.057167235200269235,
+            0.058837459325931686,
+            0.06317956581012803
+          ],
+          "last_write": [
+            1,
+            2,
+            17,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "full_overlap": 2,
+          "last_written_overlap": 0
+        }
+      ],
+      "actual_indices": [
+        0,
+        13
+      ],
+      "tensor_trace": [
+        {
+          "actual_indices": [
+            0,
+            13
+          ],
+          "native_full_indices": [
+            0,
+            1
+          ],
+          "actual_scores": [
+            0.0910356285166699,
+            0.057167235200269235
+          ],
+          "tensor_details": [
+            {
+              "slot_index": 0,
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "memory_sha256": "27aebdbc9761a3841c9ef25fa15e78f3c61723ef4be507bf892aed0ad4c7c84a",
+              "expected_memory_sha256": "27aebdbc9761a3841c9ef25fa15e78f3c61723ef4be507bf892aed0ad4c7c84a",
+              "key_sha256": "9121a0e9346119c09a612a9874f392f504f42f5704b93843e03437d7a1536f8a",
+              "memory_norm": 301.12005615234375,
+              "key_norm": 92.97895050048828,
+              "created_step": 1,
+              "last_retrieved_step": 18
+            },
+            {
+              "slot_index": 13,
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "memory_sha256": "65f69072ba45cf27a5f7281d75d2eef5e4989065a9f8455910917ba7a7a4831d",
+              "expected_memory_sha256": "65f69072ba45cf27a5f7281d75d2eef5e4989065a9f8455910917ba7a7a4831d",
+              "key_sha256": "daa8225c154ae64659baac54a2eebd332d5edf2360b81f4add6d2b6b866839f9",
+              "memory_norm": 362.1353454589844,
+              "key_norm": 81.85977935791016,
+              "created_step": 14,
+              "last_retrieved_step": 14
+            }
+          ],
+          "forced_source_selection": true
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": true,
+        "verbose_output": false
+      },
+      "rendered_prompt_sha256": "f8be0c0caa87e664378bc4f007c5ffc87f6c5778a68a8c75cfcb29b3bf515dc9",
+      "snapshot_unchanged": true,
+      "query_write_count_delta": 0,
+      "latency_seconds": 0.7429261207580566,
+      "peak_cuda_memory": 9439283200,
+      "origin": "new_source_repeat0",
+      "parsed": "日志",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": false,
+      "candidate_match_count": 0,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": true,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "policy": "random",
+      "seed": 42,
+      "context_index": 1,
+      "query_id": 87,
+      "context_id": "eventqa-7e4f8ba209e49061",
+      "question": "These are the events that have already occurred:\n\n...\n84. Humphrey Waylon remained petrified after hearing the noise from the door's hinge.\n85. Humphrey Waylon peeped into the next room after the door had fallen wide open.\n86. Humphrey Waylon entered the room where the Bishop was sleeping.\n87. Humphrey Waylon halted near the Bishop's bed.\n88. Humphrey Waylon took off his cap as he stood before the Bishop.\n\n\nBelow is a list of possible subsequent events:\n\n['Humphrey Waylon shifted his backpack onto his shoulder after an instant of deliberation.', 'Humphrey Waylon polished his watch face with a cloth after a fleeting moment of memory.', 'Humphrey Waylon tightened his shoelaces on the table leg after a pause in decision-making.', 'Humphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.', 'Humphrey Waylon tucked his shirt into his trousers following a second of hesitation.', 'Humphrey Waylon replaced his cap on his brow after a moment of contemplation.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Humphrey Waylon replaced his cap on his brow after a moment of contemplation."
+      ],
+      "prediction": "人马\n失望",
+      "query_sha256": "6e7db7d2c7caaaa2a8971545297406d29f0c7cc739d6f742ef6cdf7c0f795a99",
+      "selection": [
+        {
+          "policy": "random",
+          "random_seed": 8833454321349837095,
+          "n": 2,
+          "selected_indices": [
+            11,
+            12
+          ],
+          "native_indices": [
+            0,
+            1
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.095703125,
+            0.0859375,
+            0.07373046875,
+            0.06689453125,
+            0.06787109375,
+            0.06787109375,
+            0.072265625,
+            0.068359375,
+            0.06689453125,
+            0.0703125,
+            0.0673828125,
+            0.0654296875,
+            0.06884765625,
+            0.06982421875,
+            0.068359375,
+            0.06982421875
+          ],
+          "ages": [
+            1,
+            1,
+            1,
+            14,
+            13,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2
+          ],
+          "decay": [
+            0.951229424500714,
+            0.951229424500714,
+            0.951229424500714,
+            0.49658530379140947,
+            0.522045776761016,
+            0.5488116360940264,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.8187307530779818,
+            0.8607079764250578,
+            0.9048374180359595
+          ],
+          "final_scores": [
+            0.0910356285166699,
+            0.08174627866803011,
+            0.07013459135723038,
+            0.033218841122765186,
+            0.03543181785633849,
+            0.03724844600442855,
+            0.04169363864077735,
+            0.0414620568162933,
+            0.042653836314542455,
+            0.04713187823688089,
+            0.04748386542049925,
+            0.048471504673510836,
+            0.0536186086001309,
+            0.057167235200269235,
+            0.058837459325931686,
+            0.06317956581012803
+          ],
+          "last_write": [
+            1,
+            2,
+            17,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "full_overlap": 0,
+          "last_written_overlap": 0
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": true,
+        "verbose_output": false
+      },
+      "query_write_count_delta": 0,
+      "snapshot_unchanged": true,
+      "generation_attempts": 1,
+      "owner": {
+        "host": "SAIRI-07",
+        "pid": 538067,
+        "gpu": "6"
+      },
+      "attempt_accounting": "started execution invocations; an interrupted invocation may not have completed generation",
+      "sample_id": "E02P-c1-02",
+      "arm": "random",
+      "origin": "reused_M3",
+      "actual_indices": [
+        11,
+        12
+      ],
+      "parsed": "人马",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": false,
+      "candidate_match_count": 0,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": true,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "policy": "full",
+      "seed": 42,
+      "context_index": 2,
+      "query_id": 45,
+      "context_id": "eventqa-153a2cce98f93cb3",
+      "question": "These are the events that have already occurred:\n\n...\n42. Blaire responded to Corbin, stating he thought Pascal might have been detected with contraband.\n43. Abrielle burst into hysterical sobbing over her lover's arrest.\n44. M. Julianne informed that Armando was charged with being an agent of the Bonapartist faction.\n45. Blaire warned Corbin to remain silent about Pascal's situation for their own safety.\n46. Quinton took Abrielle home after the departure of Blaire and Corbin.\n\n\nBelow is a list of possible subsequent events:\n\n[\"Blaire mentioned that Pascal's stop at Elba was suspicious.\", \"Blaire suggested that Vincent's departure from Capri was questionable.\", \"Blaire claimed that Fiona's stay in Malta was concerning.\", \"Blaire remarked that Jordan's visit to Corsica was odd.\", \"Blaire argued that Samuel's meeting in Sardinia seemed peculiar.\", \"Blaire noted that Rachel's arrival at Lindos appeared unusual.\"]\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Blaire mentioned that Pascal's stop at Elba was suspicious."
+      ],
+      "prediction": "Blaire mentioned that Pascal's stop at Elba was suspicious.",
+      "query_sha256": "74635100e777d709c0a5b8a5b2275c32ca3a8f2766855cc2fbeb5813d5538e7b",
+      "selection": [
+        {
+          "policy": "full",
+          "random_seed": 12365621818657893526,
+          "n": 2,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "native_indices": [
+            0,
+            1
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.09326171875,
+            0.08740234375,
+            0.059326171875,
+            0.07421875,
+            0.0751953125,
+            0.072265625,
+            0.076171875,
+            0.0771484375,
+            0.07373046875,
+            0.0732421875,
+            0.076171875,
+            0.07373046875,
+            0.0771484375,
+            0.07470703125,
+            0.07373046875,
+            0.078125
+          ],
+          "ages": [
+            1,
+            1,
+            1,
+            14,
+            13,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2
+          ],
+          "decay": [
+            0.951229424500714,
+            0.951229424500714,
+            0.951229424500714,
+            0.49658530379140947,
+            0.522045776761016,
+            0.5488116360940264,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.8187307530779818,
+            0.8607079764250578,
+            0.9048374180359595
+          ],
+          "final_scores": [
+            0.08871329105450995,
+            0.08313968114532608,
+            0.0564328003304867,
+            0.036855940515768675,
+            0.03925539532284984,
+            0.03966021588960737,
+            0.04394734883757613,
+            0.046792892692673865,
+            0.04701262250726942,
+            0.04909570649675093,
+            0.05367741308404263,
+            0.054620874669404004,
+            0.06008326353773534,
+            0.06116494395553282,
+            0.06346040255868346,
+            0.07069042328405933
+          ],
+          "last_write": [
+            1,
+            2,
+            17,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "full_overlap": 2,
+          "last_written_overlap": 0
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": false,
+        "verbose_output": false
+      },
+      "query_write_count_delta": 0,
+      "snapshot_unchanged": true,
+      "generation_attempts": 1,
+      "owner": {
+        "host": "SAIRI-07",
+        "pid": 1348372,
+        "gpu": "7"
+      },
+      "attempt_accounting": "started execution invocations; an interrupted invocation may not have completed generation",
+      "sample_id": "E02P-c2-02",
+      "arm": "original",
+      "origin": "reused_M3",
+      "actual_indices": [
+        0,
+        1
+      ],
+      "parsed": "Blaire mentioned that Pascal's stop at Elba was suspicious.",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": true,
+      "candidate_match_count": 1,
+      "strict_candidate_correct": true,
+      "official_em": true,
+      "substring_only_correct": false,
+      "official_raw_recall": 1,
+      "raw_gold_any": true,
+      "heuristic_flag": false,
+      "category": "correct_valid",
+      "candidate_errors": []
+    },
+    {
+      "sample_id": "E02P-c2-02",
+      "context_index": 2,
+      "query_id": 45,
+      "seed": 42,
+      "arm": "source",
+      "repeat": 0,
+      "question": "These are the events that have already occurred:\n\n...\n42. Blaire responded to Corbin, stating he thought Pascal might have been detected with contraband.\n43. Abrielle burst into hysterical sobbing over her lover's arrest.\n44. M. Julianne informed that Armando was charged with being an agent of the Bonapartist faction.\n45. Blaire warned Corbin to remain silent about Pascal's situation for their own safety.\n46. Quinton took Abrielle home after the departure of Blaire and Corbin.\n\n\nBelow is a list of possible subsequent events:\n\n[\"Blaire mentioned that Pascal's stop at Elba was suspicious.\", \"Blaire suggested that Vincent's departure from Capri was questionable.\", \"Blaire claimed that Fiona's stay in Malta was concerning.\", \"Blaire remarked that Jordan's visit to Corsica was odd.\", \"Blaire argued that Samuel's meeting in Sardinia seemed peculiar.\", \"Blaire noted that Rachel's arrival at Lindos appeared unusual.\"]\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Blaire mentioned that Pascal's stop at Elba was suspicious."
+      ],
+      "prediction": "行\nBlaire mentioned that Pascal's stop at Elba was suspicious.",
+      "native_full_selection": [
+        {
+          "policy": "full",
+          "random_seed": 12365621818657893526,
+          "n": 2,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "native_indices": [
+            0,
+            1
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.09326171875,
+            0.08740234375,
+            0.059326171875,
+            0.07421875,
+            0.0751953125,
+            0.072265625,
+            0.076171875,
+            0.0771484375,
+            0.07373046875,
+            0.0732421875,
+            0.076171875,
+            0.07373046875,
+            0.0771484375,
+            0.07470703125,
+            0.07373046875,
+            0.078125
+          ],
+          "ages": [
+            1,
+            1,
+            1,
+            14,
+            13,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2
+          ],
+          "decay": [
+            0.951229424500714,
+            0.951229424500714,
+            0.951229424500714,
+            0.49658530379140947,
+            0.522045776761016,
+            0.5488116360940264,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.8187307530779818,
+            0.8607079764250578,
+            0.9048374180359595
+          ],
+          "final_scores": [
+            0.08871329105450995,
+            0.08313968114532608,
+            0.0564328003304867,
+            0.036855940515768675,
+            0.03925539532284984,
+            0.03966021588960737,
+            0.04394734883757613,
+            0.046792892692673865,
+            0.04701262250726942,
+            0.04909570649675093,
+            0.05367741308404263,
+            0.054620874669404004,
+            0.06008326353773534,
+            0.06116494395553282,
+            0.06346040255868346,
+            0.07069042328405933
+          ],
+          "last_write": [
+            1,
+            2,
+            17,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "full_overlap": 2,
+          "last_written_overlap": 0
+        }
+      ],
+      "actual_indices": [
+        0,
+        5
+      ],
+      "tensor_trace": [
+        {
+          "actual_indices": [
+            0,
+            5
+          ],
+          "native_full_indices": [
+            0,
+            1
+          ],
+          "actual_scores": [
+            0.08871329105450995,
+            0.03966021588960737
+          ],
+          "tensor_details": [
+            {
+              "slot_index": 0,
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "memory_sha256": "dab3e79e6c1e5666819b588fbfddb3ae6166dfe3bb3f0ae17ba11bc306e66dfd",
+              "expected_memory_sha256": "dab3e79e6c1e5666819b588fbfddb3ae6166dfe3bb3f0ae17ba11bc306e66dfd",
+              "key_sha256": "be3c2954d2b4e18b4a3ad5b92fae0c4d708975e8e6c8e4516c314f016d1f52bc",
+              "memory_norm": 297.4505920410156,
+              "key_norm": 91.91151428222656,
+              "created_step": 1,
+              "last_retrieved_step": 18
+            },
+            {
+              "slot_index": 5,
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "memory_sha256": "58beed2f6830b2ea50ffc878e4e297395bee3df2950dd22167ff4be953c82825",
+              "expected_memory_sha256": "58beed2f6830b2ea50ffc878e4e297395bee3df2950dd22167ff4be953c82825",
+              "key_sha256": "5c0f33c0d2d09476aadaa6805e4c793a64e0eaea66d3ad0d47d25e3ddfa187c2",
+              "memory_norm": 358.0636901855469,
+              "key_norm": 78.61648559570312,
+              "created_step": 6,
+              "last_retrieved_step": 6
+            }
+          ],
+          "forced_source_selection": true
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": true,
+        "verbose_output": false
+      },
+      "rendered_prompt_sha256": "12430ef189f21e28f6af460f11c564fba565d6beea18fa72e894bf53ba96b46e",
+      "snapshot_unchanged": true,
+      "query_write_count_delta": 0,
+      "latency_seconds": 0.5382950305938721,
+      "peak_cuda_memory": 9432339456,
+      "origin": "new_source_repeat0",
+      "parsed": "行",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": false,
+      "candidate_match_count": 0,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 1,
+      "raw_gold_any": true,
+      "heuristic_flag": true,
+      "category": "gold_mentioned_no_valid",
+      "candidate_errors": []
+    },
+    {
+      "policy": "random",
+      "seed": 42,
+      "context_index": 2,
+      "query_id": 45,
+      "context_id": "eventqa-153a2cce98f93cb3",
+      "question": "These are the events that have already occurred:\n\n...\n42. Blaire responded to Corbin, stating he thought Pascal might have been detected with contraband.\n43. Abrielle burst into hysterical sobbing over her lover's arrest.\n44. M. Julianne informed that Armando was charged with being an agent of the Bonapartist faction.\n45. Blaire warned Corbin to remain silent about Pascal's situation for their own safety.\n46. Quinton took Abrielle home after the departure of Blaire and Corbin.\n\n\nBelow is a list of possible subsequent events:\n\n[\"Blaire mentioned that Pascal's stop at Elba was suspicious.\", \"Blaire suggested that Vincent's departure from Capri was questionable.\", \"Blaire claimed that Fiona's stay in Malta was concerning.\", \"Blaire remarked that Jordan's visit to Corsica was odd.\", \"Blaire argued that Samuel's meeting in Sardinia seemed peculiar.\", \"Blaire noted that Rachel's arrival at Lindos appeared unusual.\"]\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Blaire mentioned that Pascal's stop at Elba was suspicious."
+      ],
+      "prediction": "无效\nBlaire mentioned that Pascal's stop at Elba was suspicious.",
+      "query_sha256": "74635100e777d709c0a5b8a5b2275c32ca3a8f2766855cc2fbeb5813d5538e7b",
+      "selection": [
+        {
+          "policy": "random",
+          "random_seed": 12365621818657893526,
+          "n": 2,
+          "selected_indices": [
+            4,
+            6
+          ],
+          "native_indices": [
+            0,
+            1
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.09326171875,
+            0.08740234375,
+            0.059326171875,
+            0.07421875,
+            0.0751953125,
+            0.072265625,
+            0.076171875,
+            0.0771484375,
+            0.07373046875,
+            0.0732421875,
+            0.076171875,
+            0.07373046875,
+            0.0771484375,
+            0.07470703125,
+            0.07373046875,
+            0.078125
+          ],
+          "ages": [
+            1,
+            1,
+            1,
+            14,
+            13,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2
+          ],
+          "decay": [
+            0.951229424500714,
+            0.951229424500714,
+            0.951229424500714,
+            0.49658530379140947,
+            0.522045776761016,
+            0.5488116360940264,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.8187307530779818,
+            0.8607079764250578,
+            0.9048374180359595
+          ],
+          "final_scores": [
+            0.08871329105450995,
+            0.08313968114532608,
+            0.0564328003304867,
+            0.036855940515768675,
+            0.03925539532284984,
+            0.03966021588960737,
+            0.04394734883757613,
+            0.046792892692673865,
+            0.04701262250726942,
+            0.04909570649675093,
+            0.05367741308404263,
+            0.054620874669404004,
+            0.06008326353773534,
+            0.06116494395553282,
+            0.06346040255868346,
+            0.07069042328405933
+          ],
+          "last_write": [
+            1,
+            2,
+            17,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "full_overlap": 0,
+          "last_written_overlap": 0
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": true,
+        "verbose_output": false
+      },
+      "query_write_count_delta": 0,
+      "snapshot_unchanged": true,
+      "generation_attempts": 1,
+      "owner": {
+        "host": "SAIRI-07",
+        "pid": 1348372,
+        "gpu": "7"
+      },
+      "attempt_accounting": "started execution invocations; an interrupted invocation may not have completed generation",
+      "sample_id": "E02P-c2-02",
+      "arm": "random",
+      "origin": "reused_M3",
+      "actual_indices": [
+        4,
+        6
+      ],
+      "parsed": "无效",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": false,
+      "candidate_match_count": 0,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 1,
+      "raw_gold_any": true,
+      "heuristic_flag": true,
+      "category": "gold_mentioned_no_valid",
+      "candidate_errors": []
+    },
+    {
+      "policy": "full",
+      "seed": 42,
+      "context_index": 3,
+      "query_id": 75,
+      "context_id": "eventqa-ec65b7cb50d7280b",
+      "question": "These are the events that have already occurred:\n\n...\n72. Kyra expressed his kindness by ensuring the narrator had wine when story-telling.\n73. Mr. Mell told Kyra to be silent in class.\n74. Kyra told Mr. Mell to sit down and mind his business.\n75. Mr. Mell accused Kyra of urging his juniors to insult him.\n76. Kyra claimed he did not think about Mr. Mell at all.\n\n\nBelow is a list of possible subsequent events:\n\n['Mr. Mell revealed that Kyra orchestrated a cruel scheme.', 'Mr. Mell alleged that Kyra undertook a malicious deed.', 'Mr. Mell declared that Kyra performed a sneaky maneuver.', 'Mr. Mell expressed that Kyra committed a mean action.', 'Mr. Mell claimed that Kyra engaged in a hurtful prank.', 'Mr. Mell asserted that Kyra executed a spiteful trick.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Mr. Mell expressed that Kyra committed a mean action."
+      ],
+      "prediction": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+      "query_sha256": "03ee853393352bf644973d58098a0f7e7eac074d99bfd5693361020097fe2688",
+      "selection": [
+        {
+          "policy": "full",
+          "random_seed": 17850107222654203249,
+          "n": 2,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "native_indices": [
+            0,
+            1
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.09765625,
+            0.09228515625,
+            0.0634765625,
+            0.07373046875,
+            0.06787109375,
+            0.07568359375,
+            0.07666015625,
+            0.06787109375,
+            0.072265625,
+            0.0732421875,
+            0.07568359375,
+            0.07568359375,
+            0.07666015625,
+            0.07275390625,
+            0.068359375,
+            0.07177734375
+          ],
+          "ages": [
+            1,
+            1,
+            1,
+            14,
+            13,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2
+          ],
+          "decay": [
+            0.951229424500714,
+            0.951229424500714,
+            0.951229424500714,
+            0.49658530379140947,
+            0.522045776761016,
+            0.5488116360940264,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.8187307530779818,
+            0.8607079764250578,
+            0.9048374180359595
+          ],
+          "final_scores": [
+            0.09289349848639786,
+            0.08778435606964598,
+            0.06038077401615861,
+            0.03661346722290177,
+            0.03543181785633849,
+            0.04153603691141313,
+            0.044229062612175976,
+            0.04116589926760549,
+            0.04607859689454221,
+            0.04909570649675093,
+            0.05333332710273466,
+            0.05606778525667298,
+            0.05970298971787625,
+            0.05956586045342739,
+            0.058837459325931686,
+            0.06494682639222951
+          ],
+          "last_write": [
+            1,
+            2,
+            17,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "full_overlap": 2,
+          "last_written_overlap": 0
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": false,
+        "verbose_output": false
+      },
+      "query_write_count_delta": 0,
+      "snapshot_unchanged": true,
+      "generation_attempts": 1,
+      "owner": {
+        "host": "SAIRI-07",
+        "pid": 538067,
+        "gpu": "6"
+      },
+      "attempt_accounting": "started execution invocations; an interrupted invocation may not have completed generation",
+      "sample_id": "E02P-c3-01",
+      "arm": "original",
+      "origin": "reused_M3",
+      "actual_indices": [
+        0,
+        1
+      ],
+      "parsed": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": true,
+      "candidate_match_count": 1,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": false,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "sample_id": "E02P-c3-01",
+      "context_index": 3,
+      "query_id": 75,
+      "seed": 42,
+      "arm": "source",
+      "repeat": 0,
+      "question": "These are the events that have already occurred:\n\n...\n72. Kyra expressed his kindness by ensuring the narrator had wine when story-telling.\n73. Mr. Mell told Kyra to be silent in class.\n74. Kyra told Mr. Mell to sit down and mind his business.\n75. Mr. Mell accused Kyra of urging his juniors to insult him.\n76. Kyra claimed he did not think about Mr. Mell at all.\n\n\nBelow is a list of possible subsequent events:\n\n['Mr. Mell revealed that Kyra orchestrated a cruel scheme.', 'Mr. Mell alleged that Kyra undertook a malicious deed.', 'Mr. Mell declared that Kyra performed a sneaky maneuver.', 'Mr. Mell expressed that Kyra committed a mean action.', 'Mr. Mell claimed that Kyra engaged in a hurtful prank.', 'Mr. Mell asserted that Kyra executed a spiteful trick.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Mr. Mell expressed that Kyra committed a mean action."
+      ],
+      "prediction": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+      "native_full_selection": [
+        {
+          "policy": "full",
+          "random_seed": 17850107222654203249,
+          "n": 2,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "native_indices": [
+            0,
+            1
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.09765625,
+            0.09228515625,
+            0.0634765625,
+            0.07373046875,
+            0.06787109375,
+            0.07568359375,
+            0.07666015625,
+            0.06787109375,
+            0.072265625,
+            0.0732421875,
+            0.07568359375,
+            0.07568359375,
+            0.07666015625,
+            0.07275390625,
+            0.068359375,
+            0.07177734375
+          ],
+          "ages": [
+            1,
+            1,
+            1,
+            14,
+            13,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2
+          ],
+          "decay": [
+            0.951229424500714,
+            0.951229424500714,
+            0.951229424500714,
+            0.49658530379140947,
+            0.522045776761016,
+            0.5488116360940264,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.8187307530779818,
+            0.8607079764250578,
+            0.9048374180359595
+          ],
+          "final_scores": [
+            0.09289349848639786,
+            0.08778435606964598,
+            0.06038077401615861,
+            0.03661346722290177,
+            0.03543181785633849,
+            0.04153603691141313,
+            0.044229062612175976,
+            0.04116589926760549,
+            0.04607859689454221,
+            0.04909570649675093,
+            0.05333332710273466,
+            0.05606778525667298,
+            0.05970298971787625,
+            0.05956586045342739,
+            0.058837459325931686,
+            0.06494682639222951
+          ],
+          "last_write": [
+            1,
+            2,
+            17,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "full_overlap": 2,
+          "last_written_overlap": 0
+        }
+      ],
+      "actual_indices": [
+        0,
+        11
+      ],
+      "tensor_trace": [
+        {
+          "actual_indices": [
+            0,
+            11
+          ],
+          "native_full_indices": [
+            0,
+            1
+          ],
+          "actual_scores": [
+            0.09289349848639786,
+            0.05606778525667298
+          ],
+          "tensor_details": [
+            {
+              "slot_index": 0,
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "memory_sha256": "962dd22aa744bee5999e10ddc1ac03d84ed5eb29d0635375d82adb1fad2641a8",
+              "expected_memory_sha256": "962dd22aa744bee5999e10ddc1ac03d84ed5eb29d0635375d82adb1fad2641a8",
+              "key_sha256": "633b2ecd08e1599cd43be6fbb71606b92482840b2857f84ac5edc4ef2957740a",
+              "memory_norm": 296.1700744628906,
+              "key_norm": 92.44438934326172,
+              "created_step": 1,
+              "last_retrieved_step": 18
+            },
+            {
+              "slot_index": 11,
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "memory_sha256": "95db40c01e5637080284ba4fb0d9e2b68277c63938afeff8baecb5a2ee434232",
+              "expected_memory_sha256": "95db40c01e5637080284ba4fb0d9e2b68277c63938afeff8baecb5a2ee434232",
+              "key_sha256": "10c3184d00610f1040fce0b116d4819882ea2b5a20bf57a357b853a13e38075f",
+              "memory_norm": 363.87945556640625,
+              "key_norm": 78.6324691772461,
+              "created_step": 12,
+              "last_retrieved_step": 12
+            }
+          ],
+          "forced_source_selection": true
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": false,
+        "verbose_output": false
+      },
+      "rendered_prompt_sha256": "dcf6ef1e2fa63949091188d0820f5f2bbb1d10876a658699009bcfd321355bf3",
+      "snapshot_unchanged": true,
+      "query_write_count_delta": 0,
+      "latency_seconds": 0.5122489929199219,
+      "peak_cuda_memory": 9421056512,
+      "origin": "new_source_repeat0",
+      "parsed": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": true,
+      "candidate_match_count": 1,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": false,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "policy": "random",
+      "seed": 42,
+      "context_index": 3,
+      "query_id": 75,
+      "context_id": "eventqa-ec65b7cb50d7280b",
+      "question": "These are the events that have already occurred:\n\n...\n72. Kyra expressed his kindness by ensuring the narrator had wine when story-telling.\n73. Mr. Mell told Kyra to be silent in class.\n74. Kyra told Mr. Mell to sit down and mind his business.\n75. Mr. Mell accused Kyra of urging his juniors to insult him.\n76. Kyra claimed he did not think about Mr. Mell at all.\n\n\nBelow is a list of possible subsequent events:\n\n['Mr. Mell revealed that Kyra orchestrated a cruel scheme.', 'Mr. Mell alleged that Kyra undertook a malicious deed.', 'Mr. Mell declared that Kyra performed a sneaky maneuver.', 'Mr. Mell expressed that Kyra committed a mean action.', 'Mr. Mell claimed that Kyra engaged in a hurtful prank.', 'Mr. Mell asserted that Kyra executed a spiteful trick.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Mr. Mell expressed that Kyra committed a mean action."
+      ],
+      "prediction": "无效\nThe event that happens next is: Mr. Mell revealed that Kyra orchestrated a cruel scheme.",
+      "query_sha256": "03ee853393352bf644973d58098a0f7e7eac074d99bfd5693361020097fe2688",
+      "selection": [
+        {
+          "policy": "random",
+          "random_seed": 17850107222654203249,
+          "n": 2,
+          "selected_indices": [
+            3,
+            13
+          ],
+          "native_indices": [
+            0,
+            1
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.09765625,
+            0.09228515625,
+            0.0634765625,
+            0.07373046875,
+            0.06787109375,
+            0.07568359375,
+            0.07666015625,
+            0.06787109375,
+            0.072265625,
+            0.0732421875,
+            0.07568359375,
+            0.07568359375,
+            0.07666015625,
+            0.07275390625,
+            0.068359375,
+            0.07177734375
+          ],
+          "ages": [
+            1,
+            1,
+            1,
+            14,
+            13,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2
+          ],
+          "decay": [
+            0.951229424500714,
+            0.951229424500714,
+            0.951229424500714,
+            0.49658530379140947,
+            0.522045776761016,
+            0.5488116360940264,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.8187307530779818,
+            0.8607079764250578,
+            0.9048374180359595
+          ],
+          "final_scores": [
+            0.09289349848639786,
+            0.08778435606964598,
+            0.06038077401615861,
+            0.03661346722290177,
+            0.03543181785633849,
+            0.04153603691141313,
+            0.044229062612175976,
+            0.04116589926760549,
+            0.04607859689454221,
+            0.04909570649675093,
+            0.05333332710273466,
+            0.05606778525667298,
+            0.05970298971787625,
+            0.05956586045342739,
+            0.058837459325931686,
+            0.06494682639222951
+          ],
+          "last_write": [
+            1,
+            2,
+            17,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "full_overlap": 0,
+          "last_written_overlap": 0
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": true,
+        "verbose_output": false
+      },
+      "query_write_count_delta": 0,
+      "snapshot_unchanged": true,
+      "generation_attempts": 1,
+      "owner": {
+        "host": "SAIRI-07",
+        "pid": 538067,
+        "gpu": "6"
+      },
+      "attempt_accounting": "started execution invocations; an interrupted invocation may not have completed generation",
+      "sample_id": "E02P-c3-01",
+      "arm": "random",
+      "origin": "reused_M3",
+      "actual_indices": [
+        3,
+        13
+      ],
+      "parsed": "无效",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": false,
+      "candidate_match_count": 0,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": true,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "policy": "full",
+      "seed": 42,
+      "context_index": 4,
+      "query_id": 29,
+      "context_id": "eventqa-365235d948f3d1d5",
+      "question": "These are the events that have already occurred:\n\n...\n26. Ladonna expressed a desire to ask Edie Arkadyevitch a question.\n27. Ladonna expressed that he was no longer a district councilor.\n28. Edie Arkadyevitch mentioned that the Shtcherbatskys would be at the Zoological Gardens.\n29. Edie Arkadyevitch commented on Ladonna's energy and capabilities.\n30. Ladonna stayed at his elder half-brother Koznishev's house.\n\n\nBelow is a list of possible subsequent events:\n\n['Ladonna stumbled upon an intense debate between Sergey Ivanovitch and the renowned author.', 'Ladonna found herself engrossed in the heated argument between Sergey Ivanovitch and the art critic.', 'Ladonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.', 'Ladonna witnessed a lively exchange of ideas between Sergey Ivanovitch and the local historian.', 'Ladonna became interested in the philosophical discussion between Sergey Ivanovitch and the professor.', 'Ladonna became intrigued by the animated conversation between Sergey Ivanovitch and the cultural commentator.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Ladonna became interested in the philosophical discussion between Sergey Ivanovitch and the professor."
+      ],
+      "prediction": "by /usr/bin/dash\nLadonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.",
+      "query_sha256": "11489450e708ca49fd29172befa89c1e71091be386e72812409c60d81024da4c",
+      "selection": [
+        {
+          "policy": "full",
+          "random_seed": 9528552419411813945,
+          "n": 2,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "native_indices": [
+            1,
+            0
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.083984375,
+            0.0859375,
+            0.08056640625,
+            0.076171875,
+            0.058349609375,
+            0.05810546875,
+            0.060546875,
+            0.0625,
+            0.06298828125,
+            0.058349609375,
+            0.0576171875,
+            0.05908203125,
+            0.061767578125,
+            0.0595703125,
+            0.060791015625,
+            0.0546875
+          ],
+          "ages": [
+            1,
+            1,
+            15,
+            14,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "decay": [
+            0.951229424500714,
+            0.951229424500714,
+            0.4723665527410147,
+            0.49658530379140947,
+            0.5488116360940264,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.8187307530779818,
+            0.8607079764250578,
+            0.9048374180359595,
+            0.951229424500714
+          ],
+          "final_scores": [
+            0.07988840869830216,
+            0.08174627866803011,
+            0.03805687558704464,
+            0.03782583368723627,
+            0.03202294458654109,
+            0.03352393917738179,
+            0.036723536037288354,
+            0.03985175947636083,
+            0.0422223075872058,
+            0.04111827476630188,
+            0.04268386232443492,
+            0.04601313220294921,
+            0.05057101575408433,
+            0.05127264312688333,
+            0.05500598561790867,
+            0.052020359152382796
+          ],
+          "last_write": [
+            5,
+            2,
+            3,
+            4,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "full_overlap": 2,
+          "last_written_overlap": 0
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": true,
+        "verbose_output": false
+      },
+      "query_write_count_delta": 0,
+      "snapshot_unchanged": true,
+      "generation_attempts": 1,
+      "owner": {
+        "host": "SAIRI-07",
+        "pid": 1348372,
+        "gpu": "7"
+      },
+      "attempt_accounting": "started execution invocations; an interrupted invocation may not have completed generation",
+      "sample_id": "E02P-c4-02",
+      "arm": "original",
+      "origin": "reused_M3",
+      "actual_indices": [
+        0,
+        1
+      ],
+      "parsed": "by /usr/bin/dash",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": false,
+      "candidate_match_count": 0,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": true,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "sample_id": "E02P-c4-02",
+      "context_index": 4,
+      "query_id": 29,
+      "seed": 42,
+      "arm": "source",
+      "repeat": 0,
+      "question": "These are the events that have already occurred:\n\n...\n26. Ladonna expressed a desire to ask Edie Arkadyevitch a question.\n27. Ladonna expressed that he was no longer a district councilor.\n28. Edie Arkadyevitch mentioned that the Shtcherbatskys would be at the Zoological Gardens.\n29. Edie Arkadyevitch commented on Ladonna's energy and capabilities.\n30. Ladonna stayed at his elder half-brother Koznishev's house.\n\n\nBelow is a list of possible subsequent events:\n\n['Ladonna stumbled upon an intense debate between Sergey Ivanovitch and the renowned author.', 'Ladonna found herself engrossed in the heated argument between Sergey Ivanovitch and the art critic.', 'Ladonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.', 'Ladonna witnessed a lively exchange of ideas between Sergey Ivanovitch and the local historian.', 'Ladonna became interested in the philosophical discussion between Sergey Ivanovitch and the professor.', 'Ladonna became intrigued by the animated conversation between Sergey Ivanovitch and the cultural commentator.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Ladonna became interested in the philosophical discussion between Sergey Ivanovitch and the professor."
+      ],
+      "prediction": "多选题\nLadonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.",
+      "native_full_selection": [
+        {
+          "policy": "full",
+          "random_seed": 9528552419411813945,
+          "n": 2,
+          "selected_indices": [
+            0,
+            1
+          ],
+          "native_indices": [
+            1,
+            0
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.083984375,
+            0.0859375,
+            0.08056640625,
+            0.076171875,
+            0.058349609375,
+            0.05810546875,
+            0.060546875,
+            0.0625,
+            0.06298828125,
+            0.058349609375,
+            0.0576171875,
+            0.05908203125,
+            0.061767578125,
+            0.0595703125,
+            0.060791015625,
+            0.0546875
+          ],
+          "ages": [
+            1,
+            1,
+            15,
+            14,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "decay": [
+            0.951229424500714,
+            0.951229424500714,
+            0.4723665527410147,
+            0.49658530379140947,
+            0.5488116360940264,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.8187307530779818,
+            0.8607079764250578,
+            0.9048374180359595,
+            0.951229424500714
+          ],
+          "final_scores": [
+            0.07988840869830216,
+            0.08174627866803011,
+            0.03805687558704464,
+            0.03782583368723627,
+            0.03202294458654109,
+            0.03352393917738179,
+            0.036723536037288354,
+            0.03985175947636083,
+            0.0422223075872058,
+            0.04111827476630188,
+            0.04268386232443492,
+            0.04601313220294921,
+            0.05057101575408433,
+            0.05127264312688333,
+            0.05500598561790867,
+            0.052020359152382796
+          ],
+          "last_write": [
+            5,
+            2,
+            3,
+            4,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "full_overlap": 2,
+          "last_written_overlap": 0
+        }
+      ],
+      "actual_indices": [
+        0,
+        3
+      ],
+      "tensor_trace": [
+        {
+          "actual_indices": [
+            0,
+            3
+          ],
+          "native_full_indices": [
+            0,
+            1
+          ],
+          "actual_scores": [
+            0.07988840869830216,
+            0.03782583368723627
+          ],
+          "tensor_details": [
+            {
+              "slot_index": 0,
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "memory_sha256": "6d105cf8b60b9582815909907c100cbcd4b7a8d52a0fb877f48d1df9119fda65",
+              "expected_memory_sha256": "6d105cf8b60b9582815909907c100cbcd4b7a8d52a0fb877f48d1df9119fda65",
+              "key_sha256": "ea9f5e9a309949b798644fd5c94eb02dc83dd53671813e3a43fe20e05dc37847",
+              "memory_norm": 360.3432312011719,
+              "key_norm": 78.70980834960938,
+              "created_step": 5,
+              "last_retrieved_step": 18
+            },
+            {
+              "slot_index": 3,
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "memory_sha256": "c5296978caa7517cdd8e7dc2771c5ea7f0b85e134214481b1daa8e7788ad1091",
+              "expected_memory_sha256": "c5296978caa7517cdd8e7dc2771c5ea7f0b85e134214481b1daa8e7788ad1091",
+              "key_sha256": "b589b44946f78f299500735c708bd16230ab702ee8d800d8aa7b10cf464f9402",
+              "memory_norm": 365.39752197265625,
+              "key_norm": 78.1608657836914,
+              "created_step": 4,
+              "last_retrieved_step": 4
+            }
+          ],
+          "forced_source_selection": true
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": true,
+        "verbose_output": false
+      },
+      "rendered_prompt_sha256": "6ea5a259717710c887c026334cdfd05654360b24e7af65773d9e4fd528d8113d",
+      "snapshot_unchanged": true,
+      "query_write_count_delta": 0,
+      "latency_seconds": 0.8229389190673828,
+      "peak_cuda_memory": 9466785792,
+      "origin": "new_source_repeat0",
+      "parsed": "多选题",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": false,
+      "candidate_match_count": 0,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": true,
+      "category": "gold_absent",
+      "candidate_errors": []
+    },
+    {
+      "policy": "random",
+      "seed": 42,
+      "context_index": 4,
+      "query_id": 29,
+      "context_id": "eventqa-365235d948f3d1d5",
+      "question": "These are the events that have already occurred:\n\n...\n26. Ladonna expressed a desire to ask Edie Arkadyevitch a question.\n27. Ladonna expressed that he was no longer a district councilor.\n28. Edie Arkadyevitch mentioned that the Shtcherbatskys would be at the Zoological Gardens.\n29. Edie Arkadyevitch commented on Ladonna's energy and capabilities.\n30. Ladonna stayed at his elder half-brother Koznishev's house.\n\n\nBelow is a list of possible subsequent events:\n\n['Ladonna stumbled upon an intense debate between Sergey Ivanovitch and the renowned author.', 'Ladonna found herself engrossed in the heated argument between Sergey Ivanovitch and the art critic.', 'Ladonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.', 'Ladonna witnessed a lively exchange of ideas between Sergey Ivanovitch and the local historian.', 'Ladonna became interested in the philosophical discussion between Sergey Ivanovitch and the professor.', 'Ladonna became intrigued by the animated conversation between Sergey Ivanovitch and the cultural commentator.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+      "gold_answers": [
+        "Ladonna became interested in the philosophical discussion between Sergey Ivanovitch and the professor."
+      ],
+      "prediction": "拉布拉多\nLadonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.",
+      "query_sha256": "11489450e708ca49fd29172befa89c1e71091be386e72812409c60d81024da4c",
+      "selection": [
+        {
+          "policy": "random",
+          "random_seed": 9528552419411813945,
+          "n": 2,
+          "selected_indices": [
+            2,
+            6
+          ],
+          "native_indices": [
+            1,
+            0
+          ],
+          "latent_count": 16,
+          "cosine": [
+            0.083984375,
+            0.0859375,
+            0.08056640625,
+            0.076171875,
+            0.058349609375,
+            0.05810546875,
+            0.060546875,
+            0.0625,
+            0.06298828125,
+            0.058349609375,
+            0.0576171875,
+            0.05908203125,
+            0.061767578125,
+            0.0595703125,
+            0.060791015625,
+            0.0546875
+          ],
+          "ages": [
+            1,
+            1,
+            15,
+            14,
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "decay": [
+            0.951229424500714,
+            0.951229424500714,
+            0.4723665527410147,
+            0.49658530379140947,
+            0.5488116360940264,
+            0.5769498103804866,
+            0.6065306597126334,
+            0.6376281516217733,
+            0.6703200460356393,
+            0.7046880897187134,
+            0.7408182206817179,
+            0.7788007830714049,
+            0.8187307530779818,
+            0.8607079764250578,
+            0.9048374180359595,
+            0.951229424500714
+          ],
+          "final_scores": [
+            0.07988840869830216,
+            0.08174627866803011,
+            0.03805687558704464,
+            0.03782583368723627,
+            0.03202294458654109,
+            0.03352393917738179,
+            0.036723536037288354,
+            0.03985175947636083,
+            0.0422223075872058,
+            0.04111827476630188,
+            0.04268386232443492,
+            0.04601313220294921,
+            0.05057101575408433,
+            0.05127264312688333,
+            0.05500598561790867,
+            0.052020359152382796
+          ],
+          "last_write": [
+            5,
+            2,
+            3,
+            4,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "full_overlap": 0,
+          "last_written_overlap": 0
+        }
+      ],
+      "format_flags": {
+        "empty_output": false,
+        "contains_json_brace": false,
+        "contains_answer_prefix": false,
+        "multiline_output": true,
+        "verbose_output": false
+      },
+      "query_write_count_delta": 0,
+      "snapshot_unchanged": true,
+      "generation_attempts": 1,
+      "owner": {
+        "host": "SAIRI-07",
+        "pid": 1348372,
+        "gpu": "7"
+      },
+      "attempt_accounting": "started execution invocations; an interrupted invocation may not have completed generation",
+      "sample_id": "E02P-c4-02",
+      "arm": "random",
+      "origin": "reused_M3",
+      "actual_indices": [
+        2,
+        6
+      ],
+      "parsed": "拉布拉多",
+      "parser_none": false,
+      "parser_empty": false,
+      "parsed_nonempty": true,
+      "candidate_valid": false,
+      "candidate_match_count": 0,
+      "strict_candidate_correct": false,
+      "official_em": false,
+      "substring_only_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false,
+      "heuristic_flag": true,
+      "category": "gold_absent",
+      "candidate_errors": []
+    }
+  ],
+  "summary": {
+    "original": {
+      "question_count": 6,
+      "counts": {
+        "parser_none": 0,
+        "parser_empty": 0,
+        "parsed_nonempty": 6,
+        "candidate_valid": 5,
+        "strict_candidate_correct": 1,
+        "substring_only_correct": 0,
+        "heuristic_flag": 1
+      },
+      "categories": {
+        "correct_valid": 1,
+        "gold_mentioned_wrong_valid": 0,
+        "gold_mentioned_no_valid": 0,
+        "gold_absent": 5
+      },
+      "em": {
+        "numerator": 1.0,
+        "denominator": 6,
+        "value": 0.16666666666666666
+      },
+      "raw_recall": {
+        "numerator": 1,
+        "denominator": 6,
+        "value": 0.16666666666666666
+      },
+      "parsed_nonempty_rate": {
+        "numerator": 6,
+        "denominator": 6,
+        "value": 1.0
+      },
+      "candidate_valid_rate": {
+        "numerator": 5,
+        "denominator": 6,
+        "value": 0.8333333333333334
+      },
+      "strict_candidate_accuracy": {
+        "numerator": 1,
+        "denominator": 6,
+        "value": 0.16666666666666666
+      },
+      "substring_only_accuracy": {
+        "numerator": 0,
+        "denominator": 6,
+        "value": 0.0
+      },
+      "heuristic_flag_rate": {
+        "numerator": 1,
+        "denominator": 6,
+        "value": 0.16666666666666666
+      },
+      "parsed_conditional_em": {
+        "numerator": 1,
+        "denominator": 6,
+        "value": 0.16666666666666666
+      },
+      "parsed_conditional_strict_accuracy": {
+        "numerator": 1,
+        "denominator": 6,
+        "value": 0.16666666666666666
+      },
+      "candidate_conditional_em": {
+        "numerator": 1,
+        "denominator": 5,
+        "value": 0.2
+      },
+      "candidate_conditional_strict_accuracy": {
+        "numerator": 1,
+        "denominator": 5,
+        "value": 0.2
+      }
+    },
+    "source": {
+      "question_count": 6,
+      "counts": {
+        "parser_none": 0,
+        "parser_empty": 0,
+        "parsed_nonempty": 6,
+        "candidate_valid": 2,
+        "strict_candidate_correct": 0,
+        "substring_only_correct": 0,
+        "heuristic_flag": 4
+      },
+      "categories": {
+        "correct_valid": 0,
+        "gold_mentioned_wrong_valid": 0,
+        "gold_mentioned_no_valid": 1,
+        "gold_absent": 5
+      },
+      "em": {
+        "numerator": 0.0,
+        "denominator": 6,
+        "value": 0.0
+      },
+      "raw_recall": {
+        "numerator": 1,
+        "denominator": 6,
+        "value": 0.16666666666666666
+      },
+      "parsed_nonempty_rate": {
+        "numerator": 6,
+        "denominator": 6,
+        "value": 1.0
+      },
+      "candidate_valid_rate": {
+        "numerator": 2,
+        "denominator": 6,
+        "value": 0.3333333333333333
+      },
+      "strict_candidate_accuracy": {
+        "numerator": 0,
+        "denominator": 6,
+        "value": 0.0
+      },
+      "substring_only_accuracy": {
+        "numerator": 0,
+        "denominator": 6,
+        "value": 0.0
+      },
+      "heuristic_flag_rate": {
+        "numerator": 4,
+        "denominator": 6,
+        "value": 0.6666666666666666
+      },
+      "parsed_conditional_em": {
+        "numerator": 0,
+        "denominator": 6,
+        "value": 0.0
+      },
+      "parsed_conditional_strict_accuracy": {
+        "numerator": 0,
+        "denominator": 6,
+        "value": 0.0
+      },
+      "candidate_conditional_em": {
+        "numerator": 0,
+        "denominator": 2,
+        "value": 0.0
+      },
+      "candidate_conditional_strict_accuracy": {
+        "numerator": 0,
+        "denominator": 2,
+        "value": 0.0
+      }
+    },
+    "random": {
+      "question_count": 6,
+      "counts": {
+        "parser_none": 0,
+        "parser_empty": 0,
+        "parsed_nonempty": 6,
+        "candidate_valid": 1,
+        "strict_candidate_correct": 0,
+        "substring_only_correct": 0,
+        "heuristic_flag": 4
+      },
+      "categories": {
+        "correct_valid": 0,
+        "gold_mentioned_wrong_valid": 0,
+        "gold_mentioned_no_valid": 1,
+        "gold_absent": 5
+      },
+      "em": {
+        "numerator": 0.0,
+        "denominator": 6,
+        "value": 0.0
+      },
+      "raw_recall": {
+        "numerator": 1,
+        "denominator": 6,
+        "value": 0.16666666666666666
+      },
+      "parsed_nonempty_rate": {
+        "numerator": 6,
+        "denominator": 6,
+        "value": 1.0
+      },
+      "candidate_valid_rate": {
+        "numerator": 1,
+        "denominator": 6,
+        "value": 0.16666666666666666
+      },
+      "strict_candidate_accuracy": {
+        "numerator": 0,
+        "denominator": 6,
+        "value": 0.0
+      },
+      "substring_only_accuracy": {
+        "numerator": 0,
+        "denominator": 6,
+        "value": 0.0
+      },
+      "heuristic_flag_rate": {
+        "numerator": 4,
+        "denominator": 6,
+        "value": 0.6666666666666666
+      },
+      "parsed_conditional_em": {
+        "numerator": 0,
+        "denominator": 6,
+        "value": 0.0
+      },
+      "parsed_conditional_strict_accuracy": {
+        "numerator": 0,
+        "denominator": 6,
+        "value": 0.0
+      },
+      "candidate_conditional_em": {
+        "numerator": 0,
+        "denominator": 1,
+        "value": 0.0
+      },
+      "candidate_conditional_strict_accuracy": {
+        "numerator": 0,
+        "denominator": 1,
+        "value": 0.0
+      }
+    }
+  },
+  "paired_source_original": {
+    "denominator": 6,
+    "strict": {
+      "source_0_other_0": 5,
+      "source_0_other_1": 1,
+      "source_1_other_0": 0,
+      "source_1_other_1": 0
+    },
+    "parser_nonempty": {
+      "source_0_other_0": 0,
+      "source_0_other_1": 0,
+      "source_1_other_0": 0,
+      "source_1_other_1": 6
+    },
+    "candidate_valid": {
+      "source_0_other_0": 1,
+      "source_0_other_1": 3,
+      "source_1_other_0": 0,
+      "source_1_other_1": 2
+    },
+    "raw_gold_any": {
+      "source_0_other_0": 5,
+      "source_0_other_1": 0,
+      "source_1_other_0": 0,
+      "source_1_other_1": 1
+    },
+    "raw_recall_positive": {
+      "source_0_other_0": 5,
+      "source_0_other_1": 0,
+      "source_1_other_0": 0,
+      "source_1_other_1": 1
+    },
+    "other_to_source_CWI": {
+      "C->C": 0,
+      "C->W": 0,
+      "C->I": 1,
+      "W->C": 0,
+      "W->W": 2,
+      "W->I": 2,
+      "I->C": 0,
+      "I->W": 0,
+      "I->I": 1
+    },
+    "text_changed": 4,
+    "context_deltas": {
+      "0": 0.0,
+      "1": 0.0,
+      "2": -1.0,
+      "3": 0.0,
+      "4": 0.0
+    },
+    "context_equal_mean": -0.2,
+    "leave_one_context_out": {
+      "0": -0.25,
+      "1": -0.25,
+      "2": 0.0,
+      "3": -0.25,
+      "4": -0.25
+    },
+    "significance": "NOT_TESTED",
+    "semantic_relatedness_causality": "NOT_ESTABLISHED"
+  },
+  "paired_source_random_auxiliary": {
+    "denominator": 6,
+    "strict": {
+      "source_0_other_0": 6,
+      "source_0_other_1": 0,
+      "source_1_other_0": 0,
+      "source_1_other_1": 0
+    },
+    "parser_nonempty": {
+      "source_0_other_0": 0,
+      "source_0_other_1": 0,
+      "source_1_other_0": 0,
+      "source_1_other_1": 6
+    },
+    "candidate_valid": {
+      "source_0_other_0": 4,
+      "source_0_other_1": 0,
+      "source_1_other_0": 1,
+      "source_1_other_1": 1
+    },
+    "raw_gold_any": {
+      "source_0_other_0": 5,
+      "source_0_other_1": 0,
+      "source_1_other_0": 0,
+      "source_1_other_1": 1
+    },
+    "raw_recall_positive": {
+      "source_0_other_0": 5,
+      "source_0_other_1": 0,
+      "source_1_other_0": 0,
+      "source_1_other_1": 1
+    },
+    "other_to_source_CWI": {
+      "C->C": 0,
+      "C->W": 0,
+      "C->I": 0,
+      "W->C": 0,
+      "W->W": 1,
+      "W->I": 0,
+      "I->C": 0,
+      "I->W": 1,
+      "I->I": 4
+    },
+    "text_changed": 6,
+    "context_deltas": {
+      "0": 0.0,
+      "1": 0.0,
+      "2": 0.0,
+      "3": 0.0,
+      "4": 0.0
+    },
+    "context_equal_mean": 0.0,
+    "leave_one_context_out": {
+      "0": 0.0,
+      "1": 0.0,
+      "2": 0.0,
+      "3": 0.0,
+      "4": 0.0
+    },
+    "significance": "NOT_TESTED",
+    "semantic_relatedness_causality": "NOT_ESTABLISHED"
+  },
+  "primary_answer_count": 18,
+  "new_generation_count": 18,
+  "source_repeat_stability": true,
+  "original_replay_matches": 6,
+  "coverage_all10": [
+    {
+      "sample_id": "E02P-c0-01",
+      "included": true,
+      "reason": "AI source supported"
+    },
+    {
+      "sample_id": "E02P-c0-02",
+      "included": true,
+      "reason": "AI source supported"
+    },
+    {
+      "sample_id": "E02P-c1-01",
+      "included": false,
+      "reason": "AI source conflict/ambiguous/not_locatable; not excluded by model output"
+    },
+    {
+      "sample_id": "E02P-c1-02",
+      "included": true,
+      "reason": "AI source supported"
+    },
+    {
+      "sample_id": "E02P-c2-01",
+      "included": false,
+      "reason": "AI source conflict/ambiguous/not_locatable; not excluded by model output"
+    },
+    {
+      "sample_id": "E02P-c2-02",
+      "included": true,
+      "reason": "AI source supported"
+    },
+    {
+      "sample_id": "E02P-c3-01",
+      "included": true,
+      "reason": "AI source supported"
+    },
+    {
+      "sample_id": "E02P-c3-02",
+      "included": false,
+      "reason": "AI source conflict/ambiguous/not_locatable; not excluded by model output"
+    },
+    {
+      "sample_id": "E02P-c4-01",
+      "included": false,
+      "reason": "AI source conflict/ambiguous/not_locatable; not excluded by model output"
+    },
+    {
+      "sample_id": "E02P-c4-02",
+      "included": true,
+      "reason": "AI source supported"
+    }
+  ],
+  "MEOI": null,
+  "formal_E02_pass": false,
+  "semantic_negative": false,
+  "efficacy_gate": "UNDETERMINED",
+  "claim_boundary": "latent identity/value sensitivity only; source semantics and fact retention unproven",
+  "scorer_sha256": "d77976be409298970614d477a9d8003850caddb0510e56a7e821a037d98493a2",
+  "contract_sha256": "248b2eeeb0886c202a868cb482cb7c003e08d1ce92374e6789918153d16c8d0d",
+  "next_route": "STOP; review pilot before any expansion or algorithm change"
+}

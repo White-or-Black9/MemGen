@@ -1,0 +1,18 @@
+{
+  "status": "NOT_RELEASED",
+  "rater_A": null,
+  "rater_B": null,
+  "adjudicator": null,
+  "training_and_budget_approved": false,
+  "prior_exposure_declarations": null,
+  "approved_thresholds": {
+    "coverage": null,
+    "status_agreement": null,
+    "span_agreement": null,
+    "fact_agreement": null,
+    "related_unrelated_candidate_availability": null
+  },
+  "approval_record": null,
+  "annotation_status": "NOT_STARTED",
+  "human_annotations": 0
+}

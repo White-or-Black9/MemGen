@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "experiment_id": "M6-E01V",
+  "compared_runs": ["run-20261008-02", "run-20261008-03"],
+  "identical_artifact_sha256": {
+    "queries.npz": "5831f42b8bdc772ccc642a60c74dd149c9abd4c727bb8198c5f89347ea4533fa",
+    "query_metrics.jsonl": "6cc4cf7709b01a65e8b27a365a337b37c5c3d14865323592bfc6c4b580d8c44b",
+    "geometry.json": "3d4834b2a4574c0ff5464f436b62d5844599200328823b66f12d451876fc1bcc",
+    "summary.json": "9e9ae70a06895e18bd57accb7ba55e6c8e6a13eea42dec344ea54b8a825321d0",
+    "interventions.jsonl": "bf376f90489909095426b7e89306ec20cf481156474dc212606db32378bce008"
+  },
+  "scientific_reproduction_status": "COMPLETE",
+  "numerical_reproduction_gate": true,
+  "full_selection_reproduction_gate": true,
+  "original_gpu_bitwise_query_matches": 670,
+  "paired_seed_query_records": 2500,
+  "unique_prompts": 500,
+  "failed_attempts_preserved": ["run-20261008-01"],
+  "new_unit_tests_passed": 13,
+  "e01_regression_tests_passed": 16,
+  "m4_regression_tests_passed": 31,
+  "m3_m1_regression_tests_passed": 25,
+  "m5_validator": "PASS",
+  "model_forward_calls": 0,
+  "gpu_used": false,
+  "human_annotations": 0,
+  "interpretation": "PASS is integrity/repeatability and the predefined approximate reproduction gates; not semantic validity or proof of answer effects."
+}

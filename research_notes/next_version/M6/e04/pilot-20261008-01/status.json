@@ -1,0 +1,9 @@
+{
+  "status": "COMPLETE_EXPLORATORY_CONTENT_PILOT",
+  "pid": 2542702,
+  "gpu": "5",
+  "completed_generations": 18,
+  "elapsed_seconds": 39.142830166998465,
+  "finished_at": "2026-10-08T11:12:45.523930+00:00",
+  "scored_at": "2026-10-08T11:12:50.531112+00:00"
+}

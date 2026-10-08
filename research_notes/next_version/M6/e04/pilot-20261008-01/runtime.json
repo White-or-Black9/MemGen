@@ -1,0 +1,48 @@
+{
+  "argv": [
+    "research_notes/next_version/M6/e04/run_content.py",
+    "worker",
+    "--output",
+    "research_notes/next_version/M6/e04/pilot-20261008-01",
+    "--gpu",
+    "5"
+  ],
+  "git_commit": "6784a26e65290e91be2ad8a965cf108cb19c7b22",
+  "git_dirty": true,
+  "git_status": "?? research_notes/next_version/M6/",
+  "python_version": "3.10.20",
+  "python_executable": "/home/baishilong/miniconda3/envs/memgen/bin/python",
+  "torch_version": "2.12.0+cu126",
+  "transformers_version": "4.55.4",
+  "cuda_version": "12.6",
+  "gpu": {
+    "logical_device_id": 0,
+    "cuda_visible_devices": "5",
+    "name": "NVIDIA RTX A6000"
+  },
+  "dtype": "torch.bfloat16",
+  "checkpoint_path": "/home/baishilong/.cache/huggingface/hub/models--Kana-s--MemGen/snapshots/269d9b1741130b94fffa410cdaa3d4bc74081a7f/Qwen2.5-1.5B-Instruct/triviaqa/weaver-sft/pn=8_pl=8_in=0_il=8/model",
+  "checkpoint_snapshot_hash": "269d9b1741130b94fffa410cdaa3d4bc74081a7f",
+  "tokenizer_path": "/home/baishilong/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "dataset_path": "/mnt/18T/baishilong/datasets/MemoryAgentBench/data/Accurate_Retrieval-00000-of-00001.parquet",
+  "data_config_path": "/mnt/18T/baishilong/MemGen/configs/data_conf/Accurate_Retrieval/EventQA/Eventqa_64k.yaml",
+  "seed": 42,
+  "deterministic_state": {
+    "deterministic_algorithms_enabled": false,
+    "cudnn_deterministic": true,
+    "cudnn_benchmark": false
+  },
+  "process_layout": {
+    "mode": "all_context",
+    "requested_contexts": 5,
+    "context_index": null,
+    "selected_context_indices": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "reseed_per_context": true
+  }
+}

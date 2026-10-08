@@ -1,0 +1,108 @@
+{
+  "schema": "M6-E02-PREP/v1",
+  "status": "PREPARATION_COMPLETE",
+  "annotation_status": "NOT_STARTED",
+  "human_annotations": 0,
+  "new_model_runs": 0,
+  "gpu_used": false,
+  "parent_contract_sha256": "a548306d4131e4df0cba1340d3272a4882feae1d9c993c881e281f4551e433c9",
+  "parent_manifest_sha256": "3de9d00983fb3fef6b99cecb5bf0911f3a0e3ede575482b253c8ce02cd2c7ade",
+  "parent_blind50_sha256": "7041c5159d7a16aaa7b603d1b19f427b3931a2bcb6fff4266658b5b0b1560433",
+  "dataset_sha256": "56c3cd80fb6731a3e53cd1a6be3148f54df60ff2d290ee50e28f8acebf9655c1",
+  "parent_preserved": true,
+  "sample_rule": "first two of frozen ten per context under original M4 SHA order",
+  "sample_roster": [
+    {
+      "sample_id": "E02P-c0-01",
+      "context_index": 0,
+      "query_id": 16
+    },
+    {
+      "sample_id": "E02P-c0-02",
+      "context_index": 0,
+      "query_id": 79
+    },
+    {
+      "sample_id": "E02P-c1-01",
+      "context_index": 1,
+      "query_id": 44
+    },
+    {
+      "sample_id": "E02P-c1-02",
+      "context_index": 1,
+      "query_id": 87
+    },
+    {
+      "sample_id": "E02P-c2-01",
+      "context_index": 2,
+      "query_id": 19
+    },
+    {
+      "sample_id": "E02P-c2-02",
+      "context_index": 2,
+      "query_id": 45
+    },
+    {
+      "sample_id": "E02P-c3-01",
+      "context_index": 3,
+      "query_id": 75
+    },
+    {
+      "sample_id": "E02P-c3-02",
+      "context_index": 3,
+      "query_id": 3
+    },
+    {
+      "sample_id": "E02P-c4-01",
+      "context_index": 4,
+      "query_id": 80
+    },
+    {
+      "sample_id": "E02P-c4-02",
+      "context_index": 4,
+      "query_id": 29
+    }
+  ],
+  "sample_count": 10,
+  "contexts": 5,
+  "independent_rater_packets": 2,
+  "output_sha256": {
+    "coordinator_only/adjudication_blank.jsonl": "c4a1115091d72901d6f56e4a0b2b969edb66d9e4307ca985482d596f82de6739",
+    "coordinator_only/chunk_offsets.jsonl": "ee294ff4bdc11da820007f936d6465e1493f7c1097f427ef66bb820c80a74752",
+    "coordinator_only/phase2_gold_review_blank.jsonl": "f6b8bd56e3112be938705bf8eb03fa7346b83d2174046276437203e30d617a48",
+    "coordinator_only/release_gate.json": "0bfd1047285fb1d18d72b30d217ec33ce0e9334507f8018169ab4ec9bb74b7bb",
+    "coordinator_only/roster_and_gold.jsonl": "afbfaeca946fc872377f214dad72298798f956f6c2e80cb99648c5001d8b9870",
+    "coordinator_only/slot_sources.jsonl": "f00d77461dc674fe25c6a38aabdeafc627cbed2a27b2893e2bda53be6770c18c",
+    "rater_A/README.md": "d062fe98e804c4fe150955593d877a7cae2cca68674c16b38997e89f17d4e5c4",
+    "rater_A/annotations_blank.jsonl": "64d9d621f4b9b6f1dd0d63054c1fb2d1dae042d3037e6c7e52cc78c3b9410a77",
+    "rater_A/contexts/c0.txt": "aea0f2d603e1c8a3afbccc92a6ea3116692155bc3f48aa8ee28144ce8f010c81",
+    "rater_A/contexts/c1.txt": "7e4f8ba209e49061bbaa68059121722b537bdf4024dba63c033fe39d895a6387",
+    "rater_A/contexts/c2.txt": "153a2cce98f93cb34447b24bf0423bb283438d7082b670b8cfb2ea78328a4180",
+    "rater_A/contexts/c3.txt": "ec65b7cb50d7280b85da1116991a736e46f1181e2cf3dfcbf83cdf1f11a03974",
+    "rater_A/contexts/c4.txt": "365235d948f3d1d5b6404e2f3b4943fdeb0e61e5afef2fe04d577dcd72532cd9",
+    "rater_A/questions.jsonl": "490e3d67ef0018489d3b0c906548a040165c16cb2745fc584f9b20879847283e",
+    "rater_B/README.md": "d062fe98e804c4fe150955593d877a7cae2cca68674c16b38997e89f17d4e5c4",
+    "rater_B/annotations_blank.jsonl": "64d9d621f4b9b6f1dd0d63054c1fb2d1dae042d3037e6c7e52cc78c3b9410a77",
+    "rater_B/contexts/c0.txt": "aea0f2d603e1c8a3afbccc92a6ea3116692155bc3f48aa8ee28144ce8f010c81",
+    "rater_B/contexts/c1.txt": "7e4f8ba209e49061bbaa68059121722b537bdf4024dba63c033fe39d895a6387",
+    "rater_B/contexts/c2.txt": "153a2cce98f93cb34447b24bf0423bb283438d7082b670b8cfb2ea78328a4180",
+    "rater_B/contexts/c3.txt": "ec65b7cb50d7280b85da1116991a736e46f1181e2cf3dfcbf83cdf1f11a03974",
+    "rater_B/contexts/c4.txt": "365235d948f3d1d5b6404e2f3b4943fdeb0e61e5afef2fe04d577dcd72532cd9",
+    "rater_B/questions.jsonl": "490e3d67ef0018489d3b0c906548a040165c16cb2745fc584f9b20879847283e"
+  },
+  "analyzer_sha256": "9a990ded8e5cdf6e0b810eff80244f4907d0be7bcc1d2f812b2cd2d1d80872dd",
+  "protocol_sha256": "a8e721acde80c8e5f7dbc55f8bf3ca042201da30daf649cf6ede7b9e004bf877",
+  "guide_sha256": "d062fe98e804c4fe150955593d877a7cae2cca68674c16b38997e89f17d4e5c4",
+  "elapsed_seconds": 4.248841632997937,
+  "max_rss_kib": 314272,
+  "paper_role": "reference_only/reproducibility",
+  "section_id": "source_evidence",
+  "item_id": "E02",
+  "claim_links": [
+    "C02",
+    "R03",
+    "R04",
+    "R07"
+  ],
+  "next_route": "Stop; await personnel, training/budget and threshold approvals."
+}

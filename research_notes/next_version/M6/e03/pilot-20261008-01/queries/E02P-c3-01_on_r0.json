@@ -1,0 +1,2158 @@
+{
+  "record": {
+    "sample_id": "E02P-c3-01",
+    "context_index": 3,
+    "query_id": 75,
+    "arm": "on",
+    "repeat": 0,
+    "seed": 42,
+    "policy": "on",
+    "question": "These are the events that have already occurred:\n\n...\n72. Kyra expressed his kindness by ensuring the narrator had wine when story-telling.\n73. Mr. Mell told Kyra to be silent in class.\n74. Kyra told Mr. Mell to sit down and mind his business.\n75. Mr. Mell accused Kyra of urging his juniors to insult him.\n76. Kyra claimed he did not think about Mr. Mell at all.\n\n\nBelow is a list of possible subsequent events:\n\n['Mr. Mell revealed that Kyra orchestrated a cruel scheme.', 'Mr. Mell alleged that Kyra undertook a malicious deed.', 'Mr. Mell declared that Kyra performed a sneaky maneuver.', 'Mr. Mell expressed that Kyra committed a mean action.', 'Mr. Mell claimed that Kyra engaged in a hurtful prank.', 'Mr. Mell asserted that Kyra executed a spiteful trick.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+    "gold_answers": [
+      "Mr. Mell expressed that Kyra committed a mean action."
+    ],
+    "prediction": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+    "selection": [
+      {
+        "policy": "full",
+        "random_seed": 17850107222654203249,
+        "n": 2,
+        "selected_indices": [
+          0,
+          1
+        ],
+        "native_indices": [
+          0,
+          1
+        ],
+        "latent_count": 16,
+        "cosine": [
+          0.09765625,
+          0.09228515625,
+          0.0634765625,
+          0.07373046875,
+          0.06787109375,
+          0.07568359375,
+          0.07666015625,
+          0.06787109375,
+          0.072265625,
+          0.0732421875,
+          0.07568359375,
+          0.07568359375,
+          0.07666015625,
+          0.07275390625,
+          0.068359375,
+          0.07177734375
+        ],
+        "ages": [
+          1,
+          1,
+          1,
+          14,
+          13,
+          12,
+          11,
+          10,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2
+        ],
+        "decay": [
+          0.951229424500714,
+          0.951229424500714,
+          0.951229424500714,
+          0.49658530379140947,
+          0.522045776761016,
+          0.5488116360940264,
+          0.5769498103804866,
+          0.6065306597126334,
+          0.6376281516217733,
+          0.6703200460356393,
+          0.7046880897187134,
+          0.7408182206817179,
+          0.7788007830714049,
+          0.8187307530779818,
+          0.8607079764250578,
+          0.9048374180359595
+        ],
+        "final_scores": [
+          0.09289349848639786,
+          0.08778435606964598,
+          0.06038077401615861,
+          0.03661346722290177,
+          0.03543181785633849,
+          0.04153603691141313,
+          0.044229062612175976,
+          0.04116589926760549,
+          0.04607859689454221,
+          0.04909570649675093,
+          0.05333332710273466,
+          0.05606778525667298,
+          0.05970298971787625,
+          0.05956586045342739,
+          0.058837459325931686,
+          0.06494682639222951
+        ],
+        "last_write": [
+          1,
+          2,
+          17,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16
+        ],
+        "full_overlap": 2,
+        "last_written_overlap": 0
+      }
+    ],
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "rendered_prompt_sha256": "dcf6ef1e2fa63949091188d0820f5f2bbb1d10876a658699009bcfd321355bf3",
+    "query_write_count_delta": 0,
+    "snapshot_unchanged": true,
+    "old_on_prediction_equal": true,
+    "old_on_selection_equal": true,
+    "latency_seconds": 0.5394210815429688,
+    "peak_cuda_memory": 9421007360
+  },
+  "runtime_result": {
+    "prediction": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+    "prompt_trace": [
+      {
+        "prompt_history_token_len": 274,
+        "full_history_included": false,
+        "query_prompt_contains_chunk_text": false,
+        "query_prompt_contains_ack_history": false,
+        "rendered_prompt_hash": "54feafbcc6af76bfbea19cc4f0545a38e85bb168a413bdf6479680af55014cbb"
+      }
+    ],
+    "generations": [
+      {
+        "input_len": 274,
+        "output_len": 15,
+        "trigger_count": 1,
+        "trigger_positive_count": 1,
+        "latency_sec": 0.5394210815429688,
+        "peak_cuda_memory": 9421007360,
+        "bank_debug": {
+          "config": {
+            "enabled": true,
+            "batch_size": 1,
+            "max_slots": 16,
+            "top_k": 2,
+            "threshold": 0.05,
+            "retrieve_threshold": 0.05,
+            "update_threshold": 0.1,
+            "decay_alpha": 0.05,
+            "pool_last_n": 64,
+            "update_policy": "thread_update",
+            "retrieve_policy": "threshold_topk",
+            "construction_write_policy": "full_thread_update",
+            "storage_device": "cpu",
+            "debug": true
+          },
+          "enabled": true,
+          "effective_retrieve_threshold": 0.05,
+          "effective_update_threshold": 0.1,
+          "step": 17,
+          "retrieval_step": 17,
+          "slot_count": 16,
+          "memory_write_count": 17,
+          "memory_retrieve_count": 16,
+          "retrieved_latent_count": 248,
+          "new_latent_count": 136,
+          "append_count": 16,
+          "replace_count": 1,
+          "rejected_write_count": 0,
+          "last_update_action": "evict_oldest_insert",
+          "update_action_trace": [
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "evict_oldest_insert"
+          ],
+          "thread_insert_count": 17,
+          "matched_replace_count": 0,
+          "capacity_evict_count": 1,
+          "dropped_matched_overwrite_count": 0,
+          "dropped_new_thread_append_count": 0,
+          "dropped_capacity_eviction_count": 0,
+          "write_action_counts": {
+            "insert": 16,
+            "evict_oldest_insert": 1
+          },
+          "update_reason_counts": {
+            "empty_bank": 1,
+            "new_thread": 15,
+            "new_thread_bank_full": 1
+          },
+          "last_write_back": {
+            "matched_slot_index": 0,
+            "max_score": 0.0905711610242379,
+            "threshold_passed": true,
+            "retrieve_threshold_passed": true,
+            "update_threshold_passed": false,
+            "effective_retrieve_threshold": 0.05,
+            "effective_update_threshold": 0.1,
+            "retrieved_indices": [
+              0,
+              1
+            ],
+            "retrieved_scores": [
+              0.0905711610242379,
+              0.08824882356207796
+            ],
+            "write_action": "evict_oldest_insert",
+            "replaced_slot_index": null,
+            "replaced_slot_score": null,
+            "evicted_slot_index": 2,
+            "evicted_slot_last_retrieved_age": 14,
+            "eviction_basis": "last_retrieved_age",
+            "update_reason": "new_thread_bank_full",
+            "inserted_new_thread": true,
+            "dropped_write": false,
+            "retrieval_bank_step": 16,
+            "retrieval_step": 17
+          },
+          "write_back_trace": [
+            {
+              "matched_slot_index": null,
+              "max_score": null,
+              "threshold_passed": false,
+              "retrieve_threshold_passed": false,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [],
+              "retrieved_scores": [],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "empty_bank",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 0,
+              "retrieval_step": 1
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.0905711610242379,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0
+              ],
+              "retrieved_scores": [
+                0.0905711610242379
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 1,
+              "retrieval_step": 2
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.08639095359235001,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.08639095359235001,
+                0.08360414863775807
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 2,
+              "retrieval_step": 3
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.0905711610242379,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.0905711610242379,
+                0.08453308362262205
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 3,
+              "retrieval_step": 4
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.09382243347126183,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.09382243347126183,
+                0.0905711610242379
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 4,
+              "retrieval_step": 5
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.09010669353180592,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.09010669353180592,
+                0.08499755111505404
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 5,
+              "retrieval_step": 6
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.09010669353180592,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.09010669353180592,
+                0.08685542108478199
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 6,
+              "retrieval_step": 7
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.09150009600910189,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.09150009600910189,
+                0.08871329105450995
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 7,
+              "retrieval_step": 8
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.08964222603937393,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.08964222603937393,
+                0.08499755111505404
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 8,
+              "retrieval_step": 9
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.0910356285166699,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.0910356285166699,
+                0.08592648609991801
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 9,
+              "retrieval_step": 10
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.0910356285166699,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.0910356285166699,
+                0.08778435606964598
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 10,
+              "retrieval_step": 11
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.0956803034409898,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.0956803034409898,
+                0.09196456350153387
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 11,
+              "retrieval_step": 12
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.09196456350153387,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.09196456350153387,
+                0.08546201860748602
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 12,
+              "retrieval_step": 13
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.09428690096369383,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.09428690096369383,
+                0.08964222603937393
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 13,
+              "retrieval_step": 14
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.09150009600910189,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.09150009600910189,
+                0.08917775854694193
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 14,
+              "retrieval_step": 15
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.09010669353180592,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.09010669353180592,
+                0.08546201860748602
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 15,
+              "retrieval_step": 16
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.0905711610242379,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.0905711610242379,
+                0.08824882356207796
+              ],
+              "write_action": "evict_oldest_insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": 2,
+              "evicted_slot_last_retrieved_age": 14,
+              "eviction_basis": "last_retrieved_age",
+              "update_reason": "new_thread_bank_full",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 16,
+              "retrieval_step": 17
+            }
+          ],
+          "slots": [
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 1,
+              "last_access_step": 17,
+              "last_retrieved_step": 17,
+              "last_retrieved_age": 0,
+              "access_count": 16,
+              "last_score": 0.0905711610242379,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 2,
+              "last_access_step": 17,
+              "last_retrieved_step": 17,
+              "last_retrieved_age": 0,
+              "access_count": 15,
+              "last_score": 0.08824882356207796,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 17,
+              "last_access_step": 17,
+              "last_retrieved_step": 17,
+              "last_retrieved_age": 0,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 4,
+              "last_access_step": 4,
+              "last_retrieved_step": 4,
+              "last_retrieved_age": 13,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 5,
+              "last_access_step": 5,
+              "last_retrieved_step": 5,
+              "last_retrieved_age": 12,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 6,
+              "last_access_step": 6,
+              "last_retrieved_step": 6,
+              "last_retrieved_age": 11,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 7,
+              "last_access_step": 7,
+              "last_retrieved_step": 7,
+              "last_retrieved_age": 10,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 8,
+              "last_access_step": 8,
+              "last_retrieved_step": 8,
+              "last_retrieved_age": 9,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 9,
+              "last_access_step": 9,
+              "last_retrieved_step": 9,
+              "last_retrieved_age": 8,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 10,
+              "last_access_step": 10,
+              "last_retrieved_step": 10,
+              "last_retrieved_age": 7,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 11,
+              "last_access_step": 11,
+              "last_retrieved_step": 11,
+              "last_retrieved_age": 6,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 12,
+              "last_access_step": 12,
+              "last_retrieved_step": 12,
+              "last_retrieved_age": 5,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 13,
+              "last_access_step": 13,
+              "last_retrieved_step": 13,
+              "last_retrieved_age": 4,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 14,
+              "last_access_step": 14,
+              "last_retrieved_step": 14,
+              "last_retrieved_age": 3,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 15,
+              "last_access_step": 15,
+              "last_retrieved_step": 15,
+              "last_retrieved_age": 2,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 16,
+              "last_access_step": 16,
+              "last_retrieved_step": 16,
+              "last_retrieved_age": 1,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            }
+          ]
+        },
+        "scores": [
+          0.09289349848639786,
+          0.08778435606964598,
+          0.06038077401615861,
+          0.03661346722290177,
+          0.03543181785633849,
+          0.04153603691141313,
+          0.044229062612175976,
+          0.04116589926760549,
+          0.04607859689454221,
+          0.04909570649675093,
+          0.05333332710273466,
+          0.05606778525667298,
+          0.05970298971787625,
+          0.05956586045342739,
+          0.058837459325931686,
+          0.06494682639222951
+        ],
+        "max_score": 0.09289349848639786,
+        "argmax_index": 0,
+        "threshold_passed": true,
+        "retrieved_indices": [
+          0,
+          1
+        ],
+        "retrieved_scores": [
+          0.09289349848639786,
+          0.08778435606964598
+        ],
+        "retrieved_slot_count": 2,
+        "retrieved_latent_count": 16,
+        "retrieval_step": 18,
+        "retrieved_memory_to_weaver": true,
+        "query_retrieved_memory_conditioning": true,
+        "query_latent_usage": "weaver_integrated",
+        "memory_bank_storage_space": "weaver",
+        "stored_latent_space": "weaver",
+        "retrieval_query_space": "weaver",
+        "retrieved_memory_space": "weaver",
+        "stored_weaver_latents_in_bank": true,
+        "retrieved_weaver_latents_from_bank": true,
+        "retrieved_memory_projected_to_weaver": false,
+        "retrieved_latents_enter_weaver": true,
+        "weaver_conditioned_on_retrieved_memory": true,
+        "weaver_conditioning_token_count": 16,
+        "conditioned_slot_count": 2,
+        "conditioned_latent_count": 16,
+        "empty_retrieval_before_ablation": false,
+        "retrieval_requested_top_k": 2,
+        "retrieval_effective_top_k": 2,
+        "reasoner_injected_latent_count": 0,
+        "reasoner_injected_latent_shape": null,
+        "reasoner_injected_latent_space": null,
+        "direct_injection_applied": false,
+        "query_weaver_invoke_count": 1,
+        "weaver_output_generated": true,
+        "weaver_output_consumed": true,
+        "fused_latent_generated": true,
+        "raw_retrieved_latents_enter_reasoner": false,
+        "retrieved_latents_enter_reasoner": false,
+        "query_write_count": 0,
+        "query_write_attempt_count": 0,
+        "constrained_choice": false
+      }
+    ],
+    "context_capacity": 32768,
+    "bank_write_count": 17,
+    "bank_retrieval_count": 16,
+    "bank_retrieved_latent_count": 248,
+    "retrieved_indices_by_turn": [
+      [
+        0,
+        1
+      ]
+    ],
+    "retrieved_scores_by_turn": [
+      [
+        0.09289349848639786,
+        0.08778435606964598
+      ]
+    ],
+    "bank_slot_count_final_before_reset": 16,
+    "bank_reset_after_context": false,
+    "cross_context_leakage_detected": false,
+    "query_write_count": 0,
+    "query_write_attempt_count": 1,
+    "peak_cuda_memory": 9421007360,
+    "latency_seconds": 0.5394210815429688,
+    "trigger_active_flag": false,
+    "eventqa_protocol": "frozen_context_bank",
+    "effective_generation_max_length": 40,
+    "query_retrieved_memory_conditioning": true,
+    "query_latent_usage": "weaver_integrated",
+    "query_retrieval_invocation_count": 1,
+    "rendered_query_messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant that can read the context and memorize it for future retrieval."
+      },
+      {
+        "role": "user",
+        "content": "Based on the context you memorized, complete the task below:\n\nThese are the events that have already occurred:\n\n...\n72. Kyra expressed his kindness by ensuring the narrator had wine when story-telling.\n73. Mr. Mell told Kyra to be silent in class.\n74. Kyra told Mr. Mell to sit down and mind his business.\n75. Mr. Mell accused Kyra of urging his juniors to insult him.\n76. Kyra claimed he did not think about Mr. Mell at all.\n\n\nBelow is a list of possible subsequent events:\n\n['Mr. Mell revealed that Kyra orchestrated a cruel scheme.', 'Mr. Mell alleged that Kyra undertook a malicious deed.', 'Mr. Mell declared that Kyra performed a sneaky maneuver.', 'Mr. Mell expressed that Kyra committed a mean action.', 'Mr. Mell claimed that Kyra engaged in a hurtful prank.', 'Mr. Mell asserted that Kyra executed a spiteful trick.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. \n\n The event that happens next is:"
+      }
+    ],
+    "rendered_query_prompt": "<|im_start|>system\nYou are a helpful assistant that can read the context and memorize it for future retrieval.<|im_end|>\n<|im_start|>user\nBased on the context you memorized, complete the task below:\n\nThese are the events that have already occurred:\n\n...\n72. Kyra expressed his kindness by ensuring the narrator had wine when story-telling.\n73. Mr. Mell told Kyra to be silent in class.\n74. Kyra told Mr. Mell to sit down and mind his business.\n75. Mr. Mell accused Kyra of urging his juniors to insult him.\n76. Kyra claimed he did not think about Mr. Mell at all.\n\n\nBelow is a list of possible subsequent events:\n\n['Mr. Mell revealed that Kyra orchestrated a cruel scheme.', 'Mr. Mell alleged that Kyra undertook a malicious deed.', 'Mr. Mell declared that Kyra performed a sneaky maneuver.', 'Mr. Mell expressed that Kyra committed a mean action.', 'Mr. Mell claimed that Kyra engaged in a hurtful prank.', 'Mr. Mell asserted that Kyra executed a spiteful trick.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. \n\n The event that happens next is:<|im_end|>\n<|im_start|>assistant\n",
+    "bank_instance_id": 140046953511664,
+    "context_initial_reset_count": 0,
+    "context_memorization_performed": false,
+    "construction_turn_diagnostics": [],
+    "pre_query_bank_tensor_snapshot": {
+      "context_index": 3,
+      "context_id": "eventqa-ec65b7cb50d7280b",
+      "slot_count": 16,
+      "retrieval_step": 17,
+      "combined_frozen_bank_hash": "79c5c0a91ca7bead786ace4d8ee08d24de47cc75d030099438184fae796fcaba",
+      "slots": [
+        {
+          "slot_index": 0,
+          "memory_tensor_hash": "ae537402e192be3e57d2346565788263da766f1047484e85c576e77f00cd19d3",
+          "key_tensor_hash": "6f702b7535f6e6a64b9ce5c51cba5545cb2c4aefeb8b3ec3ee432917589c08d8",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 1,
+          "last_retrieved_step": 17,
+          "access_count": 16,
+          "memory_token_count": 8,
+          "key_norm": 92.44437408447266,
+          "memory_norm": 296.1698913574219
+        },
+        {
+          "slot_index": 1,
+          "memory_tensor_hash": "7e9a92b467492bcc41d147c2e02bafa2f33f444e90376bdeb150b675d20bc21c",
+          "key_tensor_hash": "258c6c219973d4bb36b0d5df54f569e6bb6bc736f984194d4854163efc3f58d8",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 2,
+          "last_retrieved_step": 17,
+          "access_count": 15,
+          "memory_token_count": 8,
+          "key_norm": 96.71006774902344,
+          "memory_norm": 319.6190185546875
+        },
+        {
+          "slot_index": 2,
+          "memory_tensor_hash": "248334c76c9fd1b841080195df2487ef38530b6f8bd638ebb5d88a410b38fc7a",
+          "key_tensor_hash": "9216cec8623d6961758180a5f713e18f10c23136f7715bb34b52f6db7563b84f",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 17,
+          "last_retrieved_step": 17,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 86.89835357666016,
+          "memory_norm": 377.845947265625
+        },
+        {
+          "slot_index": 3,
+          "memory_tensor_hash": "056a56b6f89cb4e7d1b539f234ddf6762695f35943dd88a339317f5f4a33c9e7",
+          "key_tensor_hash": "385f72d8308cacd3d0529b9046a3f81dffa369287b1ab7502d90acc356c6a30a",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 4,
+          "last_retrieved_step": 4,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 78.47088623046875,
+          "memory_norm": 360.9498291015625
+        },
+        {
+          "slot_index": 4,
+          "memory_tensor_hash": "9b55139d13a285caa8771e3a0c7a9f4d28fc78cee9d3759218e0bc61a7134c0f",
+          "key_tensor_hash": "6e78e64c46e48f2800a90ad8ffbf091653fb808ad33223b313ae1d3dc922ea70",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 5,
+          "last_retrieved_step": 5,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 81.01862335205078,
+          "memory_norm": 361.6864013671875
+        },
+        {
+          "slot_index": 5,
+          "memory_tensor_hash": "2e6282d3157780dbb108ee6d1efde5653fb23f7fbf8df102b0b488bdaef94048",
+          "key_tensor_hash": "da3995d9d1427dcd3860775c1394a3edb8a46ab2b9d52061da1024a6c17e3dc7",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 6,
+          "last_retrieved_step": 6,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 79.68901824951172,
+          "memory_norm": 365.7181396484375
+        },
+        {
+          "slot_index": 6,
+          "memory_tensor_hash": "8aaf4e6b6e49fb7865e0b66da3326a357eeb8846380d29197279d55f864bca3e",
+          "key_tensor_hash": "31b6dc9a937f425e06c4e467303b7d8d71e3c1162d255033c5433f9a6c1145e7",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 7,
+          "last_retrieved_step": 7,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 79.60850524902344,
+          "memory_norm": 366.2680969238281
+        },
+        {
+          "slot_index": 7,
+          "memory_tensor_hash": "4e8f23a9876be9c10d5c40f201b9c82a88eb35efd44e80ec56e392bcc1450bc2",
+          "key_tensor_hash": "3de394023cce7a95989e631550a3a454aee1118218827ebfa9bd17167a5f7a19",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 8,
+          "last_retrieved_step": 8,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 83.2360610961914,
+          "memory_norm": 367.3104553222656
+        },
+        {
+          "slot_index": 8,
+          "memory_tensor_hash": "c415411124d1cd792ccc88edb17e62236328a62a13842ffa240602545edaa795",
+          "key_tensor_hash": "bd99e553fc45e5d9bcdf3de9f8398a3fd70932336f660048a0a8ba95fab4a017",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 9,
+          "last_retrieved_step": 9,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 77.97484588623047,
+          "memory_norm": 361.4228515625
+        },
+        {
+          "slot_index": 9,
+          "memory_tensor_hash": "58a667603594a1d804059d43736c1f00d196f7d780782e291f6cee4b824c17aa",
+          "key_tensor_hash": "4f2e5d5fd5984fa0af442cdc608af667902ee0d2c41a03920d52970afd64d22d",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 10,
+          "last_retrieved_step": 10,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 79.29092407226562,
+          "memory_norm": 364.7796630859375
+        },
+        {
+          "slot_index": 10,
+          "memory_tensor_hash": "8ea8d5bf2f0b09894db75b51dd212b92c9b28b6ad39911d8d34d2df06522e08f",
+          "key_tensor_hash": "ed8964ef550aff9b627e51c294c06cd034103902a43604237e2a09f3dab03e7e",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 11,
+          "last_retrieved_step": 11,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 78.16734313964844,
+          "memory_norm": 362.4393005371094
+        },
+        {
+          "slot_index": 11,
+          "memory_tensor_hash": "9eed011472cfa52e88368754bc1b656454e2d4ff55f3d57f1feeec28a49f4202",
+          "key_tensor_hash": "2a864c887af162fecf6d276a9ccbce0c042928ffabfdb2a25e443be27fdc2794",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 12,
+          "last_retrieved_step": 12,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 78.63245391845703,
+          "memory_norm": 363.8791198730469
+        },
+        {
+          "slot_index": 12,
+          "memory_tensor_hash": "b78e17873801855b5cd21629211c87f7fd5ef17e6f8e127035463824e2d3eab1",
+          "key_tensor_hash": "e89372156510de38b481aa3578a5ed204a4b570422372783c167ffd926a82e7d",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 13,
+          "last_retrieved_step": 13,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 78.37351989746094,
+          "memory_norm": 365.0870666503906
+        },
+        {
+          "slot_index": 13,
+          "memory_tensor_hash": "353fac330a4e5bfa51b85244911fb4629d1d1b1c7e0574f55267a5a96fb73eac",
+          "key_tensor_hash": "147c5858a10157c5de52150b348c4e7772ffa4755673538dd1eefcd7ee5a85b2",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 14,
+          "last_retrieved_step": 14,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 78.71612548828125,
+          "memory_norm": 366.591064453125
+        },
+        {
+          "slot_index": 14,
+          "memory_tensor_hash": "893abf11573cc524f718b3357ab7b86b5742c62a7f859046ec2444df484e933f",
+          "key_tensor_hash": "16286a4133d1ef3175a6aee937a679204269502a588db05e908886f050bdb7e4",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 15,
+          "last_retrieved_step": 15,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 80.6202392578125,
+          "memory_norm": 365.09564208984375
+        },
+        {
+          "slot_index": 15,
+          "memory_tensor_hash": "c02be3fa8da93d20e66c5a4a4e6ab203b90fe6c576d4fa98baf39ba8c2c499bd",
+          "key_tensor_hash": "3cba92000a1e9cb68cbd49cc803effcac5a8e0aaea138b3e3aed227d1b152673",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 16,
+          "last_retrieved_step": 16,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 81.33450317382812,
+          "memory_norm": 366.1521301269531
+        }
+      ]
+    },
+    "query_score_decomposition": {
+      "query_id": 75,
+      "query_vector_hash": "0205ee1c0c1283743ff3590187b94a45ee1bccc5a64787c59fe30b17b5b43d9e",
+      "query_norm": 0.594853401184082,
+      "query_cosine_to_first": null,
+      "query_cosine_to_previous": null,
+      "retrieval_step": 18,
+      "retrieved_indices": [
+        0,
+        1
+      ],
+      "retrieved_latent_count": 16,
+      "slots": [
+        {
+          "slot_index": 0,
+          "raw_cosine": 0.09765625,
+          "last_retrieved_age": 1,
+          "decay_factor": 0.951229424500714,
+          "final_score": 0.09289349848639786,
+          "threshold_passed": true,
+          "raw_cosine_rank": 1,
+          "final_score_rank": 1,
+          "selected_by_topk": true
+        },
+        {
+          "slot_index": 1,
+          "raw_cosine": 0.09228515625,
+          "last_retrieved_age": 1,
+          "decay_factor": 0.951229424500714,
+          "final_score": 0.08778435606964598,
+          "threshold_passed": true,
+          "raw_cosine_rank": 2,
+          "final_score_rank": 2,
+          "selected_by_topk": true
+        },
+        {
+          "slot_index": 2,
+          "raw_cosine": 0.0634765625,
+          "last_retrieved_age": 1,
+          "decay_factor": 0.951229424500714,
+          "final_score": 0.06038077401615861,
+          "threshold_passed": true,
+          "raw_cosine_rank": 16,
+          "final_score_rank": 4,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 3,
+          "raw_cosine": 0.07373046875,
+          "last_retrieved_age": 14,
+          "decay_factor": 0.49658530379140947,
+          "final_score": 0.03661346722290177,
+          "threshold_passed": false,
+          "raw_cosine_rank": 8,
+          "final_score_rank": 15,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 4,
+          "raw_cosine": 0.06787109375,
+          "last_retrieved_age": 13,
+          "decay_factor": 0.522045776761016,
+          "final_score": 0.03543181785633849,
+          "threshold_passed": false,
+          "raw_cosine_rank": 14,
+          "final_score_rank": 16,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 5,
+          "raw_cosine": 0.07568359375,
+          "last_retrieved_age": 12,
+          "decay_factor": 0.5488116360940264,
+          "final_score": 0.04153603691141313,
+          "threshold_passed": false,
+          "raw_cosine_rank": 5,
+          "final_score_rank": 13,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 6,
+          "raw_cosine": 0.07666015625,
+          "last_retrieved_age": 11,
+          "decay_factor": 0.5769498103804866,
+          "final_score": 0.044229062612175976,
+          "threshold_passed": false,
+          "raw_cosine_rank": 3,
+          "final_score_rank": 12,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 7,
+          "raw_cosine": 0.06787109375,
+          "last_retrieved_age": 10,
+          "decay_factor": 0.6065306597126334,
+          "final_score": 0.04116589926760549,
+          "threshold_passed": false,
+          "raw_cosine_rank": 15,
+          "final_score_rank": 14,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 8,
+          "raw_cosine": 0.072265625,
+          "last_retrieved_age": 9,
+          "decay_factor": 0.6376281516217733,
+          "final_score": 0.04607859689454221,
+          "threshold_passed": false,
+          "raw_cosine_rank": 11,
+          "final_score_rank": 11,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 9,
+          "raw_cosine": 0.0732421875,
+          "last_retrieved_age": 8,
+          "decay_factor": 0.6703200460356393,
+          "final_score": 0.04909570649675093,
+          "threshold_passed": false,
+          "raw_cosine_rank": 9,
+          "final_score_rank": 10,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 10,
+          "raw_cosine": 0.07568359375,
+          "last_retrieved_age": 7,
+          "decay_factor": 0.7046880897187134,
+          "final_score": 0.05333332710273466,
+          "threshold_passed": true,
+          "raw_cosine_rank": 6,
+          "final_score_rank": 9,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 11,
+          "raw_cosine": 0.07568359375,
+          "last_retrieved_age": 6,
+          "decay_factor": 0.7408182206817179,
+          "final_score": 0.05606778525667298,
+          "threshold_passed": true,
+          "raw_cosine_rank": 7,
+          "final_score_rank": 8,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 12,
+          "raw_cosine": 0.07666015625,
+          "last_retrieved_age": 5,
+          "decay_factor": 0.7788007830714049,
+          "final_score": 0.05970298971787625,
+          "threshold_passed": true,
+          "raw_cosine_rank": 4,
+          "final_score_rank": 5,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 13,
+          "raw_cosine": 0.07275390625,
+          "last_retrieved_age": 4,
+          "decay_factor": 0.8187307530779818,
+          "final_score": 0.05956586045342739,
+          "threshold_passed": true,
+          "raw_cosine_rank": 10,
+          "final_score_rank": 6,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 14,
+          "raw_cosine": 0.068359375,
+          "last_retrieved_age": 3,
+          "decay_factor": 0.8607079764250578,
+          "final_score": 0.058837459325931686,
+          "threshold_passed": true,
+          "raw_cosine_rank": 13,
+          "final_score_rank": 7,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 15,
+          "raw_cosine": 0.07177734375,
+          "last_retrieved_age": 2,
+          "decay_factor": 0.9048374180359595,
+          "final_score": 0.06494682639222951,
+          "threshold_passed": true,
+          "raw_cosine_rank": 12,
+          "final_score_rank": 3,
+          "selected_by_topk": false
+        }
+      ]
+    },
+    "pre_query_bank_summary": {
+      "slot_count": 16,
+      "write_count": 17,
+      "retrieval_count": 16,
+      "slot_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "slots": [
+        {
+          "slot_index": 0,
+          "created_step": 1,
+          "last_retrieved_step": 17,
+          "last_retrieved_age": 0,
+          "access_count": 16,
+          "last_score": 0.0905711610242379,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 1,
+          "created_step": 2,
+          "last_retrieved_step": 17,
+          "last_retrieved_age": 0,
+          "access_count": 15,
+          "last_score": 0.08824882356207796,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 2,
+          "created_step": 17,
+          "last_retrieved_step": 17,
+          "last_retrieved_age": 0,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 3,
+          "created_step": 4,
+          "last_retrieved_step": 4,
+          "last_retrieved_age": 13,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 4,
+          "created_step": 5,
+          "last_retrieved_step": 5,
+          "last_retrieved_age": 12,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 5,
+          "created_step": 6,
+          "last_retrieved_step": 6,
+          "last_retrieved_age": 11,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 6,
+          "created_step": 7,
+          "last_retrieved_step": 7,
+          "last_retrieved_age": 10,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 7,
+          "created_step": 8,
+          "last_retrieved_step": 8,
+          "last_retrieved_age": 9,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 8,
+          "created_step": 9,
+          "last_retrieved_step": 9,
+          "last_retrieved_age": 8,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 9,
+          "created_step": 10,
+          "last_retrieved_step": 10,
+          "last_retrieved_age": 7,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 10,
+          "created_step": 11,
+          "last_retrieved_step": 11,
+          "last_retrieved_age": 6,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 11,
+          "created_step": 12,
+          "last_retrieved_step": 12,
+          "last_retrieved_age": 5,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 12,
+          "created_step": 13,
+          "last_retrieved_step": 13,
+          "last_retrieved_age": 4,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 13,
+          "created_step": 14,
+          "last_retrieved_step": 14,
+          "last_retrieved_age": 3,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 14,
+          "created_step": 15,
+          "last_retrieved_step": 15,
+          "last_retrieved_age": 2,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 15,
+          "created_step": 16,
+          "last_retrieved_step": 16,
+          "last_retrieved_age": 1,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        }
+      ],
+      "true_insert_count": 16,
+      "true_matched_replace_count": 0,
+      "true_capacity_evict_count": 1,
+      "true_replace_old_slot_count": 0,
+      "write_action_counts": {
+        "insert": 16,
+        "evict_oldest_insert": 1
+      }
+    },
+    "post_query_bank_summary": {
+      "slot_count": 16,
+      "write_count": 17,
+      "retrieval_count": 16,
+      "slot_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "slots": [
+        {
+          "slot_index": 0,
+          "created_step": 1,
+          "last_retrieved_step": 17,
+          "last_retrieved_age": 0,
+          "access_count": 16,
+          "last_score": 0.0905711610242379,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 1,
+          "created_step": 2,
+          "last_retrieved_step": 17,
+          "last_retrieved_age": 0,
+          "access_count": 15,
+          "last_score": 0.08824882356207796,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 2,
+          "created_step": 17,
+          "last_retrieved_step": 17,
+          "last_retrieved_age": 0,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 3,
+          "created_step": 4,
+          "last_retrieved_step": 4,
+          "last_retrieved_age": 13,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 4,
+          "created_step": 5,
+          "last_retrieved_step": 5,
+          "last_retrieved_age": 12,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 5,
+          "created_step": 6,
+          "last_retrieved_step": 6,
+          "last_retrieved_age": 11,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 6,
+          "created_step": 7,
+          "last_retrieved_step": 7,
+          "last_retrieved_age": 10,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 7,
+          "created_step": 8,
+          "last_retrieved_step": 8,
+          "last_retrieved_age": 9,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 8,
+          "created_step": 9,
+          "last_retrieved_step": 9,
+          "last_retrieved_age": 8,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 9,
+          "created_step": 10,
+          "last_retrieved_step": 10,
+          "last_retrieved_age": 7,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 10,
+          "created_step": 11,
+          "last_retrieved_step": 11,
+          "last_retrieved_age": 6,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 11,
+          "created_step": 12,
+          "last_retrieved_step": 12,
+          "last_retrieved_age": 5,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 12,
+          "created_step": 13,
+          "last_retrieved_step": 13,
+          "last_retrieved_age": 4,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 13,
+          "created_step": 14,
+          "last_retrieved_step": 14,
+          "last_retrieved_age": 3,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 14,
+          "created_step": 15,
+          "last_retrieved_step": 15,
+          "last_retrieved_age": 2,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 15,
+          "created_step": 16,
+          "last_retrieved_step": 16,
+          "last_retrieved_age": 1,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        }
+      ],
+      "true_insert_count": 16,
+      "true_matched_replace_count": 0,
+      "true_capacity_evict_count": 1,
+      "true_replace_old_slot_count": 0,
+      "write_action_counts": {
+        "insert": 16,
+        "evict_oldest_insert": 1
+      }
+    },
+    "pre_query_write_count": 17,
+    "post_query_write_count": 17,
+    "query_write_count_delta": 0,
+    "query_write_attempt_count_delta": 1,
+    "query_read_only_enforced": true,
+    "bank_snapshot_changed_after_query": false,
+    "true_insert_count": 16,
+    "true_matched_replace_count": 0,
+    "true_capacity_evict_count": 1,
+    "true_replace_old_slot_count": 0,
+    "query_candidate_scores": [
+      0.09289349848639786,
+      0.08778435606964598,
+      0.06038077401615861,
+      0.03661346722290177,
+      0.03543181785633849,
+      0.04153603691141313,
+      0.044229062612175976,
+      0.04116589926760549,
+      0.04607859689454221,
+      0.04909570649675093,
+      0.05333332710273466,
+      0.05606778525667298,
+      0.05970298971787625,
+      0.05956586045342739,
+      0.058837459325931686,
+      0.06494682639222951
+    ],
+    "query_candidate_slot_count": 16,
+    "query_slot_1_existed": true,
+    "query_slot_1_passed_retrieve_threshold": true,
+    "query_slot_1_lost_top_k1_ranking": false,
+    "bank_preserved_for_context_queries": true
+  },
+  "contract_sha256": "a65c716d1c8bdd8530e37d4840b909361ed77b2897223d94b6d7e3db6aafb705",
+  "content_sha256": "6bed92754e9e4ad18946b4f0f98777e572b9eab70a68f8b7362dc0adafe6c953"
+}

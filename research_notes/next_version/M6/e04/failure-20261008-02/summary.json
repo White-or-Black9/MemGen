@@ -1,0 +1,38 @@
+{
+  "status": "OFFLINE_FAILURE_AUDIT_COMPLETE",
+  "all_e04_questions": 6,
+  "original_pilot_denominator": 10,
+  "buckets": {
+    "prefix_only_change_same_last_line": 4,
+    "exact_output_unchanged": 2
+  },
+  "exact_last_line_equal_count": 6,
+  "raw_unique_candidate_same_count": 6,
+  "strict_regression_ids": [
+    "E02P-c2-02"
+  ],
+  "candidate_valid_original": 5,
+  "candidate_valid_source": 2,
+  "raw_gold_any_original": 1,
+  "raw_gold_any_source": 1,
+  "e03_raw_unique_candidate_same_count": 4,
+  "e03_raw_recall_on": {
+    "numerator": 3,
+    "denominator": 10,
+    "value": 0.3
+  },
+  "e03_raw_recall_off": {
+    "numerator": 2,
+    "denominator": 10,
+    "value": 0.2
+  },
+  "e03_improved_ids": [
+    "E02P-c2-02",
+    "E02P-c3-02",
+    "E02P-c4-01"
+  ],
+  "parser_sha256": "d77976be409298970614d477a9d8003850caddb0510e56a7e821a037d98493a2",
+  "new_gpu_runs": 0,
+  "semantic_retention": "UNKNOWN",
+  "next_route": "E05 planning only after approval; no automatic GPU launch"
+}

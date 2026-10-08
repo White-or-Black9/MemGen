@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "exp_id": "M6-E01",
+  "compared_runs": ["run-20261008-01", "run-20261008-02"],
+  "identical_artifact_sha256": {
+    "query_metrics.jsonl": "7b9ce386d813cf3238e1bdfddf46fe6df97ef23a6c7692e552eeabfe2c45d6a3",
+    "token_windows.jsonl": "a191c02aa4210cdd041ec44d98be7c7de1fe2dc9189024f622c7935640cd0729",
+    "by_job.json": "8681a1b622c0fde226bc814524503a986c4ae5a103e0aebb7c7c43062bc7f3fd",
+    "summary.json": "9c8f95195eac0ecd918871f99a326e0c0687db18a805b981a4f5be966e3573c9"
+  },
+  "parent_json_hashes_verified_per_run_before_and_after": 30162,
+  "raw_policy_records_verified": 15000,
+  "new_unit_tests_passed": 16,
+  "m4_regression_tests_passed": 31,
+  "m3_m1_regression_tests_passed": 25,
+  "m5_validator": "PASS",
+  "parent_and_m4_inventory_unchanged": true,
+  "model_runs": 0,
+  "gpu_used": false,
+  "human_annotations": 0,
+  "scope": "Offline diagnostic reproducibility and evidence integrity; not a semantic retrieval or causal mechanism pass."
+}

@@ -1,0 +1,290 @@
+[
+  {
+    "sample_id": "E02P-c0-01",
+    "on_prediction": "Debbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.",
+    "off_prediction": "简短的事件列表中没有一个与上述事件列表中的事件完全匹配。我需要进一步分析这些事件，以确定哪个事件最有可能发生。",
+    "on_diagnostic": {
+      "last_nonempty_line": "Debbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        0
+      ],
+      "unique_candidate_mention": 0,
+      "diagnostic_only": true
+    },
+    "off_diagnostic": {
+      "last_nonempty_line": "简短的事件列表中没有一个与上述事件列表中的事件完全匹配。我需要进一步分析这些事件，以确定哪个事件最有可能发生。",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [],
+      "unique_candidate_mention": null,
+      "diagnostic_only": true
+    },
+    "on_strict": false,
+    "off_strict": false,
+    "on_raw_recall": 0,
+    "off_raw_recall": 0,
+    "raw_unique_candidate_same": false
+  },
+  {
+    "sample_id": "E02P-c0-02",
+    "on_prediction": "Lucian's cherished books fell into darkness, unread and forgotten.",
+    "off_prediction": "[list of events]\n\"Lucian's cherished books fell into darkness, unread and forgotten.\"",
+    "on_diagnostic": {
+      "last_nonempty_line": "Lucian's cherished books fell into darkness, unread and forgotten.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        2
+      ],
+      "unique_candidate_mention": 2,
+      "diagnostic_only": true
+    },
+    "off_diagnostic": {
+      "last_nonempty_line": "\"Lucian's cherished books fell into darkness, unread and forgotten.\"",
+      "leading_nonempty_lines": [
+        "[list of events]"
+      ],
+      "raw_candidate_mentions": [
+        2
+      ],
+      "unique_candidate_mention": 2,
+      "diagnostic_only": true
+    },
+    "on_strict": false,
+    "off_strict": false,
+    "on_raw_recall": 0,
+    "off_raw_recall": 0,
+    "raw_unique_candidate_same": true
+  },
+  {
+    "sample_id": "E02P-c1-01",
+    "on_prediction": "The event that happens next is: Noreen pointed out colleagues from Strasbourg to the Bishop.",
+    "off_prediction": "简短的事件列表中没有一个与书中的事件相关。我需要进一步搜索以找到与书中的事件相关的后续事件。",
+    "on_diagnostic": {
+      "last_nonempty_line": "The event that happens next is: Noreen pointed out colleagues from Strasbourg to the Bishop.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        5
+      ],
+      "unique_candidate_mention": 5,
+      "diagnostic_only": true
+    },
+    "off_diagnostic": {
+      "last_nonempty_line": "简短的事件列表中没有一个与书中的事件相关。我需要进一步搜索以找到与书中的事件相关的后续事件。",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [],
+      "unique_candidate_mention": null,
+      "diagnostic_only": true
+    },
+    "on_strict": false,
+    "off_strict": false,
+    "on_raw_recall": 0,
+    "off_raw_recall": 0,
+    "raw_unique_candidate_same": false
+  },
+  {
+    "sample_id": "E02P-c1-02",
+    "on_prediction": "Humphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.",
+    "off_prediction": "简短的事件列表中没有直接对应于书中的事件。我需要进一步分析书中的描述，以确定接下来会发生什么。",
+    "on_diagnostic": {
+      "last_nonempty_line": "Humphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        3
+      ],
+      "unique_candidate_mention": 3,
+      "diagnostic_only": true
+    },
+    "off_diagnostic": {
+      "last_nonempty_line": "简短的事件列表中没有直接对应于书中的事件。我需要进一步分析书中的描述，以确定接下来会发生什么。",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [],
+      "unique_candidate_mention": null,
+      "diagnostic_only": true
+    },
+    "on_strict": false,
+    "off_strict": false,
+    "on_raw_recall": 0,
+    "off_raw_recall": 0,
+    "raw_unique_candidate_same": false
+  },
+  {
+    "sample_id": "E02P-c2-01",
+    "on_prediction": "The event that happens next is: Quinton confronted Abrielle's fears, confessing his own doubts about their future together.",
+    "off_prediction": "简短\nThe event that happens next is: Quinton confronted Abrielle's fears, confessing his own doubts about their future together.",
+    "on_diagnostic": {
+      "last_nonempty_line": "The event that happens next is: Quinton confronted Abrielle's fears, confessing his own doubts about their future together.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        3
+      ],
+      "unique_candidate_mention": 3,
+      "diagnostic_only": true
+    },
+    "off_diagnostic": {
+      "last_nonempty_line": "The event that happens next is: Quinton confronted Abrielle's fears, confessing his own doubts about their future together.",
+      "leading_nonempty_lines": [
+        "简短"
+      ],
+      "raw_candidate_mentions": [
+        3
+      ],
+      "unique_candidate_mention": 3,
+      "diagnostic_only": true
+    },
+    "on_strict": false,
+    "off_strict": false,
+    "on_raw_recall": 0,
+    "off_raw_recall": 0,
+    "raw_unique_candidate_same": true
+  },
+  {
+    "sample_id": "E02P-c2-02",
+    "on_prediction": "Blaire mentioned that Pascal's stop at Elba was suspicious.",
+    "off_prediction": "简短\nBlaire mentioned that Pascal's stop at Elba was suspicious.",
+    "on_diagnostic": {
+      "last_nonempty_line": "Blaire mentioned that Pascal's stop at Elba was suspicious.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        0
+      ],
+      "unique_candidate_mention": 0,
+      "diagnostic_only": true
+    },
+    "off_diagnostic": {
+      "last_nonempty_line": "Blaire mentioned that Pascal's stop at Elba was suspicious.",
+      "leading_nonempty_lines": [
+        "简短"
+      ],
+      "raw_candidate_mentions": [
+        0
+      ],
+      "unique_candidate_mention": 0,
+      "diagnostic_only": true
+    },
+    "on_strict": true,
+    "off_strict": false,
+    "on_raw_recall": 1,
+    "off_raw_recall": 1,
+    "raw_unique_candidate_same": true
+  },
+  {
+    "sample_id": "E02P-c3-01",
+    "on_prediction": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+    "off_prediction": "[list of events]\nMr. Mell asserted that Kyra executed a spiteful trick.",
+    "on_diagnostic": {
+      "last_nonempty_line": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        2
+      ],
+      "unique_candidate_mention": 2,
+      "diagnostic_only": true
+    },
+    "off_diagnostic": {
+      "last_nonempty_line": "Mr. Mell asserted that Kyra executed a spiteful trick.",
+      "leading_nonempty_lines": [
+        "[list of events]"
+      ],
+      "raw_candidate_mentions": [
+        5
+      ],
+      "unique_candidate_mention": 5,
+      "diagnostic_only": true
+    },
+    "on_strict": false,
+    "off_strict": false,
+    "on_raw_recall": 0,
+    "off_raw_recall": 0,
+    "raw_unique_candidate_same": false
+  },
+  {
+    "sample_id": "E02P-c3-02",
+    "on_prediction": "Kayla fainted during her visit with Miss Rosie.",
+    "off_prediction": "[list of events]\nThe event that happens next is: Kayla fainted during her visit with Miss Rosie.",
+    "on_diagnostic": {
+      "last_nonempty_line": "Kayla fainted during her visit with Miss Rosie.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        0
+      ],
+      "unique_candidate_mention": 0,
+      "diagnostic_only": true
+    },
+    "off_diagnostic": {
+      "last_nonempty_line": "The event that happens next is: Kayla fainted during her visit with Miss Rosie.",
+      "leading_nonempty_lines": [
+        "[list of events]"
+      ],
+      "raw_candidate_mentions": [
+        0
+      ],
+      "unique_candidate_mention": 0,
+      "diagnostic_only": true
+    },
+    "on_strict": true,
+    "off_strict": false,
+    "on_raw_recall": 1,
+    "off_raw_recall": 1,
+    "raw_unique_candidate_same": true
+  },
+  {
+    "sample_id": "E02P-c4-01",
+    "on_prediction": "Karissa observed the children playing around her after dinner.",
+    "off_prediction": "paragraph 81\nThe event that happens next is: Karissa expressed her inability to forgive her husband for his actions.",
+    "on_diagnostic": {
+      "last_nonempty_line": "Karissa observed the children playing around her after dinner.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        2
+      ],
+      "unique_candidate_mention": 2,
+      "diagnostic_only": true
+    },
+    "off_diagnostic": {
+      "last_nonempty_line": "The event that happens next is: Karissa expressed her inability to forgive her husband for his actions.",
+      "leading_nonempty_lines": [
+        "paragraph 81"
+      ],
+      "raw_candidate_mentions": [],
+      "unique_candidate_mention": null,
+      "diagnostic_only": true
+    },
+    "on_strict": true,
+    "off_strict": false,
+    "on_raw_recall": 1,
+    "off_raw_recall": 0,
+    "raw_unique_candidate_same": false
+  },
+  {
+    "sample_id": "E02P-c4-02",
+    "on_prediction": "by /usr/bin/dash\nLadonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.",
+    "off_prediction": "[list of events]\nLadonna became intrigued by the animated conversation between Sergey Ivanovitch and the cultural commentator.",
+    "on_diagnostic": {
+      "last_nonempty_line": "Ladonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.",
+      "leading_nonempty_lines": [
+        "by /usr/bin/dash"
+      ],
+      "raw_candidate_mentions": [
+        2
+      ],
+      "unique_candidate_mention": 2,
+      "diagnostic_only": true
+    },
+    "off_diagnostic": {
+      "last_nonempty_line": "Ladonna became intrigued by the animated conversation between Sergey Ivanovitch and the cultural commentator.",
+      "leading_nonempty_lines": [
+        "[list of events]"
+      ],
+      "raw_candidate_mentions": [
+        5
+      ],
+      "unique_candidate_mention": 5,
+      "diagnostic_only": true
+    },
+    "on_strict": false,
+    "off_strict": false,
+    "on_raw_recall": 0,
+    "off_raw_recall": 0,
+    "raw_unique_candidate_same": false
+  }
+]

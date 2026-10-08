@@ -1,0 +1,9 @@
+{
+  "status": "COMPLETE_DESCRIPTIVE_PILOT",
+  "completed_generations": 40,
+  "pid": 2160354,
+  "gpu": "0",
+  "elapsed_seconds": 62.7280882490013,
+  "finished_at": "2026-10-08T10:07:38.117936+00:00",
+  "scored_at": "2026-10-08T10:07:42.481683+00:00"
+}

@@ -1,0 +1,946 @@
+[
+  {
+    "sample_id": "E02P-c0-01",
+    "context_index": 0,
+    "query_id": 16,
+    "gold_answers": [
+      "Debbie felt a sense of misery and bewilderment after the Tarleton twins' visit."
+    ],
+    "candidate_list": [
+      "Debbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.",
+      "Debbie found herself engulfed in frustration and disbelief following the surprise announcement of her promotion.",
+      "Debbie experienced a wave of confusion and despair after the unexpected arrival of Aunt Marge's parrot.",
+      "Debbie felt an unsettling mix of sadness and uncertainty when she discovered the library's new policy on late returns.",
+      "Debbie felt a sense of misery and bewilderment after the Tarleton twins' visit.",
+      "Debbie was flooded with a feeling of discomfort and perplexity after her friend revealed a secret she wasn't ready to hear."
+    ],
+    "original": {
+      "prediction": "Debbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.",
+      "parsed": "Debbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.",
+      "candidate_valid": true,
+      "strict_candidate_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false
+    },
+    "source": {
+      "prediction": "人名\n\nDebbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.",
+      "parsed": "人名",
+      "candidate_valid": false,
+      "strict_candidate_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false
+    },
+    "original_diagnostic": {
+      "last_nonempty_line": "Debbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        0
+      ],
+      "unique_candidate_mention": 0,
+      "diagnostic_only": true
+    },
+    "source_diagnostic": {
+      "last_nonempty_line": "Debbie was struck by an overwhelming sense of doubt and chaos when the neighborhood dogs all began barking in unison.",
+      "leading_nonempty_lines": [
+        "人名"
+      ],
+      "raw_candidate_mentions": [
+        0
+      ],
+      "unique_candidate_mention": 0,
+      "diagnostic_only": true
+    },
+    "text_changed": true,
+    "exact_last_line_equal": true,
+    "raw_unique_candidate_same": true,
+    "observable_bucket": "prefix_only_change_same_last_line",
+    "strict_regression": false,
+    "parent_snapshot_tensor_hashes_match": true,
+    "tensor_and_provenance_audit": [
+      {
+        "arm": "original",
+        "position": 0,
+        "slot_index": 0,
+        "slot_version": "slot0-v2",
+        "direct_source_chunk": 1,
+        "indirect_possible": [
+          0
+        ],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "c231b81d552b4f72b4d95b0d9aa56a32575f56df283e1c1780da4c25337f6267",
+        "key_sha256": "15b98f88ee813185d7a23f28e08a2fab5fc79ce857a5700e4b6f97447d6bc472",
+        "expected_hash_match": true,
+        "memory_norm": 323.87982177734375,
+        "key_norm": 97.15448760986328,
+        "pre_retrieval_age": 1,
+        "score": 0.08128181117559811,
+        "output_token_count": 26,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "original",
+        "position": 1,
+        "slot_index": 12,
+        "slot_version": "slot12-v1",
+        "direct_source_chunk": 13,
+        "indirect_possible": [
+          0,
+          1,
+          2,
+          5
+        ],
+        "source_link": "indirect_possible_only",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "be44268a4e710330c551379a90de8c54777ed816689b6a3c0814f3b36ab05604",
+        "key_sha256": "ab0e6b38c5f6ea82e6455a2b56078796279bb59342c01ca59e98522426c7bbe9",
+        "expected_hash_match": true,
+        "memory_norm": 326.3524169921875,
+        "key_norm": 98.29362487792969,
+        "pre_retrieval_age": 1,
+        "score": 0.08499755111505404,
+        "output_token_count": 26,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "source",
+        "position": 0,
+        "slot_index": 0,
+        "slot_version": "slot0-v2",
+        "direct_source_chunk": 1,
+        "indirect_possible": [
+          0
+        ],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "c231b81d552b4f72b4d95b0d9aa56a32575f56df283e1c1780da4c25337f6267",
+        "key_sha256": "15b98f88ee813185d7a23f28e08a2fab5fc79ce857a5700e4b6f97447d6bc472",
+        "expected_hash_match": true,
+        "memory_norm": 323.87982177734375,
+        "key_norm": 97.15448760986328,
+        "pre_retrieval_age": 1,
+        "score": 0.08128181117559811,
+        "output_token_count": 28,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "source",
+        "position": 1,
+        "slot_index": 1,
+        "slot_version": "slot1-v1",
+        "direct_source_chunk": 2,
+        "indirect_possible": [
+          0,
+          1
+        ],
+        "source_link": "direct_source_candidate",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "f7d646ce0729dd0d3d6adc536c6fe412615ce261502b5f9eac6e0d591caa5538",
+        "key_sha256": "f9517fdf77aa21704f22e772f4641030c2aa9d0a00813002e3e699f55160d9d3",
+        "expected_hash_match": true,
+        "memory_norm": 318.87896728515625,
+        "key_norm": 90.52208709716797,
+        "pre_retrieval_age": 12,
+        "score": 0.04662755111345732,
+        "output_token_count": 28,
+        "at_generation_cap": false
+      }
+    ],
+    "source_repeat_prediction_equal": true
+  },
+  {
+    "sample_id": "E02P-c0-02",
+    "context_index": 0,
+    "query_id": 79,
+    "gold_answers": [
+      "Lucian's three little boys died before learning to walk."
+    ],
+    "candidate_list": [
+      "Lucian's faithful dog vanished into the mist during a silent dawn.",
+      "Lucian's three little boys died before learning to walk.",
+      "Lucian's cherished books fell into darkness, unread and forgotten.",
+      "Lucian's garden flourished with flowers that never bloomed.",
+      "Lucian's three prized sculptures shattered without a single touch.",
+      "Lucian's delicate music notes ceased to echo in the empty hall."
+    ],
+    "original": {
+      "prediction": "Lucian's cherished books fell into darkness, unread and forgotten.",
+      "parsed": "Lucian's cherished books fell into darkness, unread and forgotten.",
+      "candidate_valid": true,
+      "strict_candidate_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false
+    },
+    "source": {
+      "prediction": "Lucian's cherished books fell into darkness, unread and forgotten.",
+      "parsed": "Lucian's cherished books fell into darkness, unread and forgotten.",
+      "candidate_valid": true,
+      "strict_candidate_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false
+    },
+    "original_diagnostic": {
+      "last_nonempty_line": "Lucian's cherished books fell into darkness, unread and forgotten.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        2
+      ],
+      "unique_candidate_mention": 2,
+      "diagnostic_only": true
+    },
+    "source_diagnostic": {
+      "last_nonempty_line": "Lucian's cherished books fell into darkness, unread and forgotten.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        2
+      ],
+      "unique_candidate_mention": 2,
+      "diagnostic_only": true
+    },
+    "text_changed": false,
+    "exact_last_line_equal": true,
+    "raw_unique_candidate_same": true,
+    "observable_bucket": "exact_output_unchanged",
+    "strict_regression": false,
+    "parent_snapshot_tensor_hashes_match": true,
+    "tensor_and_provenance_audit": [
+      {
+        "arm": "original",
+        "position": 0,
+        "slot_index": 0,
+        "slot_version": "slot0-v2",
+        "direct_source_chunk": 1,
+        "indirect_possible": [
+          0
+        ],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "c231b81d552b4f72b4d95b0d9aa56a32575f56df283e1c1780da4c25337f6267",
+        "key_sha256": "15b98f88ee813185d7a23f28e08a2fab5fc79ce857a5700e4b6f97447d6bc472",
+        "expected_hash_match": true,
+        "memory_norm": 323.87982177734375,
+        "key_norm": 97.15448760986328,
+        "pre_retrieval_age": 1,
+        "score": 0.0822107461604621,
+        "output_token_count": 15,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "original",
+        "position": 1,
+        "slot_index": 12,
+        "slot_version": "slot12-v1",
+        "direct_source_chunk": 13,
+        "indirect_possible": [
+          0,
+          1,
+          2,
+          5
+        ],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "be44268a4e710330c551379a90de8c54777ed816689b6a3c0814f3b36ab05604",
+        "key_sha256": "ab0e6b38c5f6ea82e6455a2b56078796279bb59342c01ca59e98522426c7bbe9",
+        "expected_hash_match": true,
+        "memory_norm": 326.3524169921875,
+        "key_norm": 98.29362487792969,
+        "pre_retrieval_age": 1,
+        "score": 0.08592648609991801,
+        "output_token_count": 15,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "source",
+        "position": 0,
+        "slot_index": 0,
+        "slot_version": "slot0-v2",
+        "direct_source_chunk": 1,
+        "indirect_possible": [
+          0
+        ],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "c231b81d552b4f72b4d95b0d9aa56a32575f56df283e1c1780da4c25337f6267",
+        "key_sha256": "15b98f88ee813185d7a23f28e08a2fab5fc79ce857a5700e4b6f97447d6bc472",
+        "expected_hash_match": true,
+        "memory_norm": 323.87982177734375,
+        "key_norm": 97.15448760986328,
+        "pre_retrieval_age": 1,
+        "score": 0.0822107461604621,
+        "output_token_count": 15,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "source",
+        "position": 1,
+        "slot_index": 6,
+        "slot_version": "slot6-v1",
+        "direct_source_chunk": 7,
+        "indirect_possible": [
+          0,
+          1,
+          2,
+          5
+        ],
+        "source_link": "direct_source_candidate",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "83b9b40dcf1b2153dd0ea25c5f7eccf15a4f7bb31b52c669036e109784c43d08",
+        "key_sha256": "7afa1fbb5342f7f91e588818ecd5ec0154c66aa1891f8948f30915a9edc35a71",
+        "expected_hash_match": true,
+        "memory_norm": 333.96588134765625,
+        "key_norm": 99.50782775878906,
+        "pre_retrieval_age": 10,
+        "score": 0.05034678327692758,
+        "output_token_count": 15,
+        "at_generation_cap": false
+      }
+    ],
+    "source_repeat_prediction_equal": true
+  },
+  {
+    "sample_id": "E02P-c1-02",
+    "context_index": 1,
+    "query_id": 87,
+    "gold_answers": [
+      "Humphrey Waylon replaced his cap on his brow after a moment of contemplation."
+    ],
+    "candidate_list": [
+      "Humphrey Waylon shifted his backpack onto his shoulder after an instant of deliberation.",
+      "Humphrey Waylon polished his watch face with a cloth after a fleeting moment of memory.",
+      "Humphrey Waylon tightened his shoelaces on the table leg after a pause in decision-making.",
+      "Humphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.",
+      "Humphrey Waylon tucked his shirt into his trousers following a second of hesitation.",
+      "Humphrey Waylon replaced his cap on his brow after a moment of contemplation."
+    ],
+    "original": {
+      "prediction": "Humphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.",
+      "parsed": "Humphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.",
+      "candidate_valid": true,
+      "strict_candidate_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false
+    },
+    "source": {
+      "prediction": "日志\n\nHumphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.",
+      "parsed": "日志",
+      "candidate_valid": false,
+      "strict_candidate_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false
+    },
+    "original_diagnostic": {
+      "last_nonempty_line": "Humphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        3
+      ],
+      "unique_candidate_mention": 3,
+      "diagnostic_only": true
+    },
+    "source_diagnostic": {
+      "last_nonempty_line": "Humphrey Waylon adjusted his glasses on the bridge of his nose after a brief moment of reflection.",
+      "leading_nonempty_lines": [
+        "日志"
+      ],
+      "raw_candidate_mentions": [
+        3
+      ],
+      "unique_candidate_mention": 3,
+      "diagnostic_only": true
+    },
+    "text_changed": true,
+    "exact_last_line_equal": true,
+    "raw_unique_candidate_same": true,
+    "observable_bucket": "prefix_only_change_same_last_line",
+    "strict_regression": false,
+    "parent_snapshot_tensor_hashes_match": true,
+    "tensor_and_provenance_audit": [
+      {
+        "arm": "original",
+        "position": 0,
+        "slot_index": 0,
+        "slot_version": "slot0-v1",
+        "direct_source_chunk": 0,
+        "indirect_possible": [],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "27aebdbc9761a3841c9ef25fa15e78f3c61723ef4be507bf892aed0ad4c7c84a",
+        "key_sha256": "9121a0e9346119c09a612a9874f392f504f42f5704b93843e03437d7a1536f8a",
+        "expected_hash_match": true,
+        "memory_norm": 301.12005615234375,
+        "key_norm": 92.97895050048828,
+        "pre_retrieval_age": 1,
+        "score": 0.0910356285166699,
+        "output_token_count": 23,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "original",
+        "position": 1,
+        "slot_index": 1,
+        "slot_version": "slot1-v1",
+        "direct_source_chunk": 1,
+        "indirect_possible": [
+          0
+        ],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "a1a8dc633b710671c1bca84b7619cdf4e787cf15b62f76f7bd9b9d866110610f",
+        "key_sha256": "89575d4a392b64f5324e20de43ea8a7e034fd247b6d248c4778e2d6abb7b8ca4",
+        "expected_hash_match": true,
+        "memory_norm": 329.4804992675781,
+        "key_norm": 99.76351165771484,
+        "pre_retrieval_age": 1,
+        "score": 0.08174627866803011,
+        "output_token_count": 23,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "source",
+        "position": 0,
+        "slot_index": 0,
+        "slot_version": "slot0-v1",
+        "direct_source_chunk": 0,
+        "indirect_possible": [],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "27aebdbc9761a3841c9ef25fa15e78f3c61723ef4be507bf892aed0ad4c7c84a",
+        "key_sha256": "9121a0e9346119c09a612a9874f392f504f42f5704b93843e03437d7a1536f8a",
+        "expected_hash_match": true,
+        "memory_norm": 301.12005615234375,
+        "key_norm": 92.97895050048828,
+        "pre_retrieval_age": 1,
+        "score": 0.0910356285166699,
+        "output_token_count": 25,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "source",
+        "position": 1,
+        "slot_index": 13,
+        "slot_version": "slot13-v1",
+        "direct_source_chunk": 13,
+        "indirect_possible": [
+          0,
+          1
+        ],
+        "source_link": "direct_source_candidate",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "65f69072ba45cf27a5f7281d75d2eef5e4989065a9f8455910917ba7a7a4831d",
+        "key_sha256": "daa8225c154ae64659baac54a2eebd332d5edf2360b81f4add6d2b6b866839f9",
+        "expected_hash_match": true,
+        "memory_norm": 362.1353454589844,
+        "key_norm": 81.85977935791016,
+        "pre_retrieval_age": 4,
+        "score": 0.057167235200269235,
+        "output_token_count": 25,
+        "at_generation_cap": false
+      }
+    ],
+    "source_repeat_prediction_equal": true
+  },
+  {
+    "sample_id": "E02P-c2-02",
+    "context_index": 2,
+    "query_id": 45,
+    "gold_answers": [
+      "Blaire mentioned that Pascal's stop at Elba was suspicious."
+    ],
+    "candidate_list": [
+      "Blaire mentioned that Pascal's stop at Elba was suspicious.",
+      "Blaire suggested that Vincent's departure from Capri was questionable.",
+      "Blaire claimed that Fiona's stay in Malta was concerning.",
+      "Blaire remarked that Jordan's visit to Corsica was odd.",
+      "Blaire argued that Samuel's meeting in Sardinia seemed peculiar.",
+      "Blaire noted that Rachel's arrival at Lindos appeared unusual."
+    ],
+    "original": {
+      "prediction": "Blaire mentioned that Pascal's stop at Elba was suspicious.",
+      "parsed": "Blaire mentioned that Pascal's stop at Elba was suspicious.",
+      "candidate_valid": true,
+      "strict_candidate_correct": true,
+      "official_raw_recall": 1,
+      "raw_gold_any": true
+    },
+    "source": {
+      "prediction": "行\nBlaire mentioned that Pascal's stop at Elba was suspicious.",
+      "parsed": "行",
+      "candidate_valid": false,
+      "strict_candidate_correct": false,
+      "official_raw_recall": 1,
+      "raw_gold_any": true
+    },
+    "original_diagnostic": {
+      "last_nonempty_line": "Blaire mentioned that Pascal's stop at Elba was suspicious.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        0
+      ],
+      "unique_candidate_mention": 0,
+      "diagnostic_only": true
+    },
+    "source_diagnostic": {
+      "last_nonempty_line": "Blaire mentioned that Pascal's stop at Elba was suspicious.",
+      "leading_nonempty_lines": [
+        "行"
+      ],
+      "raw_candidate_mentions": [
+        0
+      ],
+      "unique_candidate_mention": 0,
+      "diagnostic_only": true
+    },
+    "text_changed": true,
+    "exact_last_line_equal": true,
+    "raw_unique_candidate_same": true,
+    "observable_bucket": "prefix_only_change_same_last_line",
+    "strict_regression": true,
+    "parent_snapshot_tensor_hashes_match": true,
+    "tensor_and_provenance_audit": [
+      {
+        "arm": "original",
+        "position": 0,
+        "slot_index": 0,
+        "slot_version": "slot0-v1",
+        "direct_source_chunk": 0,
+        "indirect_possible": [],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "dab3e79e6c1e5666819b588fbfddb3ae6166dfe3bb3f0ae17ba11bc306e66dfd",
+        "key_sha256": "be3c2954d2b4e18b4a3ad5b92fae0c4d708975e8e6c8e4516c314f016d1f52bc",
+        "expected_hash_match": true,
+        "memory_norm": 297.4505920410156,
+        "key_norm": 91.91151428222656,
+        "pre_retrieval_age": 1,
+        "score": 0.08871329105450995,
+        "output_token_count": 16,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "original",
+        "position": 1,
+        "slot_index": 1,
+        "slot_version": "slot1-v1",
+        "direct_source_chunk": 1,
+        "indirect_possible": [
+          0
+        ],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "0fe7f4ec09bcc1d13c47ce510a2d4f94d2f508921c2985241602aeb59e2cba18",
+        "key_sha256": "5cc464a2df3a54f4e35db668eb1327ad786dba9d8040a3232e0ab2b886d1d346",
+        "expected_hash_match": true,
+        "memory_norm": 328.41046142578125,
+        "key_norm": 101.29595184326172,
+        "pre_retrieval_age": 1,
+        "score": 0.08313968114532608,
+        "output_token_count": 16,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "source",
+        "position": 0,
+        "slot_index": 0,
+        "slot_version": "slot0-v1",
+        "direct_source_chunk": 0,
+        "indirect_possible": [],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "dab3e79e6c1e5666819b588fbfddb3ae6166dfe3bb3f0ae17ba11bc306e66dfd",
+        "key_sha256": "be3c2954d2b4e18b4a3ad5b92fae0c4d708975e8e6c8e4516c314f016d1f52bc",
+        "expected_hash_match": true,
+        "memory_norm": 297.4505920410156,
+        "key_norm": 91.91151428222656,
+        "pre_retrieval_age": 1,
+        "score": 0.08871329105450995,
+        "output_token_count": 17,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "source",
+        "position": 1,
+        "slot_index": 5,
+        "slot_version": "slot5-v1",
+        "direct_source_chunk": 5,
+        "indirect_possible": [
+          0,
+          1
+        ],
+        "source_link": "direct_source_candidate",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "58beed2f6830b2ea50ffc878e4e297395bee3df2950dd22167ff4be953c82825",
+        "key_sha256": "5c0f33c0d2d09476aadaa6805e4c793a64e0eaea66d3ad0d47d25e3ddfa187c2",
+        "expected_hash_match": true,
+        "memory_norm": 358.0636901855469,
+        "key_norm": 78.61648559570312,
+        "pre_retrieval_age": 12,
+        "score": 0.03966021588960737,
+        "output_token_count": 17,
+        "at_generation_cap": false
+      }
+    ],
+    "source_repeat_prediction_equal": true
+  },
+  {
+    "sample_id": "E02P-c3-01",
+    "context_index": 3,
+    "query_id": 75,
+    "gold_answers": [
+      "Mr. Mell expressed that Kyra committed a mean action."
+    ],
+    "candidate_list": [
+      "Mr. Mell revealed that Kyra orchestrated a cruel scheme.",
+      "Mr. Mell alleged that Kyra undertook a malicious deed.",
+      "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+      "Mr. Mell expressed that Kyra committed a mean action.",
+      "Mr. Mell claimed that Kyra engaged in a hurtful prank.",
+      "Mr. Mell asserted that Kyra executed a spiteful trick."
+    ],
+    "original": {
+      "prediction": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+      "parsed": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+      "candidate_valid": true,
+      "strict_candidate_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false
+    },
+    "source": {
+      "prediction": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+      "parsed": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+      "candidate_valid": true,
+      "strict_candidate_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false
+    },
+    "original_diagnostic": {
+      "last_nonempty_line": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        2
+      ],
+      "unique_candidate_mention": 2,
+      "diagnostic_only": true
+    },
+    "source_diagnostic": {
+      "last_nonempty_line": "Mr. Mell declared that Kyra performed a sneaky maneuver.",
+      "leading_nonempty_lines": [],
+      "raw_candidate_mentions": [
+        2
+      ],
+      "unique_candidate_mention": 2,
+      "diagnostic_only": true
+    },
+    "text_changed": false,
+    "exact_last_line_equal": true,
+    "raw_unique_candidate_same": true,
+    "observable_bucket": "exact_output_unchanged",
+    "strict_regression": false,
+    "parent_snapshot_tensor_hashes_match": true,
+    "tensor_and_provenance_audit": [
+      {
+        "arm": "original",
+        "position": 0,
+        "slot_index": 0,
+        "slot_version": "slot0-v1",
+        "direct_source_chunk": 0,
+        "indirect_possible": [],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "962dd22aa744bee5999e10ddc1ac03d84ed5eb29d0635375d82adb1fad2641a8",
+        "key_sha256": "633b2ecd08e1599cd43be6fbb71606b92482840b2857f84ac5edc4ef2957740a",
+        "expected_hash_match": true,
+        "memory_norm": 296.1700744628906,
+        "key_norm": 92.44438934326172,
+        "pre_retrieval_age": 1,
+        "score": 0.09289349848639786,
+        "output_token_count": 15,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "original",
+        "position": 1,
+        "slot_index": 1,
+        "slot_version": "slot1-v1",
+        "direct_source_chunk": 1,
+        "indirect_possible": [
+          0
+        ],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "702907afe83455a60b809282254b8a68215b581a45e6a59dd5be1217819027e3",
+        "key_sha256": "c045f786a18da57d7c465464d8483bf5a82d0bebd9b34e58a24b2e4445eeeb08",
+        "expected_hash_match": true,
+        "memory_norm": 319.61920166015625,
+        "key_norm": 96.7100830078125,
+        "pre_retrieval_age": 1,
+        "score": 0.08778435606964598,
+        "output_token_count": 15,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "source",
+        "position": 0,
+        "slot_index": 0,
+        "slot_version": "slot0-v1",
+        "direct_source_chunk": 0,
+        "indirect_possible": [],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "962dd22aa744bee5999e10ddc1ac03d84ed5eb29d0635375d82adb1fad2641a8",
+        "key_sha256": "633b2ecd08e1599cd43be6fbb71606b92482840b2857f84ac5edc4ef2957740a",
+        "expected_hash_match": true,
+        "memory_norm": 296.1700744628906,
+        "key_norm": 92.44438934326172,
+        "pre_retrieval_age": 1,
+        "score": 0.09289349848639786,
+        "output_token_count": 15,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "source",
+        "position": 1,
+        "slot_index": 11,
+        "slot_version": "slot11-v1",
+        "direct_source_chunk": 11,
+        "indirect_possible": [
+          0,
+          1
+        ],
+        "source_link": "direct_source_candidate",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "95db40c01e5637080284ba4fb0d9e2b68277c63938afeff8baecb5a2ee434232",
+        "key_sha256": "10c3184d00610f1040fce0b116d4819882ea2b5a20bf57a357b853a13e38075f",
+        "expected_hash_match": true,
+        "memory_norm": 363.87945556640625,
+        "key_norm": 78.6324691772461,
+        "pre_retrieval_age": 6,
+        "score": 0.05606778525667298,
+        "output_token_count": 15,
+        "at_generation_cap": false
+      }
+    ],
+    "source_repeat_prediction_equal": true
+  },
+  {
+    "sample_id": "E02P-c4-02",
+    "context_index": 4,
+    "query_id": 29,
+    "gold_answers": [
+      "Ladonna became interested in the philosophical discussion between Sergey Ivanovitch and the professor."
+    ],
+    "candidate_list": [
+      "Ladonna stumbled upon an intense debate between Sergey Ivanovitch and the renowned author.",
+      "Ladonna found herself engrossed in the heated argument between Sergey Ivanovitch and the art critic.",
+      "Ladonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.",
+      "Ladonna witnessed a lively exchange of ideas between Sergey Ivanovitch and the local historian.",
+      "Ladonna became interested in the philosophical discussion between Sergey Ivanovitch and the professor.",
+      "Ladonna became intrigued by the animated conversation between Sergey Ivanovitch and the cultural commentator."
+    ],
+    "original": {
+      "prediction": "by /usr/bin/dash\nLadonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.",
+      "parsed": "by /usr/bin/dash",
+      "candidate_valid": false,
+      "strict_candidate_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false
+    },
+    "source": {
+      "prediction": "多选题\nLadonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.",
+      "parsed": "多选题",
+      "candidate_valid": false,
+      "strict_candidate_correct": false,
+      "official_raw_recall": 0,
+      "raw_gold_any": false
+    },
+    "original_diagnostic": {
+      "last_nonempty_line": "Ladonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.",
+      "leading_nonempty_lines": [
+        "by /usr/bin/dash"
+      ],
+      "raw_candidate_mentions": [
+        2
+      ],
+      "unique_candidate_mention": 2,
+      "diagnostic_only": true
+    },
+    "source_diagnostic": {
+      "last_nonempty_line": "Ladonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.",
+      "leading_nonempty_lines": [
+        "多选题"
+      ],
+      "raw_candidate_mentions": [
+        2
+      ],
+      "unique_candidate_mention": 2,
+      "diagnostic_only": true
+    },
+    "text_changed": true,
+    "exact_last_line_equal": true,
+    "raw_unique_candidate_same": true,
+    "observable_bucket": "prefix_only_change_same_last_line",
+    "strict_regression": false,
+    "parent_snapshot_tensor_hashes_match": true,
+    "tensor_and_provenance_audit": [
+      {
+        "arm": "original",
+        "position": 0,
+        "slot_index": 0,
+        "slot_version": "slot0-v2",
+        "direct_source_chunk": 4,
+        "indirect_possible": [
+          0,
+          1
+        ],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "6d105cf8b60b9582815909907c100cbcd4b7a8d52a0fb877f48d1df9119fda65",
+        "key_sha256": "ea9f5e9a309949b798644fd5c94eb02dc83dd53671813e3a43fe20e05dc37847",
+        "expected_hash_match": true,
+        "memory_norm": 360.3432312011719,
+        "key_norm": 78.70980834960938,
+        "pre_retrieval_age": 1,
+        "score": 0.07988840869830216,
+        "output_token_count": 28,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "original",
+        "position": 1,
+        "slot_index": 1,
+        "slot_version": "slot1-v1",
+        "direct_source_chunk": 1,
+        "indirect_possible": [
+          0
+        ],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "9237b972dc72b821b4d434a74312adfd33d425a489e42dc507287bf78d461651",
+        "key_sha256": "48b4b543c3fe16ced6d1ef94efb292c44458be5859a49464a51bfd5d897a949e",
+        "expected_hash_match": true,
+        "memory_norm": 328.1128234863281,
+        "key_norm": 97.72508239746094,
+        "pre_retrieval_age": 1,
+        "score": 0.08174627866803011,
+        "output_token_count": 28,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "source",
+        "position": 0,
+        "slot_index": 0,
+        "slot_version": "slot0-v2",
+        "direct_source_chunk": 4,
+        "indirect_possible": [
+          0,
+          1
+        ],
+        "source_link": "no_recorded_source_link_NOT_semantic_negative",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "6d105cf8b60b9582815909907c100cbcd4b7a8d52a0fb877f48d1df9119fda65",
+        "key_sha256": "ea9f5e9a309949b798644fd5c94eb02dc83dd53671813e3a43fe20e05dc37847",
+        "expected_hash_match": true,
+        "memory_norm": 360.3432312011719,
+        "key_norm": 78.70980834960938,
+        "pre_retrieval_age": 1,
+        "score": 0.07988840869830216,
+        "output_token_count": 25,
+        "at_generation_cap": false
+      },
+      {
+        "arm": "source",
+        "position": 1,
+        "slot_index": 3,
+        "slot_version": "slot3-v1",
+        "direct_source_chunk": 3,
+        "indirect_possible": [
+          0,
+          1
+        ],
+        "source_link": "direct_source_candidate",
+        "memory_shape": [
+          8,
+          1536
+        ],
+        "memory_sha256": "c5296978caa7517cdd8e7dc2771c5ea7f0b85e134214481b1daa8e7788ad1091",
+        "key_sha256": "b589b44946f78f299500735c708bd16230ab702ee8d800d8aa7b10cf464f9402",
+        "expected_hash_match": true,
+        "memory_norm": 365.39752197265625,
+        "key_norm": 78.1608657836914,
+        "pre_retrieval_age": 14,
+        "score": 0.03782583368723627,
+        "output_token_count": 25,
+        "at_generation_cap": false
+      }
+    ],
+    "source_repeat_prediction_equal": true
+  }
+]

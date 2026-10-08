@@ -1,0 +1,2206 @@
+{
+  "record": {
+    "sample_id": "E02P-c4-02",
+    "context_index": 4,
+    "query_id": 29,
+    "seed": 42,
+    "arm": "original_replay",
+    "repeat": 0,
+    "question": "These are the events that have already occurred:\n\n...\n26. Ladonna expressed a desire to ask Edie Arkadyevitch a question.\n27. Ladonna expressed that he was no longer a district councilor.\n28. Edie Arkadyevitch mentioned that the Shtcherbatskys would be at the Zoological Gardens.\n29. Edie Arkadyevitch commented on Ladonna's energy and capabilities.\n30. Ladonna stayed at his elder half-brother Koznishev's house.\n\n\nBelow is a list of possible subsequent events:\n\n['Ladonna stumbled upon an intense debate between Sergey Ivanovitch and the renowned author.', 'Ladonna found herself engrossed in the heated argument between Sergey Ivanovitch and the art critic.', 'Ladonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.', 'Ladonna witnessed a lively exchange of ideas between Sergey Ivanovitch and the local historian.', 'Ladonna became interested in the philosophical discussion between Sergey Ivanovitch and the professor.', 'Ladonna became intrigued by the animated conversation between Sergey Ivanovitch and the cultural commentator.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. ",
+    "gold_answers": [
+      "Ladonna became interested in the philosophical discussion between Sergey Ivanovitch and the professor."
+    ],
+    "prediction": "by /usr/bin/dash\nLadonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.",
+    "native_full_selection": [
+      {
+        "policy": "full",
+        "random_seed": 9528552419411813945,
+        "n": 2,
+        "selected_indices": [
+          0,
+          1
+        ],
+        "native_indices": [
+          1,
+          0
+        ],
+        "latent_count": 16,
+        "cosine": [
+          0.083984375,
+          0.0859375,
+          0.08056640625,
+          0.076171875,
+          0.058349609375,
+          0.05810546875,
+          0.060546875,
+          0.0625,
+          0.06298828125,
+          0.058349609375,
+          0.0576171875,
+          0.05908203125,
+          0.061767578125,
+          0.0595703125,
+          0.060791015625,
+          0.0546875
+        ],
+        "ages": [
+          1,
+          1,
+          15,
+          14,
+          12,
+          11,
+          10,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1
+        ],
+        "decay": [
+          0.951229424500714,
+          0.951229424500714,
+          0.4723665527410147,
+          0.49658530379140947,
+          0.5488116360940264,
+          0.5769498103804866,
+          0.6065306597126334,
+          0.6376281516217733,
+          0.6703200460356393,
+          0.7046880897187134,
+          0.7408182206817179,
+          0.7788007830714049,
+          0.8187307530779818,
+          0.8607079764250578,
+          0.9048374180359595,
+          0.951229424500714
+        ],
+        "final_scores": [
+          0.07988840869830216,
+          0.08174627866803011,
+          0.03805687558704464,
+          0.03782583368723627,
+          0.03202294458654109,
+          0.03352393917738179,
+          0.036723536037288354,
+          0.03985175947636083,
+          0.0422223075872058,
+          0.04111827476630188,
+          0.04268386232443492,
+          0.04601313220294921,
+          0.05057101575408433,
+          0.05127264312688333,
+          0.05500598561790867,
+          0.052020359152382796
+        ],
+        "last_write": [
+          5,
+          2,
+          3,
+          4,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17
+        ],
+        "full_overlap": 2,
+        "last_written_overlap": 0
+      }
+    ],
+    "actual_indices": [
+      0,
+      1
+    ],
+    "tensor_trace": [
+      {
+        "actual_indices": [
+          0,
+          1
+        ],
+        "native_full_indices": [
+          0,
+          1
+        ],
+        "actual_scores": [
+          0.07988840869830216,
+          0.08174627866803011
+        ],
+        "tensor_details": [
+          {
+            "slot_index": 0,
+            "memory_shape": [
+              8,
+              1536
+            ],
+            "memory_sha256": "6d105cf8b60b9582815909907c100cbcd4b7a8d52a0fb877f48d1df9119fda65",
+            "expected_memory_sha256": "6d105cf8b60b9582815909907c100cbcd4b7a8d52a0fb877f48d1df9119fda65",
+            "key_sha256": "ea9f5e9a309949b798644fd5c94eb02dc83dd53671813e3a43fe20e05dc37847",
+            "memory_norm": 360.3432312011719,
+            "key_norm": 78.70980834960938,
+            "created_step": 5,
+            "last_retrieved_step": 18
+          },
+          {
+            "slot_index": 1,
+            "memory_shape": [
+              8,
+              1536
+            ],
+            "memory_sha256": "9237b972dc72b821b4d434a74312adfd33d425a489e42dc507287bf78d461651",
+            "expected_memory_sha256": "9237b972dc72b821b4d434a74312adfd33d425a489e42dc507287bf78d461651",
+            "key_sha256": "48b4b543c3fe16ced6d1ef94efb292c44458be5859a49464a51bfd5d897a949e",
+            "memory_norm": 328.1128234863281,
+            "key_norm": 97.72508239746094,
+            "created_step": 2,
+            "last_retrieved_step": 18
+          }
+        ],
+        "forced_source_selection": false
+      }
+    ],
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "rendered_prompt_sha256": "6ea5a259717710c887c026334cdfd05654360b24e7af65773d9e4fd528d8113d",
+    "snapshot_unchanged": true,
+    "query_write_count_delta": 0,
+    "latency_seconds": 0.8701310157775879,
+    "peak_cuda_memory": 9466761216
+  },
+  "runtime_result": {
+    "prediction": "by /usr/bin/dash\nLadonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.",
+    "prompt_trace": [
+      {
+        "prompt_history_token_len": 327,
+        "full_history_included": false,
+        "query_prompt_contains_chunk_text": false,
+        "query_prompt_contains_ack_history": false,
+        "rendered_prompt_hash": "fcfdcfa17db1a6a03e5025bf8d273d10505fc6d529a860b9b4c96701bf5db46a"
+      }
+    ],
+    "generations": [
+      {
+        "input_len": 327,
+        "output_len": 28,
+        "trigger_count": 1,
+        "trigger_positive_count": 1,
+        "latency_sec": 0.8701310157775879,
+        "peak_cuda_memory": 9466761216,
+        "bank_debug": {
+          "config": {
+            "enabled": true,
+            "batch_size": 1,
+            "max_slots": 16,
+            "top_k": 2,
+            "threshold": 0.05,
+            "retrieve_threshold": 0.05,
+            "update_threshold": 0.1,
+            "decay_alpha": 0.05,
+            "pool_last_n": 64,
+            "update_policy": "thread_update",
+            "retrieve_policy": "threshold_topk",
+            "construction_write_policy": "full_thread_update",
+            "storage_device": "cpu",
+            "debug": true
+          },
+          "enabled": true,
+          "effective_retrieve_threshold": 0.05,
+          "effective_update_threshold": 0.1,
+          "step": 17,
+          "retrieval_step": 17,
+          "slot_count": 16,
+          "memory_write_count": 17,
+          "memory_retrieve_count": 16,
+          "retrieved_latent_count": 248,
+          "new_latent_count": 136,
+          "append_count": 16,
+          "replace_count": 1,
+          "rejected_write_count": 0,
+          "last_update_action": "insert",
+          "update_action_trace": [
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "replace_matched",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert",
+            "insert"
+          ],
+          "thread_insert_count": 16,
+          "matched_replace_count": 1,
+          "capacity_evict_count": 0,
+          "dropped_matched_overwrite_count": 0,
+          "dropped_new_thread_append_count": 0,
+          "dropped_capacity_eviction_count": 0,
+          "write_action_counts": {
+            "insert": 16,
+            "replace_matched": 1
+          },
+          "update_reason_counts": {
+            "empty_bank": 1,
+            "new_thread": 15,
+            "matched_thread": 1
+          },
+          "last_write_back": {
+            "matched_slot_index": 1,
+            "max_score": 0.08871329105450995,
+            "threshold_passed": true,
+            "retrieve_threshold_passed": true,
+            "update_threshold_passed": false,
+            "effective_retrieve_threshold": 0.05,
+            "effective_update_threshold": 0.1,
+            "retrieved_indices": [
+              1,
+              0
+            ],
+            "retrieved_scores": [
+              0.08871329105450995,
+              0.08453308362262205
+            ],
+            "write_action": "insert",
+            "replaced_slot_index": null,
+            "replaced_slot_score": null,
+            "evicted_slot_index": null,
+            "evicted_slot_last_retrieved_age": null,
+            "eviction_basis": null,
+            "update_reason": "new_thread",
+            "inserted_new_thread": true,
+            "dropped_write": false,
+            "retrieval_bank_step": 16,
+            "retrieval_step": 17
+          },
+          "write_back_trace": [
+            {
+              "matched_slot_index": null,
+              "max_score": null,
+              "threshold_passed": false,
+              "retrieve_threshold_passed": false,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [],
+              "retrieved_scores": [],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "empty_bank",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 0,
+              "retrieval_step": 1
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.09150009600910189,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0
+              ],
+              "retrieved_scores": [
+                0.09150009600910189
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 1,
+              "retrieval_step": 2
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.09986051087287769,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.09986051087287769,
+                0.08592648609991801
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 2,
+              "retrieval_step": 3
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.0947513684561258,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.0947513684561258,
+                0.07942394120587017
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 3,
+              "retrieval_step": 4
+            },
+            {
+              "matched_slot_index": 0,
+              "max_score": 0.10171838084260565,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": true,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                0,
+                1
+              ],
+              "retrieved_scores": [
+                0.10171838084260565,
+                0.08731988857721398
+              ],
+              "write_action": "replace_matched",
+              "replaced_slot_index": 0,
+              "replaced_slot_score": 0.10171838084260565,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "matched_thread",
+              "inserted_new_thread": false,
+              "dropped_write": false,
+              "retrieval_bank_step": 4,
+              "retrieval_step": 5
+            },
+            {
+              "matched_slot_index": 1,
+              "max_score": 0.08499755111505404,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                1,
+                0
+              ],
+              "retrieved_scores": [
+                0.08499755111505404,
+                0.08313968114532608
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 5,
+              "retrieval_step": 6
+            },
+            {
+              "matched_slot_index": 1,
+              "max_score": 0.08639095359235001,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                1,
+                0
+              ],
+              "retrieved_scores": [
+                0.08639095359235001,
+                0.08453308362262205
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 6,
+              "retrieval_step": 7
+            },
+            {
+              "matched_slot_index": 1,
+              "max_score": 0.08685542108478199,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                1,
+                0
+              ],
+              "retrieved_scores": [
+                0.08685542108478199,
+                0.08453308362262205
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 7,
+              "retrieval_step": 8
+            },
+            {
+              "matched_slot_index": 1,
+              "max_score": 0.08267521365289408,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                1,
+                0
+              ],
+              "retrieved_scores": [
+                0.08267521365289408,
+                0.07849500622100619
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 8,
+              "retrieval_step": 9
+            },
+            {
+              "matched_slot_index": 1,
+              "max_score": 0.08499755111505404,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                1,
+                0
+              ],
+              "retrieved_scores": [
+                0.08499755111505404,
+                0.08267521365289408
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 9,
+              "retrieval_step": 10
+            },
+            {
+              "matched_slot_index": 1,
+              "max_score": 0.08406861613019005,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                1,
+                0
+              ],
+              "retrieved_scores": [
+                0.08406861613019005,
+                0.08174627866803011
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 10,
+              "retrieval_step": 11
+            },
+            {
+              "matched_slot_index": 1,
+              "max_score": 0.08313968114532608,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                1,
+                0
+              ],
+              "retrieved_scores": [
+                0.08313968114532608,
+                0.08035287619073414
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 11,
+              "retrieval_step": 12
+            },
+            {
+              "matched_slot_index": 1,
+              "max_score": 0.08174627866803011,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                1,
+                0
+              ],
+              "retrieved_scores": [
+                0.08174627866803011,
+                0.07895947371343817
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 12,
+              "retrieval_step": 13
+            },
+            {
+              "matched_slot_index": 1,
+              "max_score": 0.08267521365289408,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                1,
+                0
+              ],
+              "retrieved_scores": [
+                0.08267521365289408,
+                0.08081734368316613
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 13,
+              "retrieval_step": 14
+            },
+            {
+              "matched_slot_index": 1,
+              "max_score": 0.08360414863775807,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                1,
+                0
+              ],
+              "retrieved_scores": [
+                0.08360414863775807,
+                0.08128181117559811
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 14,
+              "retrieval_step": 15
+            },
+            {
+              "matched_slot_index": 1,
+              "max_score": 0.08546201860748602,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                1,
+                0
+              ],
+              "retrieved_scores": [
+                0.08546201860748602,
+                0.08360414863775807
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 15,
+              "retrieval_step": 16
+            },
+            {
+              "matched_slot_index": 1,
+              "max_score": 0.08871329105450995,
+              "threshold_passed": true,
+              "retrieve_threshold_passed": true,
+              "update_threshold_passed": false,
+              "effective_retrieve_threshold": 0.05,
+              "effective_update_threshold": 0.1,
+              "retrieved_indices": [
+                1,
+                0
+              ],
+              "retrieved_scores": [
+                0.08871329105450995,
+                0.08453308362262205
+              ],
+              "write_action": "insert",
+              "replaced_slot_index": null,
+              "replaced_slot_score": null,
+              "evicted_slot_index": null,
+              "evicted_slot_last_retrieved_age": null,
+              "eviction_basis": null,
+              "update_reason": "new_thread",
+              "inserted_new_thread": true,
+              "dropped_write": false,
+              "retrieval_bank_step": 16,
+              "retrieval_step": 17
+            }
+          ],
+          "slots": [
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 5,
+              "last_access_step": 17,
+              "last_retrieved_step": 17,
+              "last_retrieved_age": 0,
+              "access_count": 12,
+              "last_score": 0.08453308362262205,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 2,
+              "last_access_step": 17,
+              "last_retrieved_step": 17,
+              "last_retrieved_age": 0,
+              "access_count": 15,
+              "last_score": 0.08871329105450995,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 3,
+              "last_access_step": 3,
+              "last_retrieved_step": 3,
+              "last_retrieved_age": 14,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 4,
+              "last_access_step": 4,
+              "last_retrieved_step": 4,
+              "last_retrieved_age": 13,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 6,
+              "last_access_step": 6,
+              "last_retrieved_step": 6,
+              "last_retrieved_age": 11,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 7,
+              "last_access_step": 7,
+              "last_retrieved_step": 7,
+              "last_retrieved_age": 10,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 8,
+              "last_access_step": 8,
+              "last_retrieved_step": 8,
+              "last_retrieved_age": 9,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 9,
+              "last_access_step": 9,
+              "last_retrieved_step": 9,
+              "last_retrieved_age": 8,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 10,
+              "last_access_step": 10,
+              "last_retrieved_step": 10,
+              "last_retrieved_age": 7,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 11,
+              "last_access_step": 11,
+              "last_retrieved_step": 11,
+              "last_retrieved_age": 6,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 12,
+              "last_access_step": 12,
+              "last_retrieved_step": 12,
+              "last_retrieved_age": 5,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 13,
+              "last_access_step": 13,
+              "last_retrieved_step": 13,
+              "last_retrieved_age": 4,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 14,
+              "last_access_step": 14,
+              "last_retrieved_step": 14,
+              "last_retrieved_age": 3,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 15,
+              "last_access_step": 15,
+              "last_retrieved_step": 15,
+              "last_retrieved_age": 2,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 16,
+              "last_access_step": 16,
+              "last_retrieved_step": 16,
+              "last_retrieved_age": 1,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            },
+            {
+              "memory_shape": [
+                8,
+                1536
+              ],
+              "key_shape": [
+                1536
+              ],
+              "storage_device": "cpu",
+              "storage_dtype": "torch.bfloat16",
+              "original_device": "cuda:0",
+              "original_dtype": "torch.bfloat16",
+              "created_step": 17,
+              "last_access_step": 17,
+              "last_retrieved_step": 17,
+              "last_retrieved_age": 0,
+              "access_count": 0,
+              "last_score": null,
+              "metadata": {}
+            }
+          ]
+        },
+        "scores": [
+          0.07988840869830216,
+          0.08174627866803011,
+          0.03805687558704464,
+          0.03782583368723627,
+          0.03202294458654109,
+          0.03352393917738179,
+          0.036723536037288354,
+          0.03985175947636083,
+          0.0422223075872058,
+          0.04111827476630188,
+          0.04268386232443492,
+          0.04601313220294921,
+          0.05057101575408433,
+          0.05127264312688333,
+          0.05500598561790867,
+          0.052020359152382796
+        ],
+        "max_score": 0.08174627866803011,
+        "argmax_index": 1,
+        "threshold_passed": true,
+        "retrieved_indices": [
+          0,
+          1
+        ],
+        "retrieved_scores": [
+          0.07988840869830216,
+          0.08174627866803011
+        ],
+        "retrieved_slot_count": 2,
+        "retrieved_latent_count": 16,
+        "retrieval_step": 18,
+        "retrieved_memory_to_weaver": true,
+        "query_retrieved_memory_conditioning": true,
+        "query_latent_usage": "weaver_integrated",
+        "memory_bank_storage_space": "weaver",
+        "stored_latent_space": "weaver",
+        "retrieval_query_space": "weaver",
+        "retrieved_memory_space": "weaver",
+        "stored_weaver_latents_in_bank": true,
+        "retrieved_weaver_latents_from_bank": true,
+        "retrieved_memory_projected_to_weaver": false,
+        "retrieved_latents_enter_weaver": true,
+        "weaver_conditioned_on_retrieved_memory": true,
+        "weaver_conditioning_token_count": 16,
+        "conditioned_slot_count": 2,
+        "conditioned_latent_count": 16,
+        "empty_retrieval_before_ablation": false,
+        "retrieval_requested_top_k": 2,
+        "retrieval_effective_top_k": 2,
+        "reasoner_injected_latent_count": 0,
+        "reasoner_injected_latent_shape": null,
+        "reasoner_injected_latent_space": null,
+        "direct_injection_applied": false,
+        "query_weaver_invoke_count": 1,
+        "weaver_output_generated": true,
+        "weaver_output_consumed": true,
+        "fused_latent_generated": true,
+        "raw_retrieved_latents_enter_reasoner": false,
+        "retrieved_latents_enter_reasoner": false,
+        "query_write_count": 0,
+        "query_write_attempt_count": 0,
+        "constrained_choice": false
+      }
+    ],
+    "context_capacity": 32768,
+    "bank_write_count": 17,
+    "bank_retrieval_count": 16,
+    "bank_retrieved_latent_count": 248,
+    "retrieved_indices_by_turn": [
+      [
+        0,
+        1
+      ]
+    ],
+    "retrieved_scores_by_turn": [
+      [
+        0.07988840869830216,
+        0.08174627866803011
+      ]
+    ],
+    "bank_slot_count_final_before_reset": 16,
+    "bank_reset_after_context": false,
+    "cross_context_leakage_detected": false,
+    "query_write_count": 0,
+    "query_write_attempt_count": 1,
+    "peak_cuda_memory": 9466761216,
+    "latency_seconds": 0.8701310157775879,
+    "trigger_active_flag": false,
+    "eventqa_protocol": "frozen_context_bank",
+    "effective_generation_max_length": 40,
+    "query_retrieved_memory_conditioning": true,
+    "query_latent_usage": "weaver_integrated",
+    "query_retrieval_invocation_count": 1,
+    "rendered_query_messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant that can read the context and memorize it for future retrieval."
+      },
+      {
+        "role": "user",
+        "content": "Based on the context you memorized, complete the task below:\n\nThese are the events that have already occurred:\n\n...\n26. Ladonna expressed a desire to ask Edie Arkadyevitch a question.\n27. Ladonna expressed that he was no longer a district councilor.\n28. Edie Arkadyevitch mentioned that the Shtcherbatskys would be at the Zoological Gardens.\n29. Edie Arkadyevitch commented on Ladonna's energy and capabilities.\n30. Ladonna stayed at his elder half-brother Koznishev's house.\n\n\nBelow is a list of possible subsequent events:\n\n['Ladonna stumbled upon an intense debate between Sergey Ivanovitch and the renowned author.', 'Ladonna found herself engrossed in the heated argument between Sergey Ivanovitch and the art critic.', 'Ladonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.', 'Ladonna witnessed a lively exchange of ideas between Sergey Ivanovitch and the local historian.', 'Ladonna became interested in the philosophical discussion between Sergey Ivanovitch and the professor.', 'Ladonna became intrigued by the animated conversation between Sergey Ivanovitch and the cultural commentator.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. \n\n The event that happens next is:"
+      }
+    ],
+    "rendered_query_prompt": "<|im_start|>system\nYou are a helpful assistant that can read the context and memorize it for future retrieval.<|im_end|>\n<|im_start|>user\nBased on the context you memorized, complete the task below:\n\nThese are the events that have already occurred:\n\n...\n26. Ladonna expressed a desire to ask Edie Arkadyevitch a question.\n27. Ladonna expressed that he was no longer a district councilor.\n28. Edie Arkadyevitch mentioned that the Shtcherbatskys would be at the Zoological Gardens.\n29. Edie Arkadyevitch commented on Ladonna's energy and capabilities.\n30. Ladonna stayed at his elder half-brother Koznishev's house.\n\n\nBelow is a list of possible subsequent events:\n\n['Ladonna stumbled upon an intense debate between Sergey Ivanovitch and the renowned author.', 'Ladonna found herself engrossed in the heated argument between Sergey Ivanovitch and the art critic.', 'Ladonna was captivated by a spirited dialogue between Sergey Ivanovitch and the visiting scientist.', 'Ladonna witnessed a lively exchange of ideas between Sergey Ivanovitch and the local historian.', 'Ladonna became interested in the philosophical discussion between Sergey Ivanovitch and the professor.', 'Ladonna became intrigued by the animated conversation between Sergey Ivanovitch and the cultural commentator.']\n\n Your task is to choose from the above events which event happens next based on the book excerpt. In your response to me, only include the answer without anything else. \n\n The event that happens next is:<|im_end|>\n<|im_start|>assistant\n",
+    "bank_instance_id": 140444367417648,
+    "context_initial_reset_count": 0,
+    "context_memorization_performed": false,
+    "construction_turn_diagnostics": [],
+    "pre_query_bank_tensor_snapshot": {
+      "context_index": 4,
+      "context_id": "eventqa-365235d948f3d1d5",
+      "slot_count": 16,
+      "retrieval_step": 17,
+      "combined_frozen_bank_hash": "d7a9199754dc45cbe7ab1d31514c10348d368cd53f354d80fdad5b7c7d4d9a1a",
+      "slots": [
+        {
+          "slot_index": 0,
+          "memory_tensor_hash": "e2357834dea0564134bf14169d1c7f62fc7e26dd02be0b673ace08ca7614aa50",
+          "key_tensor_hash": "4a31ed4fb5d6a9daa1a7dd21a97679c76557bf7c024cb7e2efdb8541b75bd298",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 5,
+          "last_retrieved_step": 17,
+          "access_count": 12,
+          "memory_token_count": 8,
+          "key_norm": 78.70979309082031,
+          "memory_norm": 360.3428955078125
+        },
+        {
+          "slot_index": 1,
+          "memory_tensor_hash": "14ce3e9768ba218954f5cf907835ac6d905aed9914fbd9c0040b82e1ad69c789",
+          "key_tensor_hash": "7489c2d0d24ce92dcb8d629587cbf76f018ed10fdcb1be7185c9c48d1eee51fa",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 2,
+          "last_retrieved_step": 17,
+          "access_count": 15,
+          "memory_token_count": 8,
+          "key_norm": 97.72505950927734,
+          "memory_norm": 328.11260986328125
+        },
+        {
+          "slot_index": 2,
+          "memory_tensor_hash": "83d41daada10b84f3d576ca92696b7bd8edf98b458c494bc3fdb6a483680493f",
+          "key_tensor_hash": "e7910de0b151d958e187e69db0f41c029c3918eea8cde987c9b2ce397e805402",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 3,
+          "last_retrieved_step": 3,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 80.51068878173828,
+          "memory_norm": 358.654296875
+        },
+        {
+          "slot_index": 3,
+          "memory_tensor_hash": "b33e2af20386769b72975babbc5f232d86847a24b23902c69b6cc6ad26108374",
+          "key_tensor_hash": "79b048037d0bc05fc574f8c88446bf24207bbd7a9f0584bda6539cfeab408ad7",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 4,
+          "last_retrieved_step": 4,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 78.16084289550781,
+          "memory_norm": 365.397216796875
+        },
+        {
+          "slot_index": 4,
+          "memory_tensor_hash": "e2e04b55255fa82cdf0b567c7ebccc4c8ea549e2673b897c8e848fdcef08a832",
+          "key_tensor_hash": "facb943074888313e6bb624c960662f4eb76feaa3c344bb5dfd3c6659faf1c04",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 6,
+          "last_retrieved_step": 6,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 88.8082504272461,
+          "memory_norm": 371.5871276855469
+        },
+        {
+          "slot_index": 5,
+          "memory_tensor_hash": "e9782bad55cb073e1eb8c66f779547dc3d275ec9cb2a98ea4c70c3beb0c981e8",
+          "key_tensor_hash": "6a48c34f524630f28440b8cb82c4f02de158d4944e26e0ecf693e1d0a30781cc",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 7,
+          "last_retrieved_step": 7,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 88.4670181274414,
+          "memory_norm": 371.14239501953125
+        },
+        {
+          "slot_index": 6,
+          "memory_tensor_hash": "12d15fbbacf89aa2046aa537ee7a1873943ce9ff76a6c78700cd0d62ad6c61d5",
+          "key_tensor_hash": "14a5f583eec189d843d2af761004751c4f89e4ecf4bc6c1eff2de4f874f68f53",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 8,
+          "last_retrieved_step": 8,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 87.127685546875,
+          "memory_norm": 371.6336669921875
+        },
+        {
+          "slot_index": 7,
+          "memory_tensor_hash": "0028f66f229e9cd8a8de197e46442e9e6ea04ad57f92bf160288a4ff8e8c6a64",
+          "key_tensor_hash": "3220044a31e47c87887f99c9774bf583058ab5297b4a7af035785221a995815d",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 9,
+          "last_retrieved_step": 9,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 86.36907958984375,
+          "memory_norm": 361.3987731933594
+        },
+        {
+          "slot_index": 8,
+          "memory_tensor_hash": "56e0b97ffb1da2ab2869eb8b4bb88892a56d3d9ece79e8af031fef95183c6fbf",
+          "key_tensor_hash": "6fc34758783d9f12e530ff66beb8ab5a1d078b5aed405d8876f2dd099c52dca5",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 10,
+          "last_retrieved_step": 10,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 88.74757385253906,
+          "memory_norm": 373.0050964355469
+        },
+        {
+          "slot_index": 9,
+          "memory_tensor_hash": "9ba61c761a067a0acf0baeb8b117e8548d2b1a21b39ca5d46fa23b4f97a4c976",
+          "key_tensor_hash": "2cf6a32c9fbd1fcb2a8e860a0c48860dff3ecdca12a64d6cf1de91be188bed20",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 11,
+          "last_retrieved_step": 11,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 88.3028793334961,
+          "memory_norm": 368.96746826171875
+        },
+        {
+          "slot_index": 10,
+          "memory_tensor_hash": "470c6dba35d588ed503a271e0ffb598f617e63c525235a9023a4513c36bde4d8",
+          "key_tensor_hash": "652e8b468f4ee2d3c0af84df01e43b3929da1046e46516a67de433b42f046e8d",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 12,
+          "last_retrieved_step": 12,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 88.0284652709961,
+          "memory_norm": 369.3299255371094
+        },
+        {
+          "slot_index": 11,
+          "memory_tensor_hash": "27815942bcd58d641d9852eed16e5a8ff6dac6750e15b79b5ba3e8cb4ccd3bc7",
+          "key_tensor_hash": "5c673cdf08eb731716245d9a8e34a703e906760b3ee3995bddcf3b91c15fb110",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 13,
+          "last_retrieved_step": 13,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 89.02557373046875,
+          "memory_norm": 374.6728210449219
+        },
+        {
+          "slot_index": 12,
+          "memory_tensor_hash": "3ec213eef0bccd781565e9cbba328163490967046c26c6c1ed303a5d8c3bca60",
+          "key_tensor_hash": "8739104ac00048a57197fcab2898d1f3e617523625f9e47357f8dc212b991e67",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 14,
+          "last_retrieved_step": 14,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 87.78925323486328,
+          "memory_norm": 368.064453125
+        },
+        {
+          "slot_index": 13,
+          "memory_tensor_hash": "da352f3f7d295448dcebe53d425ae4f14d0bb8b772c5a6ce2d7cb6fd77ec41c3",
+          "key_tensor_hash": "bccd13c480c77fa541704bd2ce9be5ad304a70ce0075bf4440a37938a2d3c94f",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 15,
+          "last_retrieved_step": 15,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 85.9931869506836,
+          "memory_norm": 371.0451354980469
+        },
+        {
+          "slot_index": 14,
+          "memory_tensor_hash": "b58c2538907bb93e160f5c7e5478f86858c8d134f0444cb2545d7bafe213ae1a",
+          "key_tensor_hash": "b0b6795409aa5950f2fafc9c87770d73565b1caad5de1836c6c9bd5dc2c62e4b",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 16,
+          "last_retrieved_step": 16,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 86.31350708007812,
+          "memory_norm": 363.2879333496094
+        },
+        {
+          "slot_index": 15,
+          "memory_tensor_hash": "4efea444a76dd8e8b93a99c2817c23f58798d569656f6ec61562ff744eb88dab",
+          "key_tensor_hash": "8e81227c8ebfe5990b1811827006e0b12117d8d09fc84cb7a6f86361a70cc526",
+          "memory_shape": [
+            8,
+            1536
+          ],
+          "key_shape": [
+            1536
+          ],
+          "memory_dtype": "torch.bfloat16",
+          "key_dtype": "torch.bfloat16",
+          "created_step": 17,
+          "last_retrieved_step": 17,
+          "access_count": 0,
+          "memory_token_count": 8,
+          "key_norm": 85.2511215209961,
+          "memory_norm": 381.45416259765625
+        }
+      ]
+    },
+    "query_score_decomposition": {
+      "query_id": 29,
+      "query_vector_hash": "1a9e28bca09f7d3106e2f1bb4a80fd78f377f29e65a998de8299a3d5712cb007",
+      "query_norm": 0.5951890349388123,
+      "query_cosine_to_first": null,
+      "query_cosine_to_previous": null,
+      "retrieval_step": 18,
+      "retrieved_indices": [
+        0,
+        1
+      ],
+      "retrieved_latent_count": 16,
+      "slots": [
+        {
+          "slot_index": 0,
+          "raw_cosine": 0.083984375,
+          "last_retrieved_age": 1,
+          "decay_factor": 0.951229424500714,
+          "final_score": 0.07988840869830216,
+          "threshold_passed": true,
+          "raw_cosine_rank": 2,
+          "final_score_rank": 2,
+          "selected_by_topk": true
+        },
+        {
+          "slot_index": 1,
+          "raw_cosine": 0.0859375,
+          "last_retrieved_age": 1,
+          "decay_factor": 0.951229424500714,
+          "final_score": 0.08174627866803011,
+          "threshold_passed": true,
+          "raw_cosine_rank": 1,
+          "final_score_rank": 1,
+          "selected_by_topk": true
+        },
+        {
+          "slot_index": 2,
+          "raw_cosine": 0.08056640625,
+          "last_retrieved_age": 15,
+          "decay_factor": 0.4723665527410147,
+          "final_score": 0.03805687558704464,
+          "threshold_passed": false,
+          "raw_cosine_rank": 3,
+          "final_score_rank": 12,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 3,
+          "raw_cosine": 0.076171875,
+          "last_retrieved_age": 14,
+          "decay_factor": 0.49658530379140947,
+          "final_score": 0.03782583368723627,
+          "threshold_passed": false,
+          "raw_cosine_rank": 4,
+          "final_score_rank": 13,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 4,
+          "raw_cosine": 0.058349609375,
+          "last_retrieved_age": 12,
+          "decay_factor": 0.5488116360940264,
+          "final_score": 0.03202294458654109,
+          "threshold_passed": false,
+          "raw_cosine_rank": 12,
+          "final_score_rank": 16,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 5,
+          "raw_cosine": 0.05810546875,
+          "last_retrieved_age": 11,
+          "decay_factor": 0.5769498103804866,
+          "final_score": 0.03352393917738179,
+          "threshold_passed": false,
+          "raw_cosine_rank": 14,
+          "final_score_rank": 15,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 6,
+          "raw_cosine": 0.060546875,
+          "last_retrieved_age": 10,
+          "decay_factor": 0.6065306597126334,
+          "final_score": 0.036723536037288354,
+          "threshold_passed": false,
+          "raw_cosine_rank": 9,
+          "final_score_rank": 14,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 7,
+          "raw_cosine": 0.0625,
+          "last_retrieved_age": 9,
+          "decay_factor": 0.6376281516217733,
+          "final_score": 0.03985175947636083,
+          "threshold_passed": false,
+          "raw_cosine_rank": 6,
+          "final_score_rank": 11,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 8,
+          "raw_cosine": 0.06298828125,
+          "last_retrieved_age": 8,
+          "decay_factor": 0.6703200460356393,
+          "final_score": 0.0422223075872058,
+          "threshold_passed": false,
+          "raw_cosine_rank": 5,
+          "final_score_rank": 9,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 9,
+          "raw_cosine": 0.058349609375,
+          "last_retrieved_age": 7,
+          "decay_factor": 0.7046880897187134,
+          "final_score": 0.04111827476630188,
+          "threshold_passed": false,
+          "raw_cosine_rank": 13,
+          "final_score_rank": 10,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 10,
+          "raw_cosine": 0.0576171875,
+          "last_retrieved_age": 6,
+          "decay_factor": 0.7408182206817179,
+          "final_score": 0.04268386232443492,
+          "threshold_passed": false,
+          "raw_cosine_rank": 15,
+          "final_score_rank": 8,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 11,
+          "raw_cosine": 0.05908203125,
+          "last_retrieved_age": 5,
+          "decay_factor": 0.7788007830714049,
+          "final_score": 0.04601313220294921,
+          "threshold_passed": false,
+          "raw_cosine_rank": 11,
+          "final_score_rank": 7,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 12,
+          "raw_cosine": 0.061767578125,
+          "last_retrieved_age": 4,
+          "decay_factor": 0.8187307530779818,
+          "final_score": 0.05057101575408433,
+          "threshold_passed": true,
+          "raw_cosine_rank": 7,
+          "final_score_rank": 6,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 13,
+          "raw_cosine": 0.0595703125,
+          "last_retrieved_age": 3,
+          "decay_factor": 0.8607079764250578,
+          "final_score": 0.05127264312688333,
+          "threshold_passed": true,
+          "raw_cosine_rank": 10,
+          "final_score_rank": 5,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 14,
+          "raw_cosine": 0.060791015625,
+          "last_retrieved_age": 2,
+          "decay_factor": 0.9048374180359595,
+          "final_score": 0.05500598561790867,
+          "threshold_passed": true,
+          "raw_cosine_rank": 8,
+          "final_score_rank": 3,
+          "selected_by_topk": false
+        },
+        {
+          "slot_index": 15,
+          "raw_cosine": 0.0546875,
+          "last_retrieved_age": 1,
+          "decay_factor": 0.951229424500714,
+          "final_score": 0.052020359152382796,
+          "threshold_passed": true,
+          "raw_cosine_rank": 16,
+          "final_score_rank": 4,
+          "selected_by_topk": false
+        }
+      ]
+    },
+    "pre_query_bank_summary": {
+      "slot_count": 16,
+      "write_count": 17,
+      "retrieval_count": 16,
+      "slot_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "slots": [
+        {
+          "slot_index": 0,
+          "created_step": 5,
+          "last_retrieved_step": 17,
+          "last_retrieved_age": 0,
+          "access_count": 12,
+          "last_score": 0.08453308362262205,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 1,
+          "created_step": 2,
+          "last_retrieved_step": 17,
+          "last_retrieved_age": 0,
+          "access_count": 15,
+          "last_score": 0.08871329105450995,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 2,
+          "created_step": 3,
+          "last_retrieved_step": 3,
+          "last_retrieved_age": 14,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 3,
+          "created_step": 4,
+          "last_retrieved_step": 4,
+          "last_retrieved_age": 13,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 4,
+          "created_step": 6,
+          "last_retrieved_step": 6,
+          "last_retrieved_age": 11,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 5,
+          "created_step": 7,
+          "last_retrieved_step": 7,
+          "last_retrieved_age": 10,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 6,
+          "created_step": 8,
+          "last_retrieved_step": 8,
+          "last_retrieved_age": 9,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 7,
+          "created_step": 9,
+          "last_retrieved_step": 9,
+          "last_retrieved_age": 8,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 8,
+          "created_step": 10,
+          "last_retrieved_step": 10,
+          "last_retrieved_age": 7,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 9,
+          "created_step": 11,
+          "last_retrieved_step": 11,
+          "last_retrieved_age": 6,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 10,
+          "created_step": 12,
+          "last_retrieved_step": 12,
+          "last_retrieved_age": 5,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 11,
+          "created_step": 13,
+          "last_retrieved_step": 13,
+          "last_retrieved_age": 4,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 12,
+          "created_step": 14,
+          "last_retrieved_step": 14,
+          "last_retrieved_age": 3,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 13,
+          "created_step": 15,
+          "last_retrieved_step": 15,
+          "last_retrieved_age": 2,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 14,
+          "created_step": 16,
+          "last_retrieved_step": 16,
+          "last_retrieved_age": 1,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 15,
+          "created_step": 17,
+          "last_retrieved_step": 17,
+          "last_retrieved_age": 0,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        }
+      ],
+      "true_insert_count": 16,
+      "true_matched_replace_count": 1,
+      "true_capacity_evict_count": 0,
+      "true_replace_old_slot_count": 0,
+      "write_action_counts": {
+        "insert": 16,
+        "replace_matched": 1
+      }
+    },
+    "post_query_bank_summary": {
+      "slot_count": 16,
+      "write_count": 17,
+      "retrieval_count": 16,
+      "slot_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "slots": [
+        {
+          "slot_index": 0,
+          "created_step": 5,
+          "last_retrieved_step": 17,
+          "last_retrieved_age": 0,
+          "access_count": 12,
+          "last_score": 0.08453308362262205,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 1,
+          "created_step": 2,
+          "last_retrieved_step": 17,
+          "last_retrieved_age": 0,
+          "access_count": 15,
+          "last_score": 0.08871329105450995,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 2,
+          "created_step": 3,
+          "last_retrieved_step": 3,
+          "last_retrieved_age": 14,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 3,
+          "created_step": 4,
+          "last_retrieved_step": 4,
+          "last_retrieved_age": 13,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 4,
+          "created_step": 6,
+          "last_retrieved_step": 6,
+          "last_retrieved_age": 11,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 5,
+          "created_step": 7,
+          "last_retrieved_step": 7,
+          "last_retrieved_age": 10,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 6,
+          "created_step": 8,
+          "last_retrieved_step": 8,
+          "last_retrieved_age": 9,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 7,
+          "created_step": 9,
+          "last_retrieved_step": 9,
+          "last_retrieved_age": 8,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 8,
+          "created_step": 10,
+          "last_retrieved_step": 10,
+          "last_retrieved_age": 7,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 9,
+          "created_step": 11,
+          "last_retrieved_step": 11,
+          "last_retrieved_age": 6,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 10,
+          "created_step": 12,
+          "last_retrieved_step": 12,
+          "last_retrieved_age": 5,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 11,
+          "created_step": 13,
+          "last_retrieved_step": 13,
+          "last_retrieved_age": 4,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 12,
+          "created_step": 14,
+          "last_retrieved_step": 14,
+          "last_retrieved_age": 3,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 13,
+          "created_step": 15,
+          "last_retrieved_step": 15,
+          "last_retrieved_age": 2,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 14,
+          "created_step": 16,
+          "last_retrieved_step": 16,
+          "last_retrieved_age": 1,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        },
+        {
+          "slot_index": 15,
+          "created_step": 17,
+          "last_retrieved_step": 17,
+          "last_retrieved_age": 0,
+          "access_count": 0,
+          "last_score": null,
+          "memory_shape": [
+            8,
+            1536
+          ]
+        }
+      ],
+      "true_insert_count": 16,
+      "true_matched_replace_count": 1,
+      "true_capacity_evict_count": 0,
+      "true_replace_old_slot_count": 0,
+      "write_action_counts": {
+        "insert": 16,
+        "replace_matched": 1
+      }
+    },
+    "pre_query_write_count": 17,
+    "post_query_write_count": 17,
+    "query_write_count_delta": 0,
+    "query_write_attempt_count_delta": 1,
+    "query_read_only_enforced": true,
+    "bank_snapshot_changed_after_query": false,
+    "true_insert_count": 16,
+    "true_matched_replace_count": 1,
+    "true_capacity_evict_count": 0,
+    "true_replace_old_slot_count": 0,
+    "query_candidate_scores": [
+      0.07988840869830216,
+      0.08174627866803011,
+      0.03805687558704464,
+      0.03782583368723627,
+      0.03202294458654109,
+      0.03352393917738179,
+      0.036723536037288354,
+      0.03985175947636083,
+      0.0422223075872058,
+      0.04111827476630188,
+      0.04268386232443492,
+      0.04601313220294921,
+      0.05057101575408433,
+      0.05127264312688333,
+      0.05500598561790867,
+      0.052020359152382796
+    ],
+    "query_candidate_slot_count": 16,
+    "query_slot_1_existed": true,
+    "query_slot_1_passed_retrieve_threshold": true,
+    "query_slot_1_lost_top_k1_ranking": false,
+    "bank_preserved_for_context_queries": true
+  },
+  "contract_sha256": "248b2eeeb0886c202a868cb482cb7c003e08d1ce92374e6789918153d16c8d0d",
+  "content_sha256": "2597bf0038074add8b9073880845861405fba038c5bf94a1fe0bd6f5b4133080"
+}

@@ -1,0 +1,112 @@
+[
+  {
+    "context_index": 0,
+    "top_level_fields": [
+      "answers",
+      "context",
+      "metadata",
+      "questions"
+    ],
+    "metadata_fields": {
+      "demo": "null",
+      "haystack_sessions": "null",
+      "keypoints": "null",
+      "previous_events": "list",
+      "qa_pair_ids": "list",
+      "question_dates": "null",
+      "question_ids": "null",
+      "question_types": "null",
+      "source": "str"
+    },
+    "verified_source_span_fields": [],
+    "qa_pair_ids_are_question_ids_not_source_offsets": true
+  },
+  {
+    "context_index": 1,
+    "top_level_fields": [
+      "answers",
+      "context",
+      "metadata",
+      "questions"
+    ],
+    "metadata_fields": {
+      "demo": "null",
+      "haystack_sessions": "null",
+      "keypoints": "null",
+      "previous_events": "list",
+      "qa_pair_ids": "list",
+      "question_dates": "null",
+      "question_ids": "null",
+      "question_types": "null",
+      "source": "str"
+    },
+    "verified_source_span_fields": [],
+    "qa_pair_ids_are_question_ids_not_source_offsets": true
+  },
+  {
+    "context_index": 2,
+    "top_level_fields": [
+      "answers",
+      "context",
+      "metadata",
+      "questions"
+    ],
+    "metadata_fields": {
+      "demo": "null",
+      "haystack_sessions": "null",
+      "keypoints": "null",
+      "previous_events": "list",
+      "qa_pair_ids": "list",
+      "question_dates": "null",
+      "question_ids": "null",
+      "question_types": "null",
+      "source": "str"
+    },
+    "verified_source_span_fields": [],
+    "qa_pair_ids_are_question_ids_not_source_offsets": true
+  },
+  {
+    "context_index": 3,
+    "top_level_fields": [
+      "answers",
+      "context",
+      "metadata",
+      "questions"
+    ],
+    "metadata_fields": {
+      "demo": "null",
+      "haystack_sessions": "null",
+      "keypoints": "null",
+      "previous_events": "list",
+      "qa_pair_ids": "list",
+      "question_dates": "null",
+      "question_ids": "null",
+      "question_types": "null",
+      "source": "str"
+    },
+    "verified_source_span_fields": [],
+    "qa_pair_ids_are_question_ids_not_source_offsets": true
+  },
+  {
+    "context_index": 4,
+    "top_level_fields": [
+      "answers",
+      "context",
+      "metadata",
+      "questions"
+    ],
+    "metadata_fields": {
+      "demo": "null",
+      "haystack_sessions": "null",
+      "keypoints": "null",
+      "previous_events": "list",
+      "qa_pair_ids": "list",
+      "question_dates": "null",
+      "question_ids": "null",
+      "question_types": "null",
+      "source": "str"
+    },
+    "verified_source_span_fields": [],
+    "qa_pair_ids_are_question_ids_not_source_offsets": true
+  }
+]

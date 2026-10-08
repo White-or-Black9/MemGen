@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-10-08T04:41:32.915412+00:00",
+  "identical_artifact_sha256": {
+    "states.jsonl": "fa9bb76bd0f249693e44459f3c3e3cf71dde469a082c798c3977c4f05ecf1692",
+    "comparisons.json": "7c9f352dc541c756bc3c03be02c1107478283fc3b1cf6b166aba28f4c37e8a3f",
+    "policy_summary.json": "416e2326b40068468d528c00e38726b82d7eda21a27cd4e802ce99a9fc059d4d",
+    "summary.json": "852c4baa4f1b221958ed0844dc7a0086c5ce165b9fd6ac30f8a0ba7d0cd72d69",
+    "examples.jsonl": "ad2d720609b8e45443a04d469a1dd9ea4a69aef2f3c2797d6903241c2db178ff"
+  },
+  "parent_inputs_equal": true,
+  "parent_json_hash_count": 30162,
+  "analyzer_sha256": "c57625d395cbb5142b683743235d6b0d588cb4c4215031c7a0787f551a72fade",
+  "new_tests": 9,
+  "m4_total_tests": 31,
+  "controller_scorer_regressions": 25,
+  "runs": [
+    "research_notes/next_version/m4/run-20261008-b2",
+    "research_notes/next_version/m4/run-20261008-b2-repeat"
+  ]
+}

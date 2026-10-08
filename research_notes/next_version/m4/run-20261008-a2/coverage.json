@@ -1,0 +1,31 @@
+{
+  "status": "COMPLETE_WITH_LIMITATIONS",
+  "rubric": "M4-A-source-audit-v1",
+  "jobs_verified": 25,
+  "parent_records_verified": 15000,
+  "live_slot_versions": 400,
+  "live_slots_with_source_chunk": 400,
+  "construction_write_actions": {
+    "insert": 400,
+    "replace_matched": 10,
+    "evict_oldest_insert": 15
+  },
+  "unique_contexts": 5,
+  "unique_questions": 500,
+  "seed_question_associations": 2500,
+  "source_evidence_resolved_questions": 0,
+  "unknown_source_evidence_questions": 500,
+  "unknown_seed_question_associations": 2500,
+  "unknown_latent_semantic_relevance_associations": 2500,
+  "lexical_status_counts": {
+    "absent": 500
+  },
+  "lexical_cross_boundary_matches": 0,
+  "parent_preserved": true,
+  "parent_files_checked": 30192,
+  "torch_loaded": false,
+  "elapsed_seconds": 46.72235517899935,
+  "manual_annotations_performed": 0,
+  "next_route": "plan M4-B trace/output diagnostics; source semantic labeling requires a separate verified-span protocol",
+  "manuscript_takeaway": "Slot input provenance is recoverable; question evidence and latent retention are not established by these logs."
+}

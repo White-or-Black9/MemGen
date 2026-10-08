@@ -1,0 +1,29 @@
+{
+  "stage": "M5",
+  "materials_status": "COMPLETE",
+  "verdict": "neutral",
+  "action": "request_user_decision",
+  "reason": "Current evidence supports scoped answer-production effects but not query-adaptive semantic relevance or retention; narrowing versus new mechanism evidence is a substantive user choice.",
+  "target_campaign": "20261002-m3-six-policy-v3",
+  "review_ids": ["R01", "R02", "R03", "R04", "R05", "R06", "R07", "R08", "R09", "R10", "R11", "R12", "R13", "R14", "R15", "R16"],
+  "claim_ids": ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11", "C12"],
+  "routes": {
+    "A": "Narrow scoped manuscript after a read-only interface audit; no automatic model runs.",
+    "B": "Preregister source-span and latent-retention validation before considering any redesign or inference campaign."
+  },
+  "selected_route": null,
+  "reflection": {
+    "what_worked": "Matched M3 comparison plus reproducible M4 offline audits separate selection, candidate validity and correctness.",
+    "what_failed": "Query-varying scores did not produce varying selections; source metadata did not supply verified semantic labels.",
+    "learned_constraints": "Five contexts only; historical dirty P7 cannot be merged with current M3; candidate validity is not parser failure or semantic retrieval."
+  },
+  "next_direction": {
+    "objective": "User chooses scoped writing versus obtaining new mechanism evidence.",
+    "key_steps": ["Choose A or B", "Plan the chosen stage with explicit evidence and approval gates"],
+    "success_criteria": ["User choice recorded", "No claim exceeds evidence", "Residual review gaps stay visible"],
+    "abandonment_criteria": ["Do not infer a route or launch experiments without the required authorization"]
+  },
+  "paper_edited": false,
+  "new_model_runs": 0,
+  "submission_ready": false
+}

@@ -1,0 +1,303 @@
+{
+  "status": "COMPLETE",
+  "records": 15000,
+  "seed_question_groups": 2500,
+  "unique_questions": 500,
+  "independent_contexts": 5,
+  "comparisons": {
+    "random": {
+      "count": 2500,
+      "table_other_to_full": {
+        "correct_valid": {
+          "correct_valid": 59,
+          "wrong_valid": 8,
+          "invalid": 31
+        },
+        "wrong_valid": {
+          "correct_valid": 16,
+          "wrong_valid": 213,
+          "invalid": 41
+        },
+        "invalid": {
+          "correct_valid": 430,
+          "wrong_valid": 1009,
+          "invalid": 693
+        }
+      },
+      "full_states": {
+        "correct_valid": 505,
+        "wrong_valid": 1230,
+        "invalid": 765
+      },
+      "other_states": {
+        "correct_valid": 98,
+        "wrong_valid": 270,
+        "invalid": 2132
+      },
+      "wins": 446,
+      "losses": 39,
+      "ties": 2015,
+      "net_correct": 407,
+      "delta_strict": 0.1628,
+      "invalid_correct_net": 399,
+      "valid_wrong_correct_net": 8,
+      "common_valid": {
+        "denominator": 296,
+        "full": {
+          "numerator": 75,
+          "denominator": 296,
+          "value": 0.2533783783783784
+        },
+        "other": {
+          "numerator": 67,
+          "denominator": 296,
+          "value": 0.22635135135135134
+        },
+        "caveat": "output-selected subset; selection bias; not causal evidence"
+      },
+      "equality_counts": {
+        "prediction": 215,
+        "parsed": 218,
+        "candidate_valid": 989,
+        "strict_candidate_correct": 2015,
+        "selected_candidate": 931
+      }
+    },
+    "last_written": {
+      "count": 2500,
+      "table_other_to_full": {
+        "correct_valid": {
+          "correct_valid": 25,
+          "wrong_valid": 10,
+          "invalid": 10
+        },
+        "wrong_valid": {
+          "correct_valid": 0,
+          "wrong_valid": 20,
+          "invalid": 15
+        },
+        "invalid": {
+          "correct_valid": 480,
+          "wrong_valid": 1200,
+          "invalid": 740
+        }
+      },
+      "full_states": {
+        "correct_valid": 505,
+        "wrong_valid": 1230,
+        "invalid": 765
+      },
+      "other_states": {
+        "correct_valid": 45,
+        "wrong_valid": 35,
+        "invalid": 2420
+      },
+      "wins": 480,
+      "losses": 20,
+      "ties": 2000,
+      "net_correct": 460,
+      "delta_strict": 0.184,
+      "invalid_correct_net": 470,
+      "valid_wrong_correct_net": -10,
+      "common_valid": {
+        "denominator": 55,
+        "full": {
+          "numerator": 25,
+          "denominator": 55,
+          "value": 0.45454545454545453
+        },
+        "other": {
+          "numerator": 35,
+          "denominator": 55,
+          "value": 0.6363636363636364
+        },
+        "caveat": "output-selected subset; selection bias; not causal evidence"
+      },
+      "equality_counts": {
+        "prediction": 45,
+        "parsed": 45,
+        "candidate_valid": 795,
+        "strict_candidate_correct": 2000,
+        "selected_candidate": 785
+      }
+    },
+    "cosine_only": {
+      "count": 2500,
+      "table_other_to_full": {
+        "correct_valid": {
+          "correct_valid": 410,
+          "wrong_valid": 5,
+          "invalid": 5
+        },
+        "wrong_valid": {
+          "correct_valid": 0,
+          "wrong_valid": 1005,
+          "invalid": 5
+        },
+        "invalid": {
+          "correct_valid": 95,
+          "wrong_valid": 220,
+          "invalid": 755
+        }
+      },
+      "full_states": {
+        "correct_valid": 505,
+        "wrong_valid": 1230,
+        "invalid": 765
+      },
+      "other_states": {
+        "correct_valid": 420,
+        "wrong_valid": 1010,
+        "invalid": 1070
+      },
+      "wins": 95,
+      "losses": 10,
+      "ties": 2395,
+      "net_correct": 85,
+      "delta_strict": 0.034,
+      "invalid_correct_net": 90,
+      "valid_wrong_correct_net": -5,
+      "common_valid": {
+        "denominator": 1420,
+        "full": {
+          "numerator": 410,
+          "denominator": 1420,
+          "value": 0.2887323943661972
+        },
+        "other": {
+          "numerator": 415,
+          "denominator": 1420,
+          "value": 0.29225352112676056
+        },
+        "caveat": "output-selected subset; selection bias; not causal evidence"
+      },
+      "equality_counts": {
+        "prediction": 2005,
+        "parsed": 2005,
+        "candidate_valid": 2175,
+        "strict_candidate_correct": 2395,
+        "selected_candidate": 2155
+      }
+    },
+    "recency_only": {
+      "count": 2500,
+      "table_other_to_full": {
+        "correct_valid": {
+          "correct_valid": 505,
+          "wrong_valid": 0,
+          "invalid": 0
+        },
+        "wrong_valid": {
+          "correct_valid": 0,
+          "wrong_valid": 1230,
+          "invalid": 0
+        },
+        "invalid": {
+          "correct_valid": 0,
+          "wrong_valid": 0,
+          "invalid": 765
+        }
+      },
+      "full_states": {
+        "correct_valid": 505,
+        "wrong_valid": 1230,
+        "invalid": 765
+      },
+      "other_states": {
+        "correct_valid": 505,
+        "wrong_valid": 1230,
+        "invalid": 765
+      },
+      "wins": 0,
+      "losses": 0,
+      "ties": 2500,
+      "net_correct": 0,
+      "delta_strict": 0.0,
+      "invalid_correct_net": 0,
+      "valid_wrong_correct_net": 0,
+      "common_valid": {
+        "denominator": 1735,
+        "full": {
+          "numerator": 505,
+          "denominator": 1735,
+          "value": 0.2910662824207493
+        },
+        "other": {
+          "numerator": 505,
+          "denominator": 1735,
+          "value": 0.2910662824207493
+        },
+        "caveat": "output-selected subset; selection bias; not causal evidence"
+      },
+      "equality_counts": {
+        "prediction": 2500,
+        "parsed": 2500,
+        "candidate_valid": 2500,
+        "strict_candidate_correct": 2500,
+        "selected_candidate": 2500
+      }
+    },
+    "native_order": {
+      "count": 2500,
+      "table_other_to_full": {
+        "correct_valid": {
+          "correct_valid": 290,
+          "wrong_valid": 0,
+          "invalid": 5
+        },
+        "wrong_valid": {
+          "correct_valid": 5,
+          "wrong_valid": 765,
+          "invalid": 5
+        },
+        "invalid": {
+          "correct_valid": 210,
+          "wrong_valid": 465,
+          "invalid": 755
+        }
+      },
+      "full_states": {
+        "correct_valid": 505,
+        "wrong_valid": 1230,
+        "invalid": 765
+      },
+      "other_states": {
+        "correct_valid": 295,
+        "wrong_valid": 775,
+        "invalid": 1430
+      },
+      "wins": 215,
+      "losses": 5,
+      "ties": 2280,
+      "net_correct": 210,
+      "delta_strict": 0.084,
+      "invalid_correct_net": 205,
+      "valid_wrong_correct_net": 5,
+      "common_valid": {
+        "denominator": 1060,
+        "full": {
+          "numerator": 295,
+          "denominator": 1060,
+          "value": 0.2783018867924528
+        },
+        "other": {
+          "numerator": 290,
+          "denominator": 1060,
+          "value": 0.27358490566037735
+        },
+        "caveat": "output-selected subset; selection bias; not causal evidence"
+      },
+      "equality_counts": {
+        "prediction": 1560,
+        "parsed": 1560,
+        "candidate_valid": 1815,
+        "strict_candidate_correct": 2280,
+        "selected_candidate": 1810
+      }
+    }
+  },
+  "parent_preserved": true,
+  "scorer_recomputed_identically": true,
+  "torch_loaded": false,
+  "next_route": "plan claim-boundary integration / revision decision; no automatic paper edits or retrieval redesign"
+}

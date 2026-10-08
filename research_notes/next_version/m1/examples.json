@@ -1,0 +1,1796 @@
+[
+  {
+    "parsed": "Debbie expressed her boredom with the talk of war.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": true,
+    "official_em": true,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "correct_valid",
+    "candidate_errors": [],
+    "method": "p7",
+    "seed": 42,
+    "key": [
+      0,
+      1
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "Debbie expressed her boredom with the talk of war.",
+    "gold_answers": [
+      "Debbie expressed her boredom with the talk of war."
+    ],
+    "selected_candidate": "Debbie expressed her boredom with the talk of war.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "question_gold_context",
+    "source": "outputs/mab/formal_p7_effect_repeats/20260722T120000Z-formal-p7-effect-repeats/seed42/20260722T122941Z-eventqa-65536-version-b-weaver-space-bank-n5/eventqa_per_question.jsonl"
+  },
+  {
+    "parsed": "Debbie learned about the engagement announcement during the ball.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": true,
+    "official_em": true,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "correct_valid",
+    "candidate_errors": [],
+    "method": "p7",
+    "seed": 42,
+    "key": [
+      0,
+      6
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "Debbie learned about the engagement announcement during the ball.",
+    "gold_answers": [
+      "Debbie learned about the engagement announcement during the ball."
+    ],
+    "selected_candidate": "Debbie learned about the engagement announcement during the ball.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "question_gold_context",
+    "source": "outputs/mab/formal_p7_effect_repeats/20260722T120000Z-formal-p7-effect-repeats/seed42/20260722T122941Z-eventqa-65536-version-b-weaver-space-bank-n5/eventqa_per_question.jsonl"
+  },
+  {
+    "parsed": "The event that happens next is: Debbie mentioned her mother, Lucian O'Kerry, during the conversation.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": true,
+    "substring_only_correct": true,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "p7",
+    "seed": 42,
+    "key": [
+      0,
+      2
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "The event that happens next is: Debbie mentioned her mother, Lucian O'Kerry, during the conversation.",
+    "gold_answers": [
+      "Debbie mentioned her mother, Lucian O'Kerry, during the conversation."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "question_gold_context",
+    "source": "outputs/mab/formal_p7_effect_repeats/20260722T120000Z-formal-p7-effect-repeats/seed42/20260722T122941Z-eventqa-65536-version-b-weaver-space-bank-n5/eventqa_per_question.jsonl"
+  },
+  {
+    "parsed": "The event that happens next is: The Tarleton twins recalled how they both became aware of Debbie's charms during a political speaking.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": true,
+    "substring_only_correct": true,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "p7",
+    "seed": 42,
+    "key": [
+      0,
+      13
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "The event that happens next is: The Tarleton twins recalled how they both became aware of Debbie's charms during a political speaking.",
+    "gold_answers": [
+      "The Tarleton twins recalled how they both became aware of Debbie's charms during a political speaking."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "question_gold_context",
+    "source": "outputs/mab/formal_p7_effect_repeats/20260722T120000Z-formal-p7-effect-repeats/seed42/20260722T122941Z-eventqa-65536-version-b-weaver-space-bank-n5/eventqa_per_question.jsonl"
+  },
+  {
+    "parsed": "The event that happens next is: Debbie sported a lovely yellow paisley wrap that accompanied her flip-flops.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "p7",
+    "seed": 42,
+    "key": [
+      0,
+      0
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "The event that happens next is: Debbie sported a lovely yellow paisley wrap that accompanied her flip-flops.",
+    "gold_answers": [
+      "Debbie wore a new green flowered-muslin dress that matched her slippers."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "question_gold_context",
+    "source": "outputs/mab/formal_p7_effect_repeats/20260722T120000Z-formal-p7-effect-repeats/seed42/20260722T122941Z-eventqa-65536-version-b-weaver-space-bank-n5/eventqa_per_question.jsonl"
+  },
+  {
+    "parsed": "Brent's brother, Stuart Hargrove, trained the young colt in the paddock.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "p7",
+    "seed": 42,
+    "key": [
+      0,
+      3
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "Brent's brother, Stuart Hargrove, trained the young colt in the paddock.",
+    "gold_answers": [
+      "Debbie's mother, Beatrice Tarleton, handled the new stallion in the stable."
+    ],
+    "selected_candidate": "Brent's brother, Stuart Hargrove, trained the young colt in the paddock.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "question_gold_context",
+    "source": "outputs/mab/formal_p7_effect_repeats/20260722T120000Z-formal-p7-effect-repeats/seed42/20260722T122941Z-eventqa-65536-version-b-weaver-space-bank-n5/eventqa_per_question.jsonl"
+  },
+  {
+    "parsed": "/~ Mr. Creakle gave the narrator a fleshy cut with the cane.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": true,
+    "official_em": true,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "correct_valid",
+    "candidate_errors": [],
+    "method": "recent_text",
+    "seed": 42,
+    "key": [
+      3,
+      62
+    ],
+    "context_id": "eventqa-ec65b7cb50d7280b",
+    "prediction": "/~ Mr. Creakle gave the narrator a fleshy cut with the cane.",
+    "gold_answers": [
+      "Mr. Creakle gave the narrator a fleshy cut with the cane."
+    ],
+    "selected_candidate": "Mr. Creakle gave the narrator a fleshy cut with the cane.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/p7_recent_text_32256_effect_repeats/20260722T153000Z-p7-recent-text-32256-effect-repeats/recent_text_32256/seed42/ctx3/20260722T081717Z-eventqa-memgen-recent-window-ctx3-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "The event that happens next is: Debbie expressed her boredom with the talk of war.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": true,
+    "substring_only_correct": true,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "recent_text",
+    "seed": 42,
+    "key": [
+      0,
+      1
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "The event that happens next is: Debbie expressed her boredom with the talk of war.",
+    "gold_answers": [
+      "Debbie expressed her boredom with the talk of war."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/p7_recent_text_32256_effect_repeats/20260722T153000Z-p7-recent-text-32256-effect-repeats/recent_text_32256/seed42/ctx0/20260722T074253Z-eventqa-memgen-recent-window-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "| 34. Debbie expressed her desire not to marry the Tarleton twins.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": true,
+    "substring_only_correct": true,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "recent_text",
+    "seed": 42,
+    "key": [
+      0,
+      33
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "| 34. Debbie expressed her desire not to marry the Tarleton twins.",
+    "gold_answers": [
+      "Debbie expressed her desire not to marry the Tarleton twins."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/p7_recent_text_32256_effect_repeats/20260722T153000Z-p7-recent-text-32256-effect-repeats/recent_text_32256/seed42/ctx0/20260722T074253Z-eventqa-memgen-recent-window-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "| 3| 4| 5| 6| 7| 8| 9| 10| 11| 12| 13| 1",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "recent_text",
+    "seed": 42,
+    "key": [
+      0,
+      0
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "| 3| 4| 5| 6| 7| 8| 9| 10| 11| 12| 13| 1",
+    "gold_answers": [
+      "Debbie wore a new green flowered-muslin dress that matched her slippers."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/p7_recent_text_32256_effect_repeats/20260722T153000Z-p7-recent-text-32256-effect-repeats/recent_text_32256/seed42/ctx0/20260722T074253Z-eventqa-memgen-recent-window-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": ": 1",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": true
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "recent_text",
+    "seed": 42,
+    "key": [
+      0,
+      2
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": ": 1\n\n[Task]\nBased on the context you memorized, complete the task below:\n\nThese are the events that have already occurred:\n\n1. Debbie sat with Stuart and Brent Tarleton on",
+    "gold_answers": [
+      "Debbie mentioned her mother, Lucian O'Kerry, during the conversation."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/p7_recent_text_32256_effect_repeats/20260722T153000Z-p7-recent-text-32256-effect-repeats/recent_text_32256/seed42/ctx0/20260722T074253Z-eventqa-memgen-recent-window-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "indeed the event that happens next is \"Debbie expressed her boredom with the talk of war.\"",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": true,
+    "substring_only_correct": true,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "rolling_summary",
+    "seed": 42,
+    "key": [
+      0,
+      1
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "indeed the event that happens next is \"Debbie expressed her boredom with the talk of war.\"",
+    "gold_answers": [
+      "Debbie expressed her boredom with the talk of war."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/rolling_summary/seed42/query/20260722T012259Z-eventqa-paper-baseline-effects-rolling-seed42-query-ctx0/query_artifact.json"
+  },
+  {
+    "parsed": "indeed, the event that happens next is: \"Debbie recalled Kali's words about having something important to tell her.\"",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": true,
+    "substring_only_correct": true,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "rolling_summary",
+    "seed": 42,
+    "key": [
+      0,
+      24
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "indeed, the event that happens next is: \"Debbie recalled Kali's words about having something important to tell her.\"",
+    "gold_answers": [
+      "Debbie recalled Kali's words about having something important to tell her."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/rolling_summary/seed42/query/20260722T012259Z-eventqa-paper-baseline-effects-rolling-seed42-query-ctx0/query_artifact.json"
+  },
+  {
+    "parsed": "简短的文本没有提供关于未来事件的信息。我将尝试另一种方法。新的事件文本提到一个未来事件，即卡马拉会带着一匹漂亮的马车和漂亮的衣服回来，",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "rolling_summary",
+    "seed": 42,
+    "key": [
+      0,
+      0
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "简短的文本没有提供关于未来事件的信息。我将尝试另一种方法。新的事件文本提到一个未来事件，即卡马拉会带着一匹漂亮的马车和漂亮的衣服回来，",
+    "gold_answers": [
+      "Debbie wore a new green flowered-muslin dress that matched her slippers."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/rolling_summary/seed42/query/20260722T012259Z-eventqa-paper-baseline-effects-rolling-seed42-query-ctx0/query_artifact.json"
+  },
+  {
+    "parsed": "简洁",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "rolling_summary",
+    "seed": 42,
+    "key": [
+      0,
+      2
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "简洁\nDebbie spoke fondly of her father, Lucian O'Kerry, during the meeting.",
+    "gold_answers": [
+      "Debbie mentioned her mother, Lucian O'Kerry, during the conversation."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/rolling_summary/seed42/query/20260722T012259Z-eventqa-paper-baseline-effects-rolling-seed42-query-ctx0/query_artifact.json"
+  },
+  {
+    "parsed": "Charissa embraced her sister-in-law, Karissa, upon her arrival.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": true,
+    "official_em": true,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "correct_valid",
+    "candidate_errors": [],
+    "method": "bm25_top2",
+    "seed": 42,
+    "key": [
+      4,
+      72
+    ],
+    "context_id": "eventqa-365235d948f3d1d5",
+    "prediction": "Charissa embraced her sister-in-law, Karissa, upon her arrival.",
+    "gold_answers": [
+      "Charissa embraced her sister-in-law, Karissa, upon her arrival."
+    ],
+    "selected_candidate": "Charissa embraced her sister-in-law, Karissa, upon her arrival.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/bm25_top2/seed42/ctx4/20260722T041255Z-eventqa-bm25-top2-ctx4-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "1 » The event that happens next is: Debbie wore a new green flowered-muslin dress that matched her slippers.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": true,
+    "substring_only_correct": true,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "bm25_top2",
+    "seed": 42,
+    "key": [
+      0,
+      0
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "1 » The event that happens next is: Debbie wore a new green flowered-muslin dress that matched her slippers.",
+    "gold_answers": [
+      "Debbie wore a new green flowered-muslin dress that matched her slippers."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/bm25_top2/seed42/ctx0/20260722T040101Z-eventqa-bm25-top2-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": ".php",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "bm25_top2",
+    "seed": 42,
+    "key": [
+      0,
+      3
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": ".php\nThe event that happens next is: Debbie's mother, Beatrice Tarleton, handled the new stallion in the stable.",
+    "gold_answers": [
+      "Debbie's mother, Beatrice Tarleton, handled the new stallion in the stable."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/bm25_top2/seed42/ctx0/20260722T040101Z-eventqa-bm25-top2-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "no results",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "bm25_top2",
+    "seed": 42,
+    "key": [
+      0,
+      1
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "no results",
+    "gold_answers": [
+      "Debbie expressed her boredom with the talk of war."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/bm25_top2/seed42/ctx0/20260722T040101Z-eventqa-bm25-top2-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "peł 1000000000 sonuçlar found",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "bm25_top2",
+    "seed": 42,
+    "key": [
+      0,
+      2
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "peł 1000000000 sonuçlar found",
+    "gold_answers": [
+      "Debbie mentioned her mother, Lucian O'Kerry, during the conversation."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/bm25_top2/seed42/ctx0/20260722T040101Z-eventqa-bm25-top2-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": ":none",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "dense_top2",
+    "seed": 42,
+    "key": [
+      0,
+      1
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": ":none\nDebbie expressed her boredom with the talk of war.",
+    "gold_answers": [
+      "Debbie expressed her boredom with the talk of war."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/dense_top2_effect_repeats/20260726T_dense_top2_paper_repeats/seed42/20260726T012947Z-eventqa-dense-top2-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "nekked",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "dense_top2",
+    "seed": 42,
+    "key": [
+      0,
+      2
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "nekked\nThe event that happens next is: Debbie mentioned her mother, Lucian O'Kerry, during the conversation.",
+    "gold_answers": [
+      "Debbie mentioned her mother, Lucian O'Kerry, during the conversation."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/dense_top2_effect_repeats/20260726T_dense_top2_paper_repeats/seed42/20260726T012947Z-eventqa-dense-top2-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "1 »",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "dense_top2",
+    "seed": 42,
+    "key": [
+      0,
+      0
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "1 »",
+    "gold_answers": [
+      "Debbie wore a new green flowered-muslin dress that matched her slippers."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/dense_top2_effect_repeats/20260726T_dense_top2_paper_repeats/seed42/20260726T012947Z-eventqa-dense-top2-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "[Retrieved passage 1; source=eventqa-aea0f2d603e1c8a3-chunk-0010]",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "dense_top2",
+    "seed": 42,
+    "key": [
+      0,
+      3
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "[Retrieved passage 1; source=eventqa-aea0f2d603e1c8a3-chunk-0010]\nIt doan make a g",
+    "gold_answers": [
+      "Debbie's mother, Beatrice Tarleton, handled the new stallion in the stable."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/dense_top2_effect_repeats/20260726T_dense_top2_paper_repeats/seed42/20260726T012947Z-eventqa-dense-top2-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "the man stated that he would remain at the inn despite the host's refusal.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": true,
+    "official_em": true,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": true
+    },
+    "category": "correct_valid",
+    "candidate_errors": [],
+    "method": "matched16",
+    "seed": 42,
+    "key": [
+      1,
+      13
+    ],
+    "context_id": "eventqa-7e4f8ba209e49061",
+    "prediction": "the man stated that he would remain at the inn despite the host's refusal.\n```javascript\n// The event that happens next is: The man stated that he would remain at the inn despite the host",
+    "gold_answers": [
+      "The man stated that he would remain at the inn despite the host's refusal."
+    ],
+    "selected_candidate": "The man stated that he would remain at the inn despite the host's refusal.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/matched16/seed42/ctx1/20260722T051930Z-eventqa-matched16-ctx1-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "the man picked up his knapsack and departed from the inn.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": true,
+    "official_em": true,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": true
+    },
+    "category": "correct_valid",
+    "candidate_errors": [],
+    "method": "matched16",
+    "seed": 42,
+    "key": [
+      1,
+      16
+    ],
+    "context_id": "eventqa-7e4f8ba209e49061",
+    "prediction": "the man picked up his knapsack and departed from the inn.\nThe event that happens next is: The man picked up his knapsack and departed from the inn.",
+    "gold_answers": [
+      "The man picked up his knapsack and departed from the inn."
+    ],
+    "selected_candidate": "The man picked up his knapsack and departed from the inn.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/matched16/seed42/ctx1/20260722T051930Z-eventqa-matched16-ctx1-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "简短",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "matched16",
+    "seed": 42,
+    "key": [
+      0,
+      2
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "简短\nDebbie mentioned her mother, Lucian O'Kerry, during the conversation.",
+    "gold_answers": [
+      "Debbie mentioned her mother, Lucian O'Kerry, during the conversation."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/matched16/seed42/ctx0/20260722T051708Z-eventqa-matched16-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "<thid=\"answer\">Debbie learned about the engagement announcement during the ball.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": true,
+    "substring_only_correct": true,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "matched16",
+    "seed": 42,
+    "key": [
+      0,
+      6
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "<thid=\"answer\">Debbie learned about the engagement announcement during the ball.",
+    "gold_answers": [
+      "Debbie learned about the engagement announcement during the ball."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/matched16/seed42/ctx0/20260722T051708Z-eventqa-matched16-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "简短的文本中没有提供足够的信息来确定接下来会发生什么。我需要进一步的线索或上下文来做出准确的判断。",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "matched16",
+    "seed": 42,
+    "key": [
+      0,
+      0
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "简短的文本中没有提供足够的信息来确定接下来会发生什么。我需要进一步的线索或上下文来做出准确的判断。",
+    "gold_answers": [
+      "Debbie wore a new green flowered-muslin dress that matched her slippers."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/matched16/seed42/ctx0/20260722T051708Z-eventqa-matched16-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "简短",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "matched16",
+    "seed": 42,
+    "key": [
+      0,
+      1
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "简短\nDebbie remarked on her weariness with the ongoing debates about social media trends.",
+    "gold_answers": [
+      "Debbie expressed her boredom with the talk of war."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "official_query_hash",
+    "source": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/matched16/seed42/ctx0/20260722T051708Z-eventqa-matched16-ctx0-q0-99-full/full_artifact.json"
+  },
+  {
+    "parsed": "paragraph 1",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "no_retrieved_memory_conditioning",
+    "seed": 42,
+    "key": [
+      0,
+      1
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "paragraph 1\nDebbie expressed her boredom with the talk of war.",
+    "gold_answers": [
+      "Debbie expressed her boredom with the talk of war."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/ablation_effect_repeats/20260722T143500Z-eventqa-ablation-effect-repeats/no_retrieved_memory_conditioning/seed42/ctx0/20260722T070147Z-eventqa-p7-no-retrieved-memory-conditioning-ctx0-q0-99-full/artifact.json"
+  },
+  {
+    "parsed": "[list of events]",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "no_retrieved_memory_conditioning",
+    "seed": 42,
+    "key": [
+      0,
+      7
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "[list of events]\nStuart revealed the engagement announcement for Kali to Charlie's sister.",
+    "gold_answers": [
+      "Stuart revealed the engagement announcement for Kali to Charlie's sister."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/ablation_effect_repeats/20260722T143500Z-eventqa-ablation-effect-repeats/no_retrieved_memory_conditioning/seed42/ctx0/20260722T070147Z-eventqa-p7-no-retrieved-memory-conditioning-ctx0-q0-99-full/artifact.json"
+  },
+  {
+    "parsed": "简短的文本中没有提供具体的后续事件。我需要进一步搜索以获取更多信息。",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "no_retrieved_memory_conditioning",
+    "seed": 42,
+    "key": [
+      0,
+      0
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "简短的文本中没有提供具体的后续事件。我需要进一步搜索以获取更多信息。",
+    "gold_answers": [
+      "Debbie wore a new green flowered-muslin dress that matched her slippers."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/ablation_effect_repeats/20260722T143500Z-eventqa-ablation-effect-repeats/no_retrieved_memory_conditioning/seed42/ctx0/20260722T070147Z-eventqa-p7-no-retrieved-memory-conditioning-ctx0-q0-99-full/artifact.json"
+  },
+  {
+    "parsed": "回答",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "no_retrieved_memory_conditioning",
+    "seed": 42,
+    "key": [
+      0,
+      2
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "回答\n\"Debbie spoke fondly of her father, Lucian O'Kerry, during the meeting.\"",
+    "gold_answers": [
+      "Debbie mentioned her mother, Lucian O'Kerry, during the conversation."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/ablation_effect_repeats/20260722T143500Z-eventqa-ablation-effect-repeats/no_retrieved_memory_conditioning/seed42/ctx0/20260722T070147Z-eventqa-p7-no-retrieved-memory-conditioning-ctx0-q0-99-full/artifact.json"
+  },
+  {
+    "parsed": "Debbie expressed her boredom with the talk of war.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": true,
+    "official_em": true,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "correct_valid",
+    "candidate_errors": [],
+    "method": "direct_top1",
+    "seed": 42,
+    "key": [
+      0,
+      1
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "Debbie expressed her boredom with the talk of war.",
+    "gold_answers": [
+      "Debbie expressed her boredom with the talk of war."
+    ],
+    "selected_candidate": "Debbie expressed her boredom with the talk of war.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/ablation_effect_repeats/20260722T143500Z-eventqa-ablation-effect-repeats/direct_top1/seed42/ctx0/20260722T070146Z-eventqa-p7-direct-top1-ctx0-q0-99-full/artifact.json"
+  },
+  {
+    "parsed": "Marianne proposed a game of poker to the stranger.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": true,
+    "official_em": true,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "correct_valid",
+    "candidate_errors": [],
+    "method": "direct_top1",
+    "seed": 42,
+    "key": [
+      0,
+      47
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "Marianne proposed a game of poker to the stranger.",
+    "gold_answers": [
+      "Marianne proposed a game of poker to the stranger."
+    ],
+    "selected_candidate": "Marianne proposed a game of poker to the stranger.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/ablation_effect_repeats/20260722T143500Z-eventqa-ablation-effect-repeats/direct_top1/seed42/ctx0/20260722T070146Z-eventqa-p7-direct-top1-ctx0-q0-99-full/artifact.json"
+  },
+  {
+    "parsed": "枪枪枪",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "direct_top1",
+    "seed": 42,
+    "key": [
+      0,
+      2
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "枪枪枪\n\"Debbie mentioned her mother, Lucian O'Kerry, during the conversation.\"",
+    "gold_answers": [
+      "Debbie mentioned her mother, Lucian O'Kerry, during the conversation."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/ablation_effect_repeats/20260722T143500Z-eventqa-ablation-effect-repeats/direct_top1/seed42/ctx0/20260722T070146Z-eventqa-p7-direct-top1-ctx0-q0-99-full/artifact.json"
+  },
+  {
+    "parsed": "枪枪枪",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "direct_top1",
+    "seed": 42,
+    "key": [
+      0,
+      6
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "枪枪枪\nDebbie learned about the engagement announcement during the ball.",
+    "gold_answers": [
+      "Debbie learned about the engagement announcement during the ball."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/ablation_effect_repeats/20260722T143500Z-eventqa-ablation-effect-repeats/direct_top1/seed42/ctx0/20260722T070146Z-eventqa-p7-direct-top1-ctx0-q0-99-full/artifact.json"
+  },
+  {
+    "parsed": "Debbie sported a lovely yellow paisley wrap that accompanied her flip-flops.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "direct_top1",
+    "seed": 42,
+    "key": [
+      0,
+      0
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "Debbie sported a lovely yellow paisley wrap that accompanied her flip-flops.",
+    "gold_answers": [
+      "Debbie wore a new green flowered-muslin dress that matched her slippers."
+    ],
+    "selected_candidate": "Debbie sported a lovely yellow paisley wrap that accompanied her flip-flops.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/ablation_effect_repeats/20260722T143500Z-eventqa-ablation-effect-repeats/direct_top1/seed42/ctx0/20260722T070146Z-eventqa-p7-direct-top1-ctx0-q0-99-full/artifact.json"
+  },
+  {
+    "parsed": "枪枪枪",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "direct_top1",
+    "seed": 42,
+    "key": [
+      0,
+      3
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "枪枪枪\nDebbie's father, Stuart Tarleton, auctioned the prized mare at the fair.",
+    "gold_answers": [
+      "Debbie's mother, Beatrice Tarleton, handled the new stallion in the stable."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "context_id_query_index",
+    "source": "outputs/mab/ablation_effect_repeats/20260722T143500Z-eventqa-ablation-effect-repeats/direct_top1/seed42/ctx0/20260722T070146Z-eventqa-p7-direct-top1-ctx0-q0-99-full/artifact.json"
+  },
+  {
+    "parsed": "Debbie expressed her boredom with the talk of war.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": true,
+    "official_em": true,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "correct_valid",
+    "candidate_errors": [],
+    "method": "no_decay",
+    "seed": 42,
+    "key": [
+      0,
+      1
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "Debbie expressed her boredom with the talk of war.",
+    "gold_answers": [
+      "Debbie expressed her boredom with the talk of war."
+    ],
+    "selected_candidate": "Debbie expressed her boredom with the talk of war.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "question_gold_context",
+    "source": "outputs/mab/no_decay_effect_repeats/20260725T_no_decay_alpha0_full/seed42/20260725T130806Z-eventqa-65536-version-b-weaver-space-bank-n5/eventqa_per_question.jsonl"
+  },
+  {
+    "parsed": "Debbie mentioned her mother, Lucian O'Kerry, during the conversation.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": true,
+    "official_em": true,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "correct_valid",
+    "candidate_errors": [],
+    "method": "no_decay",
+    "seed": 42,
+    "key": [
+      0,
+      2
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "Debbie mentioned her mother, Lucian O'Kerry, during the conversation.",
+    "gold_answers": [
+      "Debbie mentioned her mother, Lucian O'Kerry, during the conversation."
+    ],
+    "selected_candidate": "Debbie mentioned her mother, Lucian O'Kerry, during the conversation.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "question_gold_context",
+    "source": "outputs/mab/no_decay_effect_repeats/20260725T_no_decay_alpha0_full/seed42/20260725T130806Z-eventqa-65536-version-b-weaver-space-bank-n5/eventqa_per_question.jsonl"
+  },
+  {
+    "parsed": "The event that happens next is: The Tarleton twins recalled how they both became aware of Debbie's charms during a political speaking.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": true,
+    "substring_only_correct": true,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "no_decay",
+    "seed": 42,
+    "key": [
+      0,
+      13
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "The event that happens next is: The Tarleton twins recalled how they both became aware of Debbie's charms during a political speaking.",
+    "gold_answers": [
+      "The Tarleton twins recalled how they both became aware of Debbie's charms during a political speaking."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "question_gold_context",
+    "source": "outputs/mab/no_decay_effect_repeats/20260725T_no_decay_alpha0_full/seed42/20260725T130806Z-eventqa-65536-version-b-weaver-space-bank-n5/eventqa_per_question.jsonl"
+  },
+  {
+    "parsed": "-not found",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": false,
+    "candidate_match_count": 0,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 1,
+    "raw_gold_any": true,
+    "heuristic_flag": true,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": true,
+      "verbose_output": false
+    },
+    "category": "gold_mentioned_no_valid",
+    "candidate_errors": [],
+    "method": "no_decay",
+    "seed": 42,
+    "key": [
+      0,
+      24
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "-not found\nDebbie recalled Kali's words about having something important to tell her.",
+    "gold_answers": [
+      "Debbie recalled Kali's words about having something important to tell her."
+    ],
+    "selected_candidate": null,
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "question_gold_context",
+    "source": "outputs/mab/no_decay_effect_repeats/20260725T_no_decay_alpha0_full/seed42/20260725T130806Z-eventqa-65536-version-b-weaver-space-bank-n5/eventqa_per_question.jsonl"
+  },
+  {
+    "parsed": "Debbie sported a lovely yellow paisley wrap that accompanied her flip-flops.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "no_decay",
+    "seed": 42,
+    "key": [
+      0,
+      0
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "Debbie sported a lovely yellow paisley wrap that accompanied her flip-flops.",
+    "gold_answers": [
+      "Debbie wore a new green flowered-muslin dress that matched her slippers."
+    ],
+    "selected_candidate": "Debbie sported a lovely yellow paisley wrap that accompanied her flip-flops.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "question_gold_context",
+    "source": "outputs/mab/no_decay_effect_repeats/20260725T_no_decay_alpha0_full/seed42/20260725T130806Z-eventqa-65536-version-b-weaver-space-bank-n5/eventqa_per_question.jsonl"
+  },
+  {
+    "parsed": "Debbie's father, Stuart Tarleton, auctioned the prized mare at the fair.",
+    "parser_none": false,
+    "parser_empty": false,
+    "parsed_nonempty": true,
+    "candidate_valid": true,
+    "candidate_match_count": 1,
+    "strict_candidate_correct": false,
+    "official_em": false,
+    "substring_only_correct": false,
+    "official_raw_recall": 0,
+    "raw_gold_any": false,
+    "heuristic_flag": false,
+    "format_flags": {
+      "empty_output": false,
+      "contains_json_brace": false,
+      "contains_answer_prefix": false,
+      "multiline_output": false,
+      "verbose_output": false
+    },
+    "category": "gold_absent",
+    "candidate_errors": [],
+    "method": "no_decay",
+    "seed": 42,
+    "key": [
+      0,
+      3
+    ],
+    "context_id": "eventqa-aea0f2d603e1c8a3",
+    "prediction": "Debbie's father, Stuart Tarleton, auctioned the prized mare at the fair.",
+    "gold_answers": [
+      "Debbie's mother, Beatrice Tarleton, handled the new stallion in the stable."
+    ],
+    "selected_candidate": "Debbie's father, Stuart Tarleton, auctioned the prized mare at the fair.",
+    "candidate_count": 6,
+    "chance": 0.16666666666666666,
+    "identity_verification": "question_gold_context",
+    "source": "outputs/mab/no_decay_effect_repeats/20260725T_no_decay_alpha0_full/seed42/20260725T130806Z-eventqa-65536-version-b-weaver-space-bank-n5/eventqa_per_question.jsonl"
+  }
+]

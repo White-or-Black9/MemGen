@@ -1,0 +1,112 @@
+{
+  "status": "COMPLETE",
+  "jobs": 25,
+  "policy_records_verified": 15000,
+  "seed_question_groups": 2500,
+  "unique_questions": 500,
+  "independent_contexts": 5,
+  "source_semantic_labels": "unknown; not analyzed",
+  "n_counts": {
+    "2": 2500
+  },
+  "jobs_with_constant_full_set": 25,
+  "jobs_with_query_varying_cosine": 25,
+  "exact_set_match_counts": {
+    "recency_only": 2500,
+    "last_written": 0,
+    "cosine_only": 2000
+  },
+  "max_arithmetic_abs_error": 0.0,
+  "contexts": [
+    {
+      "context_index": 0,
+      "job_ids": [
+        "s42-c0",
+        "s142-c0",
+        "s242-c0",
+        "s342-c0",
+        "s442-c0"
+      ],
+      "full_unique_sets": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "context_index": 1,
+      "job_ids": [
+        "s42-c1",
+        "s142-c1",
+        "s242-c1",
+        "s342-c1",
+        "s442-c1"
+      ],
+      "full_unique_sets": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "context_index": 2,
+      "job_ids": [
+        "s42-c2",
+        "s142-c2",
+        "s242-c2",
+        "s342-c2",
+        "s442-c2"
+      ],
+      "full_unique_sets": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "context_index": 3,
+      "job_ids": [
+        "s42-c3",
+        "s142-c3",
+        "s242-c3",
+        "s342-c3",
+        "s442-c3"
+      ],
+      "full_unique_sets": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "context_index": 4,
+      "job_ids": [
+        "s42-c4",
+        "s142-c4",
+        "s242-c4",
+        "s342-c4",
+        "s442-c4"
+      ],
+      "full_unique_sets": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "parent_preserved": true,
+  "provenance_parent_preserved": true,
+  "query_metadata_restored": true,
+  "torch_loaded": false,
+  "next_route": "plan B2 paired candidate-validity and strict-correctness decomposition; no redesign or new inference"
+}

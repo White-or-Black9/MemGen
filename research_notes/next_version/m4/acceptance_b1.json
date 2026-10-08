@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-10-08T04:33:37.159269+00:00",
+  "identical_artifact_sha256": {
+    "diagnostics.jsonl": "24b5485f8cbb7aecff9b56b484d6fff5f700e1edaa99ad8deb06daa21878ff6a",
+    "by_job.json": "9a2b633e6ca0960d30b48f026ea801f8421fedfe93990157c734c98090fc32f3",
+    "summary.json": "3cce450868b8c8d607efe8381ced402be8bc950cc4c065fe09fa548cecf255ab",
+    "exceptions.json": "6e839f3540dd5dc5386469ca5fc6ab2a5324de27f5ced0f74720053e6e34c42a"
+  },
+  "analyzer_sha256": "ed3d3114caac63ea9e65c338fb3e262d5f92efebb88bcb3ba9b4c55fcbeb89c6",
+  "provenance_inputs_equal": true,
+  "parent_json_hash_count": 30162,
+  "new_tests": 10,
+  "m4_tests_total": 22,
+  "controller_scorer_regressions": 25,
+  "runs": [
+    "research_notes/next_version/m4/run-20261008-b1",
+    "research_notes/next_version/m4/run-20261008-b1-repeat"
+  ]
+}

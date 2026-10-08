@@ -1,5 +1,9 @@
 {
   "schema_version": "eventqa-paper-reproduction-index/v1",
+  "submitted_paper": "review/nference_Time_Latent_Me.pdf",
+  "submitted_baseline_evidence": "research_notes/next_version/baseline_evidence.json",
+  "submitted_result_table": "research_notes/next_version/RESULT_TABLE.md",
+  "source_policy": "The submitted PDF and next_version evidence are authoritative. Unmodified historical entries below refer to older paper packages, not necessarily submitted figures.",
   "paper_sources": [
     "paper/experiment.md",
     "paper/result.md"
@@ -14,20 +18,23 @@
       "id": "p7",
       "paper_sections": ["4.1", "5.1", "5.4"],
       "runner": "eval/exp/p7/mab6b_weaver_space_bank_eventqa_65536_n5.py",
-      "effect_evidence": "outputs/mab/p7/five_repeat_summary.json",
-      "raw_effect_runs": "outputs/mab/p7/repeat_{1..5}",
-      "controlled_cost_evidence": "outputs/mab/p7/controlled_cost_20260721T024259Z",
+      "effect_evidence": "research_notes/next_version/baseline_evidence.json",
+      "effect_evidence_key": "methods.p7",
+      "raw_effect_runs": "outputs/mab/formal_p7_effect_repeats/20260722T120000Z-formal-p7-effect-repeats/seed{42,142,242,342,442}",
+      "controlled_cost_evidence": "outputs/mab/eventqa_comparable_cost/20260722T013124Z-eventqa-comparable-cost/rep{1,2,3}/p7",
       "cost_runner": "eval/exp/p7/run_controlled_cost.sh",
-      "aggregation": "Historical five-repeat summary is present; no dedicated tracked P7 repeat-aggregation script was found."
+      "aggregation": "scripts/eval/review_baseline_audit.py",
+      "historical_effect_evidence": "outputs/mab/p7/five_repeat_summary.json"
     },
     {
       "id": "recent_text",
       "paper_sections": ["4.2", "5.1", "5.4"],
       "runner": "eval/exp/recent_text/eventqa_memgen_recent_window.py",
       "aggregator": "eval/exp/recent_text/aggregate.py",
-      "effect_evidence": "outputs/mab/recent_text/effect_first_pass_aggregate.json",
-      "raw_effect_runs": "outputs/mab/recent_text/effect_first_pass and outputs/mab/recent_text/effect_repeats",
-      "controlled_cost_evidence": "outputs/mab/recent_text/controlled_cost_20260721T013449Z",
+      "effect_evidence": "research_notes/next_version/baseline_evidence.json",
+      "effect_evidence_key": "methods.recent_text",
+      "raw_effect_runs": "outputs/mab/p7_recent_text_32256_effect_repeats/20260722T153000Z-p7-recent-text-32256-effect-repeats/recent_text_32256",
+      "controlled_cost_evidence": "outputs/mab/eventqa_comparable_cost/20260722T013124Z-eventqa-comparable-cost/rep{1,2,3}/recent_text",
       "cost_runner": "eval/exp/recent_text/run_controlled_cost.sh"
     },
     {
@@ -35,25 +42,28 @@
       "paper_sections": ["4.2", "5.2", "5.4"],
       "runners": ["eval/exp/rolling_summary/construction.py", "eval/exp/rolling_summary/query.py"],
       "aggregator": "eval/exp/rolling_summary/aggregate.py",
-      "effect_evidence": "outputs/mab/rolling_summary/five_repeat_summary.json",
-      "raw_effect_runs": "outputs/mab/rolling_summary/effect_repeats",
-      "controlled_cost_evidence": "outputs/mab/rolling_summary/controlled_cost_20260719T031438Z"
+      "effect_evidence": "research_notes/next_version/baseline_evidence.json",
+      "effect_evidence_key": "methods.rolling_summary",
+      "raw_effect_runs": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/rolling_summary",
+      "controlled_cost_evidence": "outputs/mab/eventqa_comparable_cost/20260722T013124Z-eventqa-comparable-cost/rep{1,2,3}/rolling_summary"
     },
     {
       "id": "bm25_top2",
       "paper_sections": ["4.2", "5.2", "5.4"],
       "runner": "eval/exp/bm25_top2/eventqa_bm25_retrieved_text.py",
       "aggregator": "eval/exp/bm25_top2/aggregate.py",
-      "effect_evidence": "outputs/mab/bm25_top2/effect_first_pass_aggregate.json",
-      "raw_effect_runs": "outputs/mab/bm25_top2/effect_first_pass and outputs/mab/bm25_top2/effect_repeats"
+      "effect_evidence": "research_notes/next_version/baseline_evidence.json",
+      "effect_evidence_key": "methods.bm25_top2",
+      "raw_effect_runs": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/bm25_top2"
     },
     {
       "id": "matched16",
       "paper_sections": ["4.2", "5.2", "5.4"],
       "runner": "eval/exp/matched16/eventqa_matched16_retrieved_text.py",
       "aggregator": "eval/exp/matched16/aggregate.py",
-      "effect_evidence": "outputs/mab/matched16/effect_first_pass_aggregate.json",
-      "raw_effect_runs": "outputs/mab/matched16/effect_first_pass and outputs/mab/matched16/effect_repeats"
+      "effect_evidence": "research_notes/next_version/baseline_evidence.json",
+      "effect_evidence_key": "methods.matched16",
+      "raw_effect_runs": "outputs/mab/paper_baseline_effects/20260722T012259Z-eventqa-paper-baseline-effects/matched16"
     },
     {
       "id": "no_query_retrieval",
@@ -67,17 +77,19 @@
       "id": "no_retrieved_memory_conditioning",
       "paper_sections": [],
       "runner": "eval/exp/no_retrieved_memory_conditioning/eventqa_p7_no_retrieved_memory_conditioning.py",
-      "effect_evidence": null,
-      "raw_effect_runs": "outputs/mab/no_retrieved_memory_conditioning/",
-      "status": "implementation and validation pending EventQA execution"
+      "effect_evidence": "research_notes/next_version/baseline_evidence.json",
+      "effect_evidence_key": "methods.no_retrieved_memory_conditioning",
+      "raw_effect_runs": "outputs/mab/ablation_effect_repeats/20260722T143500Z-eventqa-ablation-effect-repeats/no_retrieved_memory_conditioning",
+      "status": "submitted five-seed effectiveness complete; offline audited"
     },
     {
       "id": "direct_top1",
       "paper_sections": [],
       "runner": "eval/exp/direct_top1/eventqa_p7_direct_top1.py",
-      "effect_evidence": null,
-      "raw_effect_runs": "outputs/mab/direct_top1/",
-      "status": "implementation and validation pending EventQA execution"
+      "effect_evidence": "research_notes/next_version/baseline_evidence.json",
+      "effect_evidence_key": "methods.direct_top1",
+      "raw_effect_runs": "outputs/mab/ablation_effect_repeats/20260722T143500Z-eventqa-ablation-effect-repeats/direct_top1",
+      "status": "submitted five-seed effectiveness complete; offline audited"
     }
   ],
   "layout_policy": "eval/exp contains copied paper-facing entrypoint scripts and configs. outputs/mab/<experiment> contains symbolic links to canonical artifacts; do not delete targets through those links."

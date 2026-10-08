@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-10-08T03:49:17.954967+00:00",
+  "compared_runs": [
+    "research_notes/next_version/m4/run-20261008-a1",
+    "research_notes/next_version/m4/run-20261008-a2"
+  ],
+  "identical_artifact_sha256": {
+    "provenance.jsonl": "33ed94a776d061ef02a69265b9e060e17f43c6871ded2dc722ec1f218b6a97fa",
+    "evidence_mapping.jsonl": "5cade3044f480b32467ab90c7245da43ca4f4c65b86bd0148c6b693c07394ba7",
+    "seed_question_associations.jsonl": "d37b7efc5de46ca8d1598bd366aa9a3d4a002a580aae6ff2083686f7a0405cd6",
+    "chunk_offsets.jsonl": "ee294ff4bdc11da820007f936d6465e1493f7c1097f427ef66bb820c80a74752",
+    "blind_sample.jsonl": "7041c5159d7a16aaa7b603d1b19f427b3931a2bcb6fff4266658b5b0b1560433",
+    "lifecycle.json": "3f36ef67e3ce31408934c56a705a6e5f5f58367f090c58da8f0934a59a96d103",
+    "schema_audit.json": "f3c9c2ab62a027beb34ba6bcfbc7741f3c37e672d6853b020221ec2b2b1a11d3"
+  },
+  "coverage_equal_except_runtime": true,
+  "parent_json_sha256_equal": true,
+  "parent_json_files": 30162,
+  "analyzer_sha256": "1955c21ca1d00f140acb1ba5316def610a5ac041ad4f9e7e424ea1241a0d1772",
+  "new_cpu_tests_passed": 12,
+  "controller_scorer_regression_tests_passed": 25,
+  "old_torch_policy_tests_not_rerun": "MABench environment has no torch; one combined invocation failed to import this module",
+  "no_torch_in_audit": true
+}

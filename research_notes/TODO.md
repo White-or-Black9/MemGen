@@ -13,6 +13,52 @@
 
 ## Current Next Step（当前下一步）
 
+- [x] M0: freeze the final submitted PDF identity and formal campaign paths;
+  implement offline raw-record/metric/lifecycle audit and review issue matrix.
+- [x] M1: use `next_version/EXPERIMENT_PLAN.md` to define true parser failure,
+  candidate validity and historical heuristic flags separately, then analyze
+  saved outputs. Do not infer parsed accuracy from `500 - format_failures`.
+- [x] M2 CPU: implement count-matched policies, snapshots/replay and isolation;
+  fourteen focused tests pass. Two unrelated pre-existing bank assertions remain failing.
+- [x] M2 GPU: verify seed42/context0/q0-9 five-policy smoke plus native-order
+  and full-repeat checks; `20261002-m2-seed42-ctx0` has 70 outputs, exit0,
+  all contracts/hash checks pass. See `next_version/m2/M2_REPORT.md`.
+- [x] Next phase plan: `next_version/M3_PLAN.md` specifies the formal comparison
+  after M2 validation, including resource/test/completeness gates and limitations.
+- [x] M3 approval / implementation / CPU gate: user approved all eligible cards;
+  independent formal controller/worker and 39 focused tests pass.
+- [x] M3 formal GPU completion / acceptance: six policies, 25 constructions,
+  15,000 unique outputs, full-recency overlap and paired identity/budget audit.
+  Campaign `20261002-m3-six-policy-v3` COMPLETE on 2026-10-08, all records and
+  hashes independently checked; original 14,663 files preserved, 337 completed.
+- [x] M4 next-stage plan: `next_version/M4_PLAN.md` defines CPU-only M4-A
+  provenance/evidence-localization audit, with explicit unknown labels and stop gates.
+- [x] M4-A execution/acceptance: user approved CPU-only audit. Two runs agree;
+  400 live slot sources reconstructed, 500 question evidence spans unresolved;
+  12 new + 25 regression tests pass. See `next_version/m4/M4_A_REPORT.md`.
+- [x] Refine M4-B plan using measured limits: `next_version/M4_B_PLAN.md` prioritizes
+  B1 trace reconstruction, defers unlabeled semantic Recall/MRR and new inference.
+- [x] M4-B1 execution/acceptance: two CPU-only runs agree. Full fixed two slots
+  per bank despite varying queries, access-recency not write-recency; scores verified.
+  See `next_version/m4/M4_B1_REPORT.md`; 10 new + 25 regression tests pass.
+- [x] M4-B2 plan: `next_version/M4_B2_PLAN.md` defines paired candidate-validity
+  and strict-correctness decomposition with explicit non-causal boundaries.
+- [x] M4-B2 execution/acceptance: saved-output scoring and paired state tables
+  reproduced in two runs. See `next_version/m4/M4_B2_REPORT.md`; 9 new tests pass.
+- [x] M5 plan: `next_version/M5_PLAN.md` defines submitted-paper claim/gap integration
+  and a user decision on narrowing claims versus obtaining new mechanism evidence.
+- [x] M5 execution/acceptance: user approved continuation; 12 claims and R01–R16
+  mapped in `next_version/m5/`, with read-only evidence receipt validation.
+- [ ] Next route choice: A scoped writing after interface audit, or B preregistered
+  source-span/latent validation. Await user choice; no manuscript edits, model runs
+  or automatic retrieval redesign authorized by the M5 materials stage.
+- [x] M3 continuation integrity audit: 202 saved prefix records plus source/input
+  and two snapshot hashes PASS at 21:08; no partial effectiveness scoring.
+- [x] Same-stage eligible-GPU addition: GPU7 passed fresh >=12GiB resource gate
+  and its tmux/PID/log startup check; readiness and job execution remain pending.
+- The July items below are historical planning state; the submitted-paper
+  review revision is now the active route. Benchmark scaling remains paused.
+
 - [x] Complete LongBench v2 Phase 0 official-dataset audit and freeze the
   18-row smoke / 60-row bounded sample manifests.
 - [x] Complete LongBench v2 Phase 1 adapter, deterministic scorer, lifecycle

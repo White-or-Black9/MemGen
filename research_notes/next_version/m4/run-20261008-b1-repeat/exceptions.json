@@ -1,0 +1,9 @@
+{
+  "arithmetic_errors": [],
+  "missing_records": [],
+  "unknowns": [
+    "Cosine tensors cannot be recomputed from JSON; saved native/adaptor raw scores cross-checked.",
+    "No semantic source labels; no Recall/MRR or evidence-age claim.",
+    "No causal ablation of construction feedback or decay."
+  ]
+}

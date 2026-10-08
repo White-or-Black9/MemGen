@@ -1,0 +1,4322 @@
+{
+  "s42-c0": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "replace_matched",
+        "target_version": "slot0-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": "slot0-v1"
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot4-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      }
+    ]
+  },
+  "s42-c1": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s42-c2": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s42-c3": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s42-c4": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "replace_matched",
+        "target_version": "slot0-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot0-v1"
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      }
+    ]
+  },
+  "s142-c0": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "replace_matched",
+        "target_version": "slot0-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": "slot0-v1"
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot4-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      }
+    ]
+  },
+  "s142-c1": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s142-c2": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s142-c3": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s142-c4": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "replace_matched",
+        "target_version": "slot0-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot0-v1"
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      }
+    ]
+  },
+  "s242-c0": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "replace_matched",
+        "target_version": "slot0-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": "slot0-v1"
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot4-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      }
+    ]
+  },
+  "s242-c1": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s242-c2": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s242-c3": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s242-c4": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "replace_matched",
+        "target_version": "slot0-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot0-v1"
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      }
+    ]
+  },
+  "s342-c0": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "replace_matched",
+        "target_version": "slot0-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": "slot0-v1"
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot4-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      }
+    ]
+  },
+  "s342-c1": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s342-c2": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s342-c3": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s342-c4": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "replace_matched",
+        "target_version": "slot0-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot0-v1"
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      }
+    ]
+  },
+  "s442-c0": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "replace_matched",
+        "target_version": "slot0-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": "slot0-v1"
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v2",
+          "slot4-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot4-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot12-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      }
+    ]
+  },
+  "s442-c1": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s442-c2": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s442-c3": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "evict_oldest_insert",
+        "target_version": "slot2-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot2-v1"
+      }
+    ]
+  },
+  "s442-c4": {
+    "status": "PASS",
+    "slot_count": 16,
+    "construction_turns": 17,
+    "events": [
+      {
+        "turn": 0,
+        "action": "insert",
+        "target_version": "slot0-v1",
+        "prior_retrieved_versions": [],
+        "superseded_version": null
+      },
+      {
+        "turn": 1,
+        "action": "insert",
+        "target_version": "slot1-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 2,
+        "action": "insert",
+        "target_version": "slot2-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 3,
+        "action": "insert",
+        "target_version": "slot3-v1",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 4,
+        "action": "replace_matched",
+        "target_version": "slot0-v2",
+        "prior_retrieved_versions": [
+          "slot0-v1",
+          "slot1-v1"
+        ],
+        "superseded_version": "slot0-v1"
+      },
+      {
+        "turn": 5,
+        "action": "insert",
+        "target_version": "slot4-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 6,
+        "action": "insert",
+        "target_version": "slot5-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 7,
+        "action": "insert",
+        "target_version": "slot6-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 8,
+        "action": "insert",
+        "target_version": "slot7-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 9,
+        "action": "insert",
+        "target_version": "slot8-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 10,
+        "action": "insert",
+        "target_version": "slot9-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 11,
+        "action": "insert",
+        "target_version": "slot10-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 12,
+        "action": "insert",
+        "target_version": "slot11-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 13,
+        "action": "insert",
+        "target_version": "slot12-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 14,
+        "action": "insert",
+        "target_version": "slot13-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 15,
+        "action": "insert",
+        "target_version": "slot14-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      },
+      {
+        "turn": 16,
+        "action": "insert",
+        "target_version": "slot15-v1",
+        "prior_retrieved_versions": [
+          "slot1-v1",
+          "slot0-v2"
+        ],
+        "superseded_version": null
+      }
+    ]
+  }
+}

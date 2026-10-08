@@ -1,0 +1,177 @@
+{
+  "schema": "m3-partial-integrity/v1",
+  "status": "PASS_PARTIAL",
+  "checked_at": "2026-10-08T04:31:55.001036+00:00",
+  "campaign": "20261002-m3-six-policy-v3",
+  "contract_sha256": "a548306d4131e4df0cba1340d3272a4882feae1d9c993c881e281f4551e433c9",
+  "audit_source_sha256": "fd752c21be531f046b9a77eea4888203f4f2ea8774d89cd292d83ee64f74f275",
+  "source_input_hashes_verified": true,
+  "verified_records": 15000,
+  "expected_records": 15000,
+  "verified_execution_attempts_started": 15003,
+  "by_job": {
+    "s42-c0": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "1873c3b0581ed8191da051c17ab285f34992f278de59c9429a19ac5e2d28a472",
+      "snapshot_verified": true
+    },
+    "s42-c1": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "8d9001b55973459fcca0a3bcbf23a6cda9b04bca28c1ebd6a7e7ae05fbba9de0",
+      "snapshot_verified": true
+    },
+    "s42-c2": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "19f26c3a3641df2bcc52c14f5534deaeb9a10bd739ba56caf48d006ad2596ad1",
+      "snapshot_verified": true
+    },
+    "s42-c3": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "1727f9d8f7588467d7667cf5534b2ae7a9081a92e477df2291e9279763a6e657",
+      "snapshot_verified": true
+    },
+    "s42-c4": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "688b941470f3dd8de7add392a6f0f28dce2951720d3b9a7276083e8c38ec5334",
+      "snapshot_verified": true
+    },
+    "s142-c0": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "1f81bb1a1b8e76b23f7b6efcea2ce8bb950a58a1ed3443c4e6c573fc8268a07d",
+      "snapshot_verified": true
+    },
+    "s142-c1": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "141492fdb5f315f1c4f89c4253c9173763ad75accd14efddc9c09d6a57fe97f0",
+      "snapshot_verified": true
+    },
+    "s142-c2": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "7fb4079d59e543a26824658cbcf3d89635220a58e3b60e3201ff3585cebaed29",
+      "snapshot_verified": true
+    },
+    "s142-c3": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "95e006144aa65a8c11bd782ed7819aba107d33291b578568d11f94f585edd2b3",
+      "snapshot_verified": true
+    },
+    "s142-c4": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "de60500ac9c845543990b4faf0c990ba3639a2f223f69b5dee00ce9e1e4ba183",
+      "snapshot_verified": true
+    },
+    "s242-c0": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "d3ad8607db577fcb1c828125eb0e78bd4d57fe0c54e0056f933a0cf59c79bae3",
+      "snapshot_verified": true
+    },
+    "s242-c1": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "25c21adb06b0d0224a12d76d89181c2bac22b1c72db1653503e7db9cd87b4c7c",
+      "snapshot_verified": true
+    },
+    "s242-c2": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "9a36627e89f97f51287d0b45a4b352ccd453b218384943b384487f4a1f75d8d5",
+      "snapshot_verified": true
+    },
+    "s242-c3": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "e575947432d9c43761f53fca5ffdc2e5e23b4902d73bd07ef0fe7d8cc3e61d22",
+      "snapshot_verified": true
+    },
+    "s242-c4": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "ab4514f4a18d439890b712a8f7fa7d3680f2e85fcb1e88f5e54cca3d6def422b",
+      "snapshot_verified": true
+    },
+    "s342-c0": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "f17780af5129e9f41eb9037b077024ad54acd8cccae432a99a3556ac8abb04c7",
+      "snapshot_verified": true
+    },
+    "s342-c1": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "783e3456b611f18731b7248f8f95ddb774849000a9261c5660ab5564ec2fbdf4",
+      "snapshot_verified": true
+    },
+    "s342-c2": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "7b915c8b5b783ae95b47a7babfd4eac271bef5e3a7e97a03f7ec9cadb29874c8",
+      "snapshot_verified": true
+    },
+    "s342-c3": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "2f526ce6e952771f0f337e7750fd2f6b37387262d2bef822047d4a675d64f794",
+      "snapshot_verified": true
+    },
+    "s342-c4": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "627aa5708ee80c5e19251b2c13e485ace73ac6c2816f550a487ea9776f256853",
+      "snapshot_verified": true
+    },
+    "s442-c0": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "950630967bb669447d27b0dd38b44e65ca8f734822159d123bb37a1562c5fa58",
+      "snapshot_verified": true
+    },
+    "s442-c1": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "6364b1c2cd1b1b485ac7cc3e37705ef10fd4184f320bc49c3e3146a9e8ca1d60",
+      "snapshot_verified": true
+    },
+    "s442-c2": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "d7e352090116edcba8661750db85dea7b5135b46440c34c44d6c25cae3bfc081",
+      "snapshot_verified": true
+    },
+    "s442-c3": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "c8442830b72262f29bdf5268b578c74618d16cf6b2612662608169691472f1cf",
+      "snapshot_verified": true
+    },
+    "s442-c4": {
+      "records": 600,
+      "complete_six_policy_questions": 100,
+      "snapshot_file_sha256": "7c309aceffad57351a58c88b909047ce089929dbf0f4316df6bc3cc336d3b539",
+      "snapshot_verified": true
+    }
+  },
+  "by_policy": {
+    "cosine_only": 2500,
+    "full": 2500,
+    "last_written": 2500,
+    "native_order": 2500,
+    "random": 2500,
+    "recency_only": 2500
+  },
+  "queue_status_counts": {
+    "done": 25
+  },
+  "caveat": "atomic prefix only; not formal completion, scoring, significance or retrieval effectiveness",
+  "next_route": "continue current M3 generation; aggregate only after all 25 jobs complete"
+}

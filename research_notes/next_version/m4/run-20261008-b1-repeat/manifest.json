@@ -1,0 +1,57 @@
+{
+  "created_at": "2026-10-08T04:32:10.002816+00:00",
+  "parent_contract_sha256": "a548306d4131e4df0cba1340d3272a4882feae1d9c993c881e281f4551e433c9",
+  "analyzer_sha256": "ed3d3114caac63ea9e65c338fb3e262d5f92efebb88bcb3ba9b4c55fcbeb89c6",
+  "provenance_analyzer_sha256": "1955c21ca1d00f140acb1ba5316def610a5ac041ad4f9e7e424ea1241a0d1772",
+  "parent_manifest_sha256": "3de9d00983fb3fef6b99cecb5bf0911f3a0e3ede575482b253c8ce02cd2c7ade",
+  "parent_integrity": 15000,
+  "parent_json_hashes_verified_against_m4a": true,
+  "parent_json_hash_count": 30162,
+  "provenance_inputs": {
+    "provenance.jsonl": "33ed94a776d061ef02a69265b9e060e17f43c6871ded2dc722ec1f218b6a97fa",
+    "evidence_mapping.jsonl": "5cade3044f480b32467ab90c7245da43ca4f4c65b86bd0148c6b693c07394ba7",
+    "seed_question_associations.jsonl": "d37b7efc5de46ca8d1598bd366aa9a3d4a002a580aae6ff2083686f7a0405cd6",
+    "chunk_offsets.jsonl": "ee294ff4bdc11da820007f936d6465e1493f7c1097f427ef66bb820c80a74752",
+    "blind_sample.jsonl": "7041c5159d7a16aaa7b603d1b19f427b3931a2bcb6fff4266658b5b0b1560433",
+    "lifecycle.json": "3f36ef67e3ce31408934c56a705a6e5f5f58367f090c58da8f0934a59a96d103",
+    "schema_audit.json": "f3c9c2ab62a027beb34ba6bcfbc7741f3c37e672d6853b020221ec2b2b1a11d3"
+  },
+  "source_input_hashes_verified": true,
+  "tolerance": {
+    "rel_tol": 1e-12,
+    "abs_tol": 1e-12
+  },
+  "comparison_baselines": [
+    "full",
+    "random",
+    "last_written",
+    "cosine_only",
+    "recency_only",
+    "native_order"
+  ],
+  "exp_id": "M4-B1",
+  "item_id": "M4-B1",
+  "section_id": "retrieval_diagnostics",
+  "paper_role": "main_text",
+  "claim_links": [
+    "R03",
+    "R04",
+    "R07"
+  ],
+  "evidence_role": "claim-carrying limitation analysis",
+  "selected_outline_ref": "EXPERIMENT_PLAN.md",
+  "research_questions": [
+    "RQ-M4"
+  ],
+  "experimental_designs": [
+    "offline trace reconstruction"
+  ],
+  "todo_items": [
+    "B1"
+  ],
+  "python": "/home/baishilong/miniconda3/envs/MABench/bin/python",
+  "python_version": "3.10.16",
+  "resource_contract": "single CPU process; no Torch; 30 minutes; output <1GiB",
+  "comparability": "same frozen M3 outputs; no model or inference changes",
+  "elapsed_seconds": 48.48315508399992
+}

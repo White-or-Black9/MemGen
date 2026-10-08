@@ -1,5 +1,15 @@
 # EventQA paper experiment reproduction index
 
+The final submitted paper is `review/nference_Time_Latent_Me.pdf`. Its current
+audited sources and repeat results are in `research_notes/next_version/`.
+Use `scripts/eval/review_baseline_audit.py --write` for offline verification.
+The older links and commands below describe historical packages; in particular
+`outputs/mab/p7/five_repeat_summary.json` is not the submitted P7 result.
+For the submitted P7 settings explicitly pass `--max-slots 16 --top-k 2
+--retrieve-threshold 0.05 --update-threshold 0.10 --decay-alpha 0.05`;
+the runner defaults differ. Follow the corrected `manifest.json` evidence
+paths and the next-version baseline before planning a new run.
+
 This directory is an experiment-oriented entry point for the EventQA results in
 `paper/experiment.md` and `paper/result.md`.
 

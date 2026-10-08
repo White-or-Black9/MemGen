@@ -1,5 +1,210 @@
 # 项目进展
 
+## Submitted-Paper M5 Decision Materials (2026-10-08, completed)
+
+- Mapped 12 submitted-paper claims and all R01–R16 to evidence, proposed manuscript
+  deltas and remaining gates. Historical dirty P7 and current frozen M3 remain separate.
+- Preserved fixed selections/full-recency output identity, common-valid reversals,
+  historical no-decay strict reversal and non-causal transition interpretation.
+- Created `next_version/m5/M5_REPORT.md`, `CLAIM_EVIDENCE.md`, `REVISION_LEDGER.md`
+  and `decision.json`; action=request_user_decision, no route selected or submission claim.
+- Read-only receipt validation checks PDF identity, document links/ID coverage,
+  M4 core artifact hashes against all three PASS receipts and M3/B2 numeric consistency.
+  This is not a new model run or a full re-audit of the 30,162 parent JSONs.
+- Next: user chooses A (narrow scoped writing) or B (preregister source-span/latent
+  validation before any redesign). No paper/source/model edits, GPU jobs or Git commit.
+
+## Submitted-Paper M4-B2 Final Acceptance (2026-10-08, completed)
+
+- Recomputed all 15,000 M1/official scored fields and six policy summaries exactly;
+  complete paired 3x3 state transitions conserve all M3 wins/losses/net-correct counts.
+- Full−random net+407 = invalid↔correct net+399 + valid-wrong↔correct net+8.
+  Full−last-written net+460 = +470 −10. These are arithmetic, not causal components.
+- Most invalid outputs are non-candidates, not parser failures: full765 invalid
+  (760 noncandidate/5 multi-candidate), last-written2420 (2415/5), neither parser-empty.
+- Common-valid subset is selected by outputs: full75/296 vs random67/296;
+  full25/55 vs last-written35/55. Preserve reverse result and selection bias;
+  do not replace full-question accuracy or infer formatting/semantic mediation.
+- Full/recency raw strings, parsed text, selected candidate, validity and correctness
+  match in all2,500 pairs. Full/native raw strings match1560/2500, retaining order sensitivity.
+- Five core artifacts byte-identical over two runs; parent30,162 JSON hashes unchanged,
+  no model/Torch/GPU, no paper or frozen-source changes. 9 new/31 M4 tests and25 regressions pass.
+- Evidence: `next_version/m4/M4_B2_REPORT.md`, `next_version/m4/acceptance_b2.json`.
+  M4 analysis closes here. Next `next_version/M5_PLAN.md` is a claim/revision-route
+  decision-material plan only; no implementation, paper edits or new experiments yet.
+
+## Submitted-Paper M4-B1 Final Acceptance (2026-10-08, completed)
+
+- Approved CPU-only reconstruction verifies all 15,000 saved policy traces and
+  2,500 paired seed/question groups; score recomputation max absolute error 0.
+- All 25 banks choose a fixed pair over their 100 questions, despite 100 distinct
+  query vector hashes/cosine arrays per bank. Full/recency set match 2,500/2,500;
+  full/last-written sets never match and have zero slot intersection (0/5,000).
+- Full/cosine-only sets match 2,000/2,500, differing only in context0.
+  Threshold leaves 3–13 slots, not merely two. Every recency cutoff has three
+  equal-age slots; stable index tie-break matches the two full selects here.
+- Selected slots have access-age1 but write-age4–17, associated with repeated
+  construction access. Query metadata is restored independently: no accumulating
+  test-query reinforcement, no causal proof of harmful feedback or semantic relevance.
+- Two runs agree byte-for-byte on four core artifacts. Parent 30,162 JSON hashes
+  match M4-A; parent evidence unchanged. No Torch, GPU, model or paper changes.
+- 10 new tests / 22 M4 total and 25 controller/scorer regressions pass.
+  Report `next_version/m4/M4_B1_REPORT.md`, receipt `next_version/m4/acceptance_b1.json`.
+- Next plan `next_version/M4_B2_PLAN.md`: paired candidate-validity/strict-correctness
+  transitions from saved outputs. Not executed; no automatic redesign or GPU rerun.
+
+## Submitted-Paper M4-A Final Acceptance (2026-10-08, completed with limitations)
+
+- User approved M4-A. Added CPU-only analyzer and 12 passing focused tests,
+  outside M3 frozen inference roots. 25 controller/scorer regressions also pass.
+- Two complete audits verify the same 15,000 M3 records, 25 jobs and 85 chunks;
+  reconstruct 400 live slot versions from 425 writes (400 insert/10 refresh/15 eviction).
+- Current-text-only construction and prompt-only writes permit source-derived
+  chunk linkage; retrieved historical slots are possible dependencies, not proof
+  of semantic retention. Replayed final metadata and all query last-write arrays match.
+- Dataset supplies no verified question/source spans. All 500 gold event summaries
+  lack verbatim original-context matches. This is a failed lexical localization route,
+  not proof that the evidence is absent. All 2,500 seed/question relevance labels unknown.
+- Seven core artifacts identical across reruns; 30,162 parent JSON content hashes
+  match. Parent file inventory/size/mtime unchanged (30,192 files); no bank/model/GPU
+  run or manuscript edit. No Torch imported by the analyzer.
+- One attempted legacy strategy-test import failed because MABench has no Torch;
+  those 14 tests were not rerun here, no dependency installed or failure suppressed.
+- Report: `next_version/m4/M4_A_REPORT.md`; acceptance: `next_version/m4/acceptance.json`.
+  `next_version/M4_B_PLAN.md` now proposes B1 trace diagnostics; execution not started.
+
+## Submitted-Paper M4 Historical Planning (2026-10-08; superseded by M4-A acceptance)
+
+- Added `next_version/M4_PLAN.md` based on accepted M3 and review R03/R04/R07.
+- First proposed subphase M4-A is CPU-only source/provenance audit: reconstruct
+  slot incarnations and actual construction input scope; verify question evidence
+  localization and explicitly separate source overlap from latent semantic retention.
+- Only planning and input-schema inspection performed. No new analyzer run, GPU,
+  model inference, parent-output edits or manuscript changes. After M4-A approval
+  and acceptance, design M4-B from measured provenance coverage, not assumptions.
+
+## Submitted-Paper M3 Final Acceptance (2026-10-08, completed)
+
+- Recovered three dead leases on their original GPUs 0/6/7 after full source/input,
+  25 frozen-snapshot and 14,663-record preflight checks. Completed 337 missing outputs.
+- All 25 jobs done; 15,000/15,000 unique answers, 2,500 per policy; automatic
+  formal scoring COMPLETE at 11:17:24 Asia/Shanghai. All three workers exit0.
+- Final independent integrity audit passes all 15,000 records and hashes.
+  Its generic PASS_PARTIAL label is not itself completion evidence: full coverage,
+  done queue and COMPLETE formal score jointly establish acceptance.
+- Original 14,663 answer files unchanged; no new bank construction. 15,003 started
+  attempts include three interrupted unsaved calls retried without answer selection.
+- Strict accuracy: full20.20%, random3.92%, last-written1.80%, cosine-only16.80%,
+  recency-only20.20%, native-order11.80%. Primary deltas +16.28/+18.40 percentage
+  points, positive in 5/5 contexts and 5/5 seeds; descriptive stability, not significance.
+- Full and recency have identical selection sets in 2,500/2,500 pairs and identical
+  strict correctness. No semantic-retrieval attribution. Next route is a separately
+  approved relevance-label analysis plan; no next-stage execution or manuscript edits.
+- Evidence and detailed boundaries: `next_version/m3/M3_REPORT.md`, campaign
+  `results.json`, `audits/resume-final-20261008.json`, and
+  `audits/recovery-preservation-20261008.json`.
+
+## Submitted-Paper M3 Historical Launch Notes (2026-10-02; superseded by final acceptance)
+
+- Continuation audit at 21:08 Asia/Shanghai: 202 atomic-prefix records PASS
+  (s42-c0:135, s42-c1:67; 33 complete six-policy question groups). Source and
+  all input hashes plus two frozen snapshots match. Record checks cover identity,
+  paired question/gold/prompt, budget/order, frozen/no-write and attempt counts.
+- Evidence: `outputs/mab/review_m3_formal/20261002-m3-six-policy-v3/audits/continuation-01.json`.
+  Added a model-free validator under `next_version/m3/`, outside frozen inference
+  source roots; no worker/queue/model/answer mutation. Formal scoring remains pending.
+  Two jobs running, 23 pending; low throughput is an execution risk, not a null result.
+- Same-stage resource addition: GPU7 newly met the original >=12GiB gate
+  (15,374MiB free) and a third worker was launched at 21:14:07, PID1348372;
+  startup check alive/import-initialization, not WORKER_READY yet. GPU0/6 were
+  not restarted or migrated. Extra startup evidence is `launch_additions/gpu7.json`.
+  Later saved count 209/15,000; only the preceding 202-record prefix is independently
+  audited here. Inference sources, protocol and the total answer budget unchanged.
+
+- User approved implementation and all currently eligible GPUs (RTX A6000,
+  >=12GiB free VRAM, one worker/card). Only this stage is authorized.
+- Added independent formal controller/worker: 25 seed/context jobs, six policies,
+  15,000 unique outputs; M2 bounded runner and production/training unchanged.
+- Locked whole-job queue, atomic per-query persistence, frozen source/input/model
+  identity and timestamp, environment matching, dead-worker recovery and corrupt
+  record preservation. All policies restore the same bank and generation RNG.
+- CPU gate passes: M3 14 + M1 11 + M2 14 tests, shell syntax and module compilation.
+  Old bank debug-field failures remain documented in M2, not modified.
+- Master path: `outputs/mab/review_m3_formal/20261002-m3-six-policy-v3`.
+  Initial preparation failed before GPU launch on CSV MiB suffix parsing;
+  original manifest preserved, unit-covered repair receives a new campaign id.
+  V2 workers interrupted during import before generation to add durable started
+  attempt accounting; v3 preserves interrupted attempts without answer selection.
+  Implementation/status report: `next_version/m3/M3_REPORT.md`.
+- Formal results remain pending until all 25 jobs / 15,000 records pass identity,
+  pairing, budget, frozen/no-write and official scoring checks. Do not cite partial
+  counts as an effectiveness result. No paper edits, commits or next-stage work.
+- V3 launched at 17:09:25 Asia/Shanghai on all eligible cards: GPU0 PID538104,
+  GPU6 PID538067, in separate tmux sessions. Startup snapshot: both processes
+  alive and logs present, import/CUDA initialization ongoing; 25 pending jobs,
+  zero formal outputs, no WORKER_READY yet. Stage remains active, not complete.
+  Subsequent log check: both CUDA/cache/VRAM preflights PASS; model loading
+  started, still no WORKER_READY or formal output. Background workers continue.
+
+## Submitted-Paper M2 Retrieval-Policy Protocol (2026-10-02, completed)
+
+- Approved scope: CPU implementation/tests plus seed42/context0/q0-9 GPU smoke;
+  formal five-seed campaign is not authorized in this phase.
+- Added experiment-only count-matched policies, complete CPU bank/RNG snapshots
+  and trusted replay, per-query state isolation, native-order and repeat checks.
+  Production bank/model/training defaults remain unchanged.
+- Fourteen M2 tests and eleven M1 scorer tests pass. Existing bank suite has
+  49/51 pass, with two pre-existing exact-debug-field assertions missing the
+  HEAD field `dropped_write`; these failures were retained, not patched.
+- Cache/CUDA preflight PASS. Bounded worker launched on GPU6 in tmux
+  `memgen-m2-smoke-20261002`, run id `20261002-m2-seed42-ctx0`.
+  GPU validation completed: 70 outputs, exit 0, budgets/identity/no-write/frozen-state
+  contracts verified; ten full repeats are exactly identical. All file hashes match.
+- Strict correct counts on the 10 smoke questions: full3, random1, last-written0,
+  cosine-only1, recency-only3, native-order3. These are not formal effectiveness claims.
+- Full and recency select the same set and produce identical outputs on all ten
+  questions. Native order changes raw outputs at q4/q8, so the future formal
+  campaign must include the sixth reference policy (15,000 total queries).
+- Logs: `runtime_logs/review_m2_smoke/20261002-m2-seed42-ctx0/run.log`.
+  Report: `next_version/m2/M2_REPORT.md`. M0 evidence hashes unchanged.
+  Phase closed; formal campaign has not been launched. No Git commit or paper edit.
+  Next-stage decision-complete formal plan: `next_version/M3_PLAN.md` (six policies,
+  25 construction jobs, 15,000 unique outputs; pending phase approval).
+
+## Submitted-Paper M1 Offline Evaluation Decomposition (2026-10-02)
+
+- User authorized M1. Added `scripts/eval/review_eventqa_decomposition.py`,
+  using the existing MABench environment and actual official scorer.
+- Frozen 435 input hashes verified; all 22,500 predictions across nine
+  methods/five repeats match saved official EM and recall. Candidate extraction
+  has zero anomalies; 500 questions each have six unique candidates.
+- P7/Matched16 parsed-nonempty rates are both 100%; P7 strict candidate
+  accuracy is 11.00% vs 0.80%, and candidate-valid rate 37.64% vs 1.80%.
+  Whole-pipeline P7 strict accuracy remains below the 16.67% uniform-valid-choice
+  theoretical reference. This does not establish semantic retrieval relevance.
+- Formal output and interpretation: `next_version/m1/RESULTS.md`,
+  `summary.json`, `per_question.jsonl`, `examples.json`, `M1_REPORT.md`.
+- Eleven focused tests pass. Next-stage M2 plan is in `next_version/M2_PLAN.md`;
+  no new GPU inference or benchmark campaign was launched.
+
+
+## Submitted-Paper Review Revision M0 (2026-10-02)
+
+- User reopened staged revision on branch `review`, based only on
+  `review/nference_Time_Latent_Me.pdf`; earlier `paper/` drafts are historical.
+- Frozen sources and offline audit: `research_notes/next_version/` and
+  `scripts/eval/review_baseline_audit.py`. Submitted P7 uses formal five-seed
+  runs, not the old `outputs/mab/p7` links or the default-parameter P7 campaign.
+- M0 checks 45 effectiveness runs (500 questions each, the same 500 unique
+  questions) and 18 efficiency runs. Gate and exact computed results are in
+  `baseline_evidence.json` and `RESULT_TABLE.md` after successful audit.
+- Identified material limits: heuristic format flags are not parser failures;
+  Dense cost uses GPU4 while other methods use GPU5; historical P7 code was
+  dirty, so commit/config alone cannot reconstruct it exactly.
+- Next stage is M1 offline scorer/format/selection decomposition, planned in
+  `next_version/EXPERIMENT_PLAN.md`; no new benchmark or GPU run was launched.
+
+
 ## Benchmark Expansion Paused; EventQA Supplementary Planning Reopened (2026-07-18)
 
 - By the current user direction, do not open BABILong, MemBench, InfiniteBench,

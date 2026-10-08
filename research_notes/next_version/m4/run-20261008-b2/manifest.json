@@ -1,0 +1,40 @@
+{
+  "created_at": "2026-10-08T04:39:17.473029+00:00",
+  "analyzer_sha256": "c57625d395cbb5142b683743235d6b0d588cb4c4215031c7a0787f551a72fade",
+  "parent_contract_sha256": "a548306d4131e4df0cba1340d3272a4882feae1d9c993c881e281f4551e433c9",
+  "parent_json_hash_count": 30162,
+  "inputs": {
+    "manifest.json": "3de9d00983fb3fef6b99cecb5bf0911f3a0e3ede575482b253c8ce02cd2c7ade",
+    "results.json": "8c1cd57bd2d7ccd681419253a85c7a88c16f2e0f2e9f11042bb354b976865071",
+    "scored_records.json": "83cf43c57138bb7c0d8a82d7828702d6bb3bc0223255b596ffebeb1ab42f2f03"
+  },
+  "scorer_sha256": "3f64777885ec719a3ec0ec68d59b2a981c9ae8eef482d6ff638ba2699e18e105",
+  "official_sha256": "d77976be409298970614d477a9d8003850caddb0510e56a7e821a037d98493a2",
+  "b1_acceptance_sha256": "c93818d35b6c365a1b6c6a7d854f0a1c68a524a54203865d941a8eb76a974b82",
+  "tolerance_for_summary_delta": 1e-12,
+  "invalid_subtype_rule": "parser None/empty then normalization ambiguity then multiple normalized candidate mentions then noncandidate",
+  "sample_rule": "two smallest sha256(B2|policy|seed|context|query) per occupied transition bucket after full tables",
+  "exp_id": "M4-B2",
+  "item_id": "M4-B2",
+  "section_id": "evaluation_decomposition",
+  "paper_role": "appendix supporting",
+  "claim_links": [
+    "R01",
+    "R02",
+    "R03",
+    "R05"
+  ],
+  "selected_outline_ref": "EXPERIMENT_PLAN.md",
+  "research_questions": [
+    "output-validity-versus-correctness"
+  ],
+  "experimental_designs": [
+    "offline paired decomposition"
+  ],
+  "todo_items": [
+    "B2"
+  ],
+  "comparability": "same M3 evaluation contract; common-valid subset has selection bias; no causal mediation",
+  "python": "/home/baishilong/miniconda3/envs/MABench/bin/python",
+  "elapsed_seconds": 39.24655548999999
+}

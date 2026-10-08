@@ -1,0 +1,4907 @@
+[
+  {
+    "job_id": "s42-c0",
+    "seed": 42,
+    "context_index": 0,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,12": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 24,
+    "final_rankings_unique": 8,
+    "threshold_eligible_counts": {
+      "11": 60,
+      "12": 20,
+      "10": 12,
+      "13": 8
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 0
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.048095703125,
+      "max": 0.0947265625
+    },
+    "final_score_range": {
+      "min": 0.04170540637310666,
+      "max": 0.09010669353180592
+    },
+    "selection_margin_range": {
+      "min": 0.0073888958201274585,
+      "max": 0.010781152675055222
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot0-v2"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 2,
+        "write_age": 15,
+        "access_age": 12,
+        "construction_access_count": 3,
+        "selected_queries": 0,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v1"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 4,
+        "construction_access_count": 8,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 1,
+        "construction_access_count": 3,
+        "selected_queries": 100,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s42-c1",
+    "seed": 42,
+    "context_index": 1,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 22,
+    "final_rankings_unique": 4,
+    "threshold_eligible_counts": {
+      "6": 16,
+      "7": 84
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.05859375,
+      "max": 0.09716796875
+    },
+    "final_score_range": {
+      "min": 0.030066688315495495,
+      "max": 0.09242903099396586
+    },
+    "selection_margin_range": {
+      "min": 0.01021828483350376,
+      "max": 0.013469557280527691
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s42-c2",
+    "seed": 42,
+    "context_index": 2,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 27,
+    "final_rankings_unique": 1,
+    "threshold_eligible_counts": {
+      "9": 34,
+      "10": 63,
+      "11": 2,
+      "12": 1
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.056884765625,
+      "max": 0.09814453125
+    },
+    "final_score_range": {
+      "min": 0.036128520637167975,
+      "max": 0.09335796597882984
+    },
+    "selection_margin_range": {
+      "min": 0.008846779656343923,
+      "max": 0.012891073006792111
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s42-c3",
+    "seed": 42,
+    "context_index": 3,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 6,
+    "final_rankings_unique": 7,
+    "threshold_eligible_counts": {
+      "9": 94,
+      "8": 6
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.0576171875,
+      "max": 0.10009765625
+    },
+    "final_score_range": {
+      "min": 0.03211805071869532,
+      "max": 0.0952158359485578
+    },
+    "selection_margin_range": {
+      "min": 0.021398822506307244,
+      "max": 0.025556377591288523
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s42-c4",
+    "seed": 42,
+    "context_index": 4,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 2,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 17,
+    "final_rankings_unique": 6,
+    "threshold_eligible_counts": {
+      "3": 11,
+      "6": 61,
+      "4": 19,
+      "5": 9
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.050537109375,
+      "max": 0.08984375
+    },
+    "final_score_range": {
+      "min": 0.030147123564735336,
+      "max": 0.08546201860748602
+    },
+    "selection_margin_range": {
+      "min": 0.023398411215471038,
+      "max": 0.025811358065257466
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 1,
+        "construction_access_count": 12,
+        "selected_queries": 100,
+        "slot_version": "slot0-v2"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 2,
+        "write_age": 15,
+        "access_age": 15,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v1"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s142-c0",
+    "seed": 142,
+    "context_index": 0,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,12": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 24,
+    "final_rankings_unique": 8,
+    "threshold_eligible_counts": {
+      "11": 60,
+      "12": 20,
+      "10": 12,
+      "13": 8
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 0
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.048095703125,
+      "max": 0.0947265625
+    },
+    "final_score_range": {
+      "min": 0.04170540637310666,
+      "max": 0.09010669353180592
+    },
+    "selection_margin_range": {
+      "min": 0.0073888958201274585,
+      "max": 0.010781152675055222
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot0-v2"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 2,
+        "write_age": 15,
+        "access_age": 12,
+        "construction_access_count": 3,
+        "selected_queries": 0,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v1"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 4,
+        "construction_access_count": 8,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 1,
+        "construction_access_count": 3,
+        "selected_queries": 100,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s142-c1",
+    "seed": 142,
+    "context_index": 1,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 22,
+    "final_rankings_unique": 4,
+    "threshold_eligible_counts": {
+      "6": 16,
+      "7": 84
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.05859375,
+      "max": 0.09716796875
+    },
+    "final_score_range": {
+      "min": 0.030066688315495495,
+      "max": 0.09242903099396586
+    },
+    "selection_margin_range": {
+      "min": 0.01021828483350376,
+      "max": 0.013469557280527691
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s142-c2",
+    "seed": 142,
+    "context_index": 2,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 27,
+    "final_rankings_unique": 1,
+    "threshold_eligible_counts": {
+      "9": 34,
+      "10": 63,
+      "11": 2,
+      "12": 1
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.056884765625,
+      "max": 0.09814453125
+    },
+    "final_score_range": {
+      "min": 0.036128520637167975,
+      "max": 0.09335796597882984
+    },
+    "selection_margin_range": {
+      "min": 0.008846779656343923,
+      "max": 0.012891073006792111
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s142-c3",
+    "seed": 142,
+    "context_index": 3,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 6,
+    "final_rankings_unique": 7,
+    "threshold_eligible_counts": {
+      "9": 94,
+      "8": 6
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.0576171875,
+      "max": 0.10009765625
+    },
+    "final_score_range": {
+      "min": 0.03211805071869532,
+      "max": 0.0952158359485578
+    },
+    "selection_margin_range": {
+      "min": 0.021398822506307244,
+      "max": 0.025556377591288523
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s142-c4",
+    "seed": 142,
+    "context_index": 4,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 2,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 17,
+    "final_rankings_unique": 6,
+    "threshold_eligible_counts": {
+      "3": 11,
+      "6": 61,
+      "4": 19,
+      "5": 9
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.050537109375,
+      "max": 0.08984375
+    },
+    "final_score_range": {
+      "min": 0.030147123564735336,
+      "max": 0.08546201860748602
+    },
+    "selection_margin_range": {
+      "min": 0.023398411215471038,
+      "max": 0.025811358065257466
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 1,
+        "construction_access_count": 12,
+        "selected_queries": 100,
+        "slot_version": "slot0-v2"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 2,
+        "write_age": 15,
+        "access_age": 15,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v1"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s242-c0",
+    "seed": 242,
+    "context_index": 0,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,12": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 24,
+    "final_rankings_unique": 8,
+    "threshold_eligible_counts": {
+      "11": 60,
+      "12": 20,
+      "10": 12,
+      "13": 8
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 0
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.048095703125,
+      "max": 0.0947265625
+    },
+    "final_score_range": {
+      "min": 0.04170540637310666,
+      "max": 0.09010669353180592
+    },
+    "selection_margin_range": {
+      "min": 0.0073888958201274585,
+      "max": 0.010781152675055222
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot0-v2"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 2,
+        "write_age": 15,
+        "access_age": 12,
+        "construction_access_count": 3,
+        "selected_queries": 0,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v1"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 4,
+        "construction_access_count": 8,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 1,
+        "construction_access_count": 3,
+        "selected_queries": 100,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s242-c1",
+    "seed": 242,
+    "context_index": 1,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 22,
+    "final_rankings_unique": 4,
+    "threshold_eligible_counts": {
+      "6": 16,
+      "7": 84
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.05859375,
+      "max": 0.09716796875
+    },
+    "final_score_range": {
+      "min": 0.030066688315495495,
+      "max": 0.09242903099396586
+    },
+    "selection_margin_range": {
+      "min": 0.01021828483350376,
+      "max": 0.013469557280527691
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s242-c2",
+    "seed": 242,
+    "context_index": 2,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 27,
+    "final_rankings_unique": 1,
+    "threshold_eligible_counts": {
+      "9": 34,
+      "10": 63,
+      "11": 2,
+      "12": 1
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.056884765625,
+      "max": 0.09814453125
+    },
+    "final_score_range": {
+      "min": 0.036128520637167975,
+      "max": 0.09335796597882984
+    },
+    "selection_margin_range": {
+      "min": 0.008846779656343923,
+      "max": 0.012891073006792111
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s242-c3",
+    "seed": 242,
+    "context_index": 3,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 6,
+    "final_rankings_unique": 7,
+    "threshold_eligible_counts": {
+      "9": 94,
+      "8": 6
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.0576171875,
+      "max": 0.10009765625
+    },
+    "final_score_range": {
+      "min": 0.03211805071869532,
+      "max": 0.0952158359485578
+    },
+    "selection_margin_range": {
+      "min": 0.021398822506307244,
+      "max": 0.025556377591288523
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s242-c4",
+    "seed": 242,
+    "context_index": 4,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 2,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 17,
+    "final_rankings_unique": 6,
+    "threshold_eligible_counts": {
+      "3": 11,
+      "6": 61,
+      "4": 19,
+      "5": 9
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.050537109375,
+      "max": 0.08984375
+    },
+    "final_score_range": {
+      "min": 0.030147123564735336,
+      "max": 0.08546201860748602
+    },
+    "selection_margin_range": {
+      "min": 0.023398411215471038,
+      "max": 0.025811358065257466
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 1,
+        "construction_access_count": 12,
+        "selected_queries": 100,
+        "slot_version": "slot0-v2"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 2,
+        "write_age": 15,
+        "access_age": 15,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v1"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s342-c0",
+    "seed": 342,
+    "context_index": 0,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,12": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 24,
+    "final_rankings_unique": 8,
+    "threshold_eligible_counts": {
+      "11": 60,
+      "12": 20,
+      "10": 12,
+      "13": 8
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 0
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.048095703125,
+      "max": 0.0947265625
+    },
+    "final_score_range": {
+      "min": 0.04170540637310666,
+      "max": 0.09010669353180592
+    },
+    "selection_margin_range": {
+      "min": 0.0073888958201274585,
+      "max": 0.010781152675055222
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot0-v2"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 2,
+        "write_age": 15,
+        "access_age": 12,
+        "construction_access_count": 3,
+        "selected_queries": 0,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v1"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 4,
+        "construction_access_count": 8,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 1,
+        "construction_access_count": 3,
+        "selected_queries": 100,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s342-c1",
+    "seed": 342,
+    "context_index": 1,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 22,
+    "final_rankings_unique": 4,
+    "threshold_eligible_counts": {
+      "6": 16,
+      "7": 84
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.05859375,
+      "max": 0.09716796875
+    },
+    "final_score_range": {
+      "min": 0.030066688315495495,
+      "max": 0.09242903099396586
+    },
+    "selection_margin_range": {
+      "min": 0.01021828483350376,
+      "max": 0.013469557280527691
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s342-c2",
+    "seed": 342,
+    "context_index": 2,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 27,
+    "final_rankings_unique": 1,
+    "threshold_eligible_counts": {
+      "9": 34,
+      "10": 63,
+      "11": 2,
+      "12": 1
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.056884765625,
+      "max": 0.09814453125
+    },
+    "final_score_range": {
+      "min": 0.036128520637167975,
+      "max": 0.09335796597882984
+    },
+    "selection_margin_range": {
+      "min": 0.008846779656343923,
+      "max": 0.012891073006792111
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s342-c3",
+    "seed": 342,
+    "context_index": 3,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 6,
+    "final_rankings_unique": 7,
+    "threshold_eligible_counts": {
+      "9": 94,
+      "8": 6
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.0576171875,
+      "max": 0.10009765625
+    },
+    "final_score_range": {
+      "min": 0.03211805071869532,
+      "max": 0.0952158359485578
+    },
+    "selection_margin_range": {
+      "min": 0.021398822506307244,
+      "max": 0.025556377591288523
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s342-c4",
+    "seed": 342,
+    "context_index": 4,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 2,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 17,
+    "final_rankings_unique": 6,
+    "threshold_eligible_counts": {
+      "3": 11,
+      "6": 61,
+      "4": 19,
+      "5": 9
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.050537109375,
+      "max": 0.08984375
+    },
+    "final_score_range": {
+      "min": 0.030147123564735336,
+      "max": 0.08546201860748602
+    },
+    "selection_margin_range": {
+      "min": 0.023398411215471038,
+      "max": 0.025811358065257466
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 1,
+        "construction_access_count": 12,
+        "selected_queries": 100,
+        "slot_version": "slot0-v2"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 2,
+        "write_age": 15,
+        "access_age": 15,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v1"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s442-c0",
+    "seed": 442,
+    "context_index": 0,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,12": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 24,
+    "final_rankings_unique": 8,
+    "threshold_eligible_counts": {
+      "11": 60,
+      "12": 20,
+      "10": 12,
+      "13": 8
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 0
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.048095703125,
+      "max": 0.0947265625
+    },
+    "final_score_range": {
+      "min": 0.04170540637310666,
+      "max": 0.09010669353180592
+    },
+    "selection_margin_range": {
+      "min": 0.0073888958201274585,
+      "max": 0.010781152675055222
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot0-v2"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 2,
+        "write_age": 15,
+        "access_age": 12,
+        "construction_access_count": 3,
+        "selected_queries": 0,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v1"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 4,
+        "construction_access_count": 8,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 1,
+        "construction_access_count": 3,
+        "selected_queries": 100,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s442-c1",
+    "seed": 442,
+    "context_index": 1,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 22,
+    "final_rankings_unique": 4,
+    "threshold_eligible_counts": {
+      "6": 16,
+      "7": 84
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.05859375,
+      "max": 0.09716796875
+    },
+    "final_score_range": {
+      "min": 0.030066688315495495,
+      "max": 0.09242903099396586
+    },
+    "selection_margin_range": {
+      "min": 0.01021828483350376,
+      "max": 0.013469557280527691
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s442-c2",
+    "seed": 442,
+    "context_index": 2,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 27,
+    "final_rankings_unique": 1,
+    "threshold_eligible_counts": {
+      "9": 34,
+      "10": 63,
+      "11": 2,
+      "12": 1
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.056884765625,
+      "max": 0.09814453125
+    },
+    "final_score_range": {
+      "min": 0.036128520637167975,
+      "max": 0.09335796597882984
+    },
+    "selection_margin_range": {
+      "min": 0.008846779656343923,
+      "max": 0.012891073006792111
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s442-c3",
+    "seed": 442,
+    "context_index": 3,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 1,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 6,
+    "final_rankings_unique": 7,
+    "threshold_eligible_counts": {
+      "9": 94,
+      "8": 6
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.0576171875,
+      "max": 0.10009765625
+    },
+    "final_score_range": {
+      "min": 0.03211805071869532,
+      "max": 0.0952158359485578
+    },
+    "selection_margin_range": {
+      "min": 0.021398822506307244,
+      "max": 0.025556377591288523
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 0,
+        "write_age": 17,
+        "access_age": 1,
+        "construction_access_count": 16,
+        "selected_queries": 100,
+        "slot_version": "slot0-v1"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v2"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 13,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  },
+  {
+    "job_id": "s442-c4",
+    "seed": 442,
+    "context_index": 4,
+    "queries": 100,
+    "n_counts": {
+      "2": 100
+    },
+    "full_unique_sets": 1,
+    "full_set_counts": {
+      "0,1": 100
+    },
+    "native_order_unique": 2,
+    "cosine_vectors_unique": 100,
+    "query_vector_hashes_unique": 100,
+    "cosine_rankings_unique": 17,
+    "final_rankings_unique": 6,
+    "threshold_eligible_counts": {
+      "3": 11,
+      "6": 61,
+      "4": 19,
+      "5": 9
+    },
+    "exact_set_match_counts": {
+      "recency_only": 100,
+      "last_written": 0,
+      "cosine_only": 100
+    },
+    "intersection_slot_counts": {
+      "recency_only": 200,
+      "last_written": 0,
+      "cosine_only": 200
+    },
+    "recency_cutoff_tie_size_counts": {
+      "3": 100
+    },
+    "cosine_range": {
+      "min": 0.050537109375,
+      "max": 0.08984375
+    },
+    "final_score_range": {
+      "min": 0.030147123564735336,
+      "max": 0.08546201860748602
+    },
+    "selection_margin_range": {
+      "min": 0.023398411215471038,
+      "max": 0.025811358065257466
+    },
+    "max_arithmetic_abs_error": 0.0,
+    "slots": [
+      {
+        "slot_index": 0,
+        "current_write_chunk": 4,
+        "write_age": 13,
+        "access_age": 1,
+        "construction_access_count": 12,
+        "selected_queries": 100,
+        "slot_version": "slot0-v2"
+      },
+      {
+        "slot_index": 1,
+        "current_write_chunk": 1,
+        "write_age": 16,
+        "access_age": 1,
+        "construction_access_count": 15,
+        "selected_queries": 100,
+        "slot_version": "slot1-v1"
+      },
+      {
+        "slot_index": 2,
+        "current_write_chunk": 2,
+        "write_age": 15,
+        "access_age": 15,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot2-v1"
+      },
+      {
+        "slot_index": 3,
+        "current_write_chunk": 3,
+        "write_age": 14,
+        "access_age": 14,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot3-v1"
+      },
+      {
+        "slot_index": 4,
+        "current_write_chunk": 5,
+        "write_age": 12,
+        "access_age": 12,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot4-v1"
+      },
+      {
+        "slot_index": 5,
+        "current_write_chunk": 6,
+        "write_age": 11,
+        "access_age": 11,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot5-v1"
+      },
+      {
+        "slot_index": 6,
+        "current_write_chunk": 7,
+        "write_age": 10,
+        "access_age": 10,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot6-v1"
+      },
+      {
+        "slot_index": 7,
+        "current_write_chunk": 8,
+        "write_age": 9,
+        "access_age": 9,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot7-v1"
+      },
+      {
+        "slot_index": 8,
+        "current_write_chunk": 9,
+        "write_age": 8,
+        "access_age": 8,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot8-v1"
+      },
+      {
+        "slot_index": 9,
+        "current_write_chunk": 10,
+        "write_age": 7,
+        "access_age": 7,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot9-v1"
+      },
+      {
+        "slot_index": 10,
+        "current_write_chunk": 11,
+        "write_age": 6,
+        "access_age": 6,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot10-v1"
+      },
+      {
+        "slot_index": 11,
+        "current_write_chunk": 12,
+        "write_age": 5,
+        "access_age": 5,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot11-v1"
+      },
+      {
+        "slot_index": 12,
+        "current_write_chunk": 13,
+        "write_age": 4,
+        "access_age": 4,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot12-v1"
+      },
+      {
+        "slot_index": 13,
+        "current_write_chunk": 14,
+        "write_age": 3,
+        "access_age": 3,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot13-v1"
+      },
+      {
+        "slot_index": 14,
+        "current_write_chunk": 15,
+        "write_age": 2,
+        "access_age": 2,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot14-v1"
+      },
+      {
+        "slot_index": 15,
+        "current_write_chunk": 16,
+        "write_age": 1,
+        "access_age": 1,
+        "construction_access_count": 0,
+        "selected_queries": 0,
+        "slot_version": "slot15-v1"
+      }
+    ],
+    "caveat": "source chunk age is not gold evidence age; repeated queries restore frozen metadata"
+  }
+]
